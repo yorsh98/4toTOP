@@ -1,0 +1,328 @@
+
+body, html {
+    height: 100%;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+     
+}
+.banner {
+    background: linear-gradient(to top, #08587C, #106287, #497491);
+    width: 100%;
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start; /* Alinea el contenido al inicio */
+    position: relative;
+    padding-right: 150px; /* Espacio para la imagen */
+}
+
+.banner-title {
+    color: white;
+    font-size: 2vw;
+    text-align: center;
+    font-weight: bold;
+    margin: 0;
+    flex: 1; /* Ocupa el espacio restante */
+    /*padding-left: 20px; /* Espacio a la izquierda */
+}
+
+.banner img {
+    position: absolute;
+    right: 20px;
+  /* top: 10px; /* Ajusta la posición superior */
+    height: auto;
+    width: auto;
+    max-height: 90%; /* Limita el tamaño máximo */
+    max-width: 200px; /* Limita el tamaño máximo */
+}
+
+.container {
+    max-width: 600px;
+    width: 100%;
+    margin: auto;
+    text-align: center;
+    margin: 20px auto;
+}
+header img {
+    width: 100%;
+    height: auto;
+}
+.main-container {
+    border: 2px solid #82a2b8;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+    flex: none;
+    background-color: #95b9d3;
+}
+.section-container {
+    border: 2px solid #82a2b8;
+    background-color: #95b9d3;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+footer {
+    background: linear-gradient(to top, #08587c, #106287, #497491);
+    padding: 20px;
+    text-align: center;
+    color: white;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+}
+.footer-button {
+    background-color: #497491;
+    border: 2px solid black;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+}
+.footer-button:hover {
+    background-color: #106287;
+}
+
+.button-73 {
+    appearance: none;
+    background-color: #0d6b97;
+    border-radius: 40em;
+    border-style: none;
+    box-shadow: #ADCFFF 0 -12px 6px inset;
+    box-sizing: border-box;
+    color: #fff;
+    cursor: pointer;
+    display: inline-block;
+    font-family: -apple-system, sans-serif;
+    font-size: 0.8rem; /* Tamaño de fuente más pequeño */
+    font-weight: 700;
+    letter-spacing: -.24px;
+    margin: 0;
+    outline: none;
+    padding: 0.5rem 0.8rem; /* Menor padding */
+    quotes: auto;
+    text-align: center;
+    text-decoration: none;
+    transition: all .15s;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+}
+
+.button-73:hover {
+    background-color: #FFC229;
+    box-shadow: #FF6314 0 -6px 8px inset;
+    transform: scale(1.125);
+}
+
+.button-73:active {
+    transform: scale(1.025);
+}
+
+/* Ajustes para pantallas de menos de 400px */
+@media (max-width: 399px) {
+    .button-73 {
+        font-size: 1rem;
+        padding: 0.5rem 1rem;
+    }
+}
+
+/* Ajustes para pantallas de al menos 400px */
+@media (min-width: 400px) {
+    .button-73 {
+        font-size: 1.2rem;
+        padding: 0.8rem 1.5rem;
+    }
+}
+
+/* Ajustes para pantallas de al menos 600px */
+@media (min-width: 600px) {
+    .button-73 {
+        font-size: 1.8rem;
+        padding: 1rem 2rem;
+    }
+}
+
+/* Ajustes para pantallas de al menos 768px */
+@media (min-width: 768px) {
+    .button-73 {
+        font-size: 2rem;
+        padding: 1.2rem 2.5rem;
+    }
+}
+
+.button-Principal {
+    appearance: none;
+    background-color: #0d6b97;
+    border-radius: 40em;
+    border-style: none;
+    box-shadow: #ADCFFF 0 -12px 6px inset;
+    box-sizing: border-box;
+    color: #fff;
+    cursor: pointer;
+    display: inline-block;
+    font-family: -apple-system, sans-serif;
+    font-size: 1rem; /* Tamaño de fuente más pequeño */
+    font-weight: 700;
+    letter-spacing: -.24px;
+    margin: 0;
+    outline: none;
+    padding: 0.5rem 1rem; /* Menor padding */
+    quotes: auto;
+    text-align: center;
+    text-decoration: none;
+    transition: all .15s;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+}
+
+.button-Principal:hover {
+    background-color: #FFC229;
+    box-shadow: #FF6314 0 -6px 8px inset;
+    transform: scale(1.125);
+}
+
+.button-Principal:active {
+    transform: scale(1.025);
+}
+
+@media (min-width: 400px) {
+    .button-Principal {
+       font-size: 2rem; /* Ajuste del tamaño de fuente en pantallas grandes */
+       padding: 0.8rem 1.5rem; /* Ajuste del padding en pantallas grandes */
+       }
+       }
+
+@media (min-width: 768px) {
+.button-Principal {
+    font-size: 3rem; /* Ajuste del tamaño de fuente en pantallas grandes */
+    padding: 1rem 2rem; /* Ajuste del padding en pantallas grandes */
+}
+}
+
+.hidden {
+    display: none; /* Ocultar el elemento */
+}
+
+.visible {
+    display: block; /* Mostrar el elemento */
+}
+
+.rotateY-180 {
+    transition: transform 0.5s;
+    -webkit-transition: transform 0.5s;
+    -moz-transition: transform 0.5s;
+    transform: rotateY(0deg);
+    -webkit-transform: rotateY(0deg);
+    -moz-transform: rotateY(0deg);
+}
+
+.rotateY-180.show {
+    transform: rotateY(180deg);
+    -webkit-transform: rotateY(180deg);
+    -moz-transform: rotateY(180deg);
+}
+
+.rotateY-180-reverse {
+    transition: transform 0.5s;
+    -webkit-transition: transform 0.5s;
+    -moz-transition: transform 0.5s;
+    transform: rotateY(0deg);
+    -webkit-transform: rotateY(0deg);
+    -moz-transform: rotateY(0deg);
+}
+
+.rotateY-180-reverse.show {
+    transform: rotateY(-180deg);
+    -webkit-transform: rotateY(-180deg);
+    -moz-transform: rotateY(-180deg);
+}
+
+.modal-confirm {		
+	color: #434e65;
+	width: 525px;
+}
+.modal-confirm .modal-content {
+	padding: 20px;
+	font-size: 16px;
+	border-radius: 5px;
+	border: none;
+}
+.modal-confirm .modal-header {
+	background: #47c9a2;
+	border-bottom: none;   
+	position: relative;
+	text-align: center;
+	margin: -20px -20px 0;
+	border-radius: 5px 5px 0 0;
+	padding: 35px;
+}
+.modal-confirm h4 {
+	text-align: center;
+	font-size: 36px;
+	margin: 10px 0;
+}
+.modal-confirm .form-control, .modal-confirm .btn {
+	min-height: 40px;
+	border-radius: 3px; 
+}
+.modal-confirm .close {
+	position: absolute;
+	top: 15px;
+	right: 15px;
+	color: #fff;
+	text-shadow: none;
+	opacity: 0.5;
+}
+.modal-confirm .close:hover {
+	opacity: 0.8;
+}
+.modal-confirm .icon-box {
+	color: #fff;		
+	width: 95px;
+	height: 95px;
+	display: inline-block;
+	border-radius: 50%;
+	z-index: 9;
+	border: 5px solid #fff;
+	padding: 15px;
+	text-align: center;
+}
+.modal-confirm .icon-box i {
+	font-size: 64px;
+	margin: -4px 0 0 -4px;
+}
+.modal-confirm.modal-dialog {
+	margin-top: 80px;
+}
+.modal-confirm .btn, .modal-confirm .btn:active {
+	color: #fff;
+	border-radius: 4px;
+	background: #eeb711 !important;
+	text-decoration: none;
+	transition: all 0.4s;
+	line-height: normal;
+	border-radius: 30px;
+	margin-top: 10px;
+	padding: 6px 20px;
+	border: none;
+}
+.modal-confirm .btn:hover, .modal-confirm .btn:focus {
+	background: #eda645 !important;
+	outline: none;
+}
+.modal-confirm .btn span {
+	margin: 1px 3px 0;
+	float: left;
+}
+.modal-confirm .btn i {
+	margin-left: 1px;
+	font-size: 20px;
+	float: right;
+}
+.trigger-btn {
+	display: inline-block;
+	margin: 100px auto;
+}
