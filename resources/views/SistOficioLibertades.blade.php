@@ -30,14 +30,19 @@
                 <main class="container main-container" id="main-content">
                     <h1 class="text-3xl font-bold mb-4">SOLICITUD PARA NUMEROS OFICIO</h1>
                     <hr>
-                            <form id="solicitudForm" action="{{ route('enviar-solicitud') }}" method="POST" class="form-container">
+                            <div id="alert-message" class="alert alert-danger d-none" role="alert">
+                                <span id="alert-text"></span>
+                                <button type="button" class="btn-close" aria-label="Cerrar" onclick="closeAlert()"></button>
+                            </div>
+
+                            <form id="solicitudForm" action="{{ route('SistOficioLibertades.store') }}" method="POST" class="form-container needs-validation">
                                 @csrf
                                 <div class="input-group input-group-lg">
                                     <span class="input-group-text" id="inputGroup-sizing-lg">CAUSA ASIGNADA</span>
-                                    <input type="text" class="form-control" name="causa" required>
+                                    <input type="text" class="form-control" id="CausaAsig" name="CausaAsig" required pattern="^[a-zA-Z0-9\s-]{1,10}$" maxlength="10">
                                 </div><br>
 
-                                <select class="form-select form-select-lg mb-3" name="solicitante" required>
+                                <select class="form-select form-select-lg mb-3" id="UserSolicitante" name="UserSolicitante" required>
                                     <option value="" disabled selected>SOLICITANTE</option>
                                     <option value="pepito">pepito</option>
                                     <option value="pedrito">pedrito</option>
@@ -46,10 +51,14 @@
 
                                 <div class="input-group input-group-lg">
                                     <span class="input-group-text" id="inputGroup-sizing-lg">MOTIVO</span>
-                                    <input type="text" class="form-control" name="motivo" required>
+                                    <input type="text" class="form-control" id="UserDirigido" name="UserDirigido" required pattern="^[a-zA-Z0-9\s-]+$">
                                 </div><hr>
 
                                 <button type="submit" class="button-73">ENVIAR SOLICITUD</button>
+                                <div id="alert-message" class="hidden">
+                                    <p id="alert-text"></p>
+                                    <button onclick="closeAlert()">Cerrar</button>
+                                </div>
                             </form>
 
 

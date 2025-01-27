@@ -326,3 +326,32 @@ footer {
 	display: inline-block;
 	margin: 100px auto;
 }
+/*todo sobre !alerta esta  aca en temas de stylos
+*/
+
+#alert-message {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #ff4d4d;
+    color: white;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+}
+
+#alert-message.hidden {
+    display: none;
+}
+
+#alert-message button {
+    margin-left: 20px;
+    padding: 5px 10px;
+    border: none;
+    background-color: white;
+    color: #ff4d4d;
+    cursor: pointer;
+    border-radius: 3px;
+}

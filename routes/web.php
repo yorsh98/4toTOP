@@ -28,9 +28,17 @@ use Illuminate\Support\Facades\Http;
 
 
 
-//Route::redirect('/', '/SistOficioLibertades')->name('SistOficioLibertades');
+Route::redirect('/', '/SistOficioLibertades')->name('SistOficioLibertades');
 
-Route::get('/SistOficioLibertades', [App\Http\Controllers\SistOficioLibertadesController::class, 'index' ]);
+
+
+Route::get('/oficios', [SistOficioLibertadesController::class, 'index'])->name('SistOficioLibertades.index');
+
+Route::get('/SistOficioLibertades', [App\Http\Controllers\SistOficioLibertadesController::class, 'index' ])->name('SistOficioLibertades.index');
+Route::get('/SistOficioLibertades', [App\Http\Controllers\SistOficioLibertadesController::class, 'create' ]);
+Route::post('/SistOficioLibertades', [App\Http\Controllers\SistOficioLibertadesController::class, 'store' ])->name('SistOficioLibertades.store');
+
+
 
 Route::get('/tablas', [App\Http\Controllers\tablasController::class, 'index' ]);
 Route::get('/tabla2', [App\Http\Controllers\tabla2Controller::class, 'index' ])->name('tabla2');;

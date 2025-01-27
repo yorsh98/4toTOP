@@ -27,7 +27,7 @@
       @endphp 
 
         <div class="container-fluid">
-            <table class="table-responsive table-striped-columns table-bordered">
+            <table class="table-responsive table-striped-columns table-bordered" ">
                 <thead class="thead align-top">
                     <tr>
                         <th scope="col">Número de Libertad</th>
