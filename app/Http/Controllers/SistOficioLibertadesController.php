@@ -23,25 +23,43 @@ class SistOficioLibertadesController extends Controller
         return view('SistOficioLibertades');
     }
     public function store(Request $request){
-        //$url=env('API_URL', 'http://127.0.0.1');
-        /*$response = Http::post('http://127.0.0.1:8001/api/Oficio', [
-            'CausaAsig' => $request->input('CausaAsig'),
-            'UserSolicitante' => $request->input('UserSolicitante'),
-            'UserDirigido' => $request->input('UserDirigido'),
-        ]);
-        return redirect()->route('SistOficioLibertades.store');*/
-        $response = Http::post('http://127.0.0.1:8001/api/Oficio', [
+
+        //CREATE DE OFICIO/LIBERTAD 
+                $tipo = $request->input('tipo');
+
+            // Seleccionar la URL de la API según el tipo de solicitud
+            $url = $tipo === 'oficio' 
+            ? 'http://127.0.0.1:8001/api/Oficio' 
+            : 'http://127.0.0.1:8001/api/Libertad';
+            
+        $response = Http::post($url, [
             'CausaAsig' => $request->input('CausaAsig'),
             'UserSolicitante' => $request->input('UserSolicitante'),
             'UserDirigido' => $request->input('UserDirigido'),
         ]);
     
         if ($response->successful()) {
-            return redirect()->route('SistOficioLibertades.index')->with('success', 'Oficio enviado correctamente');
+
+            // Extraer las variables de la respuesta de la API
+        $data = $response->json();
+        $numEntregado = $data[$tipo]['Numentregado'] ?? null;
+        $año = $data[$tipo]['año'] ?? null;
+
+        // Pasar los valores a la vista
+        return redirect()->route('SistOficioLibertades.index')->with([
+            'success' => 'Oficio/Libertad enviado correctamente',
+            'NumEntregado' => $numEntregado,
+            'año' => $año
+        ]);
+            return redirect()->route('SistOficioLibertades.index')->with('success', 'libertad enviado correctamente');
+            // Extraer las variables de la respuesta de la API
+                
         } else {
-            Log::error('Error al enviar el oficio', ['status' => $response->status(), 'body' => $response->body()]);
-            return redirect()->route('SistOficioLibertades.index')->with('error', 'Error al enviar el oficio');
+            Log::error('Error al enviar el oficio o libertad', ['status' => $response->status(), 'body' => $response->body()]);
+            return redirect()->route('SistOficioLibertades.index')->with('error', 'Error al enviar la libertad u oficio');
         }
+
+
     }
     
 }

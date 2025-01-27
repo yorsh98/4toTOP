@@ -1,4 +1,4 @@
-/*
+
 //HABILITACION DE LOS FORMULARIOS AL PRECIONAR LOS BOTONES.
 function showElement(elementId) {
     const mainContent = document.getElementById('main-content');
@@ -110,7 +110,7 @@ document.getElementById('form2').addEventListener('submit', handleFormSubmit);
 
 // Asegúrate de que el botón dentro del modal cierre el modal correctamente
 $(document).on('click', '[data-dismiss="modal"]', function() {
-    $('#myModal').modal('hide');
+    $('#successModal').modal('hide');
 });
 
 // Función para volver al inicio de la página
@@ -244,3 +244,5 @@ function showAlert(message) {
 function closeAlert() {
     document.getElementById('alert-message').classList.add('hidden');
 }*/
+
+

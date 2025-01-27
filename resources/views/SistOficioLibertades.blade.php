@@ -35,8 +35,9 @@
                                 <button type="button" class="btn-close" aria-label="Cerrar" onclick="closeAlert()"></button>
                             </div>
 
-                            <form id="solicitudForm" action="{{ route('SistOficioLibertades.store') }}" method="POST" class="form-container needs-validation">
+                            <form id="solicitudForm" action="{{ route('SistOficioLibertades.store') }}" method="POST" class="form-container needs-validation" >
                                 @csrf
+                                <input type="hidden" name="tipo" value="oficio">
                                 <div class="input-group input-group-lg">
                                     <span class="input-group-text" id="inputGroup-sizing-lg">CAUSA ASIGNADA</span>
                                     <input type="text" class="form-control" id="CausaAsig" name="CausaAsig" required pattern="^[a-zA-Z0-9\s-]{1,10}$" maxlength="10">
@@ -69,23 +70,37 @@
         <main class="container main-container" id="main-content">
                     <h1 class="text-3xl font-bold mb-4">SOLICITUD PARA NUMEROS DE LIBERTAD</h1>
                     <hr>
-                    <form class="form-container">
-                        <div class="input-group input-group-lg">
-                            <span class="input-group-text" id="inputGroup-sizing-lg">CAUSA ASIGNADA</span>
-                            <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-lg" required>
-                        </div><br>
-                        <select class="form-select form-select-lg mb-3" aria-label="Large select example" required>
-                            <option value="" disabled selected>SOLICITANTE</option>
-                            <option value="1">pepito</option>
-                            <option value="2">pedrito</option>
-                            <option value="3">juanito</option>
-                        </select>
-                        <div class="input-group input-group-lg">
-                            <span class="input-group-text" id="inputGroup-sizing-lg">MOTIVO</span>
-                            <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-lg" required>
-                        </div><hr>
-                        <button type="submit" class="button-73" >ENVIAR SOLICITUD</button>
-                    </form>
+                    <div id="alert-message" class="alert alert-danger d-none" role="alert">
+                                <span id="alert-text"></span>
+                                <button type="button" class="btn-close" aria-label="Cerrar" onclick="closeAlert()"></button>
+                            </div>
+
+                            <form id="solicitudForm" action="{{ route('SistOficioLibertades.store') }}" method="POST" class="form-container needs-validation" >
+                                @csrf
+                                <input type="hidden" name="tipo" value="libertad">
+                                <div class="input-group input-group-lg">
+                                    <span class="input-group-text" id="inputGroup-sizing-lg">CAUSA ASIGNADA</span>
+                                    <input type="text" class="form-control" id="CausaAsig" name="CausaAsig" required pattern="^[a-zA-Z0-9\s-]{1,10}$" maxlength="10">
+                                </div><br>
+
+                                <select class="form-select form-select-lg mb-3" id="UserSolicitante" name="UserSolicitante" required>
+                                    <option value="" disabled selected>SOLICITANTE</option>
+                                    <option value="pepito">pepito</option>
+                                    <option value="pedrito">pedrito</option>
+                                    <option value="juanito">juanito</option>
+                                </select>
+
+                                <div class="input-group input-group-lg">
+                                    <span class="input-group-text" id="inputGroup-sizing-lg">MOTIVO</span>
+                                    <input type="text" class="form-control" id="UserDirigido" name="UserDirigido" required pattern="^[a-zA-Z0-9\s-]+$">
+                                </div><hr>
+
+                                <button type="submit" class="button-73">ENVIAR SOLICITUD</button>
+                                <div id="alert-message" class="hidden">
+                                    <p id="alert-text"></p>
+                                    <button onclick="closeAlert()">Cerrar</button>
+                                </div>
+                            </form>
                     <p id="mensajeError" style="color:red;"></p>
                 </main> 
             
@@ -95,26 +110,50 @@
 </div>
 
 <!-- Modal HTML -->
-<div id="myModal" class="modal fade">
-	<div class="modal-dialog modal-confirm">
-		<div class="modal-content">
-			<div class="modal-header justify-content-center">
-				<div class="icon-box">
+<!-- Modal de éxito -->
+<div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-confirm"">
+    <div class="modal-content">
+      <div class="modal-header justify-content-center">
+                <div class="icon-box">
 					<i class="material-icons">&#xE876;</i>
 				</div>
-				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-			</div>
-			<div class="modal-body text-center">
+        <h5 class="modal-title" id="successModalLabel"></h5>
+        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body text-center">
+        {{ session('success') }}
 				<h4>Solicitud exitosa!</h4>	
 				<p>Tu numero de OFICIO / LIBERTAD es: </p>
-                <h4><strong>QWER-2025</strong></h4>
+                <h4><strong>{{ session('NumEntregado') }}-{{ session('año') }}</strong></h4>
 				<a class="btn btn-success" href="{{ url('/SistOficioLibertades') }}" data-dismiss="modal"><span>Volver al Inicio</span> <i class="material-icons">&#xE5C8;</i></a>
-                <button class="btn btn-success"  data-dismiss="modal"><span>Solicitar otro Numero</span> <i class="material-icons">&#xE5C8;</i></button>
+                <button class="btn btn-success" onclick="showElement('form1')" data-dismiss="modal" ><span>Solicitar otro Numero</span> <i class="material-icons">&#xE5C8;</i></button>
 			</div>
-		</div>
-	</div>
-</div> 
-    
+      </div>
+      <div class="modal-footer">
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de error -->
+<div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title" id="errorModalLabel">Error</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        {{ session('error') }}
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
     <footer>
       <a href="{{ url('/tablas') }}" class="footer-button">Ultimos Oficios</a>
       <a href="{{ url('/SistOficioLibertades') }}" class="footer-button">Página Principal</a>
@@ -126,7 +165,54 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
     <script src="/js/app.js"></script>
+    
     <script>
+
+function solicitarOtroNumero() {
+        
+    $(document).on('click', '[data-dismiss="modal"]', function() {
+    $('#successModal').modal('hide');
+});
+
+    
+        // Cerrar el modal
+        $('successModal').modal('hide');  // Reemplaza 'myModal' con el ID real de tu modal
+       
+    }
+    
+    document.addEventListener("DOMContentLoaded", function() {
+        // Comprobar si existen mensajes de éxito o error desde PHP con valores en atributos data
+        var successMessage = "{{ session('success') }}";
+        var errorMessage = "{{ session('error') }}";
+
+        if (successMessage) {
+            var successModal = new bootstrap.Modal(document.getElementById('successModal'));
+            successModal.show();
+        }
+
+        if (errorMessage) {
+            var errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+            errorModal.show();
+        }
+    });
+
+    // Bootstrap 5 validation
+    (function() {
+        'use strict'
+        var forms = document.querySelectorAll('.needs-validation')
+        Array.prototype.slice.call(forms).forEach(function(form) {
+            form.addEventListener('submit', function(event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+                form.classList.add('was-validated')
+            }, false)
+        })
+    })()
+
+
+    
     /*
     document.getElementById('solicitudForm').addEventListener('submit', async function (e) {
     e.preventDefault(); // Evita el envío tradicional del formulario

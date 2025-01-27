@@ -28,7 +28,8 @@ use Illuminate\Support\Facades\Http;
 
 
 
-Route::redirect('/', '/SistOficioLibertades')->name('SistOficioLibertades');
+//Route::redirect('/', '/SistOficioLibertades')->name('SistOficioLibertades');
+
 
 
 
