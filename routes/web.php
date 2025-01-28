@@ -6,6 +6,8 @@ use App\Http\Controllers\tabla2Controller;
 use App\Http\Controllers\addfuncionarioController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Http;
+use App\Http\Controllers\oficioController;
+
 
 //Route::view('/', 'welcome');
 /*Route::get('/', function () {
@@ -54,8 +56,7 @@ Route::get('/SistOficioLibertades', [addfuncionarioController::class, 'enviarSol
 Route::get('/libertad', [App\Http\Controllers\libertadController::class, 'index'])->name('libertad');
 
 Route::get('/oficio', [App\Http\Controllers\oficioController::class, 'index'])->name('oficio');
-
-
+Route::delete('/Oficio/{id}', [App\Http\Controllers\oficioController::class, 'delete'])->name('Oficio.delete');
 
 
 

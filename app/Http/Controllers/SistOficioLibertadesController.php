@@ -14,10 +14,9 @@ class SistOficioLibertadesController extends Controller
 {
     public function index()
     {
-        //get al Oficio
+        
         return view('SistOficioLibertades');
-
-        //get a libertades
+        
     }
     public function create(){
         return view('SistOficioLibertades');

@@ -40,7 +40,7 @@ class addfuncionarioController extends Controller
     }
 
     public function destroy($id)
-{
+    {
     // Buscar el funcionario por su ID
     $funcionario = Funcionario::findOrFail($id);
 
@@ -49,6 +49,6 @@ class addfuncionarioController extends Controller
 
     // Redirigir de nuevo con un mensaje de éxito
     return redirect()->route('addfuncionario')->with('success', 'Funcionario eliminado correctamente.');
-}
+    }
 
 }

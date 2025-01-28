@@ -245,4 +245,3 @@ function closeAlert() {
     document.getElementById('alert-message').classList.add('hidden');
 }*/
 
-
