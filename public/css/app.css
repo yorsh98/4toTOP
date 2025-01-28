@@ -355,3 +355,22 @@ footer {
     cursor: pointer;
     border-radius: 3px;
 }
+
+.improved-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.table {
+    min-width: 1200px; /* Ancho mínimo total de la tabla */
+}
+
+.table-responsive {
+    overflow-x: auto;
+    padding: 0 15px; /* Padding para mantener alineación */
+}
+
+.table-bordered {
+    border: 2px solid #dee2e6;
+}

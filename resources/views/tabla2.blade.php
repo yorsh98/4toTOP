@@ -17,40 +17,41 @@
         <h1 class="banner-title">4° Tribunal de Juicio Oral en lo Penal de Santiago</h1>
         <img src="/img/pjud_blanco.png" alt="Descripción de la imagen">
     </header>
-    <div class="container mt-4">
-    <h1 class="text-center mb-4">Listado de Libertades</h1>
+    <div class="container-fluid mt-4 px-5"> <!-- Cambiado a container-fluid y agregado padding horizontal -->
+    <h1 class="text-center mb-4 display-6">Listado de Oficios</h1>
 
     @if (!empty($data))
+        @php
+            $lastFiveData = array_slice($data, -5);
+        @endphp 
 
-      @php
-        $lastFiveData = array_slice($data, -5);
-      @endphp 
-
-        <div class="container-fluid">
-            <table class="table-responsive table-striped-columns table-bordered" ">
-                <thead class="thead align-top">
-                    <tr>
-                        <th scope="col">Número de Libertad</th>
-                        <th scope="col">Año</th>
-                        <th scope="col">Causa Asignada</th>
-                        <th scope="col">Solicitante</th>
-                        <th scope="col">Dirigido a</th>
-                        <th scope="col">Fecha</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($lastFiveData as $tabla)
+        <div class="improved-table">
+            <div class="table-responsive" style="margin: 0 -15px;"> <!-- Margen negativo para expandirse -->
+                <table class="table table-hover table-bordered align-middle w-100"> <!-- w-100 para ancho completo -->
+                    <thead class="thead-dark">
                         <tr>
-                            <td>{{ $tabla['Numentregado'] ?? 'N/A' }}</td>
-                            <td>{{ $tabla['año'] ?? 'N/A' }}</td>
-                            <td>{{ $tabla['CausaAsig'] ?? 'N/A' }}</td>
-                            <td>{{ $tabla['UserSolicitante'] ?? 'N/A' }}</td>
-                            <td>{{ $tabla['UserDirigido'] ?? 'N/A' }}</td>
-                            <td>{{ \Carbon\Carbon::parse($tabla['created_at'])->format('d-m-Y H:i') ?? 'N/A' }}</td>
+                            <th scope="col" style="min-width: 150px;">Número de Oficio</th>
+                            <th scope="col" style="min-width: 80px;">Año</th>
+                            <th scope="col" style="min-width: 250px;">Causa Asignada</th>
+                            <th scope="col" style="min-width: 200px;">Solicitante</th>
+                            <th scope="col" style="min-width: 250px;">Dirigido a</th>
+                            <th scope="col" style="min-width: 150px;">Fecha</th>
                         </tr>
-                    @endforeach
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        @foreach($lastFiveData as $tabla)
+                            <tr>
+                                <td class="text-break">{{ $tabla['Numentregado'] ?? 'N/A' }}</td>
+                                <td>{{ $tabla['año'] ?? 'N/A' }}</td>
+                                <td class="text-wrap">{{ $tabla['CausaAsig'] ?? 'N/A' }}</td>
+                                <td class="text-truncate">{{ $tabla['UserSolicitante'] ?? 'N/A' }}</td>
+                                <td class="text-truncate">{{ $tabla['UserDirigido'] ?? 'N/A' }}</td>
+                                <td>{{ \Carbon\Carbon::parse($tabla['created_at'])->format('d-m-Y H:i') ?? 'N/A' }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
         </div>
     @else
         <div class="alert alert-warning text-center">
