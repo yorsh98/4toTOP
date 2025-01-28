@@ -3,6 +3,7 @@
 use App\Http\Controllers\SistOficioLibertadesController;
 use App\Http\Controllers\tablasController;
 use App\Http\Controllers\tabla2Controller;
+use App\Http\Controllers\addfuncionarioController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Http;
 
@@ -45,10 +46,18 @@ Route::get('/tablas', [App\Http\Controllers\tablasController::class, 'index' ]);
 Route::get('/tabla2', [App\Http\Controllers\tabla2Controller::class, 'index' ])->name('tabla2');;
 
 Route::get('/addfuncionario', [App\Http\Controllers\addfuncionarioController::class, 'index'])->name('addfuncionario');
+Route::post('/addfuncionario', [addfuncionarioController::class, 'store'])->name('addfuncionario.store');
+Route::delete('/addfuncionario/{id}', [addfuncionarioController::class, 'destroy'])->name('addfuncionario.destroy');
+Route::get('/SistOficioLibertades', [addfuncionarioController::class, 'enviarSolicitantes'])->name('SistOficioLibertades.index');
+
 
 Route::get('/libertad', [App\Http\Controllers\libertadController::class, 'index'])->name('libertad');
 
 Route::get('/oficio', [App\Http\Controllers\oficioController::class, 'index'])->name('oficio');
+
+
+
+
 
 Route::post('/enviar-solicitud', [SistOficioLibertadesController::class, 'enviarSolicitud'])
     ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class])

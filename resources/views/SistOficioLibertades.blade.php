@@ -45,9 +45,9 @@
 
                                 <select class="form-select form-select-lg mb-3" id="UserSolicitante" name="UserSolicitante" required>
                                     <option value="" disabled selected>SOLICITANTE</option>
-                                    <option value="pepito">pepito</option>
-                                    <option value="pedrito">pedrito</option>
-                                    <option value="juanito">juanito</option>
+                                    @foreach($solicitantes as $solicitante)
+                                        <option value="{{ $solicitante->nombre }}">{{ $solicitante->nombre }}</option>
+                                    @endforeach
                                 </select>
 
                                 <div class="input-group input-group-lg">
@@ -84,10 +84,10 @@
                                 </div><br>
 
                                 <select class="form-select form-select-lg mb-3" id="UserSolicitante" name="UserSolicitante" required>
-                                    <option value="" disabled selected>SOLICITANTE</option>
-                                    <option value="pepito">pepito</option>
-                                    <option value="pedrito">pedrito</option>
-                                    <option value="juanito">juanito</option>
+                                <option value="" disabled selected>SOLICITANTE</option>
+                                    @foreach($solicitantes as $solicitante)
+                                        <option value="{{ $solicitante->nombre }}">{{ $solicitante->nombre }}</option>
+                                    @endforeach
                                 </select>
 
                                 <div class="input-group input-group-lg">
