@@ -57,6 +57,7 @@ Route::get('/libertad', [App\Http\Controllers\libertadController::class, 'index'
 
 Route::get('/oficio', [App\Http\Controllers\oficioController::class, 'index'])->name('oficio');
 Route::delete('/Oficio/{id}', [App\Http\Controllers\oficioController::class, 'delete'])->name('Oficio.delete');
+Route::patch('/Oficio/{id}', [OficioController::class, 'update'])->name('Oficio.update');
 
 
 

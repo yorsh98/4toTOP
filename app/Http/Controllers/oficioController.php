@@ -30,6 +30,24 @@ class oficioController extends Controller
         }
         //return redirect()->route('Oficio.delete');
     }
+    public function update($id, Request $request){
+    // URL de tu API REST
+    $url = 'http://127.0.0.1:8001/api/Oficio/' . $id;
+
+    // Datos que deseas actualiza
+    $data = $request->only(['CausaAsig', 'UserSolicitante', 'UserDirigido']);
+
+    // Enviar la solicitud PATCH
+    $response = Http::patch($url, $data);
+
+    // Comprobar la respuesta
+    if ($response->successful()) {
+        return redirect()->route('oficio')->with('success', 'Oficio actualizado correctamente.');
+    }
+
+    return redirect()->back()->with('error', 'Error al actualizar el oficio.');
+    }
+
 
 
 }
