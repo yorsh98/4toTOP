@@ -7,6 +7,7 @@ use App\Http\Controllers\addfuncionarioController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Http;
 use App\Http\Controllers\oficioController;
+use App\Http\Controllers\libertadController;
 
 
 //Route::view('/', 'welcome');
@@ -34,7 +35,9 @@ use App\Http\Controllers\oficioController;
 //Route::redirect('/', '/SistOficioLibertades')->name('SistOficioLibertades');
 
 
-
+Route::get('/', function () {
+    return redirect()->route('SistOficioLibertades.index');
+});
 
 Route::get('/oficios', [SistOficioLibertadesController::class, 'index'])->name('SistOficioLibertades.index');
 
@@ -58,7 +61,13 @@ Route::get('/libertad', [App\Http\Controllers\libertadController::class, 'index'
 Route::get('/oficio', [App\Http\Controllers\oficioController::class, 'index'])->name('oficio');
 Route::delete('/Oficio/{id}', [App\Http\Controllers\oficioController::class, 'delete'])->name('Oficio.delete');
 Route::patch('/Oficio/{id}', [OficioController::class, 'update'])->name('Oficio.update');
+Route::get('/api/Oficios-data', [App\Http\Controllers\oficioController::class, 'getData'])->name('oficios.data');
 
+
+Route::get('/libertad', [App\Http\Controllers\libertadController::class, 'index'])->name('libertad');
+Route::delete('/Libertad/{id}', [App\Http\Controllers\libertadController::class, 'delete'])->name('Libertad.delete');
+Route::patch('/Libertad/{id}', [libertadController::class, 'update'])->name('Libertad.update');
+Route::get('/api/Libertad-data', [App\Http\Controllers\libertadController::class, 'getData'])->name('libertad.data');
 
 
 Route::post('/enviar-solicitud', [SistOficioLibertadesController::class, 'enviarSolicitud'])
