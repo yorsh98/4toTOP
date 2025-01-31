@@ -14,7 +14,7 @@ $maxWidth = [
     '2xl' => 'sm:max-w-2xl',
 ][$maxWidth];
 @endphp
-<!--
+
 <div
     x-data="{
         show: @js($show),
@@ -79,21 +79,3 @@ $maxWidth = [
 </div>
 
 
- Modal Component 
-<div class="modal fade" id="{{ $modalId ?? 'modalId' }}" tabindex="-1" aria-labelledby="{{ $modalTitleId ?? 'modalTitleId' }}" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="{{ $modalTitleId ?? 'modalTitleId' }}">{{ $title ?? 'Título del Modal' }}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                {{ $slot }}
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-primary" id="{{ $confirmButtonId ?? 'confirmButton' }}">Confirmar</button>
-            </div>
-        </div>
-    </div>
-</div>-->

@@ -12,7 +12,7 @@
                     <form action="{{ route('addfuncionario.store') }}" method="POST" class="input-group" novalidate>
                         @csrf
                         <input class="form-control" name="nombre" type="text" placeholder="Nuevo Funcionario" aria-label="Nuevo Funcionario" required pattern="^[a-zA-Z0-9\s-]+$">
-                        <button type="submit" class="btn btn-success">Submit</button>
+                        <button type="submit" class="btn btn-success">Agregar</button>
                     </form>
                         <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
                             <table class="table" style="max-height: 400px; overflow-y: auto;">

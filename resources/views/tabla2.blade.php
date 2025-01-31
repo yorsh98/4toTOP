@@ -46,7 +46,7 @@
                                 <td class="text-wrap">{{ $tabla['CausaAsig'] ?? 'N/A' }}</td>
                                 <td class="text-truncate">{{ $tabla['UserSolicitante'] ?? 'N/A' }}</td>
                                 <td class="text-truncate">{{ $tabla['UserDirigido'] ?? 'N/A' }}</td>
-                                <td>{{ \Carbon\Carbon::parse($tabla['created_at'])->format('d-m-Y H:i') ?? 'N/A' }}</td>
+                                <td>{{ \Carbon\Carbon::parse($tabla['created_at'])->format('d-m-Y') ?? 'N/A' }}</td>
                             </tr>
                         @endforeach
                     </tbody>
