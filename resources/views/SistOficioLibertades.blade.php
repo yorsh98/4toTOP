@@ -26,7 +26,7 @@
         <br><br>
         <button class="button-Principal" onclick="showElement('form2')" role="button">LIBERTAD</button>
     </main>
-        <div id="form1" class="hidden rotateY-180-reverse">
+            <div id="form1" class="hidden rotateY-180-reverse">
                 <main class="container main-container" id="main-content">
                     <h1 class="text-3xl font-bold mb-4">SOLICITUD PARA NUMEROS OFICIO</h1>
                     <hr>
@@ -40,7 +40,7 @@
                                 <input type="hidden" name="tipo" value="oficio">
                                 <div class="input-group input-group-lg">
                                     <span class="input-group-text" id="inputGroup-sizing-lg">CAUSA ASIGNADA</span>
-                                    <input type="text" class="form-control" id="CausaAsig" name="CausaAsig"  required pattern="^[a-zA-Z0-9\s-]{1,10}$" maxlength="10">
+                                    <input type="text" class="form-control" id="CausaAsig" name="CausaAsig"  required pattern="^[a-zA-Z0-9\s\-]{1,10}$" maxlength="10">
                                 </div><br>
 
                                 <select class="form-select form-select-lg mb-3" id="UserSolicitante" name="UserSolicitante" required>
@@ -52,7 +52,7 @@
 
                                 <div class="input-group input-group-lg">
                                     <span class="input-group-text" id="inputGroup-sizing-lg">MOTIVO</span>
-                                    <input type="text" class="form-control" id="UserDirigido" name="UserDirigido" required pattern="^[a-zA-Z0-9\s-]+$">
+                                    <input type="text" class="form-control" id="UserDirigido" name="UserDirigido" required pattern="^[a-zA-Z0-9\s\-]+$">
                                 </div><hr>
 
                                 <button type="submit" class="button-73">ENVIAR SOLICITUD</button>
@@ -64,10 +64,10 @@
 
 
                 </main>
-        </div>
+            </div>
 
-        <div id="form2" class="hidden rotateY-180">
-        <main class="container main-container" id="main-content">
+            <div id="form2" class="hidden rotateY-180">
+                 <main class="container main-container" id="main-content">
                     <h1 class="text-3xl font-bold mb-4">SOLICITUD PARA NUMEROS DE LIBERTAD</h1>
                     <hr>
                     <div id="alert-message-form2" class="alert alert-danger d-none" role="alert">
@@ -80,7 +80,7 @@
                                 <input type="hidden" name="tipo" value="libertad">
                                 <div class="input-group input-group-lg">
                                     <span class="input-group-text" id="inputGroup-sizing-lg">CAUSA ASIGNADA</span>
-                                    <input type="text" class="form-control" id="CausaAsig" name="CausaAsig" required pattern="^[a-zA-Z0-9\s-]{1,10}$" maxlength="10">
+                                    <input type="text" class="form-control" id="CausaAsig" name="CausaAsig" required pattern="^[a-zA-Z0-9\s\-]{1,10}$" maxlength="10">
                                 </div><br>
 
                                 <select class="form-select form-select-lg mb-3" id="UserSolicitante" name="UserSolicitante" required>
@@ -92,7 +92,7 @@
 
                                 <div class="input-group input-group-lg">
                                     <span class="input-group-text" id="inputGroup-sizing-lg">MOTIVO</span>
-                                    <input type="text" class="form-control" id="UserDirigido" name="UserDirigido" required pattern="^[a-zA-Z0-9\s-]+$">
+                                    <input type="text" class="form-control" id="UserDirigido" name="UserDirigido" required pattern="^[a-zA-Z0-9\s\-]+$">
                                 </div><hr>
 
                                 <button type="submit" class="button-73">ENVIAR SOLICITUD</button>
@@ -103,7 +103,7 @@
                             </form>
                 </main> 
             
-        </div>
+             </div>
 
         <div class="text-center">
 </div>

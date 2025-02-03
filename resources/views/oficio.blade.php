@@ -5,7 +5,7 @@
 
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Panel de Administrativo del listado de Oficios') }}
+            {{ __('Panel Administrativo del listado de Oficios') }}
         </h2>
     </x-slot>
 
@@ -59,7 +59,7 @@
                                                 @method('PATCH')
                                                 <div class="mb-3">
                                                     <label for="CausaAsig{{ $data['id'] }}" class="form-label">Causa Asignada</label>
-                                                    <input type="text" class="form-control" id="CausaAsig{{ $data['id'] }}" name="CausaAsig" value="{{ $data['CausaAsig'] }}">
+                                                    <input type="text" class="form-control" id="CausaAsig{{ $data['id'] }}" name="CausaAsig" value="{{ $data['CausaAsig'] }}" pattern="^[a-zA-Z0-9\s\-]{1,10}$">
                                                 </div>
                                                 <div class="mb-3">
                                                     <label for="UserSolicitante{{ $data['id'] }}" class="form-label">Solicitante</label>
@@ -67,7 +67,7 @@
                                                 </div>
                                                 <div class="mb-3">
                                                     <label for="UserDirigido{{ $data['id'] }}" class="form-label">Dirigido a</label>
-                                                    <input type="text" class="form-control" id="UserDirigido{{ $data['id'] }}" name="UserDirigido" value="{{ $data['UserDirigido'] }}">
+                                                    <input type="text" class="form-control" id="UserDirigido{{ $data['id'] }}" name="UserDirigido" value="{{ $data['UserDirigido'] }}" pattern="^[a-zA-Z0-9\s\-]{1,10}$">
                                                 </div>
                                                 <button type="submit" class="btn btn-success" onclick="return confirm('¿Estás seguro de ACTUALIZAR este oficio?')" >Guardar Cambios</button>
                                             </form>

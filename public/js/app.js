@@ -32,7 +32,7 @@ function goBack() {
     form2.classList.remove('visible');
     form2.classList.remove('show');
 }
-
+/*
 //VALIDACION DEL FORMULARIO Y ARRANQUE DEL MODAL
 function validateForm(form) {
     var inputs = form.querySelectorAll('input');
@@ -117,7 +117,7 @@ $(document).on('click', '[data-dismiss="modal"]', function() {
 document.getElementById('backToTop').addEventListener('click', function() {
     $('#myModal').modal('hide'); // Cierra el modal
     window.scrollTo({ top: 0, behavior: 'smooth' }); // Desplaza al inicio de la página
-});
+});*/
 /*
 function validateForm(form) {
     var inputs = form.querySelectorAll('input');
@@ -185,24 +185,26 @@ function goBack() {
 }
 
 function validateForm(form, formId) {
-    var inputs = form.querySelectorAll('input:not([type="hidden"])'); // Excluye campos ocultos
+    var inputs = form.querySelectorAll('input:not([type="hidden"])');
     var selects = form.querySelectorAll('select');
-    var regex = /^[a-zA-Z0-9\s-]+$/;  // Permite letras, números, espacios y guiones
+    var regex = /^[a-zA-Z0-9\s\-]+$/;
 
     // Validar campos de entrada
     for (var input of inputs) {
-        if (input.value.trim() && !regex.test(input.value.trim())) { // Ignora campos vacíos
+        if (input.value.trim() && !regex.test(input.value.trim())) {
             showAlert(`Por favor, ingresa solo letras, números, espacios y el símbolo "-" en los campos.`, formId);
-            input.focus(); // Enfocar el campo inválido
+            input.focus();
             return false;
         }
     }
 
     // Validar campos de selección
     for (var select of selects) {
-        if (!select.value) { // Verifica que se haya seleccionado una opción
+        // Obtener las opciones válidas del select
+        var validOptions = Array.from(select.options).map(option => option.value);
+        if (!validOptions.includes(select.value)) {
             showAlert(`Por favor, selecciona una opción válida.`, formId);
-            select.focus(); // Enfocar el campo inválido
+            select.focus();
             return false;
         }
     }
