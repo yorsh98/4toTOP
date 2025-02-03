@@ -87,7 +87,7 @@
 
     @push('scripts')
         <!-- Asegúrate de cargar jQuery primero, ya que DataTables depende de ello -->
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://code.jquery.com/jquery-3.7.1.js"   integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4="   crossorigin="anonymous"></script>
         <script src="https://cdn.datatables.net/2.2.1/js/dataTables.min.js"></script>
         
 
@@ -98,7 +98,7 @@
                     serverSide: true,
                     ajax: "{{ route('oficios.data') }}", // Asegúrate de que esta ruta está bien definida
                     columns: [
-                        { data: 'Numentregado', name: 'Numentregado' },
+                        { data: 'Numentregado', name: 'Numentregado', searchable: true },
                         { data: 'año', name: 'año' },
                         { data: 'CausaAsig', name: 'CausaAsig' },
                         { data: 'UserSolicitante', name: 'UserSolicitante' },

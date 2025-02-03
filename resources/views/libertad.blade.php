@@ -98,7 +98,7 @@
                     serverSide: true,
                     ajax: "{{ route('libertad.data') }}", // Asegúrate de que esta ruta está bien definida
                     columns: [
-                        { data: 'Numentregado', name: 'Numentregado' },
+                        { data: 'Numentregado', name: 'Numentregado', searchable: true },
                         { data: 'año', name: 'año' },
                         { data: 'CausaAsig', name: 'CausaAsig' },
                         { data: 'UserSolicitante', name: 'UserSolicitante' },

@@ -25,6 +25,9 @@ new #[Layout('layouts.guest')] class extends Component
     <!-- Session Status -->
     <x-auth-session-status class="mb-4" :status="session('status')" />
 
+    <link rel="icon" href="{{ asset('favicon.png') }}" type="image/png">
+
+
     <form wire:submit="login">
         <!-- Email Address -->
         <div>

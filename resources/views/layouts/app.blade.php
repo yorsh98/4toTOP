@@ -6,6 +6,7 @@
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
         <title>{{ config('app.name', 'Sistema Oficio/libertades 4to TOP Stgo.') }}</title>
+        <link rel="icon" href="{{ asset('favicon.png') }}" type="image/png">
 
         <!-- Fonts -->
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -14,6 +15,7 @@
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"> 
         
+
         @stack('styles')
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
