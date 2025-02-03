@@ -30,17 +30,17 @@
                 <main class="container main-container" id="main-content">
                     <h1 class="text-3xl font-bold mb-4">SOLICITUD PARA NUMEROS OFICIO</h1>
                     <hr>
-                            <div id="alert-message" class="alert alert-danger d-none" role="alert">
-                                <span id="alert-text"></span>
-                                <button type="button" class="btn-close" aria-label="Cerrar" onclick="closeAlert()"></button>
+                            <div id="alert-message-form1" class="alert alert-danger d-none" role="alert">
+                                <span id="alert-text-form1"></span>
+                                <button type="button" class="btn-close" aria-label="Cerrar" onclick="closeAlert('form1')"></button>
                             </div>
 
-                            <form id="solicitudForm" action="{{ route('SistOficioLibertades.store') }}" method="POST" class="form-container needs-validation" >
+                            <form id="solicitudForm1" action="{{ route('SistOficioLibertades.store') }}" method="POST" class="form-container needs-validation" onsubmit="return validateForm(this, 'form1')">
                                 @csrf
                                 <input type="hidden" name="tipo" value="oficio">
                                 <div class="input-group input-group-lg">
                                     <span class="input-group-text" id="inputGroup-sizing-lg">CAUSA ASIGNADA</span>
-                                    <input type="text" class="form-control" id="CausaAsig" name="CausaAsig" required pattern="^[a-zA-Z0-9\s-]{1,10}$" maxlength="10">
+                                    <input type="text" class="form-control" id="CausaAsig" name="CausaAsig"  required pattern="^[a-zA-Z0-9\s-]{1,10}$" maxlength="10">
                                 </div><br>
 
                                 <select class="form-select form-select-lg mb-3" id="UserSolicitante" name="UserSolicitante" required>
@@ -70,12 +70,12 @@
         <main class="container main-container" id="main-content">
                     <h1 class="text-3xl font-bold mb-4">SOLICITUD PARA NUMEROS DE LIBERTAD</h1>
                     <hr>
-                    <div id="alert-message" class="alert alert-danger d-none" role="alert">
-                                <span id="alert-text"></span>
-                                <button type="button" class="btn-close" aria-label="Cerrar" onclick="closeAlert()"></button>
+                    <div id="alert-message-form2" class="alert alert-danger d-none" role="alert">
+                                <span id="alert-text-form2"></span>
+                                <button type="button" class="btn-close" aria-label="Cerrar" onclick="closeAlert('form2')"></button>
                             </div>
 
-                            <form id="solicitudForm" action="{{ route('SistOficioLibertades.store') }}" method="POST" class="form-container needs-validation" >
+                            <form id="solicitudForm2" action="{{ route('SistOficioLibertades.store') }}" method="POST" class="form-container needs-validation" onsubmit="return validateForm(this, 'form2')">
                                 @csrf
                                 <input type="hidden" name="tipo" value="libertad">
                                 <div class="input-group input-group-lg">
@@ -101,7 +101,6 @@
                                     <button onclick="closeAlert()">Cerrar</button>
                                 </div>
                             </form>
-                    <p id="mensajeError" style="color:red;"></p>
                 </main> 
             
         </div>

@@ -184,64 +184,53 @@ function goBack() {
     form2.classList.remove('show');
 }
 
-function validateForm(form) {
-    var inputs = form.querySelectorAll('input');
+function validateForm(form, formId) {
+    var inputs = form.querySelectorAll('input:not([type="hidden"])'); // Excluye campos ocultos
     var selects = form.querySelectorAll('select');
     var regex = /^[a-zA-Z0-9\s-]+$/;  // Permite letras, números, espacios y guiones
 
+    // Validar campos de entrada
     for (var input of inputs) {
-        if (!regex.test(input.value.trim())) {
-            showAlert('Por favor, ingresa solo letras, números, espacios y el símbolo "-" en los campos.');
+        if (input.value.trim() && !regex.test(input.value.trim())) { // Ignora campos vacíos
+            showAlert(`Por favor, ingresa solo letras, números, espacios y el símbolo "-" en los campos.`, formId);
+            input.focus(); // Enfocar el campo inválido
             return false;
         }
     }
 
+    // Validar campos de selección
     for (var select of selects) {
-        if (!regex.test(select.value.trim())) {
-            showAlert('Por favor, selecciona una opción válida.');
+        if (!select.value) { // Verifica que se haya seleccionado una opción
+            showAlert(`Por favor, selecciona una opción válida.`, formId);
+            select.focus(); // Enfocar el campo inválido
             return false;
         }
     }
 
-    return true;
+    return true; // El formulario es válido
 }
 
-
-function showAlert(message) {
-    var alertBox = document.getElementById('alert-message');
-    document.getElementById('alert-text').textContent = message;
-    alertBox.classList.remove('d-none');
+// Función para mostrar alertas
+function showAlert(message, formId) {
+    var alertDiv = document.getElementById(`alert-message-${formId}`);
+    var alertText = document.getElementById(`alert-text-${formId}`);
+    alertText.textContent = message;
+    alertDiv.classList.remove('d-none'); // Muestra el mensaje de error
 }
 
 // Función para cerrar la alerta
-function closeAlert() {
-    document.getElementById('alert-message').classList.add('d-none');
+function closeAlert(formId) {
+    var alertDiv = document.getElementById(`alert-message-${formId}`);
+    alertDiv.classList.add('d-none'); // Oculta el mensaje de error
 }
 
-// Validación personalizada del formulario
-(function () {
-    'use strict';
-    var form = document.getElementById('myForm');
-
-    form.addEventListener('submit', function (event) {
-        if (!form.checkValidity()) {
-            event.preventDefault();
-            event.stopPropagation();
-            showAlert('Por favor, corrige los errores en el formulario antes de enviarlo.');
-        }
-        form.classList.add('was-validated');
-    }, false);
-    })();
 
 
-/*
-function showAlert(message) {
-    var alertBox = document.getElementById('alert-message');
-    document.getElementById('alert-text').textContent = message;
-    alertBox.classList.remove('hidden');
-}
 
-function closeAlert() {
-    document.getElementById('alert-message').classList.add('hidden');
-}*/
+
+
+
+
+
+
 
