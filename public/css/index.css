@@ -1,0 +1,69 @@
+/*ESTILOS DE LOS SISTEMAS INTERNOS*/
+section{
+    display: flex;
+    width: 600px;
+    height: 430px;
+    border-radius: 20px;
+    overflow: hidden;
+    
+  }
+  section img{
+    width: 1px;
+    flex-grow: 1;
+    object-fit: cover;
+    opacity: .8;
+    transition: width 0.5s ease, opacity 0.5s ease;
+    border:2px solid black ;
+  }
+  section img:hover{
+    cursor: pointer;
+    width: 300px;
+    opacity: 1;
+    filter: contrast(120%);
+  }
+  
+  /*ESTILOS PARA LA TRANSICION ANIMADA DEL NAVBAR*/
+  :target {
+      scroll-margin-top: 100px; 
+  }
+  
+  html {
+      scroll-behavior: smooth; 
+  }
+  
+  /* ESTILOS CSS DE FLIP EN INDEX (TRABAJAN EN CONJUNTO CON CLASES DE TAILWIND) */
+  .front {
+    
+    transform: rotateY(0deg); 
+  }
+  
+  .flip-container {
+    perspective: 1000px;
+    min-height: 180px; 
+  }
+  
+  .flipper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  
+  .flipper.flipped {
+    transform: rotateY(180deg);
+  }
+  
+  .front, .back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden; /* Para Safari */
+    transform-style: preserve-3d;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2); /* Sombra opcional */
+  }
+  
+  .back {
+    transform: rotateY(180deg);
+  }

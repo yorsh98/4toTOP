@@ -10,7 +10,7 @@ use App\Http\Controllers\oficioController;
 use App\Http\Controllers\libertadController;
 
 
-//Route::view('/', 'welcome');
+Route::view('/', 'welcome');
 /*Route::get('/', function () {
     $response=http::get('http://127.0.0.1:8001/api/Oficio');
     $data=$response->json("oficio");
@@ -35,9 +35,9 @@ use App\Http\Controllers\libertadController;
 //Route::redirect('/', '/SistOficioLibertades')->name('SistOficioLibertades');
 
 
-Route::get('/', function () {
+/*Route::get('/', function () {
     return redirect()->route('SistOficioLibertades.index');
-});
+});*/
 
 Route::get('/oficios', [SistOficioLibertadesController::class, 'index'])->name('SistOficioLibertades.index');
 
