@@ -43,8 +43,8 @@ class SistOficioLibertadesController extends Controller
 
         // Seleccionar la URL de la API según el tipo de solicitud
         $url = $validated['tipo'] === 'oficio'
-            ? 'http://127.0.0.1:8001/api/Oficio'
-            : 'http://127.0.0.1:8001/api/Libertad';
+            ? 'http://10.13.214.129:8082/api/Oficio'
+            : 'http://10.13.214.129:8082/api/Libertad';
         
             try {
                 // Enviar los datos validados a la API

@@ -20,7 +20,7 @@ class oficioController extends Controller
 
     public function delete($id, OficioService $OficioService, Request $request){
         //$url = $OficioService->__construct() ;
-        $url = 'http://127.0.0.1:8001/api/Oficio/' . $id;
+        $url = 'http://10.13.214.129:8082/api/Oficio/' . $id;
         $response = Http::delete($url);
 
         if ($response->successful()) {
@@ -33,7 +33,7 @@ class oficioController extends Controller
     
     public function update($id, Request $request){
     // URL de tu API REST
-    $url = 'http://127.0.0.1:8001/api/Oficio/' . $id;
+    $url = 'http://10.13.214.129:8082/api/Oficio/' . $id;
 
     // Datos que deseas actualiza
     $data = $request->only(['CausaAsig', 'UserSolicitante', 'UserDirigido']);

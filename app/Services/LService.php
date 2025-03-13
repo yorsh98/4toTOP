@@ -11,7 +11,7 @@ class LService
 
     public function __construct()
     {
-        $this->apiUrl = 'http://127.0.0.1:8001/api/Libertad/';
+        $this->apiUrl = 'http://10.13.214.129:8082/api/Libertad/';
     }
 
     public function createLibertad($data)

@@ -17,7 +17,7 @@ class tabla2Controller extends Controller
         return view('tabla2',compact('data'));
 
 
-           // $response = Http::get('http://127.0.0.1:8001/api/Oficio/');
+           // $response = Http::get('http://10.13.214.129:8082/api/Oficio/');
             //$data = $response->json("oficio");
             
     

@@ -11,7 +11,7 @@ class OficioService
 
     public function __construct()
     {
-        $this->apiUrl = 'http://127.0.0.1:8001/api/Oficio/';
+        $this->apiUrl = 'http://10.13.214.129:8082/api/Oficio/';
     }
 
     public function getOficios()

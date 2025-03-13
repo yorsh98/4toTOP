@@ -19,7 +19,7 @@ class libertadController extends Controller
     }
 
     public function delete($id){
-        $url = 'http://127.0.0.1:8001/api/Libertad/' . $id;
+        $url = 'http://10.13.214.129:8082/api/Libertad/' . $id;
         $response = Http::delete($url);
 
         if ($response->successful()) {
@@ -32,7 +32,7 @@ class libertadController extends Controller
     
     public function update($id, Request $request){
     // URL de tu API REST
-    $url = 'http://127.0.0.1:8001/api/Libertad/' . $id;
+    $url = 'http://10.13.214.129:8082/api/Libertad/' . $id;
 
     // Datos que deseas actualiza
     $data = $request->only(['CausaAsig', 'UserSolicitante', 'UserDirigido']);

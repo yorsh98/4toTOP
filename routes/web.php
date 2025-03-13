@@ -61,13 +61,13 @@ Route::get('/libertad', [App\Http\Controllers\libertadController::class, 'index'
 Route::get('/oficio', [App\Http\Controllers\oficioController::class, 'index'])->name('oficio')->middleware(['auth']);
 Route::delete('/Oficio/{id}', [App\Http\Controllers\oficioController::class, 'delete'])->name('Oficio.delete')->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
 Route::patch('/Oficio/{id}', [OficioController::class, 'update'])->name('Oficio.update')->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
-Route::get('/api/Oficios-data', [App\Http\Controllers\oficioController::class, 'getData'])->name('oficios.data');
+Route::get('/Oficio-data', [App\Http\Controllers\oficioController::class, 'getData'])->name('Oficio.data');
 
 
 Route::get('/libertad', [App\Http\Controllers\libertadController::class, 'index'])->name('libertad')->middleware(['auth']);
-Route::delete('/Libertad/{id}', [App\Http\Controllers\libertadController::class, 'delete'])->name('Libertad.delete')->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
+Route::delete('/Libertad/{id}', [App\Http\Controllers\libertadController::class, 'delete'])->name('Libertad.delete');
 Route::patch('/Libertad/{id}', [libertadController::class, 'update'])->name('Libertad.update')->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
-Route::get('/api/Libertad-data', [App\Http\Controllers\libertadController::class, 'getData'])->name('libertad.data');
+Route::get('/Libertad-data', [App\Http\Controllers\libertadController::class, 'getData'])->name('libertad.data');
 
 
 Route::post('/enviar-solicitud', [SistOficioLibertadesController::class, 'enviarSolicitud'])

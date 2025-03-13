@@ -96,7 +96,7 @@
                 var table = $('#miTabla').DataTable({
                     processing: true,
                     serverSide: true,
-                    ajax: "{{ route('oficios.data') }}", // Asegúrate de que esta ruta está bien definida
+                    ajax: "{{ route('Oficio.data') }}", // Asegúrate de que esta ruta está bien definida
                     columns: [
                         { data: 'Numentregado', name: 'Numentregado', searchable: true },
                         { data: 'año', name: 'año' },

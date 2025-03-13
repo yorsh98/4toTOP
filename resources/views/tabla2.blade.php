@@ -18,7 +18,7 @@
         <img src="/img/pjud_blanco.png" alt="Descripción de la imagen">
     </header>
     <div class="container-fluid mt-4 px-5"> <!-- Cambiado a container-fluid y agregado padding horizontal -->
-    <h1 class="text-center mb-4 display-6">Listado de Oficios</h1>
+    <h1 class="text-center mb-4 display-6">Listado de Libertades</h1>
 
     @if (!empty($data))
         @php
