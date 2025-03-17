@@ -43,7 +43,7 @@
                                 </div>
 
                                 <div class="pt-3 sm:pt-5">
-                                    <h2 class="text-xl font-semibold text-black dark:text-white">BIENVENIDO A LA INTRANET DEL 4TO TRIBUNAL DE JUICIO ORAL EN LO PENAL DE SANTIAGO</h2>
+                                    <h2 class="text-xl font-semibold text-black dark:text-white">4TO TRIBUNAL DE JUICIO ORAL EN LO PENAL DE SANTIAGO</h2>
 
                                     
                                 </div>
@@ -149,7 +149,7 @@
                                         <svg height="200px" width="200px" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512.001 512.001" xml:space="preserve" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path style="fill:#0084FF;" d="M332.803,10.449H95.726c-22.275,0-40.334,18.06-40.334,40.335v410.434 c0,22.276,18.059,40.334,40.334,40.334h320.546c22.275,0,40.334-18.059,40.334-40.334V134.253L332.803,10.449z"></path> <path style="fill:#10BAFC;" d="M373.139,134.253h83.467L332.806,10.451v83.47C332.803,116.195,350.861,134.253,373.139,134.253z"></path> <path d="M463.996,126.864L340.192,3.061C338.231,1.101,335.574,0,332.803,0H95.726C67.724,0,44.944,22.782,44.944,50.784v410.434 c0,28.001,22.781,50.783,50.783,50.783h320.546c28.002,0,50.783-22.781,50.783-50.783V134.253 C467.056,131.482,465.955,128.824,463.996,126.864z M343.255,35.679l88.127,88.126H373.14c-7.984,0-15.49-3.109-21.134-8.753 c-5.643-5.643-8.752-13.148-8.751-21.131L343.255,35.679L343.255,35.679z M416.274,491.102H95.726 c-16.479,0-29.885-13.406-29.885-29.885V50.784c0.001-16.479,13.407-29.886,29.885-29.886h226.631v73.021 c-0.002,13.565,5.28,26.318,14.871,35.909c9.592,9.592,22.345,14.874,35.911,14.874h73.018v316.515 C446.158,477.696,432.752,491.102,416.274,491.102z"></path> <path d="M275.092,351.492h-4.678c-5.77,0-10.449,4.678-10.449,10.449c0,5.771,4.679,10.449,10.449,10.449h4.678 c5.77,0,10.449-4.678,10.449-10.449C285.541,356.17,280.862,351.492,275.092,351.492z"></path> <path d="M236.61,351.492H135.118c-5.77,0-10.449,4.678-10.449,10.449c0,5.771,4.679,10.449,10.449,10.449H236.61 c5.77,0,10.449-4.678,10.449-10.449C247.059,356.17,242.381,351.492,236.61,351.492z"></path> <path d="M376.882,303.747H135.119c-5.77,0-10.449,4.678-10.449,10.449c0,5.771,4.679,10.449,10.449,10.449h241.763 c5.77,0,10.449-4.678,10.449-10.449C387.331,308.425,382.652,303.747,376.882,303.747z"></path> <path d="M376.882,256H135.119c-5.77,0-10.449,4.678-10.449,10.449s4.679,10.449,10.449,10.449h241.763 c5.77,0,10.449-4.678,10.449-10.449S382.652,256,376.882,256z"></path> <path d="M376.882,208.255H135.119c-5.77,0-10.449,4.678-10.449,10.449s4.679,10.449,10.449,10.449h241.763 c5.77,0,10.449-4.678,10.449-10.449C387.331,212.933,382.652,208.255,376.882,208.255z"></path> </g></svg>
                                     </div>
                                     <div>
-                                        <h2 class="text-xl font-semibold text-black">FORMULARIOS</h2>
+                                        <h2 class="text-xl font-semibold text-black">DOCUMENTOS</h2>
                                         
                                     </div>
                                 </a>
@@ -179,27 +179,27 @@
                                      <div class="space-y-2">
                                         <h3 class="text-lg font-semibold text-[#FF2D20] border-b pb-1 mb-2">MAGISTRADOS</h3>
                                         <ul class="space-y-1">
-                                            <li class="text-sm dark:text-gray-300">MAG 1</li>
-                                            <li class="text-sm dark:text-gray-300">MAG 2</li>
-                                            <li class="text-sm dark:text-gray-300">MAG 3</li>
+                                            <li class="text-sm dark:text-gray-300">-Turno Despacho viernes</li>
+                                            <li class="text-sm dark:text-gray-300">-</li>
+                                            <li class="text-sm dark:text-gray-300">-</li>
                                         </ul>
                                     </div>
                                     <!-- Columna 2 -->
                                     <div class="space-y-2">
                                         <h3 class="text-lg font-semibold text-[#FF2D20] border-b pb-1 mb-2">FUNCIONARIOS</h3>
                                         <ul class="space-y-1">
-                                            <li class="text-sm dark:text-gray-300">FUN 1</li>
-                                            <li class="text-sm dark:text-gray-300">FUN 2</li>
-                                            <li class="text-sm dark:text-gray-300">FUN 3</li>
+                                            <li class="text-sm dark:text-gray-300">-CAMILA LOPEZ</li>
+                                            <li class="text-sm dark:text-gray-300">-ROMINA SALGADO</li>
+                                            <li class="text-sm dark:text-gray-300">-CAMILA DIAZ</li>
                                         </ul>
                                     </div>
                                     <!-- Columna 3 -->
                                     <div class="space-y-2">
                                         <h3 class="text-lg font-semibold text-[#FF2D20] border-b pb-1 mb-2">JEFATURA</h3>
                                         <ul class="space-y-1">
-                                            <li class="text-sm dark:text-gray-300">JEF 1</li>
-                                            <li class="text-sm dark:text-gray-300">ACA PODRIAN</li>
-                                            <li class="text-sm dark:text-gray-300">PONER EL ADICIONAL DE MAG</li>
+                                            <li class="text-sm dark:text-gray-300">-TERESA ZURITA TORO</li>
+                                            <li class="text-sm dark:text-gray-300">- </li>
+                                            <li class="text-sm dark:text-gray-300">-</li>
                                         </ul>
                                     </div>   
                                 </a>
@@ -219,37 +219,37 @@
                                     <div class="pt-3 sm:pt-5">
                                         <h2 class="text-xl font-semibold text-black dark:text-white">TURNO ACD</h2>
                                         <p class="mt-2 text-sm/relaxed">
-                                            Precione aca 👇🏻
+                                            Proximo turno 18, 19 y 20 de Abril
                                         </p>
                                     </div>
                                     <svg class="size-6 shrink-0 self-center stroke-[#FF2D20]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75"/></svg>
                                 </a>
-                                <a  id="7" class="flex back items-center justify-center gap-4 rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] transition duration-300 hover:text-black/70 hover:ring-black/20 focus:outline-none focus-visible:ring-[#FF2D20] lg:pb-10 dark:bg-zinc-900 dark:ring-zinc-800 dark:hover:text-white/70 dark:hover:ring-zinc-700 dark:focus-visible:ring-[#FF2D20]">
+                                <a  id="7" class="flex back items-center justify-start gap-4 rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] transition duration-300 hover:text-black/70 hover:ring-black/20 focus:outline-none focus-visible:ring-[#FF2D20] lg:pb-10 dark:bg-zinc-900 dark:ring-zinc-800 dark:hover:text-white/70 dark:hover:ring-zinc-700 dark:focus-visible:ring-[#FF2D20]">
                                      <!-- Columna 1 -->
                                     <div class="space-y-2">
                                         <h3 class="text-lg font-semibold text-[#FF2D20] border-b pb-1 mb-2">MAGISTRADOS</h3>
                                         <ul class="space-y-1">
-                                            <li class="text-sm dark:text-gray-300">MAG 1</li>
-                                            <li class="text-sm dark:text-gray-300">MAG 2</li>
-                                            <li class="text-sm dark:text-gray-300">MAG 3</li>
+                                            <li class="text-sm dark:text-gray-300">-PEDRO ARAVENA</li>
+                                            <li class="text-sm dark:text-gray-300">-ANTONIA GODOY</li>
+                                            <li class="text-sm dark:text-gray-300">-CRISTIAN FUENTEALBA</li>
                                         </ul>
                                     </div>
                                     <!-- Columna 2 -->
                                     <div class="space-y-2">
                                         <h3 class="text-lg font-semibold text-[#FF2D20] border-b pb-1 mb-2">FUNCIONARIOS</h3>
                                         <ul class="space-y-1">
-                                            <li class="text-sm dark:text-gray-300">Jorge Andres Troncoso Reyes</li>
-                                            <li class="text-sm dark:text-gray-300">FUN 2</li>
-                                            <li class="text-sm dark:text-gray-300">FUN 3</li>
+                                            <li class="text-sm dark:text-gray-300">-CAMILA LOPEZ</li>
+                                            <li class="text-sm dark:text-gray-300">-MACARENA MUNRO</li>
+                                            <li class="text-sm dark:text-gray-300">-CRISTINA VALENZUELA</li>
                                         </ul>
                                     </div>
                                     <!-- Columna 3 -->
                                     <div class="space-y-2">
                                         <h3 class="text-lg font-semibold text-[#FF2D20] border-b pb-1 mb-2">JEFATURA</h3>
                                         <ul class="space-y-1">
-                                            <li class="text-sm dark:text-gray-300">JEF 1</li>
-                                            <li class="text-sm dark:text-gray-300">ACA PODRIAN</li>
-                                            <li class="text-sm dark:text-gray-300">PONER EL ADICIONAL DE MAG</li>
+                                            <li class="text-sm dark:text-gray-300">-TERESA ZURITA</li>
+                                            <li class="text-sm dark:text-gray-300">-</li>
+                                            <li class="text-sm dark:text-gray-300">-</li>
                                         </ul>
                                     </div>   
                                 </a>
