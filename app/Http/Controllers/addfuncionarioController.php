@@ -11,7 +11,7 @@ class addfuncionarioController extends Controller
 
     public function index()
     {
-        $solicitantes = Funcionario::all();
+        $solicitantes = Funcionario::orderBy('nombre')->get();
         return view('addfuncionario', compact('solicitantes'));
     }
 
@@ -33,7 +33,7 @@ class addfuncionarioController extends Controller
     public function enviarSolicitantes()
     {
         // Obtener los funcionarios desde la base de datos
-        $solicitantes = Funcionario::all();
+        $solicitantes = Funcionario::orderby('nombre')->get();
 
         
         return view('SistOficioLibertades', compact('solicitantes'));

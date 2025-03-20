@@ -37,18 +37,23 @@ new class extends Component
                 <!--botton en navbar-->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                     <x-nav-link :href="route('oficio')" :active="request()->routeIs('oficio')" wire:navigate>
-                        {{ __('Administración Oficios') }}
+                        {{ __('ADM Oficios') }}
                     </x-nav-link>
                 </div>
 
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                     <x-nav-link :href="route('libertad')" :active="request()->routeIs('libertad')" wire:navigate>
-                        {{ __('Administración Libertades') }}
+                        {{ __('ADM Libertades') }}
                     </x-nav-link>
                 </div>
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                     <x-nav-link :href="route('addfuncionario')" :active="request()->routeIs('addfuncionario')" wire:navigate>
-                        {{ __('Agregar Funcionarios') }}
+                        {{ __('Funcionarios') }}
+                    </x-nav-link>
+                </div>
+                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                    <x-nav-link :href="route('turno')" :active="request()->routeIs('turno')" wire:navigate>
+                        {{ __('Turnos') }}
                     </x-nav-link>
                 </div>
                 
@@ -107,21 +112,28 @@ new class extends Component
         <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link :href="route('oficio')" :active="request()->routeIs('oficio')" wire:navigate>
-                {{ __('Administración Oficios') }}
+                {{ __('ADM Oficios') }}
             </x-responsive-nav-link>
         </div>
 
         <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link :href="route('libertad')" :active="request()->routeIs('libertad')" wire:navigate>
-                {{ __('Administración Libertades') }}
+                {{ __('ADM Libertades') }}
             </x-responsive-nav-link>
         </div>
 
         <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link :href="route('addfuncionario')" :active="request()->routeIs('addfuncionario')" wire:navigate>
-                {{ __('Agregar Funcionarios') }}
+                {{ __('Funcionarios') }}
+            </x-responsive-nav-link>
+        </div>
+
+        <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
+        <div class="pt-2 pb-3 space-y-1">
+            <x-responsive-nav-link :href="route('turno')" :active="request()->routeIs('turno')" wire:navigate>
+                {{ __('Turnos') }}
             </x-responsive-nav-link>
         </div>
 

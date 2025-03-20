@@ -52,35 +52,28 @@
                             </a>
                         </div>
                         <div id="1" class="grid gap-6 lg:grid-cols-2 lg:gap-8">
-                            <div  
-                                
-                                class="flex flex-col items-start gap-6 overflow-hidden rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] transition duration-300 hover:text-black/70 hover:ring-black/20 focus:outline-none focus-visible:ring-[#FF2D20] md:row-span-3 lg:p-10 lg:pb-10 dark:bg-zinc-900 dark:ring-zinc-800 dark:hover:text-white/70 dark:hover:ring-zinc-700 dark:focus-visible:ring-[#FF2D20]"
-                            >
-                                <div id="screenshot-container" class="relative flex w-full flex-1 items-stretch">
-                                <section>
-                                    <img src="{{ asset('img/S1.jpg') }}" onclick="window.location.href='{{ url('/SistOficioLibertades') }}'">
-                                    <img src="{{ asset('img/S2.jpg') }}" onclick="window.location.href='http://10.13.214.129:8080/webaudios/'">
-                                    <img src="{{ asset('img/S3.jpg') }}" onclick="window.location.href='http://10.13.214.129:8080/cumpleanos/'">
-                                </section>
-                                    <div
-                                        class="absolute -bottom-16 -left-16 h-40 w-[calc(100%+8rem)] bg-gradient-to-b from-transparent via-white to-white dark:via-zinc-900 dark:to-zinc-900"
-                                    ></div>
-                                </div>
-
+                            <div class="flex flex-col items-start gap-6 overflow-hidden rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] transition duration-300 hover:text-black/70 hover:ring-black/20 focus:outline-none focus-visible:ring-[#FF2D20] md:row-span-3 lg:p-10 lg:pb-10 dark:bg-zinc-900 dark:ring-zinc-800 dark:hover:text-white/70 dark:hover:ring-zinc-700 dark:focus-visible:ring-[#FF2D20]">                        
                                 <div class="relative flex items-center gap-6 lg:items-end">
-                                <div class="flex size-12 shrink-0 items-center justify-center rounded-full bg-[#FF2D20]/10 sm:size-16">
-                                <svg fill="#ff483d" viewBox="-9.6 -9.6 115.20 115.20" xmlns="http://www.w3.org/2000/svg" stroke="#ff483d"><g id="SVGRepo_bgCarrier" stroke-width="0" transform="translate(0,0), scale(1)"><rect x="-9.6" y="-9.6" width="115.20" height="115.20" rx="57.6" fill="#ffebe9" strokewidth="0"></rect></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round" stroke="#CCCCCC" stroke-width="0.384"></g><g id="SVGRepo_iconCarrier"> <path d="M38.251 9.482c-40.067 11.274-39.759 66.555.429 77.023 3.157.822 7.446 1.495 9.53 1.495H52V77.2c0-11.691-.582-13.2-5.095-13.2-2.414 0-2.735-.417-3.076-4l-.382-4H52v-8H36v-4c0-3.376.322-4 2.066-4C42.505 40 44 38.228 44 32.965V28h4.566c3.772 0 7.455-1.017 9.276-2.561.188-.16.896-1.9 1.573-3.869l1.23-3.578 4.73 3.133C73.436 26.464 80 37.398 80 45.485c0 3.16 6.71 9.433 7.603 7.108 1.947-5.076-2.032-20.27-7.305-27.892C71.647 12.199 52.817 5.383 38.251 9.482m-1.382 8.423c-5.683 2.223-10.863 6.088-14.432 10.767l-2.698 3.537 4.13 4.131L28 40.471v-3.036C28 33.655 29.583 32 33.2 32c2.645 0 2.8-.245 2.8-4.429C36 21.339 37.693 20 45.571 20 51.333 20 52 19.793 52 18c0-2.661-8.436-2.714-15.131-.095m-20.46 24.47c-1.154 3.01.235 14.032 2.381 18.883 3.638 8.224 13.362 16.084 22.46 18.154 4.286.975 4.177-6.578-.12-8.358C37.959 69.74 36 66.353 36 62.183c0-3.78-18.546-22.531-19.591-19.808M60 60.027v19.214l4.555-3.732c2.505-2.053 4.704-3.57 4.885-3.371.182.199 2.013 4.253 4.069 9.01l3.737 8.647 3.627-1.505c1.995-.828 3.939-1.693 4.32-1.922.381-.228-1.081-4.275-3.25-8.991C79.774 72.66 78 68.621 78 68.4c0-.22 2.354-.4 5.23-.4h5.23l-9.48-9.572c-5.214-5.265-11.618-11.382-14.23-13.593L60 40.814v19.213" fill-rule="evenodd"></path> </g></svg>
+                                    <div class="flex size-12 shrink-0 items-center justify-center rounded-full bg-[#FF2D20]/10 sm:size-16">
+                                    <svg fill="#ff483d" viewBox="-9.6 -9.6 115.20 115.20" xmlns="http://www.w3.org/2000/svg" stroke="#ff483d"><g id="SVGRepo_bgCarrier" stroke-width="0" transform="translate(0,0), scale(1)"><rect x="-9.6" y="-9.6" width="115.20" height="115.20" rx="57.6" fill="#ffebe9" strokewidth="0"></rect></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round" stroke="#CCCCCC" stroke-width="0.384"></g><g id="SVGRepo_iconCarrier"> <path d="M38.251 9.482c-40.067 11.274-39.759 66.555.429 77.023 3.157.822 7.446 1.495 9.53 1.495H52V77.2c0-11.691-.582-13.2-5.095-13.2-2.414 0-2.735-.417-3.076-4l-.382-4H52v-8H36v-4c0-3.376.322-4 2.066-4C42.505 40 44 38.228 44 32.965V28h4.566c3.772 0 7.455-1.017 9.276-2.561.188-.16.896-1.9 1.573-3.869l1.23-3.578 4.73 3.133C73.436 26.464 80 37.398 80 45.485c0 3.16 6.71 9.433 7.603 7.108 1.947-5.076-2.032-20.27-7.305-27.892C71.647 12.199 52.817 5.383 38.251 9.482m-1.382 8.423c-5.683 2.223-10.863 6.088-14.432 10.767l-2.698 3.537 4.13 4.131L28 40.471v-3.036C28 33.655 29.583 32 33.2 32c2.645 0 2.8-.245 2.8-4.429C36 21.339 37.693 20 45.571 20 51.333 20 52 19.793 52 18c0-2.661-8.436-2.714-15.131-.095m-20.46 24.47c-1.154 3.01.235 14.032 2.381 18.883 3.638 8.224 13.362 16.084 22.46 18.154 4.286.975 4.177-6.578-.12-8.358C37.959 69.74 36 66.353 36 62.183c0-3.78-18.546-22.531-19.591-19.808M60 60.027v19.214l4.555-3.732c2.505-2.053 4.704-3.57 4.885-3.371.182.199 2.013 4.253 4.069 9.01l3.737 8.647 3.627-1.505c1.995-.828 3.939-1.693 4.32-1.922.381-.228-1.081-4.275-3.25-8.991C79.774 72.66 78 68.621 78 68.4c0-.22 2.354-.4 5.23-.4h5.23l-9.48-9.572c-5.214-5.265-11.618-11.382-14.23-13.593L60 40.814v19.213" fill-rule="evenodd"></path> </g></svg>
+                                    </div>
+
+                                    <div class="!pt-0">
+                                        <h2 class="text-xl font-semibold text-black dark:text-white">SISTEMAS INTERNOS</h2>
+                                        <p class="mt-4 text-sm/relaxed">
+                                            PRECIONE SOBRE EL SISTEMA A UTILIZAR 👆🏻
+                                        </p>
+                                    </div>
                                 </div>
 
-                                <div class="!pt-0">
-                                    <h2 class="text-xl font-semibold text-black dark:text-white">SISTEMAS INTERNOS</h2>
-                                    <p class="mt-4 text-sm/relaxed">
-                                        PRECIONE SOBRE EL SISTEMA A UTILIZAR 👆🏻
-                                    </p>
-                                    
-                                </div>
-
-                                <svg class="size-6 shrink-0 self-center stroke-[#FF2D20]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75"/></svg>
+                                <!-- Sección de imágenes movida abajo -->
+                                <div id="screenshot-container" class="relative flex w-full flex-1 items-stretch">
+                                    <section>
+                                        <img src="{{ asset('img/S1.jpg') }}" onclick="window.location.href='{{ url('/SistOficioLibertades') }}'">
+                                        <img src="{{ asset('img/S2.jpg') }}" onclick="window.location.href='http://10.13.214.129:8080/webaudios/'">
+                                        <img src="{{ asset('img/S3.jpg') }}" onclick="window.location.href='http://10.13.214.129:8080/cumpleanos/'">
+                                    </section>
+                                    <div class="absolute -bottom-16 -left-16 h-40 w-[calc(100%+8rem)] bg-gradient-to-b from-transparent via-white to-white dark:via-zinc-900 dark:to-zinc-900"></div>
                                 </div>
                             </div>
                             
@@ -178,28 +171,32 @@
                                      <!-- Columna 1 -->
                                      <div class="space-y-2">
                                         <h3 class="text-lg font-semibold text-[#FF2D20] border-b pb-1 mb-2">MAGISTRADOS</h3>
-                                        <ul class="space-y-1">
-                                            <li class="text-sm dark:text-gray-300">-Turno Despacho viernes</li>
-                                            <li class="text-sm dark:text-gray-300">-</li>
-                                            <li class="text-sm dark:text-gray-300">-</li>
+                                        <ul class="space-y-1">                                         
+                                            <ul class="space-y-1">
+                                                <li class="text-sm dark:text-gray-300">-{{ $turno1->TM1 ?? '' }}</li>
+                                                <li class="text-sm dark:text-gray-300">-{{ $turno1->TM2 ?? '' }}</li>
+                                                <li class="text-sm dark:text-gray-300">-{{ $turno1->TM3 ?? '' }}</li>
+                                            </ul> 
                                         </ul>
                                     </div>
                                     <!-- Columna 2 -->
                                     <div class="space-y-2">
                                         <h3 class="text-lg font-semibold text-[#FF2D20] border-b pb-1 mb-2">FUNCIONARIOS</h3>
                                         <ul class="space-y-1">
-                                            <li class="text-sm dark:text-gray-300">-CAMILA LOPEZ</li>
-                                            <li class="text-sm dark:text-gray-300">-ROMINA SALGADO</li>
-                                            <li class="text-sm dark:text-gray-300">-CAMILA DIAZ</li>
+                                        @if($turno1)
+                                            <li class="text-sm dark:text-gray-300">-{{ $turno1->TF1 ?? '' }}</li>
+                                            <li class="text-sm dark:text-gray-300">-{{ $turno1->TF2 ?? '' }}</li>
+                                            <li class="text-sm dark:text-gray-300">-{{ $turno1->TF3 ?? '' }}</li>
                                         </ul>
+                                        @endif
                                     </div>
                                     <!-- Columna 3 -->
                                     <div class="space-y-2">
                                         <h3 class="text-lg font-semibold text-[#FF2D20] border-b pb-1 mb-2">JEFATURA</h3>
                                         <ul class="space-y-1">
-                                            <li class="text-sm dark:text-gray-300">-TERESA ZURITA TORO</li>
-                                            <li class="text-sm dark:text-gray-300">- </li>
-                                            <li class="text-sm dark:text-gray-300">-</li>
+                                            <li class="text-sm dark:text-gray-300">-{{ $turno1->TJ1 ?? '' }}</li>
+                                            <li class="text-sm dark:text-gray-300">-{{ $turno1->TJ2 ?? '' }}</li>
+                                            <li class="text-sm dark:text-gray-300">-{{ $turno1->TJ3 ?? '' }}</li>
                                         </ul>
                                     </div>   
                                 </a>
@@ -219,37 +216,37 @@
                                     <div class="pt-3 sm:pt-5">
                                         <h2 class="text-xl font-semibold text-black dark:text-white">TURNO ACD</h2>
                                         <p class="mt-2 text-sm/relaxed">
-                                            Proximo turno 18, 19 y 20 de Abril
+                                        Proximo turno: {{ $turno2->FECHA ?? ''}}
                                         </p>
                                     </div>
                                     <svg class="size-6 shrink-0 self-center stroke-[#FF2D20]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75"/></svg>
                                 </a>
-                                <a  id="7" class="flex back items-center justify-start gap-4 rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] transition duration-300 hover:text-black/70 hover:ring-black/20 focus:outline-none focus-visible:ring-[#FF2D20] lg:pb-10 dark:bg-zinc-900 dark:ring-zinc-800 dark:hover:text-white/70 dark:hover:ring-zinc-700 dark:focus-visible:ring-[#FF2D20]">
+                                <a  id="7" class="flex back items-center justify-center gap-4 rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] transition duration-300 hover:text-black/70 hover:ring-black/20 focus:outline-none focus-visible:ring-[#FF2D20] lg:pb-10 dark:bg-zinc-900 dark:ring-zinc-800 dark:hover:text-white/70 dark:hover:ring-zinc-700 dark:focus-visible:ring-[#FF2D20]">
                                      <!-- Columna 1 -->
                                     <div class="space-y-2">
                                         <h3 class="text-lg font-semibold text-[#FF2D20] border-b pb-1 mb-2">MAGISTRADOS</h3>
                                         <ul class="space-y-1">
-                                            <li class="text-sm dark:text-gray-300">-PEDRO ARAVENA</li>
-                                            <li class="text-sm dark:text-gray-300">-ANTONIA GODOY</li>
-                                            <li class="text-sm dark:text-gray-300">-CRISTIAN FUENTEALBA</li>
+                                            <li class="text-sm dark:text-gray-300">-{{ $turno2->ACDM1 ?? '' }}</li>
+                                            <li class="text-sm dark:text-gray-300">-{{ $turno2->ACDM2 ?? '' }}</li>
+                                            <li class="text-sm dark:text-gray-300">-{{ $turno2->ACDM3 ?? '' }}</li>
                                         </ul>
                                     </div>
                                     <!-- Columna 2 -->
                                     <div class="space-y-2">
                                         <h3 class="text-lg font-semibold text-[#FF2D20] border-b pb-1 mb-2">FUNCIONARIOS</h3>
                                         <ul class="space-y-1">
-                                            <li class="text-sm dark:text-gray-300">-CAMILA LOPEZ</li>
-                                            <li class="text-sm dark:text-gray-300">-MACARENA MUNRO</li>
-                                            <li class="text-sm dark:text-gray-300">-CRISTINA VALENZUELA</li>
+                                            <li class="text-sm dark:text-gray-300">-{{ $turno2->ACDF1 ?? '' }}</li>
+                                            <li class="text-sm dark:text-gray-300">-{{ $turno2->ACDF2 ?? '' }}</li>
+                                            <li class="text-sm dark:text-gray-300">-{{ $turno2->ACDF3 ?? '' }}</li>
                                         </ul>
                                     </div>
                                     <!-- Columna 3 -->
                                     <div class="space-y-2">
                                         <h3 class="text-lg font-semibold text-[#FF2D20] border-b pb-1 mb-2">JEFATURA</h3>
                                         <ul class="space-y-1">
-                                            <li class="text-sm dark:text-gray-300">-TERESA ZURITA</li>
-                                            <li class="text-sm dark:text-gray-300">-</li>
-                                            <li class="text-sm dark:text-gray-300">-</li>
+                                            <li class="text-sm dark:text-gray-300">-{{ $turno2->ACDJ1 ?? '' }}</li>
+                                            <li class="text-sm dark:text-gray-300">-{{ $turno2->ACDJ2 ?? '' }}</li>
+                                            <li class="text-sm dark:text-gray-300">-{{ $turno2->ACDJ3 ?? '' }}</li>
                                         </ul>
                                     </div>   
                                 </a>

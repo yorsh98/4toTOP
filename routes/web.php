@@ -8,6 +8,9 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Http;
 use App\Http\Controllers\oficioController;
 use App\Http\Controllers\libertadController;
+use App\Http\Controllers\TurnoController;
+use App\Http\Controllers\welcomeController;
+
 
 
 Route::view('/', 'welcome');
@@ -68,6 +71,10 @@ Route::get('/libertad', [App\Http\Controllers\libertadController::class, 'index'
 Route::delete('/Libertad/{id}', [App\Http\Controllers\libertadController::class, 'delete'])->name('Libertad.delete');
 Route::patch('/Libertad/{id}', [libertadController::class, 'update'])->name('Libertad.update')->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
 Route::get('/Libertad-data', [App\Http\Controllers\libertadController::class, 'getData'])->name('libertad.data');
+
+Route::get('/turno', [App\Http\Controllers\turnoController::class, 'index'])->name('turno')->middleware(['auth']);
+Route::patch('/turno/{id}', [TurnoController::class, 'update'])->name('turno.update')->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
+Route::get('/', [TurnoController::class, 'enviarTurno'])->name('Welcome.index');
 
 
 Route::post('/enviar-solicitud', [SistOficioLibertadesController::class, 'enviarSolicitud'])
