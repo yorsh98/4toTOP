@@ -10,6 +10,7 @@ use App\Http\Controllers\oficioController;
 use App\Http\Controllers\libertadController;
 use App\Http\Controllers\TurnoController;
 use App\Http\Controllers\welcomeController;
+use App\Http\Controllers\guiasController;
 
 
 
@@ -75,6 +76,15 @@ Route::get('/Libertad-data', [App\Http\Controllers\libertadController::class, 'g
 Route::get('/turno', [App\Http\Controllers\turnoController::class, 'index'])->name('turno')->middleware(['auth']);
 Route::patch('/turno/{id}', [TurnoController::class, 'update'])->name('turno.update')->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
 Route::get('/', [TurnoController::class, 'enviarTurno'])->name('Welcome.index');
+
+Route::get('/guias', [App\Http\Controllers\guiasController::class, 'index'])->name('guias')->middleware(['auth']);
+Route::get('/guias/{id}/edit', [guiasController::class, 'edit'])->name('guias.edit');
+Route::patch('/guias/{id}', [guiasController::class, 'update'])->name('guias.update')->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
+Route::delete('/guias/{id}', [guiasController::class, 'destroy'])->name('guias.destroy');
+Route::post('/guias', [guiasController::class, 'store'])->name('guias.store');
+Route::get('/guias-datatable', [guiasController::class, 'datatable'])->name('guias.datatable');
+
+
 
 
 Route::post('/enviar-solicitud', [SistOficioLibertadesController::class, 'enviarSolicitud'])
