@@ -19,3 +19,25 @@ export default {
 
     plugins: [forms],
 };
+
+// tailwind.config.js
+module.exports = {
+    theme: {
+      extend: {
+        animation: {
+          'page-in': 'pageIn 0.3s ease-out',
+          'fade-in': 'fadeIn 0.2s ease-in'
+        },
+        keyframes: {
+          pageIn: {
+            '0%': { opacity: '0', transform: 'translateX(20px)' },
+            '100%': { opacity: '1', transform: 'translateX(0)' }
+          },
+          fadeIn: {
+            '0%': { opacity: '0' },
+            '100%': { opacity: '1' }
+          }
+        }
+      }
+    }
+  }

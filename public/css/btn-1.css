@@ -1,0 +1,68 @@
+/*Boton principal de GUIASTELEFONICAS*/
+
+.btn-1 {
+    appearance: none;
+    background-color: #3c6deb;
+    border-radius: 20em; /* Reducir redondeo */
+    border-style: none;
+    box-shadow: #ADCFFF 0 -4px 2px inset;
+    box-sizing: border-box;
+    color: #fff;
+    cursor: pointer;
+    display: inline-block;
+    font-family: -apple-system, sans-serif;
+    font-size: 0.4rem; /* Tamaño base más pequeño */
+    font-weight: 600; /* Reducir grosor de fuente */
+    letter-spacing: -.15px;
+    margin: 2px; /* Reducir margen entre botones */
+    outline: none;
+    padding: 0.2rem 0.3rem; /* Padding mínimo */
+    min-width: 40px; /* Ancho mínimo fijo */
+    text-align: center;
+    text-decoration: none;
+    transition: all .1s; /* Transición más rápida */
+    white-space: nowrap; /* Evitar salto de línea */
+    flex-shrink: 0; /* Evitar que se encojan */
+}
+
+.btn-1:hover {
+    background-color: #FFC229;
+    box-shadow: #FF6314 0 -2px 3px inset;
+    transform: scale(1.05); /* Efecto hover más sutil */
+}
+
+.btn-1:active {
+    transform: scale(0.98);
+}
+
+@media (min-width: 400px) {
+    .btn-1 {
+       font-size: 0.6rem;
+       padding: 0.3rem 0.5rem;
+       min-width: 50px;
+    }
+}
+
+@media (min-width: 768px) {
+    .btn-1 {
+        font-size: 0.7rem;
+        padding: 0.3rem 0.6rem;
+        min-width: 60px;
+    }
+}
+
+@media (min-width: 1023px) {
+    .btn-1 {
+        font-size: 1rem;
+        padding: 0.3rem 0.6rem;
+        min-width: 60px;
+    }
+}
+/* Contenedor para los botones */
+.botones-container {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 3px;
+    overflow-x: auto;
+    padding: 5px 0;
+}

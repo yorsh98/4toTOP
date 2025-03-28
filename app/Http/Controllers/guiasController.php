@@ -54,7 +54,7 @@ class guiasController extends Controller
         'correo' => 'nullable|email|max:255',
         'tel1' => 'nullable|numeric|digits_between:9,12', // ✅
         'tel2' => 'nullable|numeric|digits_between:9,12',
-        'institucion' => 'required|in:1,2,3,4,5,6' // Valores permitidos (corregir opciones duplicadas)
+        'institucion' => 'required|in:0,1,2,3,4,5,6,7,8,9,10,11' // id para busqueda mas rapida 
     ], $messages); //pasamos los mensajes personalizados
 
     Guias::create([
@@ -86,9 +86,6 @@ class guiasController extends Controller
     
     public function update(Request $request, $id)
     {   
-        
-        
-
         $guia = Guias::findOrFail($id);
         $guia->update([
         'nombre_completo' => $request->nombre_completo,

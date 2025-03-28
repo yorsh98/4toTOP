@@ -11,6 +11,7 @@ use App\Http\Controllers\libertadController;
 use App\Http\Controllers\TurnoController;
 use App\Http\Controllers\welcomeController;
 use App\Http\Controllers\guiasController;
+use App\Http\Controllers\guiastelefonicasController;
 
 
 
@@ -52,7 +53,7 @@ Route::post('/SistOficioLibertades', [App\Http\Controllers\SistOficioLibertadesC
 
 
 Route::get('/tablas', [App\Http\Controllers\tablasController::class, 'index' ]);
-Route::get('/tabla2', [App\Http\Controllers\tabla2Controller::class, 'index' ])->name('tabla2');;
+Route::get('/tabla2', [App\Http\Controllers\tabla2Controller::class, 'index' ])->name('tabla2');
 
 Route::get('/addfuncionario', [App\Http\Controllers\addfuncionarioController::class, 'index'])->name('addfuncionario')->middleware(['auth']);
 Route::post('/addfuncionario', [addfuncionarioController::class, 'store'])->name('addfuncionario.store');
@@ -82,7 +83,10 @@ Route::get('/guias/{id}/edit', [guiasController::class, 'edit'])->name('guias.ed
 Route::patch('/guias/{id}', [guiasController::class, 'update'])->name('guias.update')->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
 Route::delete('/guias/{id}', [guiasController::class, 'destroy'])->name('guias.destroy');
 Route::post('/guias', [guiasController::class, 'store'])->name('guias.store');
-Route::get('/guias-datatable', [guiasController::class, 'datatable'])->name('guias.datatable');
+Route::get('/guias-datatable', [guiasController::class, 'datatable'])->name('guias.datatable')->middleware(['auth']);
+
+Route::get('/guiastelefonicas', [guiastelefonicasController::class, 'index' ])->name('guiastelefonicas');
+Route::get('/guias-data', [guiastelefonicasController::class, 'getGuias'])->name('guias.data');
 
 
 

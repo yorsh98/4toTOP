@@ -1,7 +1,9 @@
 <x-app-layout>
+<x-insertbootstrap />
     @push('styles')
         
         <link href="https://cdn.datatables.net/2.2.2/css/dataTables.dataTables.min.css" rel="stylesheet">
+        
         
 
     @endpush
@@ -25,7 +27,7 @@
                             </ul>
                         </div>
                     @endif
-                    <h1>Ingrese cualquier persona al sistema de GUIA </h1>
+                    <h3>Ingrese nueva GUIA </h3>
                     <form action="{{ route('guias.store') }}" method="POST" class="input-group pt-2" novalidate>
                         @csrf
                         @method('POST')
@@ -35,12 +37,19 @@
                         <input class="form-control" name="tel1" type="number" placeholder="N° Telefonico 1" value="{{ old('telefono 1') }}" aria-label="Nuevo Funcionario"  pattern="[0-9]{9,12}" maxlength="12" >
                         <input class="form-control" name="tel2" type="number" placeholder="N° Telefonico 2" value="{{ old('telefono opcional') }}" aria-label="Nuevo Funcionario"  pattern="[0-9]{9,12}" maxlength="12" >
                         <select class="form-select" name="institucion" aria-label="Nuevo Funcionario" required>
-                            <option value="0" disabled selected >Institucion</option>
+                            <option value="" disabled selected >Institucion</option>
                             <option value="1">1. 4toTOPSTGO</option>
                             <option value="2">2. Gendarmeria</option>
                             <option value="3">3. Fiscalia</option>
-                            <option value="4">4. Corporacion</option>
+                            <option value="4">4. CAPJ</option>
                             <option value="5">5. Zonal STGO</option>
+                            <option value="6">6. Defensoria</option>
+                            <option value="7">7. Min. Interior</option>
+                            <option value="8">8. C.D. Estado</option>
+                            <option value="9">9. Defensores Privados</option>
+                            <option value="10">10. PDI/Carabineros</option>
+                            <option value="11">11. SML</option>
+                            
                         </select>
                         <button type="submit" class="btn btn-success">Agregar</button>
                     </form>
@@ -76,19 +85,6 @@
             </div>
         </div>
     </div>
-
-    
-
-
-
-            
-
-
-
-
-
-
-
         <!-- Modal para editar guías -->
                     
     <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
@@ -126,12 +122,18 @@
                         <div class="mb-3">
                             <label for="edit-institucion" class="form-label">Institución</label>
                             <select class="form-control" name="institucion" id="edit-institucion" aria-label="Nuevo Funcionario" required>
-                                <option value="0" disabled selected >Institucion</option>
+                                <option value="" disabled selected >Institucion</option>
                                 <option value="1">1. 4toTOPSTGO</option>
                                 <option value="2">2. Gendarmeria</option>
                                 <option value="3">3. Fiscalia</option>
-                                <option value="4">4. Corporacion</option>
+                                <option value="4">4. CAPJ</option>
                                 <option value="5">5. Zonal STGO</option>
+                                <option value="6">6. Defensoria</option>
+                                <option value="7">7. Min. Interior</option>
+                                <option value="8">8. C.D. Estado</option>
+                                <option value="9">9. Defensores Privados</option>
+                                <option value="10">10. PDI/Carabineros</option>
+                                <option value="11">11. SML</option>
                             </select>
                         </div>
                         <button type="submit" class="btn btn-success">Actualizar</button>
@@ -142,8 +144,9 @@
     </div>
     @push('scripts')
         <!-- Asegúrate de cargar jQuery primero, ya que DataTables depende de ello -->
-        <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
-        <script src="https://cdn.datatables.net/2.2.2/js/dataTables.min.js"></script>
+        <script src="https://code.jquery.com/jquery-3.7.1.js" ></script>
+        <script src="https://cdn.datatables.net/2.2.2/js/dataTables.min.js" ></script>
+        
         <script>
         $(document).ready(function() {
     $('#TablaGuias').DataTable({
@@ -211,9 +214,10 @@
             $('#edit-institucion').val(response.institucion);
 
             $('#editModal').modal('show'); // Abrir el modal
-        }
-    });
-}); $('#editForm').submit(function(e) {
+            }
+        });
+    }); 
+    $('#editForm').submit(function(e) {
         e.preventDefault();
         var formData = $(this).serialize();
         $.ajax({

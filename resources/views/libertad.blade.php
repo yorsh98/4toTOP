@@ -1,6 +1,6 @@
 <x-app-layout>
     @push('styles')
-        <link href="https://cdn.datatables.net/2.2.1/css/dataTables.dataTables.min.css" rel="stylesheet">
+        <link href="https://cdn.datatables.net/2.2.2/css/dataTables.dataTables.min.css" rel="stylesheet">
     @endpush
 
     <x-slot name="header">
@@ -87,8 +87,8 @@
 
     @push('scripts')
         <!-- Asegúrate de cargar jQuery primero, ya que DataTables depende de ello -->
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-        <script src="https://cdn.datatables.net/2.2.1/js/dataTables.min.js"></script>
+        <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+        <script src="https://cdn.datatables.net/2.2.2/js/dataTables.min.js"></script>
         
 
         <script>
