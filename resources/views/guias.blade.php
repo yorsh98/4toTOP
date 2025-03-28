@@ -31,9 +31,9 @@
                     <form action="{{ route('guias.store') }}" method="POST" class="input-group pt-2" novalidate>
                         @csrf
                         @method('POST')
-                        <input class="form-control" name="nombre" type="text" placeholder="Ingrese Nombre" value="{{ old('nombre') }}" aria-label="Nuevo Funcionario" required pattern="^[a-zA-Z0-9\s-]+$" >
-                        <input class="form-control" name="rut" type="text" placeholder="Ingrese RUT" value="{{ old('rut') }}" aria-label="Nuevo Funcionario"  pattern="^[a-zA-Z0-9\s-]+$">
-                        <input class="form-control" name="correo" type="email" placeholder="Ingrese Correo" value="{{ old('correo') }}" aria-label="Nuevo Funcionario" pattern="^[a-zA-Z0-9\s-]+$">
+                        <input class="form-control" name="nombre" type="text" placeholder="Ingrese Nombre" value="{{ old('nombre') }}" aria-label="Nuevo Funcionario" required pattern="^[a-zA-Z0-9\s\-]+$" >
+                        <input class="form-control" name="rut" type="text" placeholder="Ingrese RUT" value="{{ old('rut') }}" aria-label="Nuevo Funcionario"  pattern="^[a-zA-Z0-9\s\-]+$">
+                        <input class="form-control" name="correo" type="email" placeholder="Ingrese Correo" value="{{ old('correo') }}" aria-label="Nuevo Funcionario" pattern="^[a-zA-Z0-9\s\-]+$">
                         <input class="form-control" name="tel1" type="number" placeholder="N° Telefonico 1" value="{{ old('telefono 1') }}" aria-label="Nuevo Funcionario"  pattern="[0-9]{9,12}" maxlength="12" >
                         <input class="form-control" name="tel2" type="number" placeholder="N° Telefonico 2" value="{{ old('telefono opcional') }}" aria-label="Nuevo Funcionario"  pattern="[0-9]{9,12}" maxlength="12" >
                         <select class="form-select" name="institucion" aria-label="Nuevo Funcionario" required>
