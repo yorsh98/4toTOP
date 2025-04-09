@@ -34,7 +34,7 @@
                         <input class="form-control" name="nombre" type="text" placeholder="Ingrese Nombre" value="{{ old('nombre') }}" aria-label="Nuevo Funcionario" required pattern="^[a-zA-Z0-9\s\-]+$" >
                         <input class="form-control" name="rut" type="text" placeholder="Ingrese RUT" value="{{ old('rut') }}" aria-label="Nuevo Funcionario"  pattern="^[a-zA-Z0-9\s\-]+$">
                         <input class="form-control" name="correo" type="email" placeholder="Ingrese Correo" value="{{ old('correo') }}" aria-label="Nuevo Funcionario" pattern="^[a-zA-Z0-9\s\-]+$">
-                        <input class="form-control" name="tel1" type="number" placeholder="N° Telefonico 1" value="{{ old('telefono 1') }}" aria-label="Nuevo Funcionario"  pattern="[0-9]{9,12}" maxlength="12" >
+                        <input class="form-control" name="tel1" type="number" placeholder="N° Telefonico 1" value="{{ old('telefono 1') }}" aria-label="Nuevo Funcionario"  pattern="[0-9]{4,12}" maxlength="12" >
                         <input class="form-control" name="tel2" type="number" placeholder="N° Telefonico 2" value="{{ old('telefono opcional') }}" aria-label="Nuevo Funcionario"  pattern="[0-9]{9,12}" maxlength="12" >
                         <select class="form-select" name="institucion" aria-label="Nuevo Funcionario" required>
                             <option value="" disabled selected >Institucion</option>
@@ -60,7 +60,7 @@
     <div class="py-1">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
+                <div class="p-6 text-gray-900" >
                 @if(session('success'))
                     <div class="alert alert-success">
                         {{ session('success') }}
@@ -134,6 +134,7 @@
                                 <option value="9">9. Defensores Privados</option>
                                 <option value="10">10. PDI/Carabineros</option>
                                 <option value="11">11. SML</option>
+                                <option value="12">12. Otros Tribunales</option>
                             </select>
                         </div>
                         <button type="submit" class="btn btn-success">Actualizar</button>

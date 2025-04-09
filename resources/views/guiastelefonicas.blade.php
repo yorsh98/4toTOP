@@ -57,9 +57,11 @@
                                 <div class="flex flex-nowrap gap-[3px] overflow-x-auto  scroll-smooth">
                                     <button class="btn btn-1 filter-btn" data-institucion="0">TODOS</button>
                                     <button class="btn btn-1 filter-btn" data-institucion="1">4TO TOP</button>
+                                    <button class="btn btn-1 filter-btn" data-institucion="2">GENCHI</button>
                                     <button class="btn btn-1 filter-btn" data-institucion="3">FISCALÍA</button>
                                     <button class="btn btn-1 filter-btn" data-institucion="4">CAPJ</button>
-                                    <button class="btn btn-1 filter-btn" data-institucion="5">ZONAL Stgo</button>
+                                    <button class="btn btn-1 filter-btn" data-institucion="5">ZONAL STGO</button>
+                                    <button class="btn btn-1 filter-btn" data-institucion="12">OTROS TRIBUNALES</button>
                                 </div>    
                                 <div class="flex flex-nowrap gap-[3px] overflow-x-auto  scroll-smooth">
                                     <button class="btn btn-1 filter-btn" data-institucion="6">DEFENSORIA</button> 

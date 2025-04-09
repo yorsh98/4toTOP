@@ -37,7 +37,7 @@ class guiasController extends Controller
         'rut.required' => 'Debe ingresar un RUT.',
         'rut.regex' => 'El formato del RUT es inválido (Ej: 123678-9).',
         'correo.email' => 'Debe ingresar un correo electrónico válido.',
-        'tel1.digits_between' => 'El teléfono principal debe tener entre 9 y 12 dígitos.',
+        'tel1.digits_between' => 'El teléfono principal debe tener entre 4 y 12 dígitos.',
         'tel2.digits_between' => 'El teléfono opcional debe tener entre 9 y 12 dígitos.',
         'institucion.required' => 'Seleccione una institución.'
     ];
@@ -52,7 +52,7 @@ class guiasController extends Controller
             Rule::unique('guias')->whereNull('deleted_at')
         ],
         'correo' => 'nullable|email|max:255',
-        'tel1' => 'nullable|numeric|digits_between:9,12', // ✅
+        'tel1' => 'nullable|numeric|digits_between:4,12', // ✅
         'tel2' => 'nullable|numeric|digits_between:9,12',
         'institucion' => 'required|in:0,1,2,3,4,5,6,7,8,9,10,11' // id para busqueda mas rapida 
     ], $messages); //pasamos los mensajes personalizados
