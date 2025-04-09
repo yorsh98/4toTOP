@@ -13,7 +13,7 @@
         <!-- Styles -->
         @stack('styles')
         @vite(['resources/css/app.css', 'resources/js/app.js'])
-        <link rel="icon" href="{{ asset('favicon.png') }}" type="image/png">
+        <link rel="icon" href="{{ asset('favicon.webp') }}" type="image/webp">
         <link rel="stylesheet" href="{{ asset('css/index.css') }}">
         <link rel="stylesheet" href="{{ asset('css/nav.css') }}">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
@@ -22,7 +22,7 @@
     </head>
     <body class="antialiased font-sans">
         <div class="relative min-h-screen"">
-        <img id="background" src="{{ asset('img/blue.jpg') }}" alt="Fondo skyblue" class="absolute inset-0 w-full h-full object-cover "/>
+        <img id="background" src="{{ asset('img/blue.webp') }}" alt="Fondo skyblue" class="absolute inset-0 w-full h-full object-cover "/>
             <div class="relative min-h-screen flex flex-col items-center justify-center selection:bg-[#FF2D20] selection:text-white">
                 <div class="relative w-full max-w-2xl px-6 lg:max-w-7xl">
                 <header class="grid grid-cols-1 items-center gap-2 py- lg:grid-cols-3">
@@ -70,9 +70,9 @@
                                 <!-- Sección de imágenes movida abajo -->
                                 <div id="screenshot-container" class="relative flex w-full flex-1 items-stretch">
                                     <section>
-                                        <img src="{{ asset('img/S1.jpg') }}" onclick="window.location.href='{{ url('/SistOficioLibertades') }}'">
-                                        <img src="{{ asset('img/S2.jpg') }}" onclick="window.location.href='http://10.13.214.129:8080/webaudios/'">
-                                        <img src="{{ asset('img/S3.jpg') }}" onclick="window.location.href='http://10.13.214.129:8080/cumpleanos/'">
+                                        <img src="{{ asset('img/S1.webp') }}" onclick="window.location.href='{{ url('/SistOficioLibertades') }}'">
+                                        <img src="{{ asset('img/S2.webp') }}" onclick="window.location.href='http://10.13.214.129:8080/webaudios/'">
+                                        <img src="{{ asset('img/S3.webp') }}" onclick="window.location.href='http://10.13.214.129:8080/cumpleanos/'">
                                     </section>
                                     <div class="absolute -bottom-16 -left-16 h-40 w-[calc(100%+8rem)] bg-gradient-to-b from-transparent via-white to-white dark:via-zinc-900 dark:to-zinc-900"></div>
                                 </div>

@@ -14,7 +14,7 @@
         <!-- Styles -->
         @stack('styles')
         @vite(['resources/css/app.css', 'resources/js/app.js'])
-        <link rel="icon" href="{{ asset('favicon.png') }}" type="image/png">
+        <link rel="icon" href="{{ asset('favicon.webp') }}" type="image/webp">
         <link rel="stylesheet" href="{{ asset('css/index.css') }}">
         <link rel="stylesheet" href="{{ asset('css/nav2.css') }}">
         <link rel="stylesheet" href="{{ asset('css/btn-1.css') }}">
@@ -24,7 +24,7 @@
     </head>
     <body class="antialiased font-sans ">
         <div class="relative min-h-screen ">
-        <img id="background" src="{{ asset('img/blue.jpg') }}" alt="Fondo skyblue" class="absolute inset-0 w-full h-full object-cover "/>
+        <img id="background" src="{{ asset('img/blue.webp') }}" alt="Fondo skyblue" class="absolute inset-0 w-full h-full object-cover "/>
             <div class="relative min-h-screen flex flex-col items-center justify-center selection:bg-[#FF2D20] selection:text-white">
                 <div class="relative w-full max-w-2xl px-6 lg:max-w-7xl">
                 <header class="fixed top-0 left-0 w-full z-50 bg-white shadow-md">

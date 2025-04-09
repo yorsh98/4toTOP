@@ -12,13 +12,13 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="/css/app.css">
-    <link rel="icon" href="{{ asset('favicon.png') }}" type="image/png">
+    <link rel="icon" href="{{ asset('favicon.webp') }}" type="image/webp">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 <body>
     <header class="banner">
         <h1 class="banner-title">4° Tribunal de Juicio Oral en lo Penal de Santiago</h1>
-        <img src="/img/pjud_blanco.png" alt="Descripción de la imagen">
+        <img src="/img/pjud_blanco.webp" alt="Descripción de la imagen">
     </header>
     <main class="container main-container" id="main-content">
         <h1 class="text-3xl font-bold mb-4">SOLICITUD PARA NUMEROS OFICIO / LIBERTAD</h1>
@@ -154,11 +154,7 @@
     </div>
   </div>
 </div>
-    <footer>
-      <a href="{{ url('/tablas') }}" class="footer-button">Ultimos Oficios</a>
-      <a href="{{ url('/SistOficioLibertades') }}" class="footer-button">Página Principal</a>
-      <a href="{{ url('/tabla2') }}" class="footer-button">Ultimas Libertades</a>
-    </footer>
+    <x-footer-sol />
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
