@@ -12,8 +12,11 @@ use App\Http\Controllers\TurnoController;
 use App\Http\Controllers\welcomeController;
 use App\Http\Controllers\guiasController;
 use App\Http\Controllers\guiastelefonicasController;
-
-
+use App\Http\Controllers\accController;
+use App\Http\Controllers\docController;
+use App\Http\Controllers\formController;
+use App\Http\Controllers\procController;
+use App\Http\Controllers\prograController;
 
 Route::view('/', 'welcome');
 /*Route::get('/', function () {
@@ -88,7 +91,15 @@ Route::get('/guias-datatable', [guiasController::class, 'datatable'])->name('gui
 Route::get('/guiastelefonicas', [guiastelefonicasController::class, 'index' ])->name('guiastelefonicas');
 Route::get('/guias-data', [guiastelefonicasController::class, 'getGuias'])->name('guias.data');
 
+Route::get('/acc', [accController::class, 'index' ])->name('acc');
 
+Route::get('/doc', [docController::class, 'index' ])->name('doc');
+
+Route::get('/form', [formController::class, 'index' ])->name('form');
+
+Route::get('/proc', [procController::class, 'index' ])->name('proc');
+
+Route::get('/progra', [prograController::class, 'index' ])->name('progra');
 
 
 Route::post('/enviar-solicitud', [SistOficioLibertadesController::class, 'enviarSolicitud'])

@@ -37,11 +37,7 @@
             </main>
         </div>
         <script src="/js/app.js"></script>
-        
-        
         <script>
-        
-
         </script>
         @stack('scripts')
         
