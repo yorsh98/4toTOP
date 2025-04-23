@@ -126,8 +126,7 @@
 				<h4>Solicitud exitosa!</h4>	
 				<p>Tu numero de OFICIO / LIBERTAD es: </p>
                 <h4><strong>{{ session('NumEntregado') }}-{{ session('año') }}</strong></h4>
-				<a class="btn btn-success" href="{{ url('/SistOficioLibertades') }}" data-dismiss="modal"><span>Volver al Inicio</span> <i class="material-icons">&#xE5C8;</i></a>
-                <button class="btn btn-success" onclick="showElement('form1')" data-dismiss="modal" ><span>Solicitar otro Numero</span> <i class="material-icons">&#xE5C8;</i></button>
+				<a class="btn btn-success" href="{{ url('/SistOficioLibertades') }}" data-dismiss="modal"><span>Volver al Inicio</span> <i class="material-icons">&#xE5C8;</i></a>                
 			</div>
       </div>
       <div class="modal-footer">

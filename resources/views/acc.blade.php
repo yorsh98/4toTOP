@@ -23,7 +23,7 @@
                                     class="w-full px-6 py-4 flex items-center justify-between text-lg font-semibold text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-t-2xl transition-all duration-300 group">
                                 <div class="flex items-center space-x-3">
                                     <div class="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-                                        📂
+                                        🌐
                                     </div>
                                     <span class="text-gray-700 dark:text-gray-300">Accesos Sistemas Judiciales</span>
                                 </div>
@@ -70,8 +70,20 @@
                                     </div>
                                     <span class="font-medium text-gray-700 dark:text-gray-300">SIAGJ <--abrir enlace en INTERNET EXPLORER  </span>
                                 </a>
+                                <a href="https://www.pjud.cl/transparencia/busqueda-de-abogados/" target="_blank" class="flex items-center p-3 space-x-3 rounded-xl transition-all shadow-sm hover:bg-gray-100 hover:-translate-y-0.5 border border-gray-100 dark:border-gray-700">
+                                    <div class="p-2 rounded-lg">
+                                        <img src="/favicon.webp" alt="Gestión Penal" class="w-6 h-6">
+                                    </div>
+                                    <span class="font-medium text-gray-700 dark:text-gray-300">SUSPENCION DE ABOGADOS</span>
+                                </a>
+                                <a href="http://prod.intranet.pjud/suspension_abogados/" target="_blank" class="flex items-center p-3 space-x-3 rounded-xl transition-all shadow-sm hover:bg-gray-100 hover:-translate-y-0.5 border border-gray-100 dark:border-gray-700">
+                                    <div class="p-2 rounded-lg">
+                                        <img src="/favicon.webp" alt="Gestión Penal" class="w-6 h-6">
+                                    </div>
+                                    <span class="font-medium text-gray-700 dark:text-gray-300">AGREGAR SUSPENCION DE ABOGADO</span>
+                                </a>
                                 
-                                <!-- Agregar variaciones de color para cada elemento si es necesario -->
+                                
                             </div>
                         </div> 
                         <div class="bg-white dark:bg-gray-800 shadow-lg rounded-2xl hover:shadow-xl transition-all mb-6">
@@ -93,7 +105,7 @@
                             </button>
                             
                             <div id="mod2" class="hidden p-6 pt-4 grid gap-4 lg:grid-cols-3 md:grid-cols-2 border-t border-gray-100 dark:border-gray-700">
-                                <a href="https://pjud.cl" target="_blank" class="flex dark:bg-gray-700 items-center p-3 space-x-3 rounded-xl transition-all shadow-sm hover:bg-gray-100 hover:-translate-y-0.5 border border-gray-100 dark:border-gray-700">
+                                <a href="http://www2.intranet.pjud/" target="_blank" class="flex dark:bg-gray-700 items-center p-3 space-x-3 rounded-xl transition-all shadow-sm hover:bg-gray-100 hover:-translate-y-0.5 border border-gray-100 dark:border-gray-700">
                                     <div class="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
                                         <img src="/favicon.webp" alt="Poder Judicial" class="w-6 h-6">
                                     </div>
@@ -101,33 +113,33 @@
                                 </a>
                                 
                                 <!-- Repetir para los demás elementos -->
-                                <a href="https://pjud.cl" target="_blank" class="flex items-center p-3 space-x-3 rounded-xl transition-all shadow-sm hover:bg-gray-100 hover:-translate-y-0.5 border border-gray-100 dark:border-gray-700">
+                                <a href="https://bienestar.pjud.cl" target="_blank" class="flex items-center p-3 space-x-3 rounded-xl transition-all shadow-sm hover:bg-gray-100 hover:-translate-y-0.5 border border-gray-100 dark:border-gray-700">
                                     <div class="p-2 rounded-lg">
                                         <img src="/favicon.webp" alt="Gestión Penal" class="w-6 h-6">
                                     </div>
                                     <span class="font-medium text-gray-700 dark:text-gray-300">Bienestar</span>
                                 </a>
 
-                                <a href="https://pjud.cl" target="_blank" class="flex items-center p-3 space-x-3 rounded-xl transition-all shadow-sm hover:bg-gray-100 hover:-translate-y-0.5 border border-gray-100 dark:border-gray-700">
+                                <a href="http://www2.recursoshumanos.intranet.pjud/" target="_blank" class="flex items-center p-3 space-x-3 rounded-xl transition-all shadow-sm hover:bg-gray-100 hover:-translate-y-0.5 border border-gray-100 dark:border-gray-700">
                                     <div class="p-2 rounded-lg">
                                         <img src="/favicon.webp" alt="Gestión Penal" class="w-6 h-6">
                                     </div>
                                     <span class="font-medium text-gray-700 dark:text-gray-300">RRHH</span>
                                 </a>
-                                <a href="https://pjud.cl" target="_blank" class="flex items-center p-3 space-x-3 rounded-xl transition-all shadow-sm hover:bg-gray-100 hover:-translate-y-0.5 border border-gray-100 dark:border-gray-700">
+                                <a href="https://personas.pjud.cl/portalpersonassrh/servlet/com.portalpersonas.login" target="_blank" class="flex items-center p-3 space-x-3 rounded-xl transition-all shadow-sm hover:bg-gray-100 hover:-translate-y-0.5 border border-gray-100 dark:border-gray-700">
                                     <div class="p-2 rounded-lg">
                                         <img src="/favicon.webp" alt="Gestión Penal" class="w-6 h-6">
                                     </div>
                                     <span class="font-medium text-gray-700 dark:text-gray-300">Personas</span>
                                 </a>
-                                <a href="https://pjud.cl" target="_blank" class="flex items-center p-3 space-x-3 rounded-xl transition-all shadow-sm hover:bg-gray-100 hover:-translate-y-0.5 border border-gray-100 dark:border-gray-700">
+                                <a href="http://mesaayuda.intranet.pjud/" target="_blank" class="flex items-center p-3 space-x-3 rounded-xl transition-all shadow-sm hover:bg-gray-100 hover:-translate-y-0.5 border border-gray-100 dark:border-gray-700">
                                     <div class="p-2 rounded-lg">
                                         <img src="/favicon.webp" alt="Gestión Penal" class="w-6 h-6">
                                     </div>
                                     <span class="font-medium text-gray-700 dark:text-gray-300">Mesa de ayuda (Requerimientos)</span>
                                 </a>
                                 
-                                <!-- Agregar variaciones de color para cada elemento si es necesario -->
+                                
                             </div>
                         </div> 
                         <div class="bg-white dark:bg-gray-800 shadow-lg rounded-2xl hover:shadow-xl transition-all mb-6">
@@ -151,39 +163,67 @@
                             <div id="mod3" class="hidden p-6 pt-4 grid gap-4 lg:grid-cols-3 md:grid-cols-2 border-t border-gray-100 dark:border-gray-700">
                                 <a href="https://pjud.cl" target="_blank" class="flex dark:bg-gray-700 items-center p-3 space-x-3 rounded-xl transition-all shadow-sm hover:bg-gray-100 hover:-translate-y-0.5 border border-gray-100 dark:border-gray-700">
                                     <div class="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-                                        <img src="/favicon.webp" alt="Poder Judicial" class="w-6 h-6">
+                                        <img src="{{ asset('SVG/bancoestado.svg') }}" alt="Icono" class="w-9 h-6">
                                     </div>
-                                    <span class="font-medium text-gray-700 dark:text-gray-300">SIAGJ <--abrir enlace en INTERNET EXPLORER  </span>
+                                    <span class="font-medium text-gray-700 dark:text-gray-300">Costas Judiciales</span>
                                 </a>
                                 
-                                <!-- Repetir para los demás elementos -->
+                                <!-- repetir de a hacia /a para repetir cada boton con ingreso directo a la web necesitada -->
                                 <a href="https://pjud.cl" target="_blank" class="flex items-center p-3 space-x-3 rounded-xl transition-all shadow-sm hover:bg-gray-100 hover:-translate-y-0.5 border border-gray-100 dark:border-gray-700">
                                     <div class="p-2 rounded-lg">
-                                        <img src="/favicon.webp" alt="Gestión Penal" class="w-6 h-6">
+                                        <img src="{{ asset('SVG/bancoestado.svg') }}" alt="Icono" class="w-9 h-6">
                                     </div>
-                                    <span class="font-medium text-gray-700 dark:text-gray-300">GESTIÓN PENAL 1</span>
+                                    <span class="font-medium text-gray-700 dark:text-gray-300">Banco Estado Instituciones publicas</span>
                                 </a>
 
                                 <a href="https://pjud.cl" target="_blank" class="flex items-center p-3 space-x-3 rounded-xl transition-all shadow-sm hover:bg-gray-100 hover:-translate-y-0.5 border border-gray-100 dark:border-gray-700">
                                     <div class="p-2 rounded-lg">
-                                        <img src="/favicon.webp" alt="Gestión Penal" class="w-6 h-6">
+                                        <img src="{{ asset('SVG/bancoestado.svg') }}" alt="Icono" class="w-9 h-6">
                                     </div>
-                                    <span class="font-medium text-gray-700 dark:text-gray-300">MONITO WEB</span>
+                                    <span class="font-medium text-gray-700 dark:text-gray-300">Cuenta Corriente</span>
                                 </a>
                                 <a href="https://pjud.cl" target="_blank" class="flex items-center p-3 space-x-3 rounded-xl transition-all shadow-sm hover:bg-gray-100 hover:-translate-y-0.5 border border-gray-100 dark:border-gray-700">
                                     <div class="p-2 rounded-lg">
                                         <img src="/favicon.webp" alt="Gestión Penal" class="w-6 h-6">
                                     </div>
-                                    <span class="font-medium text-gray-700 dark:text-gray-300">GESTIÓN PENAL 2</span>
+                                    <span class="font-medium text-gray-700 dark:text-gray-300">CGU</span>
                                 </a>
                                 <a href="https://pjud.cl" target="_blank" class="flex items-center p-3 space-x-3 rounded-xl transition-all shadow-sm hover:bg-gray-100 hover:-translate-y-0.5 border border-gray-100 dark:border-gray-700">
                                     <div class="p-2 rounded-lg">
                                         <img src="/favicon.webp" alt="Gestión Penal" class="w-6 h-6">
                                     </div>
-                                    <span class="font-medium text-gray-700 dark:text-gray-300">GESTIÓN PENAL 3</span>
+                                    <span class="font-medium text-gray-700 dark:text-gray-300">Portal Sovos</span>
                                 </a>
-                                
-                                <!-- Agregar variaciones de color para cada elemento si es necesario -->
+                                <a href="https://pjud.cl" target="_blank" class="flex items-center p-3 space-x-3 rounded-xl transition-all shadow-sm hover:bg-gray-100 hover:-translate-y-0.5 border border-gray-100 dark:border-gray-700">
+                                    <div class="p-2 rounded-lg">
+                                        <img src="/favicon.webp" alt="Gestión Penal" class="w-6 h-6">
+                                    </div>
+                                    <span class="font-medium text-gray-700 dark:text-gray-300">Finanzas</span>
+                                </a>
+                                <a href="https://pjud.cl" target="_blank" class="flex items-center p-3 space-x-3 rounded-xl transition-all shadow-sm hover:bg-gray-100 hover:-translate-y-0.5 border border-gray-100 dark:border-gray-700">
+                                    <div class="p-2 rounded-lg">
+                                        <img src="/favicon.webp" alt="Gestión Penal" class="w-6 h-6">
+                                    </div>
+                                    <span class="font-medium text-gray-700 dark:text-gray-300">Mercado Publico</span>
+                                </a>
+                                <a href="https://pjud.cl" target="_blank" class="flex items-center p-3 space-x-3 rounded-xl transition-all shadow-sm hover:bg-gray-100 hover:-translate-y-0.5 border border-gray-100 dark:border-gray-700">
+                                    <div class="p-2 rounded-lg">
+                                    <img src="{{ asset('SVG/correos.svg') }}" alt="Icono" class="w-6 h-6">
+                                    </div>
+                                    <span class="font-medium text-gray-700 dark:text-gray-300">Consulta Facturas electronicas (CorreosChile)</span>
+                                </a>
+                                <a href="https://pjud.cl" target="_blank" class="flex items-center p-3 space-x-3 rounded-xl transition-all shadow-sm hover:bg-gray-100 hover:-translate-y-0.5 border border-gray-100 dark:border-gray-700">
+                                    <div class="p-2 rounded-lg">
+                                    <img src="{{ asset('SVG/SII.svg') }}" alt="Icono" class="w-6 h-6">
+                                    </div>
+                                    <span class="font-medium text-gray-700 dark:text-gray-300">SII valores y fechas</span>
+                                </a>
+                                <a href="https://pjud.cl" target="_blank" class="flex items-center p-3 space-x-3 rounded-xl transition-all shadow-sm hover:bg-gray-100 hover:-translate-y-0.5 border border-gray-100 dark:border-gray-700">
+                                    <div class="p-2 rounded-lg">
+                                        <img src="{{ asset('SVG/SII.svg') }}" alt="Icono" class="w-6 h-6">
+                                    </div>
+                                    <span class="font-medium text-gray-700 dark:text-gray-300">SII Situación tributaria</span>
+                                </a>                                                                
                             </div>
                         </div>
                         <div class="bg-white dark:bg-gray-800 shadow-lg rounded-2xl hover:shadow-xl transition-all mb-6">
@@ -191,9 +231,9 @@
                                     class="w-full px-6 py-4 flex items-center justify-between text-lg font-semibold text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-t-2xl transition-all duration-300 group">
                                 <div class="flex items-center space-x-3">
                                     <div class="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-                                        📂
+                                    📂
                                     </div>
-                                    <span class="text-gray-700 dark:text-gray-300">Accesos Sistemas Judiciales4</span>
+                                    <span class="text-gray-700 dark:text-gray-300">Nubes y manejo de la Informacion</span>
                                 </div>
                                 <svg id="icon-mod4" 
                                     class="w-6 h-6 transition-transform duration-300 text-gray-600 dark:text-gray-400 hover:bg-gray-50 group-hover:text-blue-600"
@@ -207,36 +247,36 @@
                             <div id="mod4" class="hidden p-6 pt-4 grid gap-4 lg:grid-cols-3 md:grid-cols-2 border-t border-gray-100 dark:border-gray-700">
                                 <a href="https://pjud.cl" target="_blank" class="flex dark:bg-gray-700 items-center p-3 space-x-3 rounded-xl transition-all shadow-sm hover:bg-gray-100 hover:-translate-y-0.5 border border-gray-100 dark:border-gray-700">
                                     <div class="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-                                        <img src="/favicon.webp" alt="Poder Judicial" class="w-6 h-6">
+                                        <img src="{{ asset('SVG/folder.svg') }}" alt="Icono" class="w-6 h-6">
                                     </div>
-                                    <span class="font-medium text-gray-700 dark:text-gray-300">SIAGJ <--abrir enlace en INTERNET EXPLORER  </span>
+                                    <span class="font-medium text-gray-700 dark:text-gray-300">CLOUD.PJUD.CL</span>
                                 </a>
                                 
                                 <!-- Repetir para los demás elementos -->
                                 <a href="https://pjud.cl" target="_blank" class="flex items-center p-3 space-x-3 rounded-xl transition-all shadow-sm hover:bg-gray-100 hover:-translate-y-0.5 border border-gray-100 dark:border-gray-700">
                                     <div class="p-2 rounded-lg">
-                                        <img src="/favicon.webp" alt="Gestión Penal" class="w-6 h-6">
+                                        <img src="{{ asset('SVG/folder.svg') }}" alt="Icono" class="w-6 h-6">
                                     </div>
-                                    <span class="font-medium text-gray-700 dark:text-gray-300">GESTIÓN PENAL</span>
+                                    <span class="font-medium text-gray-700 dark:text-gray-300">GRABACIONES.PJUD.CL</span>
                                 </a>
 
                                 <a href="https://pjud.cl" target="_blank" class="flex items-center p-3 space-x-3 rounded-xl transition-all shadow-sm hover:bg-gray-100 hover:-translate-y-0.5 border border-gray-100 dark:border-gray-700">
                                     <div class="p-2 rounded-lg">
-                                        <img src="/favicon.webp" alt="Gestión Penal" class="w-6 h-6">
+                                        <img src="{{ asset('SVG/folder.svg') }}" alt="Icono" class="w-6 h-6">
                                     </div>
-                                    <span class="font-medium text-gray-700 dark:text-gray-300">MONITO WEB</span>
+                                    <span class="font-medium text-gray-700 dark:text-gray-300">GOOD TAPE</span>
                                 </a>
                                 <a href="https://pjud.cl" target="_blank" class="flex items-center p-3 space-x-3 rounded-xl transition-all shadow-sm hover:bg-gray-100 hover:-translate-y-0.5 border border-gray-100 dark:border-gray-700">
                                     <div class="p-2 rounded-lg">
-                                        <img src="/favicon.webp" alt="Gestión Penal" class="w-6 h-6">
+                                        <img src="{{ asset('SVG/folder.svg') }}" alt="Icono" class="w-6 h-6">
                                     </div>
-                                    <span class="font-medium text-gray-700 dark:text-gray-300">GESTIÓN PENAL</span>
+                                    <span class="font-medium text-gray-700 dark:text-gray-300">ONEDRIVE</span>
                                 </a>
                                 <a href="https://pjud.cl" target="_blank" class="flex items-center p-3 space-x-3 rounded-xl transition-all shadow-sm hover:bg-gray-100 hover:-translate-y-0.5 border border-gray-100 dark:border-gray-700">
                                     <div class="p-2 rounded-lg">
-                                        <img src="/favicon.webp" alt="Gestión Penal" class="w-6 h-6">
+                                        <img src="{{ asset('SVG/folder.svg') }}" alt="Icono" class="w-6 h-6">
                                     </div>
-                                    <span class="font-medium text-gray-700 dark:text-gray-300">GESTIÓN PENAL</span>
+                                    <span class="font-medium text-gray-700 dark:text-gray-300">WETRANSFER</span>
                                 </a>
                                 
                                 <!-- Agregar variaciones de color para cada elemento si es necesario -->
