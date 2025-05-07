@@ -100,7 +100,7 @@ Route::get('/form', [formController::class, 'index' ])->name('form');
 Route::get('/proc', [procController::class, 'index' ])->name('proc');
 
 Route::get('/progra', [prograController::class, 'index' ])->name('progra');
-
+Route::get('/progra', [prograController::class, 'mostrar'])->name('progra');
 
 Route::post('/enviar-solicitud', [SistOficioLibertadesController::class, 'enviarSolicitud'])
     ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class])

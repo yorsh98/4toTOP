@@ -1,4 +1,41 @@
 <x-in-layout>
+    @php
+        $doc = [
+            [
+                'url' => '/documentos/doc/FICHA  PERSONAL 4°TOP.doc',
+                'nombre' => 'FICHA  PERSONAL 4°TOP',                
+            ],  
+            [
+                'url' => '/documentos/doc/DECLARACION JURADA (funcionario a hijo mayor de 18 años).doc',
+                'nombre' => 'DECLARACION JURADA (funcionario a hijo mayor de 18 años)',                
+            ],
+            [
+                'url' => '/documentos/doc/DECLARACION JURADA ESTUDIANTE (18-24 AÑOS).doc',
+                'nombre' => 'DECLARACION JURADA ESTUDIANTE (18-24 AÑOS)',                
+            ],
+            [
+                'url' => '/documentos/doc/FORMULARIO  PERMISO DIA CUMPLEAÑOS  (20200401_formulario__anexo__permiso....doc',
+                'nombre' => 'FORMULARIO  PERMISO DIA CUMPLEAÑOS  (20200401_formulario__anexo__permiso...)',                
+            ],
+            [
+                'url' => '/documentos/doc/FORMULARIO-N°-4-Solicitud-de-Asignación-Familia-y-Maternal.doc',
+                'nombre' => 'FORMULARIO-N°-4-Solicitud-de-Asignación-Familia-y-Maternal',                
+            ],
+            [
+                'url' => '/documentos/doc/FORMULARIO-N°-4.1-Anexo-Documentación-de-respaldo-por-tipo-de-causante.doc',
+                'nombre' => 'FORMULARIO-N°-4.1-Anexo-Documentación-de-respaldo-por-tipo-de-causante',                
+            ],          
+            [
+                'url' => '/documentos/doc/MODELO CAJA CHICA .docx',
+                'nombre' => 'MODELO CAJA CHICA',                
+            ],  
+
+            
+            //si necesita agregar otro procedimiento copiar desde y hasta [] para poder generar un nuevo modulo en la vista
+        ];
+    @endphp
+
+
                         <div class="grid gap-6 pt-5 mb-6 lg:grid-cols-1 lg:gap-8 animate__animated animate__flipInX animate__delay-0.5s">
                             <div class="absolute top-4 left-4">
                                 <a href="{{ url('/') }}" class="bg-white text-black font-semibold py-1 px-3 rounded-md shadow-md flex items-center text-sm hover:bg-blue-700 hover:text-white transition">
@@ -18,8 +55,28 @@
                             </div>
                         </div>
                         <div class="grid gap-6 lg:grid-cols-1 lg:gap-8 animate__animated animate__flipInX animate__delay-0.8s">
-                            <div class="flex flex-col items-center gap-6 overflow-hidden rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] transition duration-300 focus:outline-none focus-visible:ring-[#FF2D20] md:row-span-3 lg:p-10 lg:pb-10 dark:bg-zinc-900 dark:ring-zinc-800 dark:hover:text-white/70 dark:hover:ring-zinc-700 dark:focus-visible:ring-[#FF2D20]">
-                            
+                            <div class="flex flex-col gap-6 overflow-hidden rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] lg:p-10 lg:pb-10 dark:bg-zinc-900 dark:ring-zinc-800">
+                                    @foreach($doc as $doc)
+                                        <a 
+                                            href="{{ $doc['url'] }}" 
+                                            target="_blank"
+                                            class="group relative p-6 rounded-lg border border-gray-200 hover:border-blue-500 transition-all duration-300 shadow-sm hover:shadow-lg dark:border-zinc-700 dark:hover:border-blue-500"
+                                        >
+                                            <div class="flex justify-between items-center">
+                                                <div class="flex-1 min-w-0">
+                                                    <h3 class="text-lg font-semibold text-gray-900 truncate dark:text-white">
+                                                        {{ $doc['nombre'] }}
+                                                    </h3>
+                                                </div>
+                                                <div class="ml-4 flex items-center">
+                                                    <svg class="w-6 h-6 text-gray-400 group-hover:text-blue-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                            <div class="absolute inset-y-0 left-0 w-1 bg-blue-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-r"></div>
+                                        </a>
+                                    @endforeach
                             </div>
                         </div>
 </x-in-layout>

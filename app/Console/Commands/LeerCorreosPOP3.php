@@ -3,35 +3,57 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use Webklex\IMAP\Facades\Client;
+use PhpImap\Mailbox;
+use Illuminate\Support\Facades\File;
 
 class LeerCorreosPOP3 extends Command
 {
     protected $signature = 'correo:leer-ultimos';
-    protected $description = 'Leer los últimos 5 correos desde POP3 y mostrar asunto, remitente y cuerpo';
+    protected $description = 'Leer y guardar el correo de audiencias como HTML limpio';
 
     public function handle()
     {
-        $this->info("Conectando al servidor de correo...");
+        $this->info("Conectando por POP3 sin cifrado...");
 
-        $client = Client::account('default'); // Usa la cuenta "default" de config/imap.php
-        $client->connect();
+        $mailbox = new Mailbox(
+            '{pop3.mail.pjud:110/pop3/notls}INBOX',
+            env('MAIL_USERNAME'),
+            env('MAIL_PASSWORD'),
+            null,
+            'US-ASCII'
+        );
 
-        $folder = $client->getFolder('INBOX');
+        try {
+            $mailsIds = $mailbox->searchMailbox('ALL');
 
-        $messages = $folder->messages()->all()->limit(5)->sortByDesc('date')->get();
+            if (!$mailsIds) {
+                $this->info("No se encontraron correos.");
+                return;
+            }
+            
+            rsort($mailsIds);
 
-        foreach ($messages as $message) {
-            $this->line("====================================");
-            $this->line("📧 Asunto: " . $message->getSubject());
-            $this->line("👤 Remitente: " . $message->getFrom()[0]->mail);
-            $this->line("🕒 Fecha: " . $message->getDate()->format('Y-m-d H:i:s'));
+            foreach ($mailsIds as $mailId) {
+                $mail = $mailbox->getMail($mailId);
 
-            $body = strip_tags($message->getHTMLBody() ?: $message->getTextBody());
-            $preview = substr($body, 0, 200); // Muestra los primeros 200 caracteres
-            $this->line("📝 Cuerpo (inicio): " . $preview);
+                if (str_starts_with(strtoupper(trim($mail->subject)), 'PROGRAMACIÓN DE AUDIENCIAS')) {
+                    $contenidoOriginal = $mail->textHtml ?: nl2br($mail->textPlain);
+
+                    // Limpiar el contenido HTML quitando párrafos con "De:" o "Para:"
+                    $contenidoFiltrado = preg_replace('/<p[^>]*>.*?(De|Para)\s*:.+?<\/p>/i', '', $contenidoOriginal);
+
+                    // Guardar el HTML limpio en un archivo
+                    File::put(storage_path('app/ultima_audiencia_email.html'), $contenidoFiltrado);
+
+                    $this->info("✅ Correo guardado como HTML limpio en: storage/app/ultima_audiencia_email.html");
+                    return;
+                }
+            }
+
+            $this->info("No se encontró ningún correo con asunto 'PROGRAMACIÓN DE AUDIENCIAS'.");
+
+        } catch (\PhpImap\Exceptions\ConnectionException $ex) {
+            $this->error("❌ Error de conexión: " . $ex->getMessage());
         }
-
-        $this->info("Fin de lectura de correos.");
     }
 }
