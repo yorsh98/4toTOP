@@ -77,9 +77,13 @@
                 'url' => '/documentos/procedimientos/Procedimiento Controles de Detención Presentación Voluntaria.pdf',
                 'nombre' => 'Procedimiento Controles de Detención Presentación Voluntaria',
             ],
+            [
+                'url' => '/documentos/procedimientos/Procedimiento Tratamiento de Victimas de VIF y VG.pdf',
+                'nombre' => 'Procedimiento Tratamiento de Victimas de VIF y VG',
+            ],
             //si necesita agregar otro procedimiento copiar desde y hasta [] para poder generar un nuevo modulo en la vista
         ];
-    @endphp
+    @endphp  
 
 
 
