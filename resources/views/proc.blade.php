@@ -81,9 +81,14 @@
                 'url' => '/documentos/procedimientos/Procedimiento Tratamiento de Victimas de VIF y VG.pdf',
                 'nombre' => 'Procedimiento Tratamiento de Victimas de VIF y VG',
             ],
+            [
+                'url' => '/documentos/procedimientos/Procedimiento Giro por Transferencia Cuenta Jurisdiccional.pdf',
+                'nombre' => 'Procedimiento Giro por Transferencia Cuenta Jurisdiccional',
+            ],
             //si necesita agregar otro procedimiento copiar desde y hasta [] para poder generar un nuevo modulo en la vista
         ];
     @endphp  
+    
 
 
 
