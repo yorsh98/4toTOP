@@ -174,8 +174,8 @@
                                         <h3 class="text-lg font-semibold text-[#FF2D20] border-b pb-1 mb-2">MAGISTRADOS</h3>
                                         <ul class="space-y-1">                                         
                                             <li class="text-sm dark:text-gray-300">-{{ $turno1->TM1 ?? '' }}</li>
-                                            <li class="text-sm dark:text-gray-300">-{{ $turno1->TM2 ?? '' }}</li>
-                                            <li class="text-sm dark:text-gray-300">-{{ $turno1->TM3 ?? '' }}</li>
+                                            <li class="text-sm dark:text-gray-300">ㅤ{{ $turno1->TM2 ?? '' }}</li>
+                                            <li class="text-sm dark:text-gray-300">ㅤ{{ $turno1->TM3 ?? '' }}</li>
                                         </ul>
                                     </div>
                                     <!-- Columna 2 -->
@@ -192,8 +192,8 @@
                                         <h3 class="text-lg font-semibold text-[#FF2D20] border-b pb-1 mb-2">JEFATURA</h3>
                                         <ul class="space-y-1">
                                             <li class="text-sm dark:text-gray-300">-{{ $turno1->TJ1 ?? '' }}</li>
-                                            <li class="text-sm dark:text-gray-300">-{{ $turno1->TJ2 ?? '' }}</li>
-                                            <li class="text-sm dark:text-gray-300">-{{ $turno1->TJ3 ?? '' }}</li>
+                                            <li class="text-sm dark:text-gray-300">ㅤ{{ $turno1->TJ2 ?? '' }}</li>
+                                            <li class="text-sm dark:text-gray-300">ㅤ{{ $turno1->TJ3 ?? '' }}</li>
                                         </ul>
                                     </div>   
                                 </a>
@@ -242,8 +242,8 @@
                                         <h3 class="text-lg font-semibold text-[#FF2D20] border-b pb-1 mb-2">JEFATURA</h3>
                                         <ul class="space-y-1">
                                             <li class="text-sm dark:text-gray-300">-{{ $turno2->ACDJ1 ?? '' }}</li>
-                                            <li class="text-sm dark:text-gray-300">-{{ $turno2->ACDJ2 ?? '' }}</li>
-                                            <li class="text-sm dark:text-gray-300">-{{ $turno2->ACDJ3 ?? '' }}</li>
+                                            <li class="text-sm dark:text-gray-300">ㅤ{{ $turno2->ACDJ2 ?? '' }}</li>
+                                            <li class="text-sm dark:text-gray-300">ㅤ{{ $turno2->ACDJ3 ?? '' }}</li>
                                         </ul>
                                     </div>   
                                 </a>
