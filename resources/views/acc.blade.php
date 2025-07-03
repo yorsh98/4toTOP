@@ -36,7 +36,7 @@
                                 </svg>
                             </button>
                             
-                            <div id="mod1" class="hidden p-6 pt-4 grid gap-4 lg:grid-cols-3 md:grid-cols-2 border-t border-gray-100 dark:border-gray-700">
+                            <div id="mod1" class=" p-6 pt-4 grid gap-4 lg:grid-cols-3 md:grid-cols-2 border-t border-gray-100 dark:border-gray-700">
                                 <a href="http://gestionpenal.reformaprocesal.pjud/webGestion/login.jsf" target="_blank" class="flex dark:bg-gray-700 items-center p-3 space-x-3 rounded-xl transition-all shadow-sm hover:bg-gray-100 hover:-translate-y-0.5 border border-gray-100 dark:border-gray-700">
                                     <div class="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
                                         <img src="/favicon.webp" alt="Poder Judicial" class="w-6 h-6">
@@ -110,7 +110,7 @@
                                 </svg>
                             </button>
                             
-                            <div id="mod2" class="hidden p-6 pt-4 grid gap-4 lg:grid-cols-3 md:grid-cols-2 border-t border-gray-100 dark:border-gray-700">
+                            <div id="mod2" class=" p-6 pt-4 grid gap-4 lg:grid-cols-3 md:grid-cols-2 border-t border-gray-100 dark:border-gray-700">
                                 <a href="http://www2.intranet.pjud/" target="_blank" class="flex dark:bg-gray-700 items-center p-3 space-x-3 rounded-xl transition-all shadow-sm hover:bg-gray-100 hover:-translate-y-0.5 border border-gray-100 dark:border-gray-700">
                                     <div class="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
                                         <img src="/favicon.webp" alt="Poder Judicial" class="w-6 h-6">
@@ -164,7 +164,7 @@
                                 </svg>
                             </button>
                             
-                            <div id="mod3" class="hidden p-6 pt-4 grid gap-4 lg:grid-cols-3 md:grid-cols-2 border-t border-gray-100 dark:border-gray-700">
+                            <div id="mod3" class=" p-6 pt-4 grid gap-4 lg:grid-cols-3 md:grid-cols-2 border-t border-gray-100 dark:border-gray-700">
                                 <a href="https://recaudacion.bancoestado.cl/CostasJudiciales/Default.aspx" target="_blank" class="flex dark:bg-gray-700 items-center p-3 space-x-3 rounded-xl transition-all shadow-sm hover:bg-gray-100 hover:-translate-y-0.5 border border-gray-100 dark:border-gray-700">
                                     <div class="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
                                         <img src="{{ asset('SVG/bancoestado.svg') }}" alt="Icono" class="w-9 h-6">
@@ -248,7 +248,7 @@
                                 </svg>
                             </button>
                             
-                            <div id="mod4" class="hidden p-6 pt-4 grid gap-4 lg:grid-cols-3 md:grid-cols-2 border-t border-gray-100 dark:border-gray-700">
+                            <div id="mod4" class=" p-6 pt-4 grid gap-4 lg:grid-cols-3 md:grid-cols-2 border-t border-gray-100 dark:border-gray-700">
                                 <a href="https://cloud.pjud.cl/" target="_blank" class="flex dark:bg-gray-700 items-center p-3 space-x-3 rounded-xl transition-all shadow-sm hover:bg-gray-100 hover:-translate-y-0.5 border border-gray-100 dark:border-gray-700">
                                     <div class="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
                                         <img src="{{ asset('SVG/folder.svg') }}" alt="Icono" class="w-6 h-6">
@@ -301,7 +301,7 @@ function toggleAcceso(id) {
     const icon = document.getElementById(`icon-${id}`);
     
     if (openModule && openModule !== module) {
-        openModule.classList.add('hidden');
+        //openModule.classList.add('hidden');
         document.getElementById(`icon-${openModule.id}`).classList.remove('rotate-180');
     }
     
