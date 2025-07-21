@@ -85,6 +85,11 @@
                 'url' => '/documentos/procedimientos/Procedimiento Giro por Transferencia Cuenta Jurisdiccional.pdf',
                 'nombre' => 'Procedimiento Giro por Transferencia Cuenta Jurisdiccional',
             ],
+            [
+                'url' => '/documentos/procedimientos/Procedimiento Atención a NNA para Entrevistas Ley 21057.pdf',
+                'nombre' => 'Procedimiento Atención a NNA para Entrevistas Ley 21057',
+            ],
+
             //si necesita agregar otro procedimiento copiar desde y hasta [] para poder generar un nuevo modulo en la vista
         ];
     @endphp  
