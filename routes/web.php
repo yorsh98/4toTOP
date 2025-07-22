@@ -17,6 +17,8 @@ use App\Http\Controllers\docController;
 use App\Http\Controllers\formController;
 use App\Http\Controllers\procController;
 use App\Http\Controllers\prograController;
+use App\Livewire\AudienciaForm;
+use App\Livewire\MonitorAudiencias;
 
 Route::view('/', 'welcome');
 /*Route::get('/', function () {
@@ -107,7 +109,12 @@ Route::post('/enviar-solicitud', [SistOficioLibertadesController::class, 'enviar
     ->name('enviar-solicitud')
     ->middleware(['auth']);
 
+//rutas livewire para modulos at Publico
+//adm
+Route::get('/AdmAud', AudienciaForm::class)->name('AdmAud');
 
+// Ruta para el monitor
+Route::get('/monitor', MonitorAudiencias::class)->name('monitor');
 
 
 Route::view('dashboard', 'dashboard')
