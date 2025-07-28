@@ -12,21 +12,44 @@ class AudienciaForm extends Component
     public $rit;
     public $sala;
     public $ubicacion;
-    public $hora_inicio;
+    public $hora_inicio = '09:00';
     public $ruc;
     public $cta_zoom;
     public $tipo_audiencia;
-    public $num_testigos;
-    public $num_peritos;
+    public $num_testigos = 0;
+    public $num_peritos = 0;
     public $duracion;
     public $delito;
-    public $jueces_inhabilitados = [];
     public $encargado_causa;
     public $encargado_ttp;
     public $encargado_ttp_zoom;
-    public $acta_sala;
-    public $acusados = [];
     public $estado = 'POR_REALIZARSE';
+    
+    //campo para juez
+    public $jueces_inhabilitados = [];
+    public $Nuevosjueces_inhabilitados = [
+        'nombre_completo' => 'no'
+    ]; 
+
+    // Campos para acusados
+    public $acusados = [];
+    public $nuevoAcusado = [
+        'nombre_completo' => '',
+        'situacion' => 'LIBRE',
+        'medida_cautelar' => '',
+        'forma_notificacion' => ''
+    ];
+    
+    
+    
+    
+    // Tipos de audiencia sugeridos
+    public $tiposAudiencia = [
+        'Juicio Oral',
+        'Cont. Juicio Oral',
+        'Audiencia Corta',
+        'Lectura de Sentencia'
+    ];
 
     protected $listeners = ['editAudiencia'];
     
@@ -34,15 +57,23 @@ class AudienciaForm extends Component
         'fecha.required' => 'La fecha es obligatoria.',
         'rit.required' => 'El RIT es obligatorio.',
         'rit.unique' => 'Este RIT ya está registrado.',
+        'sala.required' => 'La sala es obligatoria.',
+        'ubicacion.required' => 'La ubicación es obligatoria.',
         'hora_inicio.required' => 'La hora de inicio es obligatoria.',
-        'delito.required' => 'Debe describir el delito.',
-        'estado.required' => 'Seleccione un estado válido.',
-        'estado.in' => 'El estado seleccionado no es válido.',
+        'tipo_audiencia.required' => 'El tipo de audiencia es obligatorio.',
+        'duracion.required' => 'La duración es obligatoria.',
+        'delito.required' => 'El delito es obligatorio.',
+        'encargado_causa.required' => 'El encargado de causa es obligatorio.',
+        'encargado_ttp.required' => 'El encargado TTP es obligatorio.',
         'acusados.required' => 'Debe agregar al menos un acusado.',
-        'acusados.min' => 'Debe agregar al menos un acusado.',
-        'acusados.*.nombre_completo.required' => 'El nombre del acusado es obligatorio.',
-        
+        'nuevoAcusado.nombre_completo.required' => 'El nombre del acusado es obligatorio.',
+       
     ];
+
+    public function mount()
+    {
+        $this->fecha = now()->addDay()->format('Y-m-d');
+    }
 
     public function editAudiencia($id)
     {
@@ -60,41 +91,99 @@ class AudienciaForm extends Component
         $this->num_peritos = $audiencia->num_peritos;
         $this->duracion = $audiencia->duracion;
         $this->delito = $audiencia->delito;
-        $this->jueces_inhabilitados = $audiencia->jueces_inhabilitados;
+        $this->jueces_inhabilitados = json_decode($audiencia->jueces_inhabilitados, true) ?? [];
         $this->encargado_causa = $audiencia->encargado_causa;
         $this->encargado_ttp = $audiencia->encargado_ttp;
         $this->encargado_ttp_zoom = $audiencia->encargado_ttp_zoom;
-        $this->acta_sala = $audiencia-> acta_sala; 
-        $this->acusados = $audiencia->acusados;
+        $this->estado = $audiencia->estado;
+        $this->acusados = json_decode($audiencia->acusados, true) ?? [];
     }
 
-    public function addAcusado()
+    public function agregarAcusado()
     {
-        $this->acusados[] = [
-            'nombre_completo' => '',
-            'situacion' => 'LIBRE',
-            'medida_cautelar' => '',
-            'forma_notificacion' => ''
-        ];
+        $this->validate([
+            'nuevoAcusado.nombre_completo' => 'required',
+            'nuevoAcusado.situacion' => 'required|in:LIBRE,DETENIDO,MEDIDAS_CAUTELARES',
+            
+        ]);
+
+        $this->acusados[] = $this->nuevoAcusado;
+        $this->reset('nuevoAcusado');
     }
 
-    public function removeAcusado($index)
+    public function eliminarAcusado($index)
     {
         unset($this->acusados[$index]);
         $this->acusados = array_values($this->acusados);
     }
 
-    public function save()
+    public function Agregarjueces_inhabilitados()
     {
-        $validated = $this->validate(Audiencia::rules());
+        $this->validate([
+            'Nuevosjueces_inhabilitados.nombre_completo' => 'required',
+        ]);
+
+        $this->jueces_inhabilitados[] = $this->Nuevosjueces_inhabilitados;
+        $this->reset('Nuevosjueces_inhabilitados');
+    }
+
+    public function eliminarjueces_inhabilitados($index)
+    {
+        unset($this->jueces_inhabilitados[$index]);
+        $this->jueces_inhabilitados = array_values($this->jueces_inhabilitados);
+    }
+
+    public function guardarAudiencia()
+    {
+        $validated = $this->validate([
+            'fecha' => 'required|date',
+            'rit' => 'required|unique:audiencias,rit,'.$this->audienciaId,
+            'sala' => 'required',
+            'ubicacion' => 'required',
+            'hora_inicio' => 'required',
+            'tipo_audiencia' => 'required',
+            'duracion' => 'required',
+            'delito' => 'required',
+            'encargado_causa' => 'required',
+            'encargado_ttp' => 'required',
+            'acusados' => 'required|array|min:1',
+            'nuevoAcusado.nombre_completo' => 'required_if:acusados,[]',
+           
+        ]);
+
+        $data = [
+            'fecha' => $this->fecha,
+            'rit' => $this->rit,
+            'sala' => $this->sala,
+            'ubicacion' => $this->ubicacion,
+            'hora_inicio' => $this->hora_inicio,
+            'ruc' => $this->ruc,
+            'cta_zoom' => $this->cta_zoom,
+            'tipo_audiencia' => $this->tipo_audiencia,
+            'num_testigos' => $this->num_testigos,
+            'num_peritos' => $this->num_peritos,
+            'duracion' => $this->duracion,
+            'delito' => $this->delito,
+            'jueces_inhabilitados' => json_encode($this->jueces_inhabilitados),
+            'encargado_causa' => $this->encargado_causa,
+            'encargado_ttp' => $this->encargado_ttp,
+            'encargado_ttp_zoom' => $this->encargado_ttp_zoom,
+            'estado' => $this->estado,
+            'acusados' => json_encode($this->acusados)
+        ];
+
+        if (!empty($this->nuevoAcusado['nombre_completo'])) {
+            $this->agregarAcusado();
+        }
 
         Audiencia::updateOrCreate(
             ['id' => $this->audienciaId],
-            $validated
+            $data
         );
 
         $this->reset();
-        session()->flash('message', 'Audiencia guardada correctamente');
+        $this->fecha = now()->format('Y-m-d');
+        session()->flash('success', 'Audiencia guardada correctamente');
     }
 
     public function render()

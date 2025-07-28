@@ -8,7 +8,7 @@
     
 
 
-<div class="container mx-auto p-6">
+<div class="container mx-auto p-2">
     <div class="grid gap-6 lg:grid-cols-2 lg:gap-8">
         <!-- Módulo 1 -->
         <div class="bg-white shadow-md rounded-lg p-6">

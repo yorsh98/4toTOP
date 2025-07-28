@@ -1,0 +1,91 @@
+:root {
+    --juicio-oral: #3498db;
+    --audiencia-corta: #2ecc71;
+    --lectura: #9b59b6;
+    --turno-1: #3498db;
+    --turno-2: #e74c3c;
+    --turno-3: #2ecc71;
+    --fondo-tabla: #f8f9fa;
+}
+
+.audiencias-container {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+/* Estilos para tarjetas de audiencia */
+.audiencia-card {
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+.card-header {
+    padding: 13px 18px;
+    color: white;
+    font-weight: 500;
+}
+
+/* Tipos de audiencia */
+.header-juicio { background: var(--juicio-oral); }
+.header-audiencia { background: var(--audiencia-corta); }
+.header-lectura { background: var(--lectura); }
+
+/* Estilos para tablas */
+.tabla-juicio {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9em;
+}
+
+.tabla-juicio th, 
+.tabla-juicio td {
+    border: 1px solid #ddd;
+    padding: 8px 12px;
+    text-align: left;
+    vertical-align: top;
+}
+
+.tabla-juicio th {
+    background-color: #f2f2f2;
+    font-weight: 600;
+    width: 25%;
+}
+
+/* Tags y etiquetas */
+.tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.75em;
+    font-weight: 600;
+    margin-right: 5px;
+}
+
+.tag.situacion { background: #d5f5e3; color: #27ae60; }
+.tag.medidas { background: #fdebd0; color: #f39c12; }
+.tag.notificacion { background: #d6eaf8; color: #2980b9; }
+
+/* Secciones específicas */
+.acusados-section {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px dashed #eee;
+}
+
+.seccion-titulo {
+    font-size: 1.3em;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 15px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid;
+    display: flex;
+    align-items: center;
+}
+
+.titulo-juicio { color: var(--juicio-oral); border-color: var(--juicio-oral); }
+.titulo-audiencia { color: var(--audiencia-corta); border-color: var(--audiencia-corta); }
+.titulo-lectura { color: var(--lectura); border-color: var(--lectura); }
