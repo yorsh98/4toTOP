@@ -112,7 +112,8 @@ Route::post('/enviar-solicitud', [SistOficioLibertadesController::class, 'enviar
 
 //rutas livewire para modulos at Publico
 
-Route::get('/AdmAudv', [AdmAudvController::class, 'index' ])->name('AdmAudv');
+Route::get('/AdmAudv', [AdmAudvController::class, 'index' ])->name('AdmAudv')->middleware(['auth']);
+
 //adm
 Route::get('/AdmAud', AudienciaForm::class)->name('AdmAud');
 

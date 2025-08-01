@@ -28,7 +28,7 @@ class Audiencia extends Model
     {
         return [
             'fecha' => 'required|date',
-            'rit' => 'required|string|unique:audiencias,rit',
+            'rit' => 'required|string',
             'sala' => 'string',
             'hora_inicio' => 'required',
             'tipo_audiencia' => 'required|string',
@@ -36,7 +36,7 @@ class Audiencia extends Model
             'estado' => 'required|in:POR_REALIZARSE,EN_CURSO,RECESO,FINALIZADA',
             'acusados' => 'required|array|min:1',
             'acusados.*.nombre_completo' => 'required|string',
-            'acusados.*.situacion' => 'in:LIBRE,DETENIDO,MEDIDAS_CAUTELARES',
+            'acusados.*.situacion' => 'required|string',
             'acusados.*.medida_cautelar' => 'string',
             'acusados.*.forma_notificacion' => 'string'
         ];

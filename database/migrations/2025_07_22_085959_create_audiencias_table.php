@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('audiencias', function (Blueprint $table) {
             $table->id();
             $table->date('fecha'); // Filtro clave para monitores
-            $table->string('rit')->unique(); // "194-2024"
+            $table->string('rit'); // "123-2025"
             $table->string('sala');
             $table->string('ubicacion');
             $table->time('hora_inicio');

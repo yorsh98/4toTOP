@@ -4,6 +4,8 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use App\Models\Audiencia;
+use Illuminate\Validation\Rule;
+
 
 class AudienciaForm extends Component
 {
@@ -35,14 +37,16 @@ class AudienciaForm extends Component
     public $acusados = [];
     public $nuevoAcusado = [
         'nombre_completo' => '',
-        'situacion' => 'LIBRE',
+        'situacion' => '',
         'medida_cautelar' => '',
         'forma_notificacion' => ''
     ];
-    
-    
-    
-    
+    public $tiposdelibertad = [
+        'Libre',
+        'P.Prev.',
+        'P.x OC.',        
+    ];
+
     // Tipos de audiencia sugeridos
     public $tiposAudiencia = [
         'Juicio Oral',
@@ -56,7 +60,7 @@ class AudienciaForm extends Component
     protected $messages = [
         'fecha.required' => 'La fecha es obligatoria.',
         'rit.required' => 'El RIT es obligatorio.',
-        'rit.unique' => 'Este RIT ya está registrado.',
+        //'rit.unique' => 'Este RIT ya está registrado.',
         'sala.required' => 'La sala es obligatoria.',
         'ubicacion.required' => 'La ubicación es obligatoria.',
         'hora_inicio.required' => 'La hora de inicio es obligatoria.',
@@ -91,19 +95,26 @@ class AudienciaForm extends Component
         $this->num_peritos = $audiencia->num_peritos;
         $this->duracion = $audiencia->duracion;
         $this->delito = $audiencia->delito;
-        $this->jueces_inhabilitados = json_decode($audiencia->jueces_inhabilitados, true) ?? [];
+        //$this->jueces_inhabilitados = $audiencia->jueces_inhabilitados ?? [];
+        $this->jueces_inhabilitados = is_string($audiencia->jueces_inhabilitados)
+        ? json_decode($audiencia->jueces_inhabilitados, true) ?? []
+        : ($audiencia->jueces_inhabilitados ?? []);
         $this->encargado_causa = $audiencia->encargado_causa;
         $this->encargado_ttp = $audiencia->encargado_ttp;
         $this->encargado_ttp_zoom = $audiencia->encargado_ttp_zoom;
         $this->estado = $audiencia->estado;
-        $this->acusados = json_decode($audiencia->acusados, true) ?? [];
+        //$this->acusados = $audiencia->acusados ?? [];
+        $this->acusados = is_string($audiencia->acusados)
+        ? json_decode($audiencia->acusados, true) ?? []
+        : ($audiencia->acusados ?? []);
+
     }
 
     public function agregarAcusado()
     {
         $this->validate([
             'nuevoAcusado.nombre_completo' => 'required',
-            'nuevoAcusado.situacion' => 'required|in:LIBRE,DETENIDO,MEDIDAS_CAUTELARES',
+            'nuevoAcusado.situacion' => 'required',
             
         ]);
 
@@ -137,9 +148,21 @@ class AudienciaForm extends Component
     {
         $validated = $this->validate([
             'fecha' => 'required|date',
-            'rit' => 'required|unique:audiencias,rit,'.$this->audienciaId,
-            'sala' => 'required',
-            'ubicacion' => 'required',
+            //'rit' => 'required'.$this->audienciaId,
+            //'rit' => ['required', Rule::unique('audiencias', 'rit')->ignore($this->audienciaId)],
+            /*'rit' => ['required',
+            // Valida combinación única de RIT + FECHA
+            Rule::unique('audiencias')->where(function ($query) {
+                return $query->where('rit', $this->rit)
+                            ->whereDate('fecha', $this->fecha);
+            })->ignore($this->audienciaId)
+        ],*/
+            'rit' => ['required',Rule::unique('audiencias')->where(function ($query) {
+                return $query->where('rit', $this->rit)
+                            ->whereDate('fecha', $this->fecha)
+                            ->where('tipo_audiencia', $this->tipo_audiencia);
+            })->ignore($this->audienciaId)
+        ],
             'hora_inicio' => 'required',
             'tipo_audiencia' => 'required',
             'duracion' => 'required',
@@ -176,15 +199,26 @@ class AudienciaForm extends Component
             $this->agregarAcusado();
         }
 
-        Audiencia::updateOrCreate(
-            ['id' => $this->audienciaId],
-            $data
-        );
+        Audiencia::create($data);
 
         $this->reset();
-        $this->fecha = now()->format('Y-m-d');
+        //$this->fecha = now()->format('Y-m-d');
         session()->flash('success', 'Audiencia guardada correctamente');
     }
+
+    public function buscarPorRit()
+    {
+        if (!empty($this->rit)) {
+            $audienciaExistente = Audiencia::where('rit', $this->rit)->first();
+            
+            if ($audienciaExistente) {
+                $this->editAudiencia($audienciaExistente->id);
+                // Opcional: Mostrar mensaje informativo
+                session()->flash('info', 'Se cargó una audiencia existente. Puedes modificar los datos y se guardará como nueva versión.');
+            }
+        }
+    }
+
 
     public function render()
     {

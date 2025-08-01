@@ -1,3 +1,4 @@
+
 <div class="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md">
     <h2 class="text-2xl font-bold text-gray-800 mb-6">
         {{ $audienciaId ? 'Editar' : 'Registro de Nueva' }} Audiencia
@@ -11,17 +12,32 @@
 
     <form wire:submit.prevent="guardarAudiencia" class="space-y-6">
         <!-- Sección 1: Información Básica -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-6">
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Fecha*</label>
                 <input type="date" wire:model="fecha" class="w-full px-3 py-2 border border-gray-300 rounded-md">
                 @error('fecha') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
             </div>
-            
+           <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Duración*</label>
+                <input type="text" wire:model="duracion" placeholder="Ej: 2 horas, 1 día" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                @error('duracion') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+            </div> 
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">RIT*</label>
-                <input type="text" wire:model="rit" placeholder="Ej: 194-2024" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                <input 
+                    type="text" 
+                    wire:model="rit" 
+                    wire:blur="buscarPorRit" 
+                    placeholder="Ej: 123-2025" 
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md"
+                >
                 @error('rit') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+            </div>
+           
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">RUC</label>
+                <input type="text" wire:model="ruc" placeholder="Opcional" class="w-full px-3 py-2 border border-gray-300 rounded-md">
             </div>
             
             <div>
@@ -29,15 +45,17 @@
                 <input type="text" wire:model="sala" placeholder="Ej: Sala 701" class="w-full px-3 py-2 border border-gray-300 rounded-md">
                 @error('sala') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
             </div>
-        </div>
 
-        <!-- Sección 2: Ubicación y Horario -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Ubicación*</label>
                 <input type="text" wire:model="ubicacion" placeholder="Ej: Edificio A, Piso 7" class="w-full px-3 py-2 border border-gray-300 rounded-md">
                 @error('ubicacion') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
             </div>
+        </div>
+
+        <!-- Sección 2: Ubicación y Horario -->
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-6">
+            
             
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Hora Inicio*</label>
@@ -58,24 +76,17 @@
         </div>
 
         <!-- Sección 3: Datos Complementarios -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">RUC</label>
-                <input type="text" wire:model="ruc" placeholder="Opcional" class="w-full px-3 py-2 border border-gray-300 rounded-md">
-            </div>
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-6">
+            
             
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Cuenta Zoom</label>
                 <input type="text" wire:model="cta_zoom" placeholder="ID de reunión Zoom" class="w-full px-3 py-2 border border-gray-300 rounded-md">
             </div>
             
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Duración*</label>
-                <input type="text" wire:model="duracion" placeholder="Ej: 2 horas, 1 día" class="w-full px-3 py-2 border border-gray-300 rounded-md">
-                @error('duracion') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
-            </div>
+            
         </div>
-
+       <hr> 
         <!-- Sección 4: Delito y Participantes -->
         <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Delito*</label>
@@ -83,7 +94,7 @@
             @error('delito') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="grid grid-cols-2 md:grid-cols-2 gap-6">
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">N° Testigos</label>
                 <input type="number" wire:model="num_testigos" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-md">
@@ -96,7 +107,7 @@
         </div>
 
         <!-- Sección 5: Encargados -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-6">
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Encargado de Causa*</label>
                 <input type="text" wire:model="encargado_causa" class="w-full px-3 py-2 border border-gray-300 rounded-md">
@@ -210,11 +221,12 @@
                         </div>
                         
                         <div>
-                            <select wire:model="nuevoAcusado.situacion" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
-                                <option value="LIBRE">Libre</option>
-                                <option value="DETENIDO">Detenido</option>
-                                <option value="MEDIDAS_CAUTELARES">Medidas Cautelares</option>
-                            </select>
+                            <input type="text" wire:model="nuevoAcusado.situacion" list="tiposdelibertad" placeholder="Situacion" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
+                            <datalist id="tiposdelibertad">
+                                @foreach($tiposdelibertad as $tipoL)
+                                    <option value="{{ $tipoL }}">
+                                @endforeach
+                            </datalist>
                         </div>
                         
                         <div>
@@ -275,7 +287,11 @@
                 @endif
             </div>
         </div>
-
+        @if(session('success'))
+            <div class="mb-6 p-4 bg-green-100 text-green-700 rounded-lg">
+                {{ session('success') }}
+            </div>
+        @endif
         <!-- Botón de enviar -->
         <div class="flex justify-end pt-6">
             <button type="submit" class="bg-black-100 text-black px-6 py-2 rounded-md hover:bg-green-600">
