@@ -203,7 +203,7 @@ class AudienciaForm extends Component
 
         $this->reset();
         //$this->fecha = now()->format('Y-m-d');
-        session()->flash('success', 'Audiencia guardada correctamente');
+        $this->dispatch('alerta-success');
     }
 
     public function buscarPorRit()

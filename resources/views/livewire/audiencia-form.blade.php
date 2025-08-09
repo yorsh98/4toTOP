@@ -300,3 +300,16 @@
         </div>
     </form>
 </div>
+
+@script
+<script>
+    document.addEventListener('alerta-success', () => {
+        Swal.fire({
+            icon: 'success',
+            title: 'Éxito',
+            text: '¡Audiencia agregada o actualizada correctamente!',
+            confirmButtonColor: '#3085d6'
+        });
+    });
+</script>        
+@endscript

@@ -69,7 +69,7 @@
                     <label for="FECHA" class="block text-sm font-medium text-gray-600">FECHA PROXIMO TURNO</label>
                     <input type="text" name="FECHA" id="FECHA" class="w-full border rounded-md p-2" placeholder="EJ: 18, 19 y 20 de Abril" value="{{ $turno2->{'FECHA'} ?? '' }}">
                 </div>
-                <button type="submit" class="btn btn-success py-2 mt-2">
+                <button type="submit"  class="btn btn-success py-2 mt-2">
                     Enviar Turno 2
                 </button>
             </form>

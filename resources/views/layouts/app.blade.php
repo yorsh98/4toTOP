@@ -8,10 +8,7 @@
         <title>{{ config('app.name', 'Sistema Oficio/libertades 4to TOP Stgo.') }}</title>
         <link rel="icon" href="{{ asset('favicon.png') }}" type="image/png">
 
-        <!-- Fonts -->
-        
-        
-        <x-insertbootstrap /> <!-- ultima actualizacion antes de incluir bootstrap a vite --> 
+        <!-- Fonts --> 
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
         @livewireStyles
         @stack('styles')

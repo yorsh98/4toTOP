@@ -5,7 +5,7 @@
     <div class="d-flex justify-content-between mb-3">
         <div class="input-group w-50">
             <input type="text" 
-                   class="form-control" 
+                   class="form-control rounded" 
                    placeholder="Buscar guías..." 
                    wire:model.live.debounce.100ms="search">
             <span class="input-group-text">
@@ -23,7 +23,7 @@
             </select>
         </div> 
         <div class="d-flex gap-2">
-            <select class="form-select w-auto" wire:model.live="perPage">
+            <select class="form-select w-auto rounded" wire:model.live="perPage">
                 <option value="10">10 por página</option>
                 <option value="25">25 por página</option>
                 <option value="50">50 por página</option>
@@ -41,7 +41,7 @@
     <!-- Formulario de creación -->
     @if($showCreateForm && $modo === 'full')
         <div class="card mb-4">
-            <div class="card-header bg-primary text-white">
+            <div class="card-header bg-primary text-white rounded">
                 <h5 class="mb-0">Crear Nueva Guía</h5>
             </div>
             <div class="card-body">
@@ -49,27 +49,27 @@
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label class="form-label">Nombre</label>
-                            <input type="text" class="form-control" wire:model="newNombre" required>
+                            <input type="text" class="form-control rounded" wire:model="newNombre" required>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">RUT</label>
-                            <input type="text" class="form-control" wire:model="newRut">
+                            <input type="text" class="form-control rounded" wire:model="newRut">
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Email</label>
-                            <input type="email" class="form-control" wire:model="newEmail">
+                            <input type="email" class="form-control rounded" wire:model="newEmail">
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Teléfono 1</label>
-                            <input type="text" class="form-control" wire:model="newTelefono1">
+                            <input type="text" class="form-control rounded" wire:model="newTelefono1">
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Teléfono 2</label>
-                            <input type="text" class="form-control" wire:model="newTelefono2">
+                            <input type="text" class="form-control rounded" wire:model="newTelefono2">
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Institución</label>
-                            <select class="form-select" wire:model="newInstitucion" required>
+                            <select class="form-select rounded" wire:model="newInstitucion" required>
                                 <option value="" selected>Seleccionar institución</option>
                                 <option value="1">1. 4toTOPSTGO</option>
                                 <option value="2">2. Gendarmeria</option>
