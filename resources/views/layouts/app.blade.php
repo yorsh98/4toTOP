@@ -11,7 +11,7 @@
         <!-- Fonts -->
         
         
-        <link rel="preconnect" href="https://fonts.bunny.net">
+        <x-insertbootstrap /> <!-- ultima actualizacion antes de incluir bootstrap a vite --> 
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
         @livewireStyles
         @stack('styles')

@@ -85,11 +85,11 @@ Route::patch('/turno/{id}', [TurnoController::class, 'update'])->name('turno.upd
 Route::get('/', [TurnoController::class, 'enviarTurno'])->name('Welcome.index');
 
 Route::get('/guias', [App\Http\Controllers\guiasController::class, 'index'])->name('guias')->middleware(['auth']);
-Route::get('/guias/{id}/edit', [guiasController::class, 'edit'])->name('guias.edit');
-Route::patch('/guias/{id}', [guiasController::class, 'update'])->name('guias.update')->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
-Route::delete('/guias/{id}', [guiasController::class, 'destroy'])->name('guias.destroy');
+//Route::get('/guias/{id}/edit', [guiasController::class, 'edit'])->name('guias.edit');
+//Route::patch('/guias/{id}', [guiasController::class, 'update'])->name('guias.update')->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
+//Route::delete('/guias/{id}', [guiasController::class, 'destroy'])->name('guias.destroy');
 Route::post('/guias', [guiasController::class, 'store'])->name('guias.store');
-Route::get('/guias-datatable', [guiasController::class, 'datatable'])->name('guias.datatable')->middleware(['auth']);
+//Route::get('/guias-datatable', [guiasController::class, 'datatable'])->name('guias.datatable')->middleware(['auth']);
 
 Route::get('/guiastelefonicas', [guiastelefonicasController::class, 'index' ])->name('guiastelefonicas');
 Route::get('/guias-data', [guiastelefonicasController::class, 'getGuias'])->name('guias.data');

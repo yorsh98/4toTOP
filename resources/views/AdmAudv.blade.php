@@ -1,5 +1,5 @@
 <x-app-layout>
-    <x-insertbootstrap />
+   
     <link rel="stylesheet" href="{{ asset('css/audiencias.css') }}">
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">

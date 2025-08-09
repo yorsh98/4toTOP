@@ -16,8 +16,10 @@
         "vite": "^6.0"
     },
     "dependencies": {
+        "bootstrap": "^5.3.7",
         "datatables.net": "^2.2.1",
         "datatables.net-bs5": "^2.2.1",
-        "datatables.net-buttons": "^3.2.1"
+        "datatables.net-buttons": "^3.2.1",
+        "sweetalert2": "^11.22.3"
     }
 }

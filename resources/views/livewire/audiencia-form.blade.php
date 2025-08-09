@@ -161,7 +161,7 @@
                             <button 
                                 type="button" 
                                 wire:click="Agregarjueces_inhabilitados" 
-                                class="bg-blue-500 text-black px-4 py-2 rounded-md text-sm hover:bg-blue-600"
+                                class="bg-blue-200 text-black px-4 py-2 rounded-md text-sm hover:bg-blue-600"
                             >
                                 Agregar Juez
                             </button>
@@ -240,7 +240,7 @@
                         </div>
                     </div>
                     <div class="mt-3">
-                        <button type="button" wire:click="agregarAcusado" class="w-full bg-blue-500 text-black px-3 py-2 rounded-md text-sm hover:bg-blue-600">
+                        <button type="button" wire:click="agregarAcusado" class="w-full bg-blue-200 text-black px-3 py-2 rounded-md text-sm hover:bg-blue-600">
                             Agregar Acusado
                         </button>
                     </div>
@@ -294,7 +294,7 @@
         @endif
         <!-- Botón de enviar -->
         <div class="flex justify-end pt-6">
-            <button type="submit" class="bg-black-100 text-black px-6 py-2 rounded-md hover:bg-green-600">
+            <button type="submit" class="bg-green-300 text-black px-6 py-2 rounded-md hover:bg-green-600">
                 {{ $audienciaId ? 'Actualizar' : 'Guardar' }} Audiencia
             </button>
         </div>

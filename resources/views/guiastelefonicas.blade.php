@@ -19,89 +19,13 @@
                         </div>
                         <div class="grid gap-6 lg:grid-cols-1 lg:gap-8 animate__animated animate__fadeInUp animate__delay-0.8s">
                             <div class="flex flex-col items-center gap-6 overflow-hidden rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] transition duration-300 focus:outline-none focus-visible:ring-[#FF2D20] md:row-span-3 lg:p-10 lg:pb-10 dark:bg-zinc-900 dark:ring-zinc-800 dark:hover:text-white/70 dark:hover:ring-zinc-700 dark:focus-visible:ring-[#FF2D20]">
-                                <div class="flex flex-nowrap gap-[3px] overflow-x-auto  scroll-smooth">
-                                    <button class="btn btn-1 filter-btn" data-institucion="0">TODOS</button>
-                                    <button class="btn btn-1 filter-btn" data-institucion="1">4TO TOP</button>
-                                    <button class="btn btn-1 filter-btn" data-institucion="2">GENCHI</button>
-                                    <button class="btn btn-1 filter-btn" data-institucion="3">FISCALÍA</button>
-                                    <button class="btn btn-1 filter-btn" data-institucion="4">CAPJ</button>
-                                    <button class="btn btn-1 filter-btn" data-institucion="5">ZONAL STGO</button>
-                                    <button class="btn btn-1 filter-btn" data-institucion="12">OTROS TRIBUNALES</button>
-                                </div>    
-                                <div class="flex flex-nowrap gap-[3px] overflow-x-auto  scroll-smooth">
-                                    <button class="btn btn-1 filter-btn" data-institucion="6">DEFENSORIA</button> 
-                                    <button class="btn btn-1 filter-btn" data-institucion="7">MIN. INTERIOR</button> 
-                                    <button class="btn btn-1 filter-btn" data-institucion="8">C.D. ESTADO</button> 
-                                    <button class="btn btn-1 filter-btn" data-institucion="9">DEF. PRIVADOS</button>
-                                    <button class="btn btn-1 filter-btn" data-institucion="10">PDI/CARABINEROS</button>
-                                    <button class="btn btn-1 filter-btn" data-institucion="11">SML</button>
-                                </div> 
+                                
 
-                            <!-- Tabla -->
-                                <table id="guias-table" class="table table-striped">
-                                    <thead>
-                                        <tr>
-                                            <th>Nombre Completo</th>
-                                            <th>RUT</th>
-                                            <th>Email</th>
-                                            <th>Teléfono 1</th>
-                                            <th>Teléfono 2</th>
-                                        </tr>
-                                    </thead>
-                                </table>
+                                <livewire:tabla-guias :modo="'lectura'" />
                             </div>
                         </div>
-                    <x-insertdatatables/>
+                   
                     @push('scripts')
-                    <script>
-                        $(document).ready(function() {
-                            let table = $('#guias-table').DataTable({
-                                processing: true,
-                                serverSide: true,
-                                ajax: {
-                                    url: "{{ route('guias.data') }}",
-                                    data: function(d) {
-                                        d.institucion = $('.filter-btn.active').attr('data-institucion') || '';
-                                    }
-                                },
-                                createdRow: function(row, data, dataIndex) {
-                                    // Animación para cada fila de la tabla
-                                    $(row).addClass('animate__animated animate__fadeIn')
-                                        .css('animation-delay', `${dataIndex * 0.08}s`);
-                                },
-                                columns: [
-                                    { data: 'nombre_completo', name: 'nombre_completo' },
-                                    { data: 'rut', name: 'rut' },
-                                    { data: 'email', name: 'email' },
-                                    { data: 'telefono1', name: 'telefono1' },
-                                    { data: 'telefono2', name: 'telefono2' }
-                                ],
-                                language: {
-                                    "sProcessing": "Procesando...",
-                                    "sZeroRecords": "No se encontraron resultados",
-                                    "sLengthMenu":     "",
-                                    "sEmptyTable": "No hay datos disponibles en la tabla",
-                                    "sInfo": "Mostrando _START_ a _END_ de _TOTAL_ registros",
-                                    "sInfoEmpty": "Mostrando 0 a 0 de 0 registros",
-                                    "sInfoFiltered": "(filtrado de _MAX_ registros en total)",
-                                    "sSearch": "Buscar:",
-                                    "oPaginate": {
-                                        "sFirst": "Primera",
-                                        "sPrevious": "Anterior",
-                                        "sNext": "Siguiente",
-                                        "sLast": "Última"
-                                    }
-                                }
-                            });
-                            
-                            // Animación al hacer click en los filtros
-                            $('.filter-btn').on('click', function() {
-                                $('.filter-btn').removeClass('active btn-secondary').addClass('btn-primary');
-                                $(this).addClass('active btn-secondary animate__animated animate__pulse')
-                                    .removeClass('btn-primary');
-                                table.ajax.reload();
-                            });
-                        });
-                    </script>
+                    
                     @endpush('scripts')
 </x-in-layout>
