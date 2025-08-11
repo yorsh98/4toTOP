@@ -94,6 +94,7 @@ class TablaGuias extends Component
     {
         $guia = Guias::findOrFail($id);
 
+        // Asigna TODOS los campos incluyendo el ID
         $this->editId = $guia->id;
         $this->editNombre = $guia->nombre_completo;
         $this->editRut = $guia->rut;
@@ -102,34 +103,36 @@ class TablaGuias extends Component
         $this->editTelefono2 = $guia->telefono2;
         $this->editInstitucion = $guia->institucion;
 
-         $this->dispatch('openModal', 'editModal');
+        // Dispara el evento para abrir el modal
+        $this->dispatch('open-edit-modal');
     }
+
 
     public function update()
-    {
-        $this->validate([
-            'editNombre' => 'required|min:3|max:100',
-            'editRut' => 'nullable|max:20',
-            'editEmail' => 'nullable|email|max:100',
-            'editTelefono1' => 'nullable|max:20',
-            'editTelefono2' => 'nullable|max:20',
-            'editInstitucion' => 'required|numeric|between:1,11',
-        ]);
+{
+    $this->validate([
+        'editNombre' => 'required|min:3|max:100',
+        'editRut' => 'nullable|max:20',
+        'editEmail' => 'nullable|email|max:100',
+        'editTelefono1' => 'nullable|max:20',
+        'editTelefono2' => 'nullable|max:20',
+        'editInstitucion' => 'required|numeric|between:1,11',
+    ]);
 
-        $guia = Guias::findOrFail($this->editId);
-        $guia->update([
-            'nombre_completo' => $this->editNombre,
-            'rut' => $this->editRut,
-            'email' => $this->editEmail,
-            'telefono1' => $this->editTelefono1,
-            'telefono2' => $this->editTelefono2,
-            'institucion' => $this->editInstitucion,
-        ]);
+    $guia = Guias::findOrFail($this->editId);
+    $guia->update([
+        'nombre_completo' => $this->editNombre,
+        'rut' => $this->editRut,
+        'email' => $this->editEmail,
+        'telefono1' => $this->editTelefono1,
+        'telefono2' => $this->editTelefono2,
+        'institucion' => $this->editInstitucion,
+    ]);
 
-               $this->dispatch('closeModal');
-               $this->dispatch('notify', type: 'success', message: 'Guía actualizada correctamente.'
-        );
-    }
+    $this->dispatch('close-edit-modal');
+    $this->dispatch('alerta-exito');
+}
+
 
     public function confirmDelete($id)
     {   

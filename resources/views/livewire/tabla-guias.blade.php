@@ -1,6 +1,4 @@
 <div>
-   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
- 
     <!-- Barra de búsqueda y controles -->
     <div class="d-flex justify-content-between mb-3">
         <div class="input-group w-50">
@@ -71,17 +69,17 @@
                             <label class="form-label">Institución</label>
                             <select class="form-select rounded" wire:model="newInstitucion" required>
                                 <option value="" selected>Seleccionar institución</option>
-                                <option value="1">1. 4toTOPSTGO</option>
-                                <option value="2">2. Gendarmeria</option>
-                                <option value="3">3. Fiscalia</option>
-                                <option value="4">4. CAPJ</option>
-                                <option value="5">5. Zonal STGO</option>
-                                <option value="6">6. Defensoria</option>
-                                <option value="7">7. Min. Interior</option>
-                                <option value="8">8. C.D. Estado</option>
-                                <option value="9">9. Defensores Privados</option>
-                                <option value="10">10. PDI/Carabineros</option>
-                                <option value="11">11. SML</option>
+                                <option value="1">4toTOPSTGO</option>
+                                <option value="2">Gendarmeria</option>
+                                <option value="3">Fiscalia</option>
+                                <option value="4">CAPJ</option>
+                                <option value="5">Zonal STGO</option>
+                                <option value="6">Defensoria</option>
+                                <option value="7">Min. Interior</option>
+                                <option value="8">C.D. Estado</option>
+                                <option value="9">Defensores Privados</option>
+                                <option value="10">PDI/Carabineros</option>
+                                <option value="11">SML</option>
                             </select>
                         </div>
                         <div class="col-12">
@@ -150,57 +148,83 @@
     </div>
 
     <!-- Modal de Edición -->
-    <dialog id="editModal" wire:ignore.self class="modal">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title">Editar Guía</h5>
-                    <button type="button" class="btn-close btn-close-white" 
-                            wire:click="$dispatch('closeModal')" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form wire:submit.prevent="update">
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label">Nombre</label>
-                                <input type="text" class="form-control" wire:model="editNombre" required>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">RUT</label>
-                                <input type="text" class="form-control" wire:model="editRut">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Email</label>
-                                <input type="email" class="form-control" wire:model="editEmail">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Teléfono 1</label>
-                                <input type="text" class="form-control" wire:model="editTelefono1">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Teléfono 2</label>
-                                <input type="text" class="form-control" wire:model="editTelefono2">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Institución</label>
-                                <select class="form-select" wire:model="editInstitucion" required>
-                                    <option value="" disabled selected>Seleccionar institución</option>
-                                    @foreach($instituciones as $key => $institucion)
-                                        <option value="{{ $key }}">{{ $institucion }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
+     <div wire:ignore
+    x-data="{ open: false }" 
+    x-on:open-edit-modal.window="open = true" 
+    x-on:close-edit-modal.window="open = false"
+    class="relative z-50">
+    <!-- Fondo oscuro -->
+        <div 
+            x-show="open" 
+            class="fixed inset-0 bg-black bg-opacity-50"
+            x-transition.opacity
+        ></div>
+
+        <!-- Contenido modal -->
+        <div 
+            x-show="open" 
+            class="fixed inset-0 flex items-center justify-center p-4"
+            x-transition
+        >
+            <div class="bg-white rounded-lg shadow-lg w-full max-w-lg p-6">
+                <h2 class="text-lg font-semibold mb-4">Editar Guía</h2>
+
+                <!-- Formulario Livewire -->
+                <form wire:submit.prevent="update">
+                    <div class="mb-4">
+                        <label class="block mb-1">Nombre Completo</label>
+                        <input type="text" wire:model.defer="editNombre" class="border p-2 w-full rounded">
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block mb-1">RUT</label>
+                        <input type="text" wire:model.defer="editRut" class="border p-2 w-full rounded">
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block mb-1">Email</label>
+                        <input type="email" wire:model.defer="editEmail" class="border p-2 w-full rounded">
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block mb-1">Telefono 1</label>
+                        <input type="number" wire:model.defer="editTelefono1" class="border p-2 w-full rounded">
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block mb-1">Telefono 2</label>
+                        <input type="number" wire:model.defer="editTelefono2" class="border p-2 w-full rounded">
+                    </div>
+                    <div class="mb-4">
+                            <label class="block mb-1">Institución</label>
+                            <select class="form-select rounded" wire:model.defer="editInstitucion" required>
+                                <option value="" selected>Seleccionar institución</option>
+                                <option value="1">4toTOPSTGO</option>
+                                <option value="2">Gendarmeria</option>
+                                <option value="3">Fiscalia</option>
+                                <option value="4">CAPJ</option>
+                                <option value="5">Zonal STGO</option>
+                                <option value="6">Defensoria</option>
+                                <option value="7">Min. Interior</option>
+                                <option value="8">C.D. Estado</option>
+                                <option value="9">Defensores Privados</option>
+                                <option value="10">PDI/Carabineros</option>
+                                <option value="11">SML</option>
+                            </select>
                         </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" 
-                            wire:click="$dispatch('closeModal')">Cancelar</button>
-                    <button type="button" class="btn btn-primary" wire:click="update">Guardar</button>
-                </div>
+                    <div class="flex justify-end gap-2 mt-4">
+                        <button type="button" @click="open = false"
+                            class="px-4 py-2 bg-gray-300 rounded">
+                            Cancelar
+                        </button>
+                        <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded">
+                            Guardar
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
-    </dialog>
+    </div>
 </div>
 
 @script
@@ -209,7 +233,7 @@
             Swal.fire({
                 icon: 'success',
                 title: 'Éxito',
-                text: '¡Guia agregada correctamente!',
+                text: '¡Guia guardada correctamente!',
                 confirmButtonColor: '#3085d6'
             });
         });

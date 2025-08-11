@@ -147,16 +147,7 @@ class AudienciaForm extends Component
     public function guardarAudiencia()
     {
         $validated = $this->validate([
-            'fecha' => 'required|date',
-            //'rit' => 'required'.$this->audienciaId,
-            //'rit' => ['required', Rule::unique('audiencias', 'rit')->ignore($this->audienciaId)],
-            /*'rit' => ['required',
-            // Valida combinación única de RIT + FECHA
-            Rule::unique('audiencias')->where(function ($query) {
-                return $query->where('rit', $this->rit)
-                            ->whereDate('fecha', $this->fecha);
-            })->ignore($this->audienciaId)
-        ],*/
+            'fecha' => 'required|date',           
             'rit' => ['required',Rule::unique('audiencias')->where(function ($query) {
                 return $query->where('rit', $this->rit)
                             ->whereDate('fecha', $this->fecha)
