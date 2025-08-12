@@ -1,4 +1,4 @@
-<footer>
+<footer class="footer-SistSol">
       <a href="{{ url('/tablas') }}" class="footer-button">Ultimos Oficios</a>
       <a href="{{ url('/') }}" class="footer-button">Página Principal</a>
       <a href="{{ url('/SistOficioLibertades') }}" class="footer-button">Inicio Sistema</a>

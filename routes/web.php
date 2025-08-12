@@ -18,8 +18,11 @@ use App\Http\Controllers\formController;
 use App\Http\Controllers\procController;
 use App\Http\Controllers\prograController;
 use App\Http\Controllers\AdmAudvController;
+use App\Http\Controllers\MonitorController;
 use App\Livewire\AudienciaForm;
 use App\Livewire\MonitorAudiencias;
+
+
 
 Route::view('/', 'welcome');
 /*Route::get('/', function () {
@@ -88,11 +91,11 @@ Route::get('/guias', [App\Http\Controllers\guiasController::class, 'index'])->na
 //Route::get('/guias/{id}/edit', [guiasController::class, 'edit'])->name('guias.edit');
 //Route::patch('/guias/{id}', [guiasController::class, 'update'])->name('guias.update')->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
 //Route::delete('/guias/{id}', [guiasController::class, 'destroy'])->name('guias.destroy');
-Route::post('/guias', [guiasController::class, 'store'])->name('guias.store');
+//Route::post('/guias', [guiasController::class, 'store'])->name('guias.store');
 //Route::get('/guias-datatable', [guiasController::class, 'datatable'])->name('guias.datatable')->middleware(['auth']);
 
 Route::get('/guiastelefonicas', [guiastelefonicasController::class, 'index' ])->name('guiastelefonicas');
-Route::get('/guias-data', [guiastelefonicasController::class, 'getGuias'])->name('guias.data');
+//Route::get('/guias-data', [guiastelefonicasController::class, 'getGuias'])->name('guias.data');
 
 Route::get('/acc', [accController::class, 'index' ])->name('acc');
 
@@ -118,7 +121,9 @@ Route::get('/AdmAudv', [AdmAudvController::class, 'index' ])->name('AdmAudv')->m
 Route::get('/AdmAud', AudienciaForm::class)->name('AdmAud');
 
 // Ruta para el monitor
-Route::get('/monitor', MonitorAudiencias::class)->name('monitor');
+
+Route::get('/Monitor', [MonitorController::class, 'index' ])->name('Monitor');
+//Route::get('/monitor', MonitorAudiencias::class)->name('monitor');
 
 
 Route::view('dashboard', 'dashboard')

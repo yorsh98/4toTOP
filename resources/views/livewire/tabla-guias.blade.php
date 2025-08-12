@@ -94,7 +94,7 @@
     
 
     <!-- Tabla de guías -->
-    <div class="table-responsive">
+    <div class="table-responsive rounded">
         <table class="table table-striped table-hover">
             <thead class="table-light">
                 <tr>
