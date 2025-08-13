@@ -1,24 +1,31 @@
 <div class="w-full h-full" x-data="{
     rotationInterval: null,
+    countdown: @js($rotationInterval),
     init() {
-        // Escuchar evento de Livewire para iniciar rotación
+        // Iniciar rotación automáticamente
+        this.startRotation(@js($rotationInterval));
+        
+        // Escuchar eventos
         window.addEventListener('startRotationJS', (event) => {
             this.startRotation(event.detail.duration);
         });
-        
-        // Escuchar evento para detener rotación
         window.addEventListener('stopRotationJS', () => {
             this.stopRotation();
         });
-        
-        // Iniciar rotación automáticamente
-        this.startRotation(@js($rotationInterval));
     },
     startRotation(duration) {
-        this.stopRotation(); // Detener cualquier intervalo existente
+        this.stopRotation();
+        this.countdown = duration; // Reiniciar contador
+        
+        // Usar un solo intervalo para ambas funciones
         this.rotationInterval = setInterval(() => {
-            @this.rotate();
-        }, duration * 1010);
+            this.countdown--;
+            
+            if(this.countdown <= 0) {
+                @this.rotate();
+                this.countdown = duration; // Reiniciar contador al rotar
+            }
+        }, 1000); // Intervalo de 1 segundo para mayor precisión
     },
     stopRotation() {
         if (this.rotationInterval) {
@@ -81,10 +88,6 @@
     <!-- Indicador de rotación -->
     <div class="fixed bottom-4 right-4 bg-black bg-opacity-70 text-white px-3 py-1 rounded-full text-sm">
         Mostrando: {{ $currentType }} | Próximo cambio en: 
-        <span x-data="{ countdown: {{ $rotationInterval }} }" 
-              x-init="setInterval(() => { countdown = countdown > 0 ? countdown - 1 : {{ $rotationInterval }} }, 900)" 
-              x-text="countdown">
-            {{ $rotationInterval }}
-        </span>s
+        <span x-text="countdown">{{ $rotationInterval }}</span>s
     </div>
 </div>
