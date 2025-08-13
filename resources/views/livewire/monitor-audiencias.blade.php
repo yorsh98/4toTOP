@@ -1,6 +1,34 @@
-<div class="w-full h-full">
+<div class="w-full h-full" x-data="{
+    rotationInterval: null,
+    init() {
+        // Escuchar evento de Livewire para iniciar rotación
+        window.addEventListener('startRotationJS', (event) => {
+            this.startRotation(event.detail.duration);
+        });
+        
+        // Escuchar evento para detener rotación
+        window.addEventListener('stopRotationJS', () => {
+            this.stopRotation();
+        });
+        
+        // Iniciar rotación automáticamente
+        this.startRotation(@js($rotationInterval));
+    },
+    startRotation(duration) {
+        this.stopRotation(); // Detener cualquier intervalo existente
+        this.rotationInterval = setInterval(() => {
+            @this.rotate();
+        }, duration * 1010);
+    },
+    stopRotation() {
+        if (this.rotationInterval) {
+            clearInterval(this.rotationInterval);
+            this.rotationInterval = null;
+        }
+    }
+}">
     <!-- Contenedor grid que usa todo el espacio -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 gap-4 h-full">
+    <div class="grid grid-cols-1 lg:grid-cols-1 xl:grid-cols-1 gap-4 h-full">
         @foreach($audiencias as $tipo => $grupo)
             <!-- Tarjeta de tipo de audiencia -->
             <div class="bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300 h-full flex flex-col">
@@ -11,7 +39,8 @@
                 </div>
                 
                 <!-- Contenido de audiencias -->
-                <div class="p-2 space-y-2 flex-1 overflow-y-auto">
+                <div class="p-2 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2 flex-1 overflow-y-auto">
+
                     @foreach($grupo as $audiencia)
                         <div class="border border-gray-200 rounded-lg overflow-hidden">
                             <!-- Encabezado de audiencia -->
@@ -48,5 +77,14 @@
                 </div>
             </div>
         @endforeach
+    </div>
+    <!-- Indicador de rotación -->
+    <div class="fixed bottom-4 right-4 bg-black bg-opacity-70 text-white px-3 py-1 rounded-full text-sm">
+        Mostrando: {{ $currentType }} | Próximo cambio en: 
+        <span x-data="{ countdown: {{ $rotationInterval }} }" 
+              x-init="setInterval(() => { countdown = countdown > 0 ? countdown - 1 : {{ $rotationInterval }} }, 900)" 
+              x-text="countdown">
+            {{ $rotationInterval }}
+        </span>s
     </div>
 </div>

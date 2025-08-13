@@ -80,6 +80,11 @@ class TablaGuias extends Component
         $this->modo = $modo;
     }
 
+    public function updatingFiltroInstitucion()
+    {
+        $this->resetPage();
+    }
+    
     public function updatingSearch()
     {
         $this->resetPage();

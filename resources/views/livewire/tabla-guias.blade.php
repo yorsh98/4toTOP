@@ -36,63 +36,60 @@
         </div>
     </div>
 
-    <!-- Formulario de creación -->
-    @if($showCreateForm && $modo === 'full')
-        <div class="card mb-4">
-            <div class="card-header bg-primary text-white rounded">
-                <h5 class="mb-0">Crear Nueva Guía</h5>
-            </div>
-            <div class="card-body">
-                <form wire:submit.prevent="create">
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Nombre</label>
-                            <input type="text" class="form-control rounded" wire:model="newNombre" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">RUT</label>
-                            <input type="text" class="form-control rounded" wire:model="newRut">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Email</label>
-                            <input type="email" class="form-control rounded" wire:model="newEmail">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Teléfono 1</label>
-                            <input type="text" class="form-control rounded" wire:model="newTelefono1">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Teléfono 2</label>
-                            <input type="text" class="form-control rounded" wire:model="newTelefono2">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Institución</label>
-                            <select class="form-select rounded" wire:model="newInstitucion" required>
-                                <option value="" selected>Seleccionar institución</option>
-                                <option value="1">4toTOPSTGO</option>
-                                <option value="2">Gendarmeria</option>
-                                <option value="3">Fiscalia</option>
-                                <option value="4">CAPJ</option>
-                                <option value="5">Zonal STGO</option>
-                                <option value="6">Defensoria</option>
-                                <option value="7">Min. Interior</option>
-                                <option value="8">C.D. Estado</option>
-                                <option value="9">Defensores Privados</option>
-                                <option value="10">PDI/Carabineros</option>
-                                <option value="11">SML</option>
-                            </select>
-                        </div>
-                        <div class="col-12">
-                            <button type="submit" class="btn btn-success">Guardar</button>
-                            <button type="button" class="btn btn-secondary" wire:click="resetCreateForm">Cancelar</button>
-                        </div>
-                    </div>
-                </form>
-            </div>
+<!-- Formulario de creación con animación -->
+    <div 
+        x-data="{ showForm: @entangle('showCreateForm') }" 
+        x-show="showForm && @js($modo === 'full')"
+        style="display: none;" 
+        x-transition.scale.origin.center
+        class="card mb-4">
+        <div class="card-header bg-primary text-white rounded">
+            <h5 class="mb-0">Crear Nueva Guía</h5>
         </div>
-    @endif
-    
-
+        <div class="card-body">
+            <form wire:submit.prevent="create">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Nombre</label>
+                        <input type="text" class="form-control rounded" wire:model="newNombre" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">RUT</label>
+                        <input type="text" class="form-control rounded" wire:model="newRut">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-control rounded" wire:model="newEmail">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Teléfono 1</label>
+                        <input type="text" class="form-control rounded" wire:model="newTelefono1">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Teléfono 2</label>
+                        <input type="text" class="form-control rounded" wire:model="newTelefono2">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Institución</label>
+                        <select class="form-select rounded" wire:model="newInstitucion" required>
+                            <option value="" selected>Seleccionar institución</option>
+                            @foreach($instituciones as $id => $nombre)
+                                <option value="{{ $id }}">{{ $nombre }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-success">Guardar</button>
+                        <button type="button" class="btn btn-secondary" 
+                                wire:click="resetCreateForm" 
+                                @click="showForm = false">
+                            Cancelar
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
     <!-- Tabla de guías -->
     <div class="table-responsive rounded">
         <table class="table table-striped table-hover">
@@ -148,73 +145,50 @@
     </div>
 
     <!-- Modal de Edición -->
-     <div wire:ignore
-    x-data="{ open: false }" 
-    x-on:open-edit-modal.window="open = true" 
-    x-on:close-edit-modal.window="open = false"
-    class="relative z-50">
-    <!-- Fondo oscuro -->
-        <div 
-            x-show="open" 
-            class="fixed inset-0 bg-black bg-opacity-50"
-            x-transition.opacity
-        ></div>
+    <div wire:ignore
+        x-data="{ open: false }" 
+        x-on:open-edit-modal.window="open = true" 
+        x-on:close-edit-modal.window="open = false"
+        class="relative z-50"
+    >
+        <div x-show="open" class="fixed inset-0 bg-black bg-opacity-50" x-transition.opacity></div>
 
-        <!-- Contenido modal -->
-        <div 
-            x-show="open" 
-            class="fixed inset-0 flex items-center justify-center p-4"
-            x-transition
-        >
+        <div x-show="open" class="fixed inset-0 flex items-center justify-center p-4" x-transition>
             <div class="bg-white rounded-lg shadow-lg w-full max-w-lg p-6">
                 <h2 class="text-lg font-semibold mb-4">Editar Guía</h2>
 
-                <!-- Formulario Livewire -->
                 <form wire:submit.prevent="update">
                     <div class="mb-4">
                         <label class="block mb-1">Nombre Completo</label>
                         <input type="text" wire:model.defer="editNombre" class="border p-2 w-full rounded">
                     </div>
-
                     <div class="mb-4">
                         <label class="block mb-1">RUT</label>
                         <input type="text" wire:model.defer="editRut" class="border p-2 w-full rounded">
                     </div>
-
                     <div class="mb-4">
                         <label class="block mb-1">Email</label>
                         <input type="email" wire:model.defer="editEmail" class="border p-2 w-full rounded">
                     </div>
-
                     <div class="mb-4">
                         <label class="block mb-1">Telefono 1</label>
                         <input type="number" wire:model.defer="editTelefono1" class="border p-2 w-full rounded">
                     </div>
-
                     <div class="mb-4">
                         <label class="block mb-1">Telefono 2</label>
                         <input type="number" wire:model.defer="editTelefono2" class="border p-2 w-full rounded">
                     </div>
                     <div class="mb-4">
-                            <label class="block mb-1">Institución</label>
-                            <select class="form-select rounded" wire:model.defer="editInstitucion" required>
-                                <option value="" selected>Seleccionar institución</option>
-                                <option value="1">4toTOPSTGO</option>
-                                <option value="2">Gendarmeria</option>
-                                <option value="3">Fiscalia</option>
-                                <option value="4">CAPJ</option>
-                                <option value="5">Zonal STGO</option>
-                                <option value="6">Defensoria</option>
-                                <option value="7">Min. Interior</option>
-                                <option value="8">C.D. Estado</option>
-                                <option value="9">Defensores Privados</option>
-                                <option value="10">PDI/Carabineros</option>
-                                <option value="11">SML</option>
-                            </select>
-                        </div>
+                        <label class="block mb-1">Institución</label>
+                        <select class="form-select rounded" wire:model.defer="editInstitucion" required>
+                            <option value="" selected>Seleccionar institución</option>
+                            @foreach($instituciones as $id => $nombre)
+                                <option value="{{ $id }}">{{ $nombre }}</option>
+                            @endforeach
+                        </select>
+                    </div>
                     <div class="flex justify-end gap-2 mt-4">
-                        <button type="button" @click="open = false"
-                            class="px-4 py-2 bg-gray-300 rounded">
+                        <button type="button" @click="open = false" class="px-4 py-2 bg-gray-300 rounded">
                             Cancelar
                         </button>
                         <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded">
@@ -228,26 +202,23 @@
 </div>
 
 @script
-   <script>
-         document.addEventListener('alerta-exito', () => {
-            Swal.fire({
-                icon: 'success',
-                title: 'Éxito',
-                text: '¡Guia guardada correctamente!',
-                confirmButtonColor: '#3085d6'
-            });
+<script>
+    document.addEventListener('alerta-exito', () => {
+        Swal.fire({
+            icon: 'success',
+            title: 'Éxito',
+            text: '¡Guia guardada correctamente!',
+            confirmButtonColor: '#3085d6'
         });
-        
-        window.addEventListener('alerta-deleted', () => {
-            Swal.fire({
-                icon: 'success',
-                title: 'Éxito',
-                text: '¡Guia Eliminada correctamente!',
-                confirmButtonColor: '#3085d6'
-            });
-        }); 
-        
-     </script>
+    });
 
+    window.addEventListener('alerta-deleted', () => {
+        Swal.fire({
+            icon: 'success',
+            title: 'Éxito',
+            text: '¡Guia Eliminada correctamente!',
+            confirmButtonColor: '#3085d6'
+        });
+    });
+</script>
 @endscript
-

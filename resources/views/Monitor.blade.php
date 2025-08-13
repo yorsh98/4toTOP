@@ -21,7 +21,7 @@
                     <div class="h-full overflow-y-auto p-6">
                         <h3 class="text-2xl font-bold text-center mb-6 text-gray-800">ATENCION DE PUBLICO</h3>
                         <!-- Contenido dinámico -->
-                        <!--Livewire -->
+                        <!--Livewire -->                        
                     </div>
                 </div>
                 
@@ -33,7 +33,7 @@
                             <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-green-500 to-purple-600"></div>
                             <h1 class="text-2xl font-bold text-gray-800 mb-2 flex items-center justify-center gap-3">
                                 <i class="fas fa-balance-scale"></i>
-                                Programación de Audiencias
+                                PROGRAMACION DE AUDIENCIAS
                                 <i class="far fa-calendar-alt"></i> 
                             </h1>            
                         </div>
