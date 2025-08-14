@@ -6,6 +6,8 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\Guias;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Auth;
+
 
 class TablaGuias extends Component
 {
@@ -77,6 +79,7 @@ class TablaGuias extends Component
 
     public function mount($modo = 'full')
     {
+        
         $this->modo = $modo;
     }
 
@@ -96,7 +99,10 @@ class TablaGuias extends Component
     }
 
     public function edit($id)
-    {
+    {   
+        if (!Auth::check()) {
+            abort(403, 'No autorizado.');
+        }
         $guia = Guias::findOrFail($id);
 
         // Asigna TODOS los campos incluyendo el ID
@@ -114,33 +120,37 @@ class TablaGuias extends Component
 
 
     public function update()
-{
-    $this->validate([
-        'editNombre' => 'required|min:3|max:100',
-        'editRut' => 'nullable|max:20',
-        'editEmail' => 'nullable|email|max:100',
-        'editTelefono1' => 'nullable|max:20',
-        'editTelefono2' => 'nullable|max:20',
-        'editInstitucion' => 'required|numeric|between:1,11',
-    ]);
+    {   
+        if (!Auth::check()) {
+            abort(403, 'No autorizado.');
+        }
+        $this->validate([
+            'editNombre' => 'required|min:3|max:100',
+            'editRut' => 'nullable|max:20',
+            'editEmail' => 'nullable|email|max:100',
+            'editTelefono1' => 'nullable|max:20',
+            'editTelefono2' => 'nullable|max:20',
+            'editInstitucion' => 'required|numeric|between:1,11',
+        ]);
 
-    $guia = Guias::findOrFail($this->editId);
-    $guia->update([
-        'nombre_completo' => $this->editNombre,
-        'rut' => $this->editRut,
-        'email' => $this->editEmail,
-        'telefono1' => $this->editTelefono1,
-        'telefono2' => $this->editTelefono2,
-        'institucion' => $this->editInstitucion,
-    ]);
+        $guia = Guias::findOrFail($this->editId);
+        $guia->update([
+            'nombre_completo' => $this->editNombre,
+            'rut' => $this->editRut,
+            'email' => $this->editEmail,
+            'telefono1' => $this->editTelefono1,
+            'telefono2' => $this->editTelefono2,
+            'institucion' => $this->editInstitucion,
+        ]);
 
-    $this->dispatch('close-edit-modal');
-    $this->dispatch('alerta-exito');
-}
+        $this->dispatch('close-edit-modal');
+        $this->dispatch('alerta-exito');
+    }
 
 
     public function confirmDelete($id)
     {   
+        
         $this->js("
             if (confirm('¿Estás seguro de eliminar esta guía?')) {
                 \$wire.call('performDelete', $id);}
@@ -148,13 +158,19 @@ class TablaGuias extends Component
     }
 
     public function performDelete($id)
-    {
+    {   
+        if (!Auth::check()) {
+            abort(403, 'No autorizado.');
+        }
         Guias::destroy($id);
         $this->dispatch('alerta-deleted');
     }
 
     public function create()
-    {
+    {   
+        if (!Auth::check()) {
+            abort(403, 'No autorizado.');
+        }
         $this->validate([
             'newNombre' => 'required|min:3|max:100',
             'newRut' => 'nullable|max:20',
@@ -188,7 +204,8 @@ class TablaGuias extends Component
     }
 
     public function render()
-    {
+    {   
+        
         $query = Guias::query()
             ->when($this->search, function($query) {
                 $query->where(function($q) {

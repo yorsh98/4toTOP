@@ -12,8 +12,12 @@ class MonitorAudiencias extends Component
     public $audienciaTypes = ['Juicio Oral', 'Cont. Juicio Oral', 'Audiencia Corta', 'Lectura de Sentencia'];
     public $rotationInterval = 10; // segundos
 
-    protected $listeners = ['startRotation', 'stopRotation'];
+    protected $listeners = ['startRotation', 'stopRotation', 'keepAlive'];
 
+    public function keepAlive()
+    {
+        // Mantiene activa la sesión
+    }
     public function mount()
     {
         $this->startRotation();

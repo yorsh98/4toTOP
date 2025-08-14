@@ -62,6 +62,12 @@
         </footer>
         @stack('scripts')
         @livewireScripts
+        <script>
+            // Ping cada 5 minutos para mantener la sesión
+            setInterval(() => {
+                Livewire.emit('keepAlive');
+            }, 300000);
+        </script>
     </body>
 </html>
 

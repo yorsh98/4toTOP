@@ -117,11 +117,6 @@ Route::post('/enviar-solicitud', [SistOficioLibertadesController::class, 'enviar
 
 Route::get('/AdmAudv', [AdmAudvController::class, 'index' ])->name('AdmAudv')->middleware(['auth']);
 
-//adm
-Route::get('/AdmAud', AudienciaForm::class)->name('AdmAud');
-
-// Ruta para el monitor
-
 Route::get('/Monitor', [MonitorController::class, 'index' ])->name('Monitor');
 //Route::get('/monitor', MonitorAudiencias::class)->name('monitor');
 

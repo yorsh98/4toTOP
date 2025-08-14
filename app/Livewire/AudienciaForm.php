@@ -5,6 +5,7 @@ namespace App\Livewire;
 use Livewire\Component;
 use App\Models\Audiencia;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Auth;
 
 
 class AudienciaForm extends Component
@@ -80,12 +81,18 @@ class AudienciaForm extends Component
     ];
 
     public function mount()
-    {
+    {   
+        if (!Auth::check()) {
+            abort(403, 'No autorizado.');
+        }
         $this->fecha = now()->addDay()->format('Y-m-d');
     }
 
     public function editAudiencia($id)
-    {
+    {   
+        if (!Auth::check()) {
+            abort(403, 'No autorizado.');
+        }
         $audiencia = Audiencia::find($id);
         $this->audienciaId = $audiencia->id;
         $this->fecha = $audiencia->fecha->format('Y-m-d');
@@ -152,7 +159,10 @@ class AudienciaForm extends Component
     }
 
     public function guardarAudiencia()
-    {
+    {   
+        if (!Auth::check()) {
+            abort(403, 'No autorizado.');
+        }
         $validated = $this->validate([
             'fecha' => 'required|date',           
             'rit' => ['required',Rule::unique('audiencias')->where(function ($query) {
@@ -225,7 +235,9 @@ class AudienciaForm extends Component
 
 
     public function render()
-    {
+    {   if (!Auth::check()) {
+            abort(403, 'No autorizado.');
+        }
         return view('livewire.audiencia-form');
     }
 }
