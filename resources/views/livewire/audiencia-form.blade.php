@@ -1,15 +1,11 @@
 
-<div class="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md">
+<div class="max-w-4xl mx-auto p-6 bg-white">
     <h2 class="text-2xl font-bold text-gray-800 mb-6">
         {{ $audienciaId ? 'Editar' : 'Registro de Nueva' }} Audiencia
     </h2>
-    
-    @if(session('success'))
-        <div class="mb-6 p-4 bg-green-100 text-green-700 rounded-lg">
-            {{ session('success') }}
-        </div>
-    @endif
-
+    <div class="rounded shadow text-sm m-5 text-center bg-red-200 px-2 py-2">
+        <span>todos los campos marcados con * son OBLIGATORIOS</span>
+    </div>
     <form wire:submit.prevent="guardarAudiencia" class="space-y-6">
         <!-- Sección 1: Información Básica -->
         <div class="grid grid-cols-2 md:grid-cols-3 gap-6">
@@ -20,8 +16,7 @@
                     wire:model="rit" 
                     wire:blur="buscarPorRit" 
                     placeholder="Ej: 123-2025" 
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md"
-                >
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md">
                 @error('rit') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
             </div>
             <div>
@@ -37,8 +32,7 @@
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">RUC</label>
                 <input type="text" wire:model="ruc" placeholder="Opcional" class="w-full px-3 py-2 border border-gray-300 rounded-md">
-            </div>
-            
+            </div>            
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Sala*</label>
                 <input type="text" wire:model="sala" placeholder="Ej: Sala 701" class="w-full px-3 py-2 border border-gray-300 rounded-md">
@@ -51,17 +45,13 @@
                 @error('ubicacion') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
             </div>
         </div>
-
         <!-- Sección 2: Ubicación, Horario y datos complementarios -->
-        <div class="grid grid-cols-2 md:grid-cols-3 gap-6">
-            
-            
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-6">                        
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Hora Inicio*</label>
                 <input type="time" wire:model="hora_inicio" class="w-full px-3 py-2 border border-gray-300 rounded-md">
                 @error('hora_inicio') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
-            </div>
-            
+            </div>            
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Tipo Audiencia*</label>
                 <input type="text" wire:model="tipo_audiencia" list="tiposAudiencia" placeholder="Seleccione o escriba" class="w-full px-3 py-2 border border-gray-300 rounded-md">
@@ -89,59 +79,41 @@
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">N° Testigos</label>
                 <input type="number" wire:model="num_testigos" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-md">
-            </div>
-            
+            </div>            
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">N° Peritos</label>
                 <input type="number" wire:model="num_peritos" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-md">
             </div>
         </div>
-
         <!-- Sección 4: Encargados -->
         <div class="grid grid-cols-2 md:grid-cols-3 gap-6">
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Encargado de Causa*</label>
                 <input type="text" wire:model="encargado_causa" class="w-full px-3 py-2 border border-gray-300 rounded-md">
                 @error('encargado_causa') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
-            </div>
-            
+            </div>            
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Encargado TTP*</label>
                 <input type="text" wire:model="encargado_ttp" class="w-full px-3 py-2 border border-gray-300 rounded-md">
                 @error('encargado_ttp') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
-            </div>
-            
+            </div>            
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Encargado TTP Zoom</label>
                 <input type="text" wire:model="encargado_ttp_zoom" class="w-full px-3 py-2 border border-gray-300 rounded-md">
             </div>
         </div>
-
-        <!-- Sección 5: Estado -->
-        <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Estado</label>
-            <select wire:model="estado" class="w-full px-3 py-2 border border-gray-300 rounded-md">
-                <option value="POR_REALIZARSE">Por Realizarse</option>
-                <option value="EN_CURSO">En Curso</option>
-                <option value="RECESO">Receso</option>
-                <option value="FINALIZADA">Finalizada</option>
-            </select>
-        </div>
-
-        <!-- Sección 6: Magistrados -->
+        <!-- Sección 5: Magistrados -->
         <div class="grid grid-cols-2 md:grid-cols-3 gap-6">
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Juez Presidente*</label>
                 <input type="text" wire:model="JuezP" class="w-full px-3 py-2 border border-gray-300 rounded-md">
                 @error('JuezP') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
-            </div>
-            
+            </div>            
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Juez Redactor*</label>
                 <input type="text" wire:model="JuezR" class="w-full px-3 py-2 border border-gray-300 rounded-md">
                 @error('JuezR') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
-            </div>
-            
+            </div>            
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Juez Integrante*</label>
                 <input type="text" wire:model="JuezI" class="w-full px-3 py-2 border border-gray-300 rounded-md">
@@ -149,10 +121,8 @@
             </div>
         </div>
         <div class="border-t pt-6">
-            <h3 class="text-lg font-medium text-gray-800 mb-4">Jueces inhabilitados*</h3>
-            
-            @error('jueces_inhabilitados') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
-            
+            <h3 class="text-lg font-medium text-gray-800 mb-4">Jueces inhabilitados*</h3>            
+            @error('jueces_inhabilitados') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror            
             <div class="space-y-4">
                 <!-- Formulario para nuevo magistrado -->
                 <div class="bg-gray-50 p-4 rounded-lg">
@@ -163,22 +133,19 @@
                                 type="text" 
                                 wire:model="Nuevosjueces_inhabilitados.nombre_completo" 
                                 placeholder="Nombre completo del magistrado" 
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                            >
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
                             @error('Nuevosjueces_inhabilitados') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                         </div>
                         <div>
                             <button 
                                 type="button" 
                                 wire:click="Agregarjueces_inhabilitados" 
-                                class="bg-blue-200 text-black px-4 py-2 rounded-md text-sm hover:bg-blue-600"
-                            >
+                                class="bg-blue-200 text-black px-4 py-2 rounded-md text-sm hover:bg-blue-600">
                                 Agregar Juez
                             </button>
                         </div>
                     </div>
-                </div>
-                
+                </div>                
                 <!-- Lista de jueces -->
                 @if(count($jueces_inhabilitados) > 0)
                     <div class="overflow-x-auto">
@@ -197,8 +164,7 @@
                                             <button 
                                                 type="button" 
                                                 wire:click="eliminarjueces_inhabilitados({{ $index }})" 
-                                                class="text-red-500 hover:text-red-700 text-sm"
-                                            >
+                                                class="text-red-500 hover:text-red-700 text-sm">
                                                 Eliminar
                                             </button>
                                         </td>
@@ -212,14 +178,10 @@
                 @endif
             </div>
         </div>
-
-        <!-- Sección 7: Acusados -->
-
+        <!-- Sección 6: Acusados -->
         <div class="border-t pt-6">
-            <h3 class="text-lg font-medium text-gray-800 mb-4">Acusados*</h3>
-            
-            @error('acusados') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
-            
+            <h3 class="text-lg font-medium text-gray-800 mb-4">Acusados*</h3>            
+            @error('acusados') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror            
             <div class="space-y-4">
                 <!-- Formulario para nuevo acusado -->
                 <div class="bg-gray-50 p-4 rounded-lg">
@@ -228,8 +190,7 @@
                         <div>
                             <input type="text" wire:model="nuevoAcusado.nombre_completo" placeholder="Nombre completo" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
                             @error('nuevoAcusado.nombre_completo') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
-                        </div>
-                        
+                        </div>                        
                         <div>
                             <input type="text" wire:model="nuevoAcusado.situacion" list="tiposdelibertad" placeholder="Situacion" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
                             <datalist id="tiposdelibertad">
@@ -237,16 +198,12 @@
                                     <option value="{{ $tipoL }}">
                                 @endforeach
                             </datalist>
-                        </div>
-                        
+                        </div>                        
                         <div>
-                            <input type="text" wire:model="nuevoAcusado.medida_cautelar" placeholder="Medidas cautelares" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
-                             
-                        </div>
-                        
+                            <input type="text" wire:model="nuevoAcusado.medida_cautelar" placeholder="Medidas cautelares" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">                             
+                        </div>                        
                         <div>
-                            <input type="text" wire:model="nuevoAcusado.forma_notificacion" placeholder="Forma notificación" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
-                             
+                            <input type="text" wire:model="nuevoAcusado.forma_notificacion" placeholder="Forma notificación" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">                             
                         </div>
                     </div>
                     <div class="mt-3">
@@ -254,8 +211,7 @@
                             Agregar Acusado
                         </button>
                     </div>
-                </div>
-                
+                </div>                
                 <!-- Lista de acusados -->
                 @if(is_array($acusados) && count($acusados) > 0)
                     <div class="overflow-x-auto">
@@ -297,11 +253,16 @@
                 @endif
             </div>
         </div>
-        @if(session('success'))
-            <div class="mb-6 p-4 bg-green-100 text-green-700 rounded-lg">
-                {{ session('success') }}
-            </div>
-        @endif
+        <!-- Sección 6: Estado -->
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Estado</label>
+            <select wire:model="estado" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                <option value="POR_REALIZARSE">Por Realizarse</option>
+                <option value="EN_CURSO">En Curso</option>
+                <option value="RECESO">Receso</option>
+                <option value="FINALIZADA">Finalizada</option>
+            </select>
+        </div>
         <!-- Botón de enviar -->
         <div class="flex justify-end pt-6">
             <button type="submit" class="bg-green-300 text-black px-6 py-2 rounded-md hover:bg-green-600">
@@ -310,7 +271,6 @@
         </div>
     </form>
 </div>
-
 @script
 <script>
     document.addEventListener('alerta-success', () => {
