@@ -18,10 +18,20 @@
             <main class="flex flex-1 gap-2 p-2 pb-6">
                 <!-- Panel izquierdo-->
                 <div class="w-1/3 bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200">
-                    <div class="h-full overflow-y-auto p-6">
-                        <h3 class="text-2xl font-bold text-center mb-6 text-gray-800">ATENCION DE PUBLICO</h3>
-                        <!-- Contenido dinámico -->
-                        <!--Livewire -->                        
+                    <div class="h-full p-4 flex flex-col">
+                        <div class="text-center mb-4 bg-white rounded-xl shadow-md p-4 relative overflow-hidden">
+                            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-green-500 to-purple-600"></div>
+                            <h1 class="text-2xl font-bold text-gray-800 mb-2 flex items-center justify-center gap-3">
+                                <i class="fas fa-hands-helping"></i>
+                                ATENCION DE PUBLICO
+                                <i class="fas fa-comments"></i> 
+                            </h1>            
+                        </div>
+                        
+                        <!-- Contenedor para Livewire -->
+                        <div class="flex">
+                           
+                        </div>
                     </div>
                 </div>
                 

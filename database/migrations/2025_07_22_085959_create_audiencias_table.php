@@ -32,9 +32,12 @@ return new class extends Migration
             $table->json('acusados'); // JSON estructurado con campos específicos
             $table->enum('estado', ['POR_REALIZARSE', 'EN_CURSO', 'RECESO', 'FINALIZADA'])
                 ->default('POR_REALIZARSE');
-            $table->timestamps();
-            
+            $table->string('JuezP');
+            $table->string('JuezR');
+            $table->string('JuezI');    
+            $table->timestamps();            
             $table->index(['fecha', 'estado']);
+            
         });
     }
 

@@ -14,7 +14,7 @@ class Audiencia extends Model
         'ruc', 'cta_zoom', 'tipo_audiencia', 'num_testigos',
         'num_peritos', 'duracion', 'delito', 'jueces_inhabilitados',
         'encargado_causa', 'encargado_ttp', 'encargado_ttp_zoom',
-        'acusados', 'estado', 'acta_sala'
+        'acusados', 'estado', 'acta_sala', 'JuezP', 'JuezR', 'JuezI',
     ];
 
     protected $casts = [
@@ -38,7 +38,10 @@ class Audiencia extends Model
             'acusados.*.nombre_completo' => 'required|string',
             'acusados.*.situacion' => 'required|string',
             'acusados.*.medida_cautelar' => 'string',
-            'acusados.*.forma_notificacion' => 'string'
+            'acusados.*.forma_notificacion' => 'string',
+            'JuezP' => 'required|string',
+            'JuezR' => 'required|string',
+            'JuezI' => 'required|string'
         ];
     }
 }

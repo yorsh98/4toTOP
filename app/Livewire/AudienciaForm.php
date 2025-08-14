@@ -26,7 +26,10 @@ class AudienciaForm extends Component
     public $encargado_ttp;
     public $encargado_ttp_zoom;
     public $estado = 'POR_REALIZARSE';
-    
+    public $JuezP;
+    public $JuezR;
+    public $JuezI;
+
     //campo para juez
     public $jueces_inhabilitados = [];
     public $Nuevosjueces_inhabilitados = [
@@ -71,7 +74,9 @@ class AudienciaForm extends Component
         'encargado_ttp.required' => 'El encargado TTP es obligatorio.',
         'acusados.required' => 'Debe agregar al menos un acusado.',
         'nuevoAcusado.nombre_completo.required' => 'El nombre del acusado es obligatorio.',
-       
+        'JuezP.required' => 'El Juez Presidente es obligatorio.',
+        'JuezR.required' => 'El Juez Redactor es obligatorio.',
+        'JuezI.required' => 'El Juez Integrante es obligatorio.',
     ];
 
     public function mount()
@@ -107,7 +112,9 @@ class AudienciaForm extends Component
         $this->acusados = is_string($audiencia->acusados)
         ? json_decode($audiencia->acusados, true) ?? []
         : ($audiencia->acusados ?? []);
-
+        $this->JuezP = $audiencia->JuezP;
+        $this->JuezR = $audiencia->JuezR;
+        $this->JuezI = $audiencia->JuezI;
     }
 
     public function agregarAcusado()
@@ -162,6 +169,9 @@ class AudienciaForm extends Component
             'encargado_ttp' => 'required',
             'acusados' => 'required|array|min:1',
             'nuevoAcusado.nombre_completo' => 'required_if:acusados,[]',
+            'JuezP' => 'required',
+            'JuezR' => 'required',
+            'JuezI' => 'required',
            
         ]);
 
@@ -183,7 +193,10 @@ class AudienciaForm extends Component
             'encargado_ttp' => $this->encargado_ttp,
             'encargado_ttp_zoom' => $this->encargado_ttp_zoom,
             'estado' => $this->estado,
-            'acusados' => json_encode($this->acusados)
+            'acusados' => json_encode($this->acusados),
+            'JuezP' => $this->JuezP,
+            'JuezR' => $this->JuezR,
+            'JuezI' => $this->JuezI
         ];
 
         if (!empty($this->nuevoAcusado['nombre_completo'])) {
