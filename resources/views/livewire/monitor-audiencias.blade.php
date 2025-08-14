@@ -93,55 +93,55 @@
                                     
                                     <!-- Tarjeta ESTADO -->
                                     <div 
-    x-data="{ isBlinking: @js(in_array($audiencia->estado, ['POR_REALIZARSE', 'EN_CURSO', 'RECESO', 'FINALIZADA'])) }"
-    x-init="if(isBlinking) {
-        setInterval(() => {
-            isBlinking = !isBlinking;
-        }, 1000);
-    }"
-    class="bg-gray-50 p-3 rounded-lg border-l-4 
-           @if($tipo == 'Juicio Oral' || $tipo == 'Cont. Juicio Oral') border-blue-500 
-           @elseif($tipo == 'Audiencia Corta') border-green-500 
-           @else border-purple-500 
-           @endif"
-    :class="{ 
-        'bg-blue-50': isBlinking,
-        'ring-2 ring-blue-300': isBlinking,
-        'animate-pulse': isBlinking
-    }">
-    <div class="flex items-center gap-3">
-        <i class="fas fa-video text-lg 
-           @if($audiencia->estado == 'POR_REALIZARSE') text-red-500
-           @elseif($audiencia->estado == 'EN_CURSO') text-green-500
-           @elseif($audiencia->estado == 'RECESO') text-blue-500
-           @else text-red-500
-           @endif"
-           :class="{ 'animate-pulse': isBlinking }"></i>
-        <div>
-            <h4 class="text-xs text-gray-500 font-medium mb-1">ESTADO</h4>
-            <p class="font-medium text-sm" :class="{ 'animate-pulse': isBlinking }">
-                @switch($audiencia->estado)
-                    @case('POR_REALIZARSE') 
-                        <span :class="{ 'text-red-600': !isBlinking, 'text-red-600': isBlinking }">
-                            POR INICIAR
-                        </span> @break
-                    @case('EN_CURSO') 
-                        <span :class="{ 'text-green-600': !isBlinking, 'text-green-600': isBlinking }">
-                            EN CURSO
-                        </span> @break
-                    @case('RECESO') 
-                        <spans :class="{ 'text-blue-600': !isBlinking, 'text-blue-700': isBlinking }">
-                            RECESO
-                        </span> @break
-                    @case('FINALIZADA') 
-                        <span :class="{ 'text-red-600': !isBlinking, 'text-red-600': isBlinking }">
-                            FINALIZADA
-                        </span> @break
-                @endswitch
-            </p>
-        </div>
-    </div>
-</div>
+                                        x-data="{ isBlinking: @js(in_array($audiencia->estado, ['POR_REALIZARSE', 'EN_CURSO', 'RECESO', 'FINALIZADA'])) }"
+                                        x-init="if(isBlinking) {
+                                            setInterval(() => {
+                                                isBlinking = !isBlinking;
+                                            }, 1000);
+                                        }"
+                                        class="bg-gray-50 p-3 rounded-lg border-l-4 
+                                            @if($tipo == 'Juicio Oral' || $tipo == 'Cont. Juicio Oral') border-blue-500 
+                                            @elseif($tipo == 'Audiencia Corta') border-green-500 
+                                            @else border-purple-500 
+                                            @endif"
+                                        :class="{ 
+                                            'bg-blue-50': isBlinking,
+                                            'ring-2 ring-blue-300': isBlinking,
+                                            'animate-pulse': isBlinking
+                                        }">
+                                        <div class="flex items-center gap-3">
+                                            <i class="fas fa-video text-lg 
+                                            @if($audiencia->estado == 'POR_REALIZARSE') text-red-500
+                                            @elseif($audiencia->estado == 'EN_CURSO') text-green-500
+                                            @elseif($audiencia->estado == 'RECESO') text-blue-500
+                                            @else text-red-500
+                                            @endif"
+                                            :class="{ 'animate-pulse': isBlinking }"></i>
+                                            <div>
+                                                <h4 class="text-xs text-gray-500 font-medium mb-1">ESTADO</h4>
+                                                <p class="font-medium text-sm" :class="{ 'animate-pulse': isBlinking }">
+                                                    @switch($audiencia->estado)
+                                                        @case('POR_REALIZARSE') 
+                                                            <span :class="{ 'text-red-600': !isBlinking, 'text-red-600': isBlinking }">
+                                                                POR INICIAR
+                                                            </span> @break
+                                                        @case('EN_CURSO') 
+                                                            <span :class="{ 'text-green-600': !isBlinking, 'text-green-600': isBlinking }">
+                                                                EN CURSO
+                                                            </span> @break
+                                                        @case('RECESO') 
+                                                            <spans :class="{ 'text-blue-600': !isBlinking, 'text-blue-700': isBlinking }">
+                                                                RECESO
+                                                            </span> @break
+                                                        @case('FINALIZADA') 
+                                                            <span :class="{ 'text-red-600': !isBlinking, 'text-red-600': isBlinking }">
+                                                                FINALIZADA
+                                                            </span> @break
+                                                    @endswitch
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
