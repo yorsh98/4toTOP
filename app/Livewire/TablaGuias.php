@@ -89,7 +89,7 @@ class TablaGuias extends Component
     }
     
     public function updatingSearch()
-    {
+    {   
         $this->resetPage();
     }
 
@@ -150,7 +150,9 @@ class TablaGuias extends Component
 
     public function confirmDelete($id)
     {   
-        
+       if (!Auth::check()) {
+            abort(403, 'No autorizado.');
+        } 
         $this->js("
             if (confirm('¿Estás seguro de eliminar esta guía?')) {
                 \$wire.call('performDelete', $id);}
