@@ -130,7 +130,7 @@
                                                                 EN CURSO
                                                             </span> @break
                                                         @case('RECESO') 
-                                                            <spans :class="{ 'text-blue-600': !isBlinking, 'text-blue-700': isBlinking }">
+                                                            <span :class="{ 'text-blue-600': !isBlinking, 'text-blue-700': isBlinking }">
                                                                 RECESO
                                                             </span> @break
                                                         @case('FINALIZADA') 
