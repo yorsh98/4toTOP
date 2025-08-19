@@ -19,47 +19,16 @@ use App\Http\Controllers\procController;
 use App\Http\Controllers\prograController;
 use App\Http\Controllers\AdmAudvController;
 use App\Http\Controllers\MonitorController;
-use App\Livewire\AudienciaForm;
-use App\Livewire\MonitorAudiencias;
 
 
 
 Route::view('/', 'welcome');
-/*Route::get('/', function () {
-    $response=http::get('http://127.0.0.1:8001/api/Oficio');
-    $data=$response->json("oficio");
-     // Obtener solo los valores de 'CausaAsig'
-     //dd($causasAsignadas = array_column($data['oficio'], 'Numentregado'));
-    foreach ($data as $Numentregado){
-        echo $Numentregado['Numentregado'];
-        echo "<br>";
-    };
-    
-});*/
-
-
-
-//Route::get('/', [SistOficioLibertadesController::class, 'index']);
-//Route::get('/', [tablasController::class, 'index'])->name("tabla");
-
-
-
-
-
-//Route::redirect('/', '/SistOficioLibertades')->name('SistOficioLibertades');
-
-
-/*Route::get('/', function () {
-    return redirect()->route('SistOficioLibertades.index');
-});*/
 
 Route::get('/oficios', [SistOficioLibertadesController::class, 'index'])->name('SistOficioLibertades.index');
 
 Route::get('/SistOficioLibertades', [App\Http\Controllers\SistOficioLibertadesController::class, 'index' ])->name('SistOficioLibertades.index');
 Route::get('/SistOficioLibertades', [App\Http\Controllers\SistOficioLibertadesController::class, 'create' ]);
 Route::post('/SistOficioLibertades', [App\Http\Controllers\SistOficioLibertadesController::class, 'store' ])->name('SistOficioLibertades.store');
-
-
 
 Route::get('/tablas', [App\Http\Controllers\tablasController::class, 'index' ]);
 Route::get('/tabla2', [App\Http\Controllers\tabla2Controller::class, 'index' ])->name('tabla2');
@@ -69,14 +38,12 @@ Route::post('/addfuncionario', [addfuncionarioController::class, 'store'])->name
 Route::delete('/addfuncionario/{id}', [addfuncionarioController::class, 'destroy'])->name('addfuncionario.destroy');
 Route::get('/SistOficioLibertades', [addfuncionarioController::class, 'enviarSolicitantes'])->name('SistOficioLibertades.index');
 
-
 Route::get('/libertad', [App\Http\Controllers\libertadController::class, 'index'])->name('libertad');
 
 Route::get('/oficio', [App\Http\Controllers\oficioController::class, 'index'])->name('oficio')->middleware(['auth']);
 Route::delete('/Oficio/{id}', [App\Http\Controllers\oficioController::class, 'delete'])->name('Oficio.delete')->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
 Route::patch('/Oficio/{id}', [OficioController::class, 'update'])->name('Oficio.update')->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
 Route::get('/Oficio-data', [App\Http\Controllers\oficioController::class, 'getData'])->name('Oficio.data');
-
 
 Route::get('/libertad', [App\Http\Controllers\libertadController::class, 'index'])->name('libertad')->middleware(['auth']);
 Route::delete('/Libertad/{id}', [App\Http\Controllers\libertadController::class, 'delete'])->name('Libertad.delete');
@@ -88,14 +55,8 @@ Route::patch('/turno/{id}', [TurnoController::class, 'update'])->name('turno.upd
 Route::get('/', [TurnoController::class, 'enviarTurno'])->name('Welcome.index');
 
 Route::get('/guias', [App\Http\Controllers\guiasController::class, 'index'])->name('guias')->middleware(['auth']);
-//Route::get('/guias/{id}/edit', [guiasController::class, 'edit'])->name('guias.edit');
-//Route::patch('/guias/{id}', [guiasController::class, 'update'])->name('guias.update')->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
-//Route::delete('/guias/{id}', [guiasController::class, 'destroy'])->name('guias.destroy');
-//Route::post('/guias', [guiasController::class, 'store'])->name('guias.store');
-//Route::get('/guias-datatable', [guiasController::class, 'datatable'])->name('guias.datatable')->middleware(['auth']);
 
 Route::get('/guiastelefonicas', [guiastelefonicasController::class, 'index' ])->name('guiastelefonicas');
-//Route::get('/guias-data', [guiastelefonicasController::class, 'getGuias'])->name('guias.data');
 
 Route::get('/acc', [accController::class, 'index' ])->name('acc');
 
@@ -116,15 +77,12 @@ Route::post('/enviar-solicitud', [SistOficioLibertadesController::class, 'enviar
 //rutas livewire para modulos at Publico
 
 Route::get('/AdmAudv', [AdmAudvController::class, 'index' ])->name('AdmAudv')->middleware(['auth']);
-
 Route::get('/Monitor', [MonitorController::class, 'index' ])->name('Monitor');
-//Route::get('/monitor', MonitorAudiencias::class)->name('monitor');
 
 //ruta para que no expire el MONITOR
 Route::get('/csrf-refresh', function () {
     return response()->json(['csrf' => csrf_token()]);
 });
-
 
 Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
