@@ -120,6 +120,11 @@ Route::get('/AdmAudv', [AdmAudvController::class, 'index' ])->name('AdmAudv')->m
 Route::get('/Monitor', [MonitorController::class, 'index' ])->name('Monitor');
 //Route::get('/monitor', MonitorAudiencias::class)->name('monitor');
 
+//ruta para que no expire el MONITOR
+Route::get('/csrf-refresh', function () {
+    return response()->json(['csrf' => csrf_token()]);
+});
+
 
 Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])

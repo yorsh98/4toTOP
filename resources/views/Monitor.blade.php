@@ -63,10 +63,17 @@
         @stack('scripts')
         @livewireScripts
         <script>
-            // Ping cada 5 minutos para mantener la sesión
+             // Ping al servidor cada 5 minutos para mantener la sesión activa
             setInterval(() => {
-                Livewire.emit('keepAlive');
-            }, 300000);
+                fetch('/csrf-refresh')
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.csrf) {
+                            document.querySelector('meta[name="csrf-token"]').setAttribute("content", data.csrf);
+                        }
+                    });
+            }, 10 * 60 * 500); // 5 minutos
+           
         </script>
     </body>
 </html>

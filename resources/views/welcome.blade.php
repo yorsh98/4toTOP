@@ -9,7 +9,8 @@
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,600&display=swap" rel="stylesheet" />
-
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
         <!-- Styles -->
         @stack('styles')
         @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -109,20 +110,16 @@
                                 class="flex items-center gap-4 rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] transition duration-300 hover:text-black/70 hover:ring-black/20 focus:outline-none focus-visible:ring-[#FF2D20] lg:pb-10 dark:bg-zinc-900 dark:ring-zinc-800 dark:hover:text-white/70 dark:hover:ring-zinc-700 dark:focus-visible:ring-[#FF2D20]"
                             >
                                 <div class="flex size-12 shrink-0 items-center justify-center rounded-full bg-[#FF2D20]/10 sm:size-16">
-                                <svg fill="#FFFFFF" width="214px" height="214px" viewBox="-2.4 -2.4 28.80 28.80" role="img" xmlns="http://www.w3.org/2000/svg" stroke="#FFFFFF" stroke-width="0.00024000000000000003"><g id="SVGRepo_bgCarrier" stroke-width="0"><rect x="-2.4" y="-2.4" width="28.80" height="28.80" rx="14.4" fill="#2D8CFF" strokewidth="0"></rect></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round" stroke="#CCCCCC" stroke-width="0.9600000000000002"></g><g id="SVGRepo_iconCarrier"><title>Zoom icon</title><path d="M4.587 13.63l-.27-.012H1.89l3.235-3.235-.013-.27a.815.815 0 0 0-.795-.795l-.27-.013H.004l.014.27c.034.438.353.77.794.795l.27.013H3.51L.273 13.618l.014.269c.015.433.362.78.795.796l.27.013h4.044l-.014-.27c-.036-.443-.35-.767-.795-.795zm3.237-4.325H7.82a2.695 2.695 0 1 0 .003 0zm1.141 3.839a1.618 1.618 0 1 1-2.288-2.287 1.618 1.618 0 0 1 2.288 2.287zm12.872-3.838a2.157 2.157 0 0 0-1.615.729 2.152 2.152 0 0 0-1.618-.731 2.147 2.147 0 0 0-1.208.37c-.21-.233-.68-.37-.948-.37v5.392l.27-.013c.45-.03.777-.349.795-.796l.013-.27V11.73l.014-.27c.01-.202.04-.382.132-.54a1.078 1.078 0 0 1 1.473-.393 1.078 1.078 0 0 1 .392.392c.093.16.12.339.132.54l.014.271v1.887l.013.269c.027.44.35.768.795.796l.27.013V11.73l.012-.27c.01-.2.04-.384.134-.543.299-.514.959-.69 1.473-.39a1.078 1.078 0 0 1 .392.393c.092.16.12.343.131.54l.014.27v1.887l.013.269c.028.443.35.77.796.796l.27.013V11.46a2.157 2.157 0 0 0-2.16-2.155zm-10.26.788a2.696 2.696 0 1 0 3.81 3.813 2.696 2.696 0 0 0-3.81-3.813zm3.049 3.05a1.618 1.618 0 1 1-2.288-2.288 1.618 1.618 0 0 1 2.288 2.288z"></path></g></svg>
+                                    <svg fill="#FFFFFF" width="214px" height="214px" viewBox="-2.4 -2.4 28.80 28.80" role="img" xmlns="http://www.w3.org/2000/svg" stroke="#FFFFFF" stroke-width="0.00024000000000000003"><g id="SVGRepo_bgCarrier" stroke-width="0"><rect x="-2.4" y="-2.4" width="28.80" height="28.80" rx="14.4" fill="#2D8CFF" strokewidth="0"></rect></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round" stroke="#CCCCCC" stroke-width="0.9600000000000002"></g><g id="SVGRepo_iconCarrier"><title>Zoom icon</title><path d="M4.587 13.63l-.27-.012H1.89l3.235-3.235-.013-.27a.815.815 0 0 0-.795-.795l-.27-.013H.004l.014.27c.034.438.353.77.794.795l.27.013H3.51L.273 13.618l.014.269c.015.433.362.78.795.796l.27.013h4.044l-.014-.27c-.036-.443-.35-.767-.795-.795zm3.237-4.325H7.82a2.695 2.695 0 1 0 .003 0zm1.141 3.839a1.618 1.618 0 1 1-2.288-2.287 1.618 1.618 0 0 1 2.288 2.287zm12.872-3.838a2.157 2.157 0 0 0-1.615.729 2.152 2.152 0 0 0-1.618-.731 2.147 2.147 0 0 0-1.208.37c-.21-.233-.68-.37-.948-.37v5.392l.27-.013c.45-.03.777-.349.795-.796l.013-.27V11.73l.014-.27c.01-.202.04-.382.132-.54a1.078 1.078 0 0 1 1.473-.393 1.078 1.078 0 0 1 .392.392c.093.16.12.339.132.54l.014.271v1.887l.013.269c.027.44.35.768.795.796l.27.013V11.73l.012-.27c.01-.2.04-.384.134-.543.299-.514.959-.69 1.473-.39a1.078 1.078 0 0 1 .392.393c.092.16.12.343.131.54l.014.27v1.887l.013.269c.028.443.35.77.796.796l.27.013V11.46a2.157 2.157 0 0 0-2.16-2.155zm-10.26.788a2.696 2.696 0 1 0 3.81 3.813 2.696 2.696 0 0 0-3.81-3.813zm3.049 3.05a1.618 1.618 0 1 1-2.288-2.288 1.618 1.618 0 0 1 2.288 2.288z"></path></g></svg>
                                 </div>
-
                                 <div class="pt-3 sm:pt-5">
                                     <h2 class="text-xl font-semibold text-black dark:text-white">PROGRAMACION DIARIA</h2>
 
                                     <p class="mt-4 text-sm/relaxed">
                                     PRESIONE PARA DESPLEGAR TODA LA INFORMACION 📋
                                     </p>
-                                </div>
-
-                                
+                                </div>                                
                             </a>
-
                             <div class="grid grid-cols-2 gap-4 ">
                                 <a  id="5"
                                     href="{{ url('/proc') }}" 
@@ -134,7 +131,6 @@
                                         <h2 class="text-xl font-semibold text-black ">PROCEDIMIENTOS TRIBUNAL</h2>                                        
                                     </div>
                                 </a>
-
                                 <a  id="6"
                                     href="{{ url('/doc') }}" 
                                     class="flex items-center gap-4 rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] transition duration-300 hover:text-black/70 hover:ring-black/20 focus:outline-none focus-visible:ring-[#FF2D20] lg:pb-10 dark:bg-zinc-900 dark:ring-zinc-800 dark:hover:text-white/70 dark:hover:ring-zinc-700 dark:focus-visible:ring-[#FF2D20]">
@@ -149,7 +145,7 @@
                             </div>
                         </div>
                         <div class="grid gap-6 pt-6 lg:grid-cols-2 lg:gap-8">
-                        <div class="flip-container " onclick="toggleFlip(this)">
+                            <div class="flip-container " onclick="toggleFlip(this)">
                                 <div class="flipper ">
                                 <a  id="7"
                                     
@@ -254,24 +250,48 @@
 
                         </div>
                         <div class="grid gap-6 pt-6 lg:grid-cols-3 lg:gap-8">
-                        <a
-                                href="http://www2.intranet.pjud/"
-                                class="flex items-start gap-4 rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] transition duration-300 hover:text-black/70 hover:ring-black/20 focus:outline-none focus-visible:ring-[#FF2D20] lg:pb-10 dark:bg-zinc-900 dark:ring-zinc-800 dark:hover:text-white/70 dark:hover:ring-zinc-700 dark:focus-visible:ring-[#FF2D20]"
+                            <div 
+                                x-data="{ open: false }" 
+                                class="relative flex items-start gap-4 rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] transition duration-300 hover:text-black/70 hover:ring-black/20 focus:outline-none focus-visible:ring-[#FF2D20] lg:pb-10 dark:bg-zinc-900 dark:ring-zinc-800 dark:hover:text-white/70 dark:hover:ring-zinc-700 dark:focus-visible:ring-[#FF2D20]"
                             >
-                                <div class="flex size-12 shrink-0 items-center justify-center rounded-full bg-[#FF2D20]/10 sm:size-16">
-                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M2.99902 3L20.999 21M9.8433 9.91364C9.32066 10.4536 8.99902 11.1892 8.99902 12C8.99902 13.6569 10.3422 15 11.999 15C12.8215 15 13.5667 14.669 14.1086 14.133M6.49902 6.64715C4.59972 7.90034 3.15305 9.78394 2.45703 12C3.73128 16.0571 7.52159 19 11.9992 19C13.9881 19 15.8414 18.4194 17.3988 17.4184M10.999 5.04939C11.328 5.01673 11.6617 5 11.9992 5C16.4769 5 20.2672 7.94291 21.5414 12C21.2607 12.894 20.8577 13.7338 20.3522 14.5" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
+                                <!-- Cabecera clickable -->
+                                <button 
+                                    @click="open = !open" 
+                                    class="flex items-start gap-4 w-full text-left"
+                                >
+                                    <div class="flex size-12 shrink-0 items-center justify-center rounded-full sm:size-16">
+                                        <!-- ICONO -->
+                                        <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 496.159 496.159" xml:space="preserve" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path style="fill:#48A1AF;" d="M248.083,0.003C111.071,0.003,0,111.063,0,248.085c0,137.001,111.07,248.07,248.083,248.07 c137.006,0,248.076-111.069,248.076-248.07C496.159,111.062,385.089,0.003,248.083,0.003z"></path> <g> <rect x="243.03" y="137.849" style="fill:#D8DBBA;" width="10.938" height="202.92"></rect> <path style="fill:#D8DBBA;" d="M268.273,366.721c0-46.279-19.353-45.438-19.353-45.438s-19.353-0.842-19.353,45.438 c0,0,5.049,17.67-78.253,17.67v8.414h195.211v-8.414C263.226,384.391,268.273,366.721,268.273,366.721z"></path> <path style="fill:#D8DBBA;" d="M248.5,103.353c-4.628,0-10.813,9.808-10.813,31.73s22.467,21.922,22.467,0 S253.128,103.353,248.5,103.353z"></path> </g> <g> <path style="fill:#6D6D68;" d="M369.95,135.295c-1.718-0.696-3.685,0.13-4.385,1.853l-45.437,111.909 c-0.7,1.723,0.129,3.686,1.852,4.385c0.415,0.169,0.843,0.248,1.266,0.248c1.328,0,2.588-0.793,3.119-2.1l45.437-111.91 C372.502,137.957,371.673,135.994,369.95,135.295z"></path> <path style="fill:#6D6D68;" d="M431.964,249.057l-45.437-111.909c-0.7-1.723-2.667-2.549-4.385-1.853 c-1.723,0.699-2.552,2.662-1.853,4.385l45.438,111.91c0.53,1.307,1.79,2.1,3.119,2.1c0.422,0,0.851-0.079,1.266-0.248 C431.834,252.742,432.663,250.779,431.964,249.057z"></path> </g> <path style="fill:#E4E5CF;" d="M319.32,248.22c0,0,0.842,39.967,57.218,39.967c56.375,0,56.375-39.967,56.375-39.967H319.32z"></path> <path style="fill:#D8DBBA;" d="M388.085,107.144c0.004,0.034,0.002,0.069,0.005,0.104c-2.276-2.316-5.662-3.79-9.449-3.79 c-6.854,0-12.411,4.812-12.411,10.745c0,5.936,5.557,10.746,12.411,10.746c0.166,0,0.327-0.016,0.491-0.021 c-2.809,1.693-6.088,2.686-9.606,2.686c-5.189,0-16.191-6.592-34.779-6.592c-14.725,0-44.584,8.835-86.666,8.835v13.884 c33.729,0,64.768-9.771,79.655-10.236c27.542-0.86,35.9,4.207,44.034,7.011c8.134,2.805,23.139-4.189,23.139-16.969 C394.908,117.136,392.299,111.335,388.085,107.144z"></path> <g> <path style="fill:#6D6D68;" d="M176.031,249.057l-45.437-111.909c-0.7-1.723-2.667-2.549-4.385-1.853 c-1.723,0.699-2.552,2.662-1.853,4.385l45.438,111.91c0.531,1.307,1.79,2.1,3.119,2.1c0.422,0,0.851-0.079,1.266-0.248 C175.901,252.742,176.73,250.779,176.031,249.057z"></path> <path style="fill:#6D6D68;" d="M114.018,135.295c-1.718-0.696-3.685,0.13-4.385,1.853L64.196,249.057 c-0.7,1.723,0.129,3.686,1.852,4.385c0.415,0.169,0.843,0.248,1.266,0.248c1.328,0,2.588-0.793,3.119-2.1l45.437-111.91 C116.569,137.957,115.74,135.994,114.018,135.295z"></path> </g> <path style="fill:#E4E5CF;" d="M63.247,248.22c0,0,0,39.967,56.375,39.967c56.376,0,57.217-39.967,57.217-39.967H63.247z"></path> <path style="fill:#D8DBBA;" d="M161.413,121.023c-18.588,0-29.589,6.592-34.778,6.592c-3.519,0-6.798-0.992-9.606-2.686 c0.164,0.005,0.325,0.021,0.491,0.021c6.854,0,12.411-4.811,12.411-10.746c0-5.934-5.558-10.745-12.411-10.745 c-3.787,0-7.174,1.474-9.449,3.79c0.003-0.035,0.001-0.07,0.005-0.104c-4.214,4.19-6.824,9.991-6.824,16.403 c0,12.779,15.006,19.773,23.14,16.969s16.492-7.871,44.034-7.011c14.887,0.465,45.926,10.236,79.655,10.236v-13.884 C205.998,129.858,176.139,121.023,161.413,121.023z"></path> </g></svg>
+                                    </div>
+
+                                    <div class="pt-3 sm:pt-5">
+                                        <h2 class="text-xl font-semibold text-black dark:text-white">
+                                            ESTADO DE AUDIENCIAS
+                                        </h2>                                    
+                                        <p class="mt-4 text-sm/relaxed">
+                                            PRECIONA ACA 👇🏻
+                                        </p>
+                                    </div>
+                                </button>
+
+                                <!-- Contenido desplegable - Modificado para posición flotante -->
+                                <div 
+                                x-show="open"
+                                x-transition:enter="transition ease-out duration-200"
+                                x-transition:enter-start="opacity-0 translate-y-1"
+                                x-transition:enter-end="opacity-100 translate-y-0"
+                                x-transition:leave="transition ease-in duration-150"
+                                x-transition:leave-start="opacity-100 translate-y-0"
+                                x-transition:leave-end="opacity-0 translate-y-1"
+                                @click.outside="open = false"
+                                class="absolute z-50 mt-2 origin-top-right rounded-lg bg-gray-100 dark:bg-zinc-800 shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none overflow-visible"
+                                style="right: 0; top: 0; min-width: 20rem; max-width: 90vw; transform: translateY(-100%);"
+                            >
+                                <div class="p-4 w-full">
+                                    <livewire:cambiar-estado-audiencia />
                                 </div>
-
-                                <div class="pt-3 sm:pt-5">
-                                    <h2 class="text-xl font-semibold text-black dark:text-white">PROXIMAMENTE</h2>
-
-                                    <p class="mt-4 text-sm/relaxed">
-                                        AGENDA DIARIA
-                                    </p>
-                                </div>
-
-                                <svg class="size-6 shrink-0 self-center stroke-[#FF2D20]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75"/></svg>
-                            </a>  
+                            </div>
+                            </div> 
                             <a
                                 href="http://www2.intranet.pjud/"
                                 class="flex items-start gap-4 rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] transition duration-300 hover:text-black/70 hover:ring-black/20 focus:outline-none focus-visible:ring-[#FF2D20] lg:pb-10 dark:bg-zinc-900 dark:ring-zinc-800 dark:hover:text-white/70 dark:hover:ring-zinc-700 dark:focus-visible:ring-[#FF2D20]"
@@ -284,7 +304,7 @@
                                     <h2 class="text-xl font-semibold text-black dark:text-white">PROXIMAMENTE</h2>
 
                                     <p class="mt-4 text-sm/relaxed">
-                                        RUEDA DE ESTACIONAMIENTO NO VA
+                                        AGENDA DIARIA
                                     </p>
                                 </div>
 

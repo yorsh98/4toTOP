@@ -10,7 +10,7 @@ class MonitorAudiencias extends Component
 {
     public $currentTypeIndex = 0;
     public $audienciaTypes = ['Juicio Oral', 'Cont. Juicio Oral', 'Audiencia Corta', 'Lectura de Sentencia'];
-    public $rotationInterval = 10; // segundos
+    public $rotationInterval = 3; // segundos
 
     protected $listeners = ['startRotation', 'stopRotation', 'keepAlive'];
 
