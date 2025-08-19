@@ -10,6 +10,7 @@
         <link rel="icon" href="{{ asset('favicon.webp') }}" type="image/webp">
         <meta name="csrf-token" content="{{ csrf_token() }}">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
         @livewireStyles
         @stack('styles')
     </head>
@@ -26,11 +27,12 @@
                                 ATENCION DE PUBLICO
                                 <i class="fas fa-comments"></i> 
                             </h1>            
-                        </div>
-                        
-                        <!-- Contenedor para Livewire -->
-                        <div class="flex">
-                           
+                        </div>                       
+                        <!-- Contenedor para el video -->
+                        <div class="flex items-center justify-center w-full h-full bg-black">
+                           <video id="player" playsinline controls autoplay loop muted>
+                                <source src="{{ asset('videos/VideoAtenciónPublico.mp4') }}" type="video/mp4" />
+                           </video>
                         </div>
                     </div>
                 </div>
@@ -46,8 +48,7 @@
                                 PROGRAMACION DE AUDIENCIAS
                                 <i class="far fa-calendar-alt"></i> 
                             </h1>            
-                        </div>
-                        
+                        </div>                        
                         <!-- Contenedor para Livewire -->
                         <div class="flex">
                             <livewire:monitor-audiencias/>
@@ -63,6 +64,7 @@
         @stack('scripts')
         @livewireScripts
         <script>
+            
              // Ping al servidor cada 5 minutos para mantener la sesión activa
             setInterval(() => {
                 fetch('/csrf-refresh')
@@ -75,6 +77,7 @@
             }, 10 * 60 * 500); // 5 minutos
            
         </script>
+        <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
     </body>
 </html>
 

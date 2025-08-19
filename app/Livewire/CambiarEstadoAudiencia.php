@@ -51,10 +51,7 @@ class CambiarEstadoAudiencia extends Component
     }
 
     public function render()
-    {
-        // Forzar recarga antes de renderizar (opcional)
-        // $this->cargarAudiencias(true);
-        
+    {      
         return view('livewire.cambiar-estado-audiencia');
     }
 }
