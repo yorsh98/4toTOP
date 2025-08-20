@@ -1,11 +1,11 @@
-<div class="space-y-2">
+<div class="space-y-1">
     <!-- Indicador de última actualización -->
     <div class="text-xs text-right text-gray-500">
         Actualizado
     </div>
 
     @foreach($audiencias as $audiencia)
-        <div class="grid grid-cols-3 gap-4 items-center p-4 bg-white shadow rounded-lg dark:bg-zinc-900">
+        <div class="grid grid-cols-3 gap-4 items-center p-3 bg-white shadow rounded-lg dark:bg-zinc-900">
             <!-- RIT -->
             <div class="text-sm font-semibold text-gray-800 dark:text-gray-200">
                 RIT: {{ $audiencia->rit }}
