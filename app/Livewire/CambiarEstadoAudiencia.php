@@ -10,24 +10,45 @@ class CambiarEstadoAudiencia extends Component
 {
     public $audiencias = [];
     public $ultimaActualizacion;
+    public $filtro = null; // <-- filtro por tipo de audiencia
+    public $tiposAudiencia = [
+        'Juicio Oral',
+        'Cont. Juicio Oral',
+        'Audiencia Corta',
+        'Lectura de Sentencia'
+    ];
 
     public function mount()
     {
-        $this->cargarAudiencias(true); // Forzar carga inicial
+        $this->cargarAudiencias(true);
     }
 
-    // Añade parámetro para forzar recarga desde DB
+    public function setFiltro($tipo)
+    {
+        $this->filtro = $tipo;
+        $this->cargarAudiencias(true);
+    }
+
     public function cargarAudiencias($forceRefresh = false)
     {
-        if ($forceRefresh) {
-            // Limpiar cache de relaciones si es necesario
+            if ($forceRefresh) {
             Audiencia::all()->each->refresh();
         }
 
-        $this->audiencias = Audiencia::whereDate('fecha', Carbon::today())
+        // Si no hay filtro seleccionado, no mostrar audiencias
+        if (!$this->filtro) {
+            $this->audiencias = collect(); // colección vacía
+            $this->ultimaActualizacion = now()->format('H:i:s');
+            return;
+        }
+
+        $query = Audiencia::whereDate('fecha', Carbon::today())
+            ->where('tipo_audiencia', $this->filtro);
+
+        $this->audiencias = $query
             ->orderBy('hora_inicio')
             ->get()
-            ->fresh(); // Obtener instancias frescas
+            ->fresh();
 
         $this->ultimaActualizacion = now()->format('H:i:s');
     }
@@ -35,15 +56,11 @@ class CambiarEstadoAudiencia extends Component
     public function cambiarEstado($id, $nuevoEstado)
     {
         $audiencia = Audiencia::findOrFail($id);
-        
-        // Actualizar y obtener la audiencia fresca
         $audiencia->update(['estado' => $nuevoEstado]);
-        $audiencia->refresh(); // Forzar recarga de la instancia
+        $audiencia->refresh();
 
-        // Recargar TODAS las audiencias para mantener consistencia
         $this->cargarAudiencias(true);
 
-        // Opcional: Notificación de éxito
         $this->dispatch('notificacion', [
             'tipo' => 'success',
             'mensaje' => 'Estado actualizado correctamente'
