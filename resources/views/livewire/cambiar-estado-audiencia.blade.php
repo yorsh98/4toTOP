@@ -1,7 +1,7 @@
 <div class="space-y-2">
     <!-- Indicador de última actualización -->
     <div class="text-xs text-right text-gray-500">
-        Actualizado: {{ $ultimaActualizacion }}
+        Actualizado
     </div>
 
     @foreach($audiencias as $audiencia)

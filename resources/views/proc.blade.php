@@ -89,6 +89,18 @@
                 'url' => '/documentos/procedimientos/Procedimiento Atención a NNA para Entrevistas Ley 21057.pdf',
                 'nombre' => 'Procedimiento Atención a NNA para Entrevistas Ley 21057',
             ],
+            [
+                'url' => '/documentos/procedimientos/Procedimiento Tramitación Medidas Cautelares Personales_.pdf',
+                'nombre' => 'Procedimiento Tramitación Medidas Cautelares Personales',
+            ],
+            [
+                'url' => '/documentos/procedimientos/Procedimiento Órdenes de Libertad y Ordenes de ingreso a P.P..pdf',
+                'nombre' => 'Procedimiento Órdenes de Libertad y Ordenes de ingreso a P.P.',
+            ],
+            [
+                'url' => '/documentos/procedimientos/Procedimiento Solicitud traduccion Sist. VI-SOR.pdf',
+                'nombre' => 'Procedimiento Solicitud traduccion Sist. VI-SOR',
+            ],
 
             //si necesita agregar otro procedimiento copiar desde y hasta [] para poder generar un nuevo modulo en la vista
         ];
