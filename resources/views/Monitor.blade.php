@@ -10,8 +10,7 @@
         <link rel="icon" href="{{ asset('favicon.webp') }}" type="image/webp">
         <meta name="csrf-token" content="{{ csrf_token() }}">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-        <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
-        @livewireStyles
+        <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />        
         @stack('styles')
     </head>
     <body class="bg-gray-100 flex flex-col min-h-screen">
@@ -62,7 +61,6 @@
             </a> 
         </footer>
         @stack('scripts')
-        @livewireScripts
         <script>
             
              // Ping al servidor cada 5 minutos para mantener la sesión activa

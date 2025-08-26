@@ -11,7 +11,7 @@
         <link href="https://fonts.bunny.net/css?family=figtree:400,600&display=swap" rel="stylesheet" />
         <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
-        <!-- Styles -->
+        <!-- Styles -->        
         @stack('styles')
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         <link rel="icon" href="{{ asset('favicon.webp') }}" type="image/webp">
@@ -338,7 +338,7 @@
                     </footer>
                 </div>
             </div>
-        </div>
+        </div>       
         <script src="/js/index.js"></script>
     </body>
 </html>
