@@ -36,23 +36,28 @@
 }">
     <!-- Contenedor grid que usa todo el espacio -->
     <div class="grid grid-cols-1 lg:grid-cols-1 xl:grid-cols-1 gap-4 h-full">
-        @foreach($audiencias as $tipo => $grupo)
-            <!-- Tarjeta de tipo de audiencia -->
-            <div class="bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300 h-full flex flex-col">
-                <!-- Encabezado de sección -->
-                <div class="@if($tipo == 'Juicio Oral' || $tipo == 'Cont. Juicio Oral') bg-blue-600 @elseif($tipo == 'Audiencia Corta') bg-lime-700 @else bg-purple-600 @endif text-white px-4 py-3 flex items-center gap-2">
-                    <i class="fas @if($tipo == 'Juicio Oral' || $tipo == 'Cont. Juicio Oral') fa-balance-scale @elseif($tipo == 'Audiencia Corta') fa-stopwatch @else fa-file-alt @endif"></i>
-                    <h3 class="text-lg font-bold">{{ $tipo }}</h3>
-                </div>
-                
-                <!-- Contenido de audiencias -->
-                <div class="p-2 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2 flex-1 overflow-y-auto">
-
-                    @foreach($grupo as $audiencia)
+        <!-- Tarjeta de tipo de audiencia (siempre visible) -->
+        <div class="bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300 h-full flex flex-col">
+            <!-- Encabezado de sección -->
+            <div class="@if($currentType == 'Juicio Oral' || $currentType == 'Cont. Juicio Oral') bg-blue-600 @elseif($currentType == 'Audiencia Corta') bg-lime-700 @else bg-purple-600 @endif text-white px-4 py-3 flex items-center gap-2">
+                <i class="fas @if($currentType == 'Juicio Oral' || $currentType == 'Cont. Juicio Oral') fa-balance-scale @elseif($currentType == 'Audiencia Corta') fa-stopwatch @else fa-file-alt @endif"></i>
+                <h3 class="text-lg font-bold">{{ $currentType }}</h3>
+            </div>
+            
+            <!-- Contenido de audiencias -->
+            <div class="p-2 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2 flex-1 overflow-y-auto">
+                <!-- Mensaje cuando no hay audiencias -->
+                @if($audiencias->isEmpty())
+                    <div class="col-span-full text-center py-8 text-gray-500 italic bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
+                        <i class="fas fa-exclamation-circle text-3xl mb-3 text-gray-400"></i>
+                        <p class="text-lg font-medium">No se encuentran programadas audiencias de este tipo para este día</p>
+                    </div>
+                @else
+                    @foreach($audiencias->first() as $audiencia)
                         <div class="border border-gray-200 rounded-lg overflow-hidden">
                             <!-- Encabezado de audiencia -->
-                            <div class="@if($tipo == 'Juicio Oral' || $tipo == 'Cont. Juicio Oral') bg-blue-500 
-                                        @elseif($tipo == 'Audiencia Corta') bg-lime-600 
+                            <div class="@if($currentType == 'Juicio Oral' || $currentType == 'Cont. Juicio Oral') bg-blue-500 
+                                        @elseif($currentType == 'Audiencia Corta') bg-lime-600 
                                         @else bg-purple-500 @endif 
                                         text-white px-3 py-2 flex gap-2 text-sm">
                                 <!-- Icono centrado verticalmente entre las líneas -->
@@ -61,9 +66,9 @@
                                 </div>
                                 <!-- Texto en dos líneas, centrado -->
                                 <div class="flex flex-col justify-center flex-1">
-                                    <strong><span class="block text-center">
+                                    <span class="block font-bold text-center">
                                         SALA {{ $audiencia->sala }} - {{ $audiencia->ubicacion }} - {{ \Carbon\Carbon::parse($audiencia->hora_inicio)->format('H:i') }} Horas
-                                    </span></strong>
+                                    </span>
                                     <span class="block text-center">
                                         RUC {{ $audiencia->ruc }}
                                     </span>
@@ -74,19 +79,19 @@
                                 <div class="grid grid-cols-2 gap-3">
                                     <!-- Tarjeta RIT -->
                                     <div class="bg-gray-50 p-3 rounded-lg border-l-4 
-                                        @if($tipo == 'Juicio Oral' || $tipo == 'Cont. Juicio Oral') border-blue-500 
-                                        @elseif($tipo == 'Audiencia Corta') border-lime-500 
+                                        @if($currentType == 'Juicio Oral' || $currentType == 'Cont. Juicio Oral') border-blue-500 
+                                        @elseif($currentType == 'Audiencia Corta') border-lime-500 
                                         @else border-purple-500 
                                         @endif">
                                         <div class="flex items-center gap-3">
                                             <i class="fas fa-pen-alt text-lg 
-                                                @if($tipo == 'Juicio Oral' || $tipo == 'Cont. Juicio Oral') text-blue-500 
-                                                @elseif($tipo == 'Audiencia Corta') text-lime-500 
+                                                @if($currentType == 'Juicio Oral' || $currentType == 'Cont. Juicio Oral') text-blue-500 
+                                                @elseif($currentType == 'Audiencia Corta') text-lime-500 
                                                 @else text-purple-500 
                                                 @endif"></i>
-                                            <div>
-                                                <h4 class="text-xs text-gray-500 font-medium mb-1">RIT</h4>
-                                                <p class="text-gray-800 font-medium text-sm">{{ $audiencia->rit }}</p>
+                                            <div class="font-bold">
+                                                <h4 class="text-xs text-gray-500 mb-1">RIT</h4>
+                                                <p class="text-gray-800 text-sm">{{ $audiencia->rit }}</p>
                                             </div>
                                         </div>
                                     </div>
@@ -100,8 +105,8 @@
                                             }, 1000);
                                         }"
                                         class="bg-gray-50 p-3 rounded-lg border-l-4 
-                                            @if($tipo == 'Juicio Oral' || $tipo == 'Cont. Juicio Oral') border-blue-500 
-                                            @elseif($tipo == 'Audiencia Corta') border-lime-600 
+                                            @if($currentType == 'Juicio Oral' || $currentType == 'Cont. Juicio Oral') border-blue-500 
+                                            @elseif($currentType == 'Audiencia Corta') border-lime-600 
                                             @else border-purple-500 
                                             @endif"
                                         :class="{ 
@@ -119,7 +124,7 @@
                                             :class="{ 'animate-pulse': isBlinking }"></i>
                                             <div>
                                                 <h4 class="text-xs text-gray-500 font-medium mb-1">ESTADO</h4>
-                                                <p class="font-medium text-sm" :class="{ 'animate-pulse': isBlinking }">
+                                                <p class="font-bold text-sm" :class="{ 'animate-pulse': isBlinking }">
                                                     @switch($audiencia->estado)
                                                         @case('POR_REALIZARSE') 
                                                             <span :class="{ 'text-red-600': !isBlinking, 'text-red-600': isBlinking }">
@@ -146,10 +151,11 @@
                             </div>
                         </div>
                     @endforeach
-                </div>
+                @endif
             </div>
-        @endforeach
+        </div>
     </div>
+    
     <!-- Indicador de rotación -->
     <div class="fixed bottom-4 right-4 bg-black bg-opacity-70 text-white px-3 py-1 rounded-full text-sm">
         Mostrando: {{ $currentType }} | Próximo cambio en: 
