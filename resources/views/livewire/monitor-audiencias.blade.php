@@ -40,7 +40,7 @@
             <!-- Tarjeta de tipo de audiencia -->
             <div class="bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300 h-full flex flex-col">
                 <!-- Encabezado de sección -->
-                <div class="@if($tipo == 'Juicio Oral' || $tipo == 'Cont. Juicio Oral') bg-blue-600 @elseif($tipo == 'Audiencia Corta') bg-green-600 @else bg-purple-600 @endif text-white px-4 py-3 flex items-center gap-2">
+                <div class="@if($tipo == 'Juicio Oral' || $tipo == 'Cont. Juicio Oral') bg-blue-600 @elseif($tipo == 'Audiencia Corta') bg-lime-700 @else bg-purple-600 @endif text-white px-4 py-3 flex items-center gap-2">
                     <i class="fas @if($tipo == 'Juicio Oral' || $tipo == 'Cont. Juicio Oral') fa-balance-scale @elseif($tipo == 'Audiencia Corta') fa-stopwatch @else fa-file-alt @endif"></i>
                     <h3 class="text-lg font-bold">{{ $tipo }}</h3>
                 </div>
@@ -52,7 +52,7 @@
                         <div class="border border-gray-200 rounded-lg overflow-hidden">
                             <!-- Encabezado de audiencia -->
                             <div class="@if($tipo == 'Juicio Oral' || $tipo == 'Cont. Juicio Oral') bg-blue-500 
-                                        @elseif($tipo == 'Audiencia Corta') bg-green-500 
+                                        @elseif($tipo == 'Audiencia Corta') bg-lime-600 
                                         @else bg-purple-500 @endif 
                                         text-white px-3 py-2 flex gap-2 text-sm">
                                 <!-- Icono centrado verticalmente entre las líneas -->
@@ -61,9 +61,9 @@
                                 </div>
                                 <!-- Texto en dos líneas, centrado -->
                                 <div class="flex flex-col justify-center flex-1">
-                                    <span class="block text-center">
-                                        Sala {{ $audiencia->sala }} - {{ $audiencia->ubicacion }} - {{ \Carbon\Carbon::parse($audiencia->hora_inicio)->format('H:i') }} Horas
-                                    </span>
+                                    <strong><span class="block text-center">
+                                        SALA {{ $audiencia->sala }} - {{ $audiencia->ubicacion }} - {{ \Carbon\Carbon::parse($audiencia->hora_inicio)->format('H:i') }} Horas
+                                    </span></strong>
                                     <span class="block text-center">
                                         RUC {{ $audiencia->ruc }}
                                     </span>
@@ -75,13 +75,13 @@
                                     <!-- Tarjeta RIT -->
                                     <div class="bg-gray-50 p-3 rounded-lg border-l-4 
                                         @if($tipo == 'Juicio Oral' || $tipo == 'Cont. Juicio Oral') border-blue-500 
-                                        @elseif($tipo == 'Audiencia Corta') border-green-500 
+                                        @elseif($tipo == 'Audiencia Corta') border-lime-500 
                                         @else border-purple-500 
                                         @endif">
                                         <div class="flex items-center gap-3">
                                             <i class="fas fa-pen-alt text-lg 
                                                 @if($tipo == 'Juicio Oral' || $tipo == 'Cont. Juicio Oral') text-blue-500 
-                                                @elseif($tipo == 'Audiencia Corta') text-green-500 
+                                                @elseif($tipo == 'Audiencia Corta') text-lime-500 
                                                 @else text-purple-500 
                                                 @endif"></i>
                                             <div>
@@ -101,7 +101,7 @@
                                         }"
                                         class="bg-gray-50 p-3 rounded-lg border-l-4 
                                             @if($tipo == 'Juicio Oral' || $tipo == 'Cont. Juicio Oral') border-blue-500 
-                                            @elseif($tipo == 'Audiencia Corta') border-green-500 
+                                            @elseif($tipo == 'Audiencia Corta') border-lime-600 
                                             @else border-purple-500 
                                             @endif"
                                         :class="{ 
@@ -112,7 +112,7 @@
                                         <div class="flex items-center gap-3">
                                             <i class="fas fa-video text-lg 
                                             @if($audiencia->estado == 'POR_REALIZARSE') text-red-500
-                                            @elseif($audiencia->estado == 'EN_CURSO') text-green-500
+                                            @elseif($audiencia->estado == 'EN_CURSO') text-lime-600
                                             @elseif($audiencia->estado == 'RECESO') text-blue-500
                                             @else text-red-500
                                             @endif"
@@ -126,7 +126,7 @@
                                                                 POR INICIAR
                                                             </span> @break
                                                         @case('EN_CURSO') 
-                                                            <span :class="{ 'text-green-600': !isBlinking, 'text-green-600': isBlinking }">
+                                                            <span :class="{ 'text-lime-600': !isBlinking, 'text-lime-600': isBlinking }">
                                                                 EN CURSO
                                                             </span> @break
                                                         @case('RECESO') 
