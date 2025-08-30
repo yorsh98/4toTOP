@@ -61,16 +61,19 @@
             </a> 
         </footer>
         
-        <!-- Notificación transparente -->
-        <!-- Notificación transparente - Centrada sobre TODO el viewport -->
-        <div id="notification" class="fixed inset-0 flex items-center justify-center bg-black/10 backdrop-blur-sm 
+        <!-- Notificación en todo el vp dejando ver lo de atras -->
+       <div id="notification" class="fixed inset-0 flex items-center justify-center 
             pointer-events-none z-50 transition-opacity duration-300 opacity-0">
-            <div class="bg-white/80 backdrop-blur-md text-gray-800 font-medium rounded-2xl shadow-2xl 
-                p-6 max-w-md mx-4 text-center border border-white/20 transform transition-all duration-300 scale-95">
-                <p class="flex items-center justify-center gap-3 text-lg">
-                    <i class="fas fa-bell text-blue-600 animate-pulse"></i>
-                    ¡Recuerda: Antes de ingresar a sala debes registrarte en meson de ATENCION DE PUBLICO!
-                </p>
+            <div class="bg-white/80 backdrop-blur-md text-gray-800 font-semibold text-center 
+                rounded-xl shadow-2xl border border-white/30 
+                px-8 py-5 mx-6 max-w-4xl w-full transform transition-all duration-300 scale-95">
+                <div class="flex items-center justify-center gap-4 text-lg">
+                    <i class="fas fa-bell text-blue-600 animate-pulse text-2xl"></i>
+                    <span class="leading-tight">
+                        ⚠️ <strong>Importante:</strong> Antes de ingresar a sala, debes registrarte en el mesón de <br>
+                        <span class="text-blue-700 font-bold">Atención al Público</span>.
+                    </span>
+                </div>
             </div>
         </div>
 
