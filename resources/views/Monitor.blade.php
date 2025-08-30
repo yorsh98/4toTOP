@@ -10,8 +10,8 @@
         <link rel="icon" href="{{ asset('favicon.webp') }}" type="image/webp">
         <meta name="csrf-token" content="{{ csrf_token() }}">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-        <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
-        @livewireStyles
+        <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css">
+      
         @stack('styles')
     </head>
     <body class="bg-gray-100 flex flex-col min-h-screen">
@@ -38,7 +38,6 @@
                 </div>
                 
                 <!-- Panel derecho-->
-                <!-- Panel derecho ajustado -->
                 <div class="w-2/3 bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200">
                     <div class="h-full p-4 flex flex-col">
                         <div class="text-center mb-4 bg-white rounded-xl shadow-md p-4 relative overflow-hidden">
@@ -61,11 +60,24 @@
                 PROGRAMACIÓN DE AUDIENCIAS - {{ strtoupper(\Carbon\Carbon::now()->isoFormat('dddd DD-MM-YYYY')) }}
             </a> 
         </footer>
+        
+        <!-- Notificación transparente -->
+        <!-- Notificación transparente - Centrada sobre TODO el viewport -->
+        <div id="notification" class="fixed inset-0 flex items-center justify-center bg-black/10 backdrop-blur-sm 
+            pointer-events-none z-50 transition-opacity duration-300 opacity-0">
+            <div class="bg-white/80 backdrop-blur-md text-gray-800 font-medium rounded-2xl shadow-2xl 
+                p-6 max-w-md mx-4 text-center border border-white/20 transform transition-all duration-300 scale-95">
+                <p class="flex items-center justify-center gap-3 text-lg">
+                    <i class="fas fa-bell text-blue-600 animate-pulse"></i>
+                    ¡Recuerda: Antes de ingresar a sala debes registrarte en meson de ATENCION DE PUBLICO!
+                </p>
+            </div>
+        </div>
+
         @stack('scripts')
-        @livewireScripts
+        
         <script>
-            
-             // Ping al servidor cada 5 minutos para mantener la sesión activa
+            // Ping al servidor cada 5 minutos para mantener la sesión activa
             setInterval(() => {
                 fetch('/csrf-refresh')
                     .then(res => res.json())
@@ -75,12 +87,28 @@
                         }
                     });
             }, 10 * 60 * 500); // 5 minutos
-           
+            
+            // Configuración de la notificación
+            document.addEventListener('DOMContentLoaded', () => {
+                const notification = document.getElementById('notification');
+                
+                const showNotification = () => {
+                    notification.classList.remove('opacity-0');
+                    notification.classList.add('opacity-100');
+                };
+                
+                const hideNotification = () => {
+                    notification.classList.remove('opacity-100');
+                    notification.classList.add('opacity-0');
+                };
+                
+                // Ciclo de notificación: 20s de espera -> 5s visible
+                setInterval(() => {
+                    showNotification();
+                    setTimeout(hideNotification, 5000);
+                }, 20000);
+            });
         </script>
         <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
     </body>
 </html>
-
-
-
-
