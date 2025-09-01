@@ -139,8 +139,7 @@
     </div>
 
     <!-- Paginación -->
-    <div class="d-flex justify-content-between align-items-center mt-3">
-        <div>Mostrando {{ $guias->firstItem() }} a {{ $guias->lastItem() }} de {{ $guias->total() }} registros</div>
+    <div class="d-flex justify-end align-items-center mt-3">       
         {{ $guias->links() }}
     </div>
 
