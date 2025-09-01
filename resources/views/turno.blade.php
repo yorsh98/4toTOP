@@ -1,13 +1,9 @@
-<x-app-layout>
-    
+<x-app-layout>    
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
             {{ __('Panel Administrativo de los Turnos') }}
         </h2>
-    </x-slot>
-    
-
-
+    </x-slot>   
 <div class="container mx-auto p-2">
     <div class="grid gap-6 lg:grid-cols-2 lg:gap-8">
         <!-- Módulo 1 -->
