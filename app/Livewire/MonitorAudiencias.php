@@ -58,4 +58,17 @@ class MonitorAudiencias extends Component
             'currentType' => $currentType
         ]);
     }
+
+    //metodo para CAMBIO DE ESTADO en AUDIENCIAS CORTAS
+    public function actualizarEstadoAudienciasCortas($estado)
+    {
+        // Solo actualizamos las audiencias de tipo "Audiencia Corta" que estén en un estado lógico previo
+        \App\Models\Audiencia::where('tipo_audiencia', 'Audiencia Corta')
+            ->whereIn('estado', ['POR_REALIZARSE', 'EN_CURSO']) // Evita cambiar ya finalizadas
+            ->update([
+                'estado' => $estado,
+                'updated_at' => now(),
+            ]);
+    }
+    
 }

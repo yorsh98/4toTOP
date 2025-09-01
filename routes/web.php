@@ -20,8 +20,6 @@ use App\Http\Controllers\prograController;
 use App\Http\Controllers\AdmAudvController;
 use App\Http\Controllers\MonitorController;
 
-
-
 Route::view('/', 'welcome');
 
 Route::get('/oficios', [SistOficioLibertadesController::class, 'index'])->name('SistOficioLibertades.index');

@@ -94,8 +94,7 @@
                                                 <p class="text-gray-800 text-sm">{{ $audiencia->rit }}</p>
                                             </div>
                                         </div>
-                                    </div>
-                                    
+                                    </div>                                    
                                     <!-- Tarjeta ESTADO -->
                                     <div 
                                         x-data="{ isBlinking: @js(in_array($audiencia->estado, ['POR_REALIZARSE', 'EN_CURSO', 'RECESO', 'FINALIZADA'])) }"
@@ -117,7 +116,7 @@
                                         <div class="flex items-center gap-3">
                                             <i class="fas fa-video text-lg 
                                             @if($audiencia->estado == 'POR_REALIZARSE') text-red-500
-                                            @elseif($audiencia->estado == 'EN_CURSO') text-lime-600
+                                            @elseif($audiencia->estado == 'EN_CURSO') text-green-600
                                             @elseif($audiencia->estado == 'RECESO') text-blue-500
                                             @else text-red-500
                                             @endif"
@@ -154,11 +153,35 @@
                 @endif
             </div>
         </div>
-    </div>
-    
+    </div>    
     <!-- Indicador de rotación -->
     <div class="fixed bottom-4 right-4 bg-black bg-opacity-70 text-white px-3 py-1 rounded-full text-sm">
         Mostrando: {{ $currentType }} | Próximo cambio en: 
         <span x-text="countdown">{{ $rotationInterval }}</span>s
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Función para verificar y actualizar estados automáticamente
+            const checkAndAutoUpdateAudienciasCortas = () => {
+                const now = new Date();
+                const hours = now.getHours();
+                const minutes = now.getMinutes();
+                const time = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+
+                // Solo actuar si estamos en un rango razonable (ej. entre 12:00 y 16:00)
+                if (hours < 12 || hours > 16) return;
+
+                // Llamada a Livewire para actualizar estados según la hora
+                if (time === '13:30') {
+                    @this.actualizarEstadoAudienciasCortas('EN_CURSO');
+                } else if (time === '15:00') {
+                    @this.actualizarEstadoAudienciasCortas('FINALIZADA');
+                }
+            };
+            // Ejecutar cada minuto (para no perder el minuto exacto)
+            setInterval(checkAndAutoUpdateAudienciasCortas, 60000); // Cada 60 segundos
+            // Ejecutar inmediatamente al cargar
+            checkAndAutoUpdateAudienciasCortas();
+        });
+    </script>
 </div>
