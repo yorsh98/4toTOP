@@ -15,10 +15,14 @@ class LeerCorreosPOP3 extends Command
     {
         $this->info("Conectando por POP3 sin cifrado...");
 
+        // Credenciales hardcodeadas directamente
+        $usuario = 'jtroncosor@pjud.cl';
+        $password = 'J0rg3.tr0nc0501234';
+
         $mailbox = new Mailbox(
             '{pop3.mail.pjud:110/pop3/notls}INBOX',
-            env('MAIL_USERNAME'),
-            env('MAIL_PASSWORD'),
+            $usuario,      // Usuario directo
+            $password,     // Contraseña directa
             null,
             'US-ASCII'
         );
@@ -31,12 +35,18 @@ class LeerCorreosPOP3 extends Command
                 return;
             }
             
+            $this->info("Encontrados " . count($mailsIds) . " correos");
             rsort($mailsIds);
+
+            $correoEncontrado = false;
 
             foreach ($mailsIds as $mailId) {
                 $mail = $mailbox->getMail($mailId);
+                $asunto = strtoupper(trim($mail->subject));
 
-                if (str_starts_with(strtoupper(trim($mail->subject)), 'PROGRAMACIÓN DE AUDIENCIAS')) {
+                $this->info("Revisando: " . $mail->subject);
+
+                if (str_starts_with($asunto, 'PROGRAMACIÓN DE AUDIENCIAS')) {
                     $contenidoOriginal = $mail->textHtml ?: nl2br($mail->textPlain);
 
                     // Limpiar el contenido HTML quitando párrafos con "De:" o "Para:"
@@ -46,14 +56,23 @@ class LeerCorreosPOP3 extends Command
                     File::put(storage_path('app/ultima_audiencia_email.html'), $contenidoFiltrado);
 
                     $this->info("✅ Correo guardado como HTML limpio en: storage/app/ultima_audiencia_email.html");
-                    return;
+                    $correoEncontrado = true;
+                    break;
                 }
             }
 
-            $this->info("No se encontró ningún correo con asunto 'PROGRAMACIÓN DE AUDIENCIAS'.");
+            if (!$correoEncontrado) {
+                $this->info("No se encontró ningún correo con asunto 'PROGRAMACIÓN DE AUDIENCIAS'.");
+            }
 
         } catch (\PhpImap\Exceptions\ConnectionException $ex) {
             $this->error("❌ Error de conexión: " . $ex->getMessage());
+            $this->error("Verifica: ");
+            $this->error("- Que el servidor pop3.mail.pjud esté activo");
+            $this->error("- Que el puerto 110 esté abierto");
+            $this->error("- Que las credenciales sean correctas");
+        } catch (\Exception $ex) {
+            $this->error("❌ Error general: " . $ex->getMessage());
         }
     }
 }
