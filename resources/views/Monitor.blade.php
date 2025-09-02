@@ -100,11 +100,13 @@
           <i class="fas fa-bell text-red-600 text-xl"></i>
           <span class="leading-tight text-red-600">
             ⚠️ <strong>Importante:</strong> Antes de ingresar a sala, debes
-            registrarte en el mesón de <span class="font-bold">Atención al Público</span>.
+            registrarte en el mesón de <br>
+            <span class="font-bold">Atención al Público</span>.  ➡️
           </span>
         </div>
       </div>
     </div>
+
 
     @stack('scripts')
 
