@@ -30,6 +30,8 @@ class AudienciaForm extends Component
     public $JuezP;
     public $JuezR;
     public $JuezI;
+    public $acta;
+    public $anfitrion;
 
     //campo para juez
     public $jueces_inhabilitados = [];
@@ -64,20 +66,20 @@ class AudienciaForm extends Component
     protected $messages = [
         'fecha.required' => 'La fecha es obligatoria.',
         'rit.required' => 'El RIT es obligatorio.',
-        //'rit.unique' => 'Este RIT ya está registrado.',
+        'ruc.required' => 'El RUC es obligatorio.',
         'sala.required' => 'La sala es obligatoria.',
+        'acta.required' => 'El Acta es obligatorio.',
         'ubicacion.required' => 'La ubicación es obligatoria.',
         'hora_inicio.required' => 'La hora de inicio es obligatoria.',
-        'tipo_audiencia.required' => 'El tipo de audiencia es obligatorio.',
-        'duracion.required' => 'La duración es obligatoria.',
-        'delito.required' => 'El delito es obligatorio.',
-        'encargado_causa.required' => 'El encargado de causa es obligatorio.',
-        'encargado_ttp.required' => 'El encargado TTP es obligatorio.',
+        'tipo_audiencia.required' => 'El tipo de audiencia es obligatorio.',        
+        'delito.required' => 'El delito es obligatorio.',                
         'acusados.required' => 'Debe agregar al menos un acusado.',
         'nuevoAcusado.nombre_completo.required' => 'El nombre del acusado es obligatorio.',
-        'JuezP.required' => 'El Juez Presidente es obligatorio.',
-        'JuezR.required' => 'El Juez Redactor es obligatorio.',
-        'JuezI.required' => 'El Juez Integrante es obligatorio.',
+        'nuevoAcusado.situacion' => 'Favor ingresar la situacion del acusado',
+        'JuezR.required' => 'El Juez Redactor es obligatorio.',   
+        'cta_zoom' => 'La cuenta ZOOM es obligatoria',
+        'encargado_causa' => 'El encargado de causa es obligatorio',
+        'Nuevosjueces_inhabilitados' => 'Debe agregar al menos un magistrado si no puede agregar a NO'
     ];
 
     public function mount()
@@ -122,6 +124,8 @@ class AudienciaForm extends Component
         $this->JuezP = $audiencia->JuezP;
         $this->JuezR = $audiencia->JuezR;
         $this->JuezI = $audiencia->JuezI;
+        $this->acta = $audiencia->acta;
+        $this->anfitrion = $audiencia->anfitrion;
     }
 
     public function agregarAcusado()
@@ -172,17 +176,15 @@ class AudienciaForm extends Component
             })->ignore($this->audienciaId)
         ],
             'hora_inicio' => 'required',
+            'sala' => 'required',
+            'ruc' => 'required',
             'tipo_audiencia' => 'required',
-            'duracion' => 'required',
-            'delito' => 'required',
+            'cta_zoom' => 'required',
             'encargado_causa' => 'required',
-            'encargado_ttp' => 'required',
+            'acta' => 'required',
             'acusados' => 'required|array|min:1',
-            'nuevoAcusado.nombre_completo' => 'required_if:acusados,[]',
-            'JuezP' => 'required',
-            'JuezR' => 'required',
-            'JuezI' => 'required',
-           
+            'nuevoAcusado.nombre_completo' => 'required_if:acusados,[]',            
+            'JuezR' => 'required',                       
         ]);
 
         $data = [
@@ -206,7 +208,9 @@ class AudienciaForm extends Component
             'acusados' => json_encode($this->acusados),
             'JuezP' => $this->JuezP,
             'JuezR' => $this->JuezR,
-            'JuezI' => $this->JuezI
+            'JuezI' => $this->JuezI,
+            'acta' => $this->acta,
+            'anfitrion' => $this->anfitrion
         ];
 
         if (!empty($this->nuevoAcusado['nombre_completo'])) {
@@ -216,7 +220,7 @@ class AudienciaForm extends Component
         Audiencia::create($data);
 
         $this->reset();
-        //$this->fecha = now()->format('Y-m-d');
+        $this->fecha = now()->addDay()->format('Y-m-d');
         $this->dispatch('alerta-success');
     }
 
