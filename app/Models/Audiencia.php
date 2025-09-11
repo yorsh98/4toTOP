@@ -14,7 +14,7 @@ class Audiencia extends Model
         'ruc', 'cta_zoom', 'tipo_audiencia', 'num_testigos',
         'num_peritos', 'duracion', 'delito', 'jueces_inhabilitados',
         'encargado_causa', 'encargado_ttp', 'encargado_ttp_zoom',
-        'acusados', 'estado', 'acta_sala', 'JuezP', 'JuezR', 'JuezI',
+        'acusados', 'estado', 'acta', 'JuezP', 'JuezR', 'JuezI', 'anfitrion',
     ];
 
     protected $casts = [
@@ -28,20 +28,33 @@ class Audiencia extends Model
     {
         return [
             'fecha' => 'required|date',
-            'rit' => 'required|string',
-            'sala' => 'string',
+            'rit'  => 'required|string',
+            'sala' => 'required',
+            'ubicacion' => 'nullable|string',
             'hora_inicio' => 'required',
+            'ruc' => 'required',
+            'cta_zoom' => 'required|string',
             'tipo_audiencia' => 'required|string',
-            'delito' => 'required|string',
-            'estado' => 'required|in:POR_REALIZARSE,EN_CURSO,RECESO,FINALIZADA',
+            'num_testigos' => 'nullable|integer',
+            'num_peritos' => 'nullable|integer',
+            'duracion' => 'nullable|string',
+            'delito' => 'nullable|string',
+            'jueces_inhabilitados' => 'nullable|string',
+            'encargado_causa' => 'required|string', 
+            'encargado_ttp' => 'nullable|string',
+            'encargado_ttp_zoom' => 'nullable|string',
             'acusados' => 'required|array|min:1',
             'acusados.*.nombre_completo' => 'required|string',
             'acusados.*.situacion' => 'required|string',
-            'acusados.*.medida_cautelar' => 'string',
-            'acusados.*.forma_notificacion' => 'string',
-            'JuezP' => 'required|string',
+            'acusados.*.medida_cautelar' => 'nullable|string',
+            'acusados.*.forma_notificacion' => 'nullable|string',
+            'estado' => 'required|in:POR_REALIZARSE,EN_CURSO,RECESO,FINALIZADA',
+            'acta' => 'required|string',
+            'JuezP' => 'nullable|string',
             'JuezR' => 'required|string',
-            'JuezI' => 'required|string'
+            'JuezI' => 'nulllable|string',
+            'anfitrion' => 'nullable|string'
         ];
+        
     }
 }
