@@ -16,25 +16,26 @@ return new class extends Migration
             $table->date('fecha'); // Filtro clave para monitores
             $table->string('rit'); // "123-2025"
             $table->string('sala');
-            $table->string('ubicacion');
+            $table->string('ubicacion')->nullable();
             $table->time('hora_inicio');
             $table->string('ruc')->nullable();
             $table->string('cta_zoom')->nullable();
             $table->string('tipo_audiencia'); // Cambiado a string para texto libre
-            $table->integer('num_testigos')->default(0);
-            $table->integer('num_peritos')->default(0);
-            $table->string('duracion'); // Cambiado a string para "días" o "meses"
-            $table->string('delito');
+            $table->integer('num_testigos')->default(0)->nullable();
+            $table->integer('num_peritos')->default(0)->nullable();
+            $table->string('duracion')->nullable(); // Cambiado a string para "días" o "meses"
+            $table->string('delito')->nullable();
             $table->json('jueces_inhabilitados')->nullable();
             $table->string('encargado_causa');
-            $table->string('encargado_ttp');
+            $table->string('acta'); 
+            $table->string('encargado_ttp')->nullable();
             $table->string('encargado_ttp_zoom')->nullable();
             $table->json('acusados'); // JSON estructurado con campos específicos
-            $table->enum('estado', ['POR_REALIZARSE', 'EN_CURSO', 'RECESO', 'FINALIZADA'])
-                ->default('POR_REALIZARSE');
-            $table->string('JuezP');
+            $table->enum('estado', ['POR_REALIZARSE', 'EN_CURSO', 'RECESO', 'FINALIZADA'])->default('POR_REALIZARSE');
+            $table->string('anfitrion')->nullable();    
+            $table->string('JuezP')->nullable();
             $table->string('JuezR');
-            $table->string('JuezI');    
+            $table->string('JuezI')->nullable();    
             $table->timestamps();            
             $table->index(['fecha', 'estado']);
             
