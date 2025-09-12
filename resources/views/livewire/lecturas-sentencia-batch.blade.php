@@ -100,7 +100,7 @@
                         </div>
 
                         <div class="md:col-span-2">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Encargado de sala*</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Encargado de causa*</label>
                             <input type="text" required class="{{ $baseInput }}"
                                    placeholder="Nombre completo"
                                    wire:model.defer="items.{{ $i }}.encargado_sala">
