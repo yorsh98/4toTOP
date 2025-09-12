@@ -96,7 +96,7 @@
                     <button type="button" wire:click="removeRow({{ $i }})" class="text-red-600 text-sm hover:underline"><i class="fas fa-trash"></i></button>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">RIT*</label>
                         <input type="text" wire:model.defer="items.{{ $i }}.rit" wire:input.debounce.600ms="buscarPorRit({{ $i }})"  required class="{{ $baseInput }}" placeholder="Ej: 123-2025">
@@ -117,7 +117,12 @@
                         <label class="block text-sm font-medium text-gray-700 mb-1">Acta*</label>
                         <input type="text" wire:model.defer="items.{{ $i }}.acta" required class="{{ $baseInput }}">
                         @error("items.$i.acta") <span data-error class="text-red-500 text-xs">{{ $message }}</span> @enderror
-                    </div>               
+                    </div>   
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Tipo Audiencia*</label>
+                        <input type="text" wire:model.defer="items.{{ $i }}.tipo_audiencia" required class="{{ $baseInput }}">
+                        @error("items.$i.tipo_audiencia") <span data-error class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                    </div>                    
                 </div>                
                 <!-- Acusados -->
                 <div class="border-t pt-4">

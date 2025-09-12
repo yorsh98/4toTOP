@@ -149,11 +149,8 @@
 
     @script
     <script>
-        document.addEventListener('audiencia-eliminada', () => {
-            // si usas SweetAlert, descomenta:
-            // Swal?.fire?.({ icon:'success', title:'Eliminada', timer:1200, showConfirmButton:false });
-            // si no, un feedback mínimo:
-            console.log('Audiencia eliminada');
+        document.addEventListener('audiencia-eliminada', () => {            
+            Swal?.fire?.({ icon:'success', title:'Eliminada', timer:1200, showConfirmButton:false });                        
         });
     </script>
     @endscript

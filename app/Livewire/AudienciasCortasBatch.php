@@ -67,6 +67,7 @@ class AudienciasCortasBatch extends Component
         $this->items[$i]['ruc']             = $aud->ruc ?? $this->items[$i]['ruc'];
         $this->items[$i]['encargado_causa'] = $aud->encargado_causa ?? $this->items[$i]['encargado_causa'];
         $this->items[$i]['acta']            = $aud->acta ?? $this->items[$i]['acta'];        
+        $this->items[$i]['tipo_audiencia']  = $aud->tipo_audiencia ?? $this->items[$i]['tipo_audiencia']; 
         // Acusados: gracias a $casts en el modelo, viene como array
         $this->items[$i]['acusados']        = is_array($aud->acusados) ? $aud->acusados : [];
 
@@ -79,7 +80,8 @@ class AudienciasCortasBatch extends Component
             'rit'             => '',                        
             'ruc'             => '',
             'encargado_causa' => '',
-            'acta'            => '',            
+            'acta'            => '',           
+            'tipo_audiencia'  => 'Audiencia Corta',
             // Acusados de esta fila
             'acusados'        => [],
             // Buffer para agregar un acusado a esta fila
@@ -202,7 +204,7 @@ class AudienciasCortasBatch extends Component
                     'hora_inicio'          => $this->shared['hora_inicio'],
                     'ruc'                  => $row['ruc'],
                     'cta_zoom'             => $this->shared['cta_zoom'] ?: null,
-                    'tipo_audiencia'       => 'Audiencia Corta',
+                    'tipo_audiencia'       => $row['tipo_audiencia'],
                     'num_testigos'         => null,
                     'num_peritos'          => null,
                     'duracion'             => null,
