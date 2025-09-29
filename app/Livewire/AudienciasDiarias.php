@@ -51,11 +51,8 @@ class AudienciasDiarias extends Component
             ->orderBy('hora_inicio')
             ->limit(200) // por si algún día se dispara
             ->get()
-            ->map(function ($a) {
-                $a->acusados = is_array($a->acusados) ? $a->acusados : (empty($a->acusados) ? [] : (array) $a->acusados);
-                $a->jueces_inhabilitados = is_array($a->jueces_inhabilitados) ? $a->jueces_inhabilitados : [];
-                return $a;
-            });
+            ->values();
+            
 
         $this->dispatch('busqueda-lista');
     }

@@ -19,6 +19,8 @@ use App\Http\Controllers\procController;
 use App\Http\Controllers\prograController;
 use App\Http\Controllers\AdmAudvController;
 use App\Http\Controllers\MonitorController;
+use App\Http\Controllers\AudienciasExportController;
+
 
 Route::view('/', 'welcome');
 
@@ -81,6 +83,10 @@ Route::get('/Monitor', [MonitorController::class, 'index' ])->name('Monitor');
 Route::get('/csrf-refresh', function () {
     return response()->json(['csrf' => csrf_token()]);
 });
+
+//ruta para la generacion del excel
+Route::get('/audiencias/export/diaria', [AudienciasExportController::class, 'diaria'])
+->name('audiencias.export.diaria');
 
 Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
