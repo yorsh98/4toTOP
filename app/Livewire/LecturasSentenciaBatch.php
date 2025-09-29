@@ -56,7 +56,7 @@ class LecturasSentenciaBatch extends Component
 
         $this->items[] = [
             'fecha'          => now()->addDay()->toDateString(),
-            'hora_inicio'    => '13:30',
+            'hora_inicio'    => '11:00',
             'JuezR'          => '',
             'tipo_audiencia' => 'Lectura de Sentencia',
             'sala'           => '',
