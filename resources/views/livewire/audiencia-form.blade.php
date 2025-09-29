@@ -5,7 +5,7 @@
                 scroll-mt-24";
 @endphp
 
-<div class="max-w-4xl mx-auto p-6 bg-white">
+<div class="max-w-4xl mx-auto p-6 bg-blue-50 rounded border">
     <h2 class="text-2xl font-bold text-gray-800 mb-6">
         {{ $audienciaId ? 'Editar' : 'Registro de Nueva' }} Audiencia
     </h2>
@@ -145,7 +145,7 @@
             @error('jueces_inhabilitados') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror            
             <div class="space-y-4">
                 <!-- Formulario para nuevo magistrado -->
-                <div class="bg-gray-50 p-4 rounded-lg">
+                <div class="bg-gray-50 p-4 rounded-lg border">
                     <h4 class="text-sm font-medium text-gray-700 mb-3">Agregar Juez</h4>
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                         <div class="flex-grow">
@@ -161,7 +161,7 @@
                                 type="button" 
                                 wire:click="Agregarjueces_inhabilitados" 
                                 class="bg-blue-200 text-black px-4 py-2 rounded-md text-sm hover:bg-blue-600">
-                                Agregar Juez
+                                + Agregar
                             </button>
                         </div>
                     </div>
@@ -204,9 +204,9 @@
             @error('acusados') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror            
             <div class="space-y-4">
                 <!-- Formulario para nuevo acusado -->
-                <div class="bg-gray-50 p-4 rounded-lg">
+                <div class="bg-gray-50 p-4 rounded-lg border">
                     <h4 class="text-sm font-medium text-gray-700 mb-3">Agregar Acusado</h4>
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
                         <div>
                             <input type="text" wire:model.defer="nuevoAcusado.nombre_completo" placeholder="Nombre completo" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
                             @error('nuevoAcusado.nombre_completo') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
@@ -226,12 +226,11 @@
                         <div>
                             <input type="text" wire:model.defer="nuevoAcusado.forma_notificacion" placeholder="Forma notificación" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">                             
                         </div>
-                    </div>
-                    <div class="mt-3">
                         <button type="button" wire:click="agregarAcusado" class="w-full bg-blue-200 text-black px-3 py-2 rounded-md text-sm hover:bg-blue-600">
-                            Agregar Acusado
+                            + Agregar
                         </button>
                     </div>
+                    
                 </div>                
                 <!-- Lista de acusados -->
                 @if(is_array($acusados) && count($acusados) > 0)

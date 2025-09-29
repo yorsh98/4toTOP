@@ -93,7 +93,9 @@
             <div class="border rounded-lg bg-lime-50 p-4 space-y-4">
                 <div class="flex justify-between items-center">
                     <span class="text-sm font-semibold">Fila #{{ $i + 1 }}</span>
-                    <button type="button" wire:click="removeRow({{ $i }})" class="text-red-600 text-sm hover:underline"><i class="fas fa-trash"></i></button>
+                    <button type="button" wire:click="removeRow({{ $i }})" class="text-red-600 transition-transform duration-150 ease-out
+                    hover:-translate-y-0.5 active:translate-y-0
+                    focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400/50 transform-gpu"><i class="fas fa-trash"></i></button>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-5 gap-4">

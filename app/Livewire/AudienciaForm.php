@@ -109,18 +109,18 @@ class AudienciaForm extends Component
         $this->num_peritos = $audiencia->num_peritos;
         $this->duracion = $audiencia->duracion;
         $this->delito = $audiencia->delito;
-        //$this->jueces_inhabilitados = $audiencia->jueces_inhabilitados ?? [];
-        $this->jueces_inhabilitados = is_string($audiencia->jueces_inhabilitados)
-        ? json_decode($audiencia->jueces_inhabilitados, true) ?? []
-        : ($audiencia->jueces_inhabilitados ?? []);
+        $this->jueces_inhabilitados = $audiencia->jueces_inhabilitados ?? [];
+        //$this->jueces_inhabilitados = is_string($audiencia->jueces_inhabilitados)
+        //? json_decode($audiencia->jueces_inhabilitados, true) ?? []
+        //: ($audiencia->jueces_inhabilitados ?? []);
         $this->encargado_causa = $audiencia->encargado_causa;
         $this->encargado_ttp = $audiencia->encargado_ttp;
         $this->encargado_ttp_zoom = $audiencia->encargado_ttp_zoom;
         $this->estado = $audiencia->estado;
-        //$this->acusados = $audiencia->acusados ?? [];
-        $this->acusados = is_string($audiencia->acusados)
-        ? json_decode($audiencia->acusados, true) ?? []
-        : ($audiencia->acusados ?? []);
+        $this->acusados = $audiencia->acusados ?? [];
+        //$this->acusados = is_string($audiencia->acusados)
+        //? json_decode($audiencia->acusados, true) ?? []
+        //: ($audiencia->acusados ?? []);
         $this->JuezP = $audiencia->JuezP;
         $this->JuezR = $audiencia->JuezR;
         $this->JuezI = $audiencia->JuezI;
@@ -200,12 +200,12 @@ class AudienciaForm extends Component
             'num_peritos' => $this->num_peritos,
             'duracion' => $this->duracion,
             'delito' => $this->delito,
-            'jueces_inhabilitados' => json_encode($this->jueces_inhabilitados),
+            'jueces_inhabilitados' => $this->jueces_inhabilitados,
             'encargado_causa' => $this->encargado_causa,
             'encargado_ttp' => $this->encargado_ttp,
             'encargado_ttp_zoom' => $this->encargado_ttp_zoom,
             'estado' => $this->estado,
-            'acusados' => json_encode($this->acusados),
+            'acusados' => $this->acusados,
             'JuezP' => $this->JuezP,
             'JuezR' => $this->JuezR,
             'JuezI' => $this->JuezI,

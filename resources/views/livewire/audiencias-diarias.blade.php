@@ -19,10 +19,23 @@
         <div>
             <label class="block text-sm text-gray-600 mb-1">Fecha</label>
             <input type="date" wire:model.lazy="fecha"
-                   class="px-3 py-2 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                class="px-3 py-2 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
         </div>
 
         <div class="flex items-center gap-2">
+            <a
+            href="{{ route('audiencias.export.diaria', ['fecha' => $fecha]) }}"
+            target="_blank"
+            class="inline-flex items-center justify-center rounded-md px-3 py-2
+                    transition-transform duration-200 ease-out
+                    motion-safe:hover:-translate-y-0.5 motion-safe:hover:scale-105
+                    focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+            title="Exportar Excel"
+            aria-label="Exportar Excel"
+            >
+            <i class="fas fa-file-excel inline-block" style="color:#217346; font-size:32px;"></i>
+            </a>
+
             <button type="button" wire:click="diaAnterior"
                     class="px-3 py-2 border rounded-md hover:bg-gray-50">← Día anterior</button>
             <button type="button" wire:click="hoy"
@@ -31,6 +44,7 @@
                     class="px-3 py-2 border rounded-md hover:bg-gray-50">Día siguiente →</button>
         </div>
     </div>
+
 
     <div class="mb-3 text-sm text-gray-600">
         Mostrando audiencias del <span class="font-semibold">{{ \Carbon\Carbon::parse($fecha)->format('d-m-Y') }}</span>.
@@ -99,12 +113,29 @@
                             <td class="px-3 py-2">
                                 @php
                                     $inh = $aud->jueces_inhabilitados ?? [];
+
+                                    // Parche defensivo por si viene como string JSON legado
+                                    if (is_string($inh)) {
+                                        $decoded = json_decode($inh, true);
+                                        $inh = json_last_error() === JSON_ERROR_NONE ? $decoded : [$inh];
+                                    }
+
+                                    // Normaliza a lista de nombres (soporta array de strings o de arrays)
+                                    $labels = collect($inh)
+                                        ->map(function ($item) {
+                                            if (is_array($item)) {
+                                                return $item['nombre_completo'] ?? null;
+                                            }
+                                            return $item; // ya es string
+                                        })
+                                        ->filter()
+                                        ->values();
                                 @endphp
-                                @if (empty($inh))
+                                @if ($labels->isEmpty())
                                     <span class="text-[10px] text-gray-400 italic">vacío</span>
                                 @else
                                     <div class="max-w-[220px] break-words">
-                                        {{ implode(', ', $inh) }}
+                                        {{ $labels->join(', ') }}
                                     </div>
                                 @endif
                             </td>
@@ -131,13 +162,16 @@
                             <td class="px-3 py-2 text-right">
                                 <button
                                     type="button"
-                                    class="text-red-600 hover:underline"
+                                    class="inline-flex items-center gap-1 text-red-600
+                                        transition-transform duration-150 ease-out
+                                        hover:-translate-y-0.5 hover:shadow-sm active:translate-y-0
+                                        focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400/50 transform-gpu"
                                     x-on:click="
                                         if (confirm('¿Eliminar esta audiencia (RIT {{ $aud->rit }})?')) {
                                             $wire.eliminar({{ $aud->id }});
                                         }
                                     ">
-                                    Eliminar
+                                    <i class="fas fa-trash"></i>
                                 </button>
                             </td>
                         </tr>

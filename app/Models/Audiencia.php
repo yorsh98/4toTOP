@@ -52,7 +52,7 @@ class Audiencia extends Model
             'acta' => 'required|string',
             'JuezP' => 'nullable|string',
             'JuezR' => 'required|string',
-            'JuezI' => 'nulllable|string',
+            'JuezI' => 'nullable|string',
             'anfitrion' => 'nullable|string'
         ];
         
