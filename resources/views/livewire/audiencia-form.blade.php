@@ -27,7 +27,7 @@
                 <input 
                     type="text" 
                     wire:model.defer="rit" required
-                    wire:blur="buscarPorRit" 
+                    wire:input.debounce.600ms="buscarPorRit" 
                     placeholder="Ej: 123-2025" 
                     class="{{ $baseInput }} {{ $errors->has('rit') ? 'border-red-500 ring-red-300' : '' }}"
                     aria-invalid="{{ $errors->has('rit') ? 'true' : 'false' }}">
