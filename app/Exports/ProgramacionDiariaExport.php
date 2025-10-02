@@ -50,6 +50,21 @@ class ProgramacionDiariaExport implements WithEvents, WithTitle
         return in_array(mb_strtoupper($label), ['TESTIGOS','PERITOS'], true);
     }
 
+    private function applyOuterMargin(Worksheet $sheet, int $firstRow, int $lastRow, string $firstCol = 'A', string $lastCol = 'H'): void
+    {
+        if ($lastRow < $firstRow) return;
+
+        $sheet->getStyle("{$firstCol}{$firstRow}:{$lastCol}{$lastRow}")
+            ->applyFromArray([
+                'borders' => [
+                    'outline' => [
+                        'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM,
+                        'color'      => ['rgb' => '000000'], // negro
+                    ],
+                ],
+            ]);
+    }
+
     /** Filas (label/value) según tipo */
     private function rowsFor(string $tipo, $aud): array
     {
@@ -103,6 +118,7 @@ class ProgramacionDiariaExport implements WithEvents, WithTitle
             case 'CONT. JUICIO ORAL':
             case 'CONTINUACIÓN JUICIO ORAL':
                 return [
+                    $base['DELITO'],
                     $base['TESTIGOS'],
                     $base['PERITOS'],
                     $base['INHABS'],
@@ -112,8 +128,7 @@ class ProgramacionDiariaExport implements WithEvents, WithTitle
                     $base['JUEZR'],
                     $base['ENC_TT'],
                     $base['JUEZI'],
-                    $base['ENC_TTZ'],
-                    $base['DELITO'],
+                    $base['ENC_TTZ'],                    
                 ];
 
             default:
@@ -237,8 +252,14 @@ class ProgramacionDiariaExport implements WithEvents, WithTitle
                     $sheet->setCellValue("A{$row}", 'No se encontraron audiencias para la fecha seleccionada.');
                     $sheet->mergeCells("A{$row}:H{$row}");
                     $sheet->getStyle("A{$row}:H{$row}")->applyFromArray($mutedStyle);
+
+                    // Marco negro alrededor de todo lo generado (desde el título hasta este mensaje)
+                    $lastRowIfEmpty = $row;
+                    $this->applyOuterMargin($sheet, 1, $lastRowIfEmpty);
+
                     return;
                 }
+
 
                 // Títulos de sección: imprimir una vez
                 $printedSection = [
@@ -568,6 +589,11 @@ class ProgramacionDiariaExport implements WithEvents, WithTitle
                     // margen externo entre audiencias
                     $row += 1;
                 }
+                // ===== Marco negro alrededor de TODO el contenido generado =====
+                // $row quedó apuntando a la siguiente fila libre; por eso restamos 1.
+                $lastRowUsed = max(1, $row - 1);
+                $this->applyOuterMargin($sheet, 1, $lastRowUsed);
+
             },
         ];
     }
