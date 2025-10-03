@@ -32,6 +32,7 @@ class AudienciaForm extends Component
     public $JuezI;
     public $acta;
     public $anfitrion;
+    public $obs;
 
     //campo para juez
     public $jueces_inhabilitados = [];
@@ -126,6 +127,7 @@ class AudienciaForm extends Component
         $this->JuezI = $audiencia->JuezI;
         $this->acta = $audiencia->acta;
         $this->anfitrion = $audiencia->anfitrion;
+        $this->obs = $audiencia->obs;
     }
 
     public function agregarAcusado()
@@ -210,7 +212,8 @@ class AudienciaForm extends Component
             'JuezR' => $this->JuezR,
             'JuezI' => $this->JuezI,
             'acta' => $this->acta,
-            'anfitrion' => $this->anfitrion
+            'anfitrion' => $this->anfitrion,
+            'obs' => $this->obs
         ];
 
         if (!empty($this->nuevoAcusado['nombre_completo'])) {

@@ -7,19 +7,20 @@ use App\Models\Audiencia;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use Carbon\Carbon;
 
 class AudienciasCortasBatch extends Component
 {
     /** Datos compartidos por todas las filas */
     public $shared = [
-        'fecha'     => '',
-        'sala'      => '',
-        'JuezP'     => '',
-        'JuezR'     => '',
-        'JuezI'     => '',
-        'anfitrion' => '',
-        'cta_zoom'  => '',
-        'ubicacion' => '',
+        'fecha'       => '',
+        'sala'        => '',
+        'JuezP'       => '',
+        'JuezR'       => '',
+        'JuezI'       => '',
+        'anfitrion'   => '',
+        'cta_zoom'    => '',
+        'ubicacion'   => '',
         'hora_inicio' => '13:30',
     ];
 
@@ -29,10 +30,13 @@ class AudienciasCortasBatch extends Component
     /** Sugerencias */
     public array $situaciones = ['Libre', 'P.Prev.', 'P.x OC.'];
 
+    /** Constante interna: no se expone en la vista */
+    private const TIPO = 'Audiencia Corta';
+
     public function mount(): void
     {
         abort_unless(Auth::check(), 403, 'No autorizado.');
-        $this->shared['fecha'] = now()->addDay()->toDateString(); // como usas en tus forms
+        $this->shared['fecha'] = now()->addDay()->toDateString();
         $this->addRow();
     }
 
@@ -41,55 +45,42 @@ class AudienciasCortasBatch extends Component
         $rit   = $this->items[$i]['rit'] ?? null;
         $fecha = $this->shared['fecha'] ?? null;
 
-        // Limpia error previo del RIT en esta fila (si lo hubiera)
         $this->resetErrorBag("items.$i.rit");
 
-        if (!$rit || !$fecha) {
-            return;
-        }
+        if (!$rit) return;
 
-        // Busca por RIT + FECHA + tipo 'Audiencia Corta'
-        // Si quieres buscar solo por RIT (sin fecha/tipo), quita los where de fecha/tipo.
+        // Puedes filtrar por fecha/tipo si lo deseas; por ahora sólo por RIT (última coincidencia).
         $aud = Audiencia::query()
             ->where('rit', $rit)
-            //->whereDate('fecha', $fecha)
-            //->where('tipo_audiencia', 'Audiencia Corta')
-            ->latest('id') // por si hubiese más de una, toma la última
+            ->latest('id')
             ->first();
 
-        if (!$aud) {
-            // Si quieres marcar que no se encontró:
-            // $this->addError("items.$i.rit", "No se encontró una Audiencia Corta con ese RIT para la fecha seleccionada.");
-            return;
-        }
+        if (!$aud) return;
 
         // Rellena SOLO campos de la fila (los compartidos no se tocan)
         $this->items[$i]['ruc']             = $aud->ruc ?? $this->items[$i]['ruc'];
         $this->items[$i]['encargado_causa'] = $aud->encargado_causa ?? $this->items[$i]['encargado_causa'];
-        $this->items[$i]['acta']            = $aud->acta ?? $this->items[$i]['acta'];        
-        $this->items[$i]['tipo_audiencia']  = $aud->tipo_audiencia ?? $this->items[$i]['tipo_audiencia']; 
-        // Acusados: gracias a $casts en el modelo, viene como array
+        $this->items[$i]['acta']            = $aud->acta ?? $this->items[$i]['acta'];
+        // NO copiamos tipo_audiencia desde BD: siempre será self::TIPO
+        $this->items[$i]['obs']             = $aud->obs ?? $this->items[$i]['obs'];
         $this->items[$i]['acusados']        = is_array($aud->acusados) ? $aud->acusados : [];
-
     }
-
 
     public function addRow(): void
     {
         $this->items[] = [
-            'rit'             => '',                        
+            'rit'             => '',
             'ruc'             => '',
             'encargado_causa' => '',
-            'acta'            => '',           
-            'tipo_audiencia'  => 'Audiencia Corta',
-            // Acusados de esta fila
+            'acta'            => '',
+            // 'tipo_audiencia' no se usa ni se muestra
+            'obs'             => '',
             'acusados'        => [],
-            // Buffer para agregar un acusado a esta fila
             'nuevoAcusado'    => [
-                'nombre_completo'   => '',
-                'situacion'         => 'Libre',
-                'medida_cautelar'   => '',
-                'forma_notificacion'=> '',
+                'nombre_completo'    => '',
+                'situacion'          => 'Libre',
+                'medida_cautelar'    => '',
+                'forma_notificacion' => '',
             ],
         ];
     }
@@ -109,10 +100,10 @@ class AudienciasCortasBatch extends Component
 
         $this->items[$i]['acusados'][] = $this->items[$i]['nuevoAcusado'];
         $this->items[$i]['nuevoAcusado'] = [
-            'nombre_completo'   => '',
-            'situacion'         => 'Libre',
-            'medida_cautelar'   => '',
-            'forma_notificacion'=> '',
+            'nombre_completo'    => '',
+            'situacion'          => 'Libre',
+            'medida_cautelar'    => '',
+            'forma_notificacion' => '',
         ];
     }
 
@@ -138,10 +129,11 @@ class AudienciasCortasBatch extends Component
 
             // Filas
             'items'                        => 'required|array|min:1',
-            'items.*.rit'                  => 'required|string',                        
+            'items.*.rit'                  => 'required|string',
             'items.*.ruc'                  => 'required|string',
             'items.*.encargado_causa'      => 'required|string',
             'items.*.acta'                 => 'required|string',
+            'items.*.obs'                  => 'nullable|string',
 
             // Acusados (mínimo 1 por fila)
             'items.*.acusados'                     => 'required|array|min:1',
@@ -163,7 +155,7 @@ class AudienciasCortasBatch extends Component
             throw $e;
         }
 
-        // Duplicados en el mismo lote (rit repetido para la misma fecha compartida)
+        // Duplicados en el mismo lote (RIT repetido para la misma fecha)
         $seen = [];
         foreach ($this->items as $i => $row) {
             $key = $row['rit'].'|'.$this->shared['fecha'];
@@ -182,7 +174,7 @@ class AudienciasCortasBatch extends Component
         foreach ($this->items as $i => $row) {
             $exists = Audiencia::where('rit', $row['rit'])
                 ->whereDate('fecha', $this->shared['fecha'])
-                ->where('tipo_audiencia', 'Audiencia Corta')
+                ->where('tipo_audiencia', self::TIPO)
                 ->exists();
 
             if ($exists) {
@@ -204,7 +196,7 @@ class AudienciasCortasBatch extends Component
                     'hora_inicio'          => $this->shared['hora_inicio'],
                     'ruc'                  => $row['ruc'],
                     'cta_zoom'             => $this->shared['cta_zoom'] ?: null,
-                    'tipo_audiencia'       => $row['tipo_audiencia'],
+                    'tipo_audiencia'       => self::TIPO, // <-- FORZADO AQUÍ
                     'num_testigos'         => null,
                     'num_peritos'          => null,
                     'duracion'             => null,
@@ -214,17 +206,18 @@ class AudienciasCortasBatch extends Component
                     'encargado_ttp'        => null,
                     'encargado_ttp_zoom'   => null,
                     'estado'               => 'POR_REALIZARSE',
-                    'acusados'             => $row['acusados'], // gracias a $casts → JSON
+                    'acusados'             => $row['acusados'], // $casts → JSON
                     'JuezP'                => $this->shared['JuezP'],
                     'JuezR'                => $this->shared['JuezR'],
                     'JuezI'                => $this->shared['JuezI'],
                     'acta'                 => $row['acta'],
                     'anfitrion'            => $this->shared['anfitrion'] ?: null,
+                    'obs'                  => $row['obs'] ?: null,
                 ]);
             }
         });
 
-        // Reset suave: dejamos los compartidos, limpiamos filas
+        // Reset suave: dejamos compartidos, limpiamos filas
         $this->items = [];
         $this->addRow();
 

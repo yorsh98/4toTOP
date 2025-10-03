@@ -44,6 +44,7 @@ class LecturasSentenciaBatch extends Component
         // Rellena lo útil para LS (ajusta a gusto)
         $this->items[$i]['ruc']   = $this->items[$i]['ruc']   ?: ($aud->ruc ?? '');
         $this->items[$i]['acta']  = $this->items[$i]['acta']  ?: ($aud->acta ?? '');
+        $this->items[$i]['obs']   = $this->items[$i]['obs']   ?: ($aud->obs ?? '');
         $this->items[$i]['acusados'] = is_array($aud->acusados) ? $aud->acusados : [];
     }
 
@@ -65,6 +66,7 @@ class LecturasSentenciaBatch extends Component
             'ruc'            => '',
             'encargado_sala' => '',
             'acta'           => '',
+            'obs'            => '',
             // Acusados
             'acusados'       => [],
             'nuevoAcusado'   => [
@@ -118,6 +120,7 @@ class LecturasSentenciaBatch extends Component
             'items.*.ruc'                      => 'required|string',
             'items.*.encargado_sala'           => 'required|string',
             'items.*.acta'                     => 'required|string',
+            'items.*.obs'                      => 'nullable|string',
             'items.*.acusados'                 => 'required|array|min:1',
             'items.*.acusados.*.nombre_completo'    => 'required|string',
             'items.*.acusados.*.situacion'          => 'required|string',
@@ -194,6 +197,7 @@ class LecturasSentenciaBatch extends Component
                     'JuezR'                => $row['JuezR'],
                     'JuezI'                => null,
                     'acta'                 => $row['acta'],
+                    'obs'                  => $row['obs'],
                     'anfitrion'            => null,
                 ]);
             }
