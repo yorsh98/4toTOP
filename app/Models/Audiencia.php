@@ -14,7 +14,7 @@ class Audiencia extends Model
         'ruc', 'cta_zoom', 'tipo_audiencia', 'num_testigos',
         'num_peritos', 'duracion', 'delito', 'jueces_inhabilitados',
         'encargado_causa', 'encargado_ttp', 'encargado_ttp_zoom',
-        'acusados', 'estado', 'acta', 'JuezP', 'JuezR', 'JuezI', 'anfitrion',
+        'acusados', 'estado', 'acta', 'JuezP', 'JuezR', 'JuezI', 'anfitrion', 'obs',
     ];
 
     protected $casts = [
@@ -53,7 +53,8 @@ class Audiencia extends Model
             'JuezP' => 'nullable|string',
             'JuezR' => 'required|string',
             'JuezI' => 'nullable|string',
-            'anfitrion' => 'nullable|string'
+            'anfitrion' => 'nullable|string',
+            'obs' => 'nullable|string'
         ];
         
     }

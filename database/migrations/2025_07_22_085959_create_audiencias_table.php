@@ -35,7 +35,8 @@ return new class extends Migration
             $table->string('anfitrion')->nullable();    
             $table->string('JuezP')->nullable();
             $table->string('JuezR');
-            $table->string('JuezI')->nullable();    
+            $table->string('JuezI')->nullable();   
+            $table->string('obs')->nullable();
             $table->timestamps();            
             $table->index(['fecha', 'estado']);
             

@@ -21,7 +21,6 @@ class AudienciasDiarias extends Component
 
     public function updatedFecha(): void
     {
-        // al cambiar la fecha con el date picker
         $this->buscar();
     }
 
@@ -49,10 +48,9 @@ class AudienciasDiarias extends Component
             ->whereDate('fecha', $this->fecha)
             ->orderBy('sala')
             ->orderBy('hora_inicio')
-            ->limit(200) // por si algún día se dispara
+            ->limit(200)
             ->get()
             ->values();
-            
 
         $this->dispatch('busqueda-lista');
     }
