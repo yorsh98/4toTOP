@@ -85,11 +85,18 @@
         </div>
        <hr> 
         <!-- Sección 3: Delito y Participantes -->
-        <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Delito*</label>
-            <input type="text" wire:model.defer="delito" required placeholder="Descripción del delito" class="{{ $baseInput }} {{ $errors->has('delito') ? 'border-red-500 ring-red-300' : '' }}" aria-invalid="{{ $errors->has('delito') ? 'true' : 'false' }}">
-            @error('delito') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
-        </div>
+        <div class="grid grid-cols-2 md:grid-cols-2 gap-6">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Delito*</label>
+                <input type="text" wire:model.defer="delito" required placeholder="Descripción del delito" class="{{ $baseInput }} {{ $errors->has('delito') ? 'border-red-500 ring-red-300' : '' }}" aria-invalid="{{ $errors->has('delito') ? 'true' : 'false' }}">
+                @error('delito') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Observación</label>
+                <input type="text" wire:model.defer="obs" class="{{ $baseInput }} {{ $errors->has('obs') ? 'border-red-500 ring-red-300' : '' }}" aria-invalid="{{ $errors->has('obs') ? 'true' : 'false' }}">
+            </div>
+        </div>    
+        
 
         <div class="grid grid-cols-2 md:grid-cols-3 gap-6">
             <div>

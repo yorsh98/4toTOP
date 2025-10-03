@@ -121,9 +121,8 @@
                         @error("items.$i.acta") <span data-error class="text-red-500 text-xs">{{ $message }}</span> @enderror
                     </div>   
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Tipo Audiencia*</label>
-                        <input type="text" wire:model.defer="items.{{ $i }}.tipo_audiencia" required class="{{ $baseInput }}">
-                        @error("items.$i.tipo_audiencia") <span data-error class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Observación</label>
+                        <input type="text" wire:model.defer="items.{{ $i }}.obs" class="{{ $baseInput }}">                        
                     </div>                    
                 </div>                
                 <!-- Acusados -->

@@ -65,11 +65,9 @@
                             @error("items.$i.hora_inicio") <span data-error class="text-red-500 text-xs">{{ $message }}</span> @enderror
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Tipo audiencia*</label>
-                            <input type="text" required class="{{ $baseInput }}"
-                                   placeholder="Lectura de Sentencia"
-                                   wire:model.defer="items.{{ $i }}.tipo_audiencia">
-                            @error("items.$i.tipo_audiencia") <span data-error class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Observación</label>
+                            <input type="text" class="{{ $baseInput }}"                                   
+                                   wire:model.defer="items.{{ $i }}.obs">                            
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Juez Redactor*</label>

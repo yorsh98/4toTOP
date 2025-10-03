@@ -5,13 +5,9 @@ use Livewire\Volt\Component;
 
 new class extends Component
 {
-    /**
-     * Log the current user out of the application.
-     */
     public function logout(Logout $logout): void
     {
         $logout();
-
         $this->redirect('/', navigate: true);
     }
 }; ?>
@@ -28,54 +24,57 @@ new class extends Component
                     </a>
                 </div>
 
-                <!-- Navigation Links -->
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                <!-- Navigation Links (DESKTOP ≥1024px) -->
+                <div class="hidden space-x-8 lg:-my-px lg:ms-10 lg:flex">
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
                         {{ __('Inicio') }}
                     </x-nav-link>
                 </div>
+
                 <!--botton en navbar-->
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                <div class="hidden space-x-8 lg:-my-px lg:ms-10 lg:flex">
                     <x-nav-link :href="route('oficio')" :active="request()->routeIs('oficio')" wire:navigate>
                         {{ __('ADM Oficios') }}
                     </x-nav-link>
                 </div>
 
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                <div class="hidden space-x-8 lg:-my-px lg:ms-10 lg:flex">
                     <x-nav-link :href="route('libertad')" :active="request()->routeIs('libertad')" wire:navigate>
                         {{ __('ADM Libertades') }}
                     </x-nav-link>
                 </div>
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+
+                <div class="hidden space-x-8 lg:-my-px lg:ms-10 lg:flex">
                     <x-nav-link :href="route('addfuncionario')" :active="request()->routeIs('addfuncionario')" wire:navigate>
                         {{ __('Funcionarios') }}
                     </x-nav-link>
                 </div>
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+
+                <div class="hidden space-x-8 lg:-my-px lg:ms-10 lg:flex">
                     <x-nav-link :href="route('turno')" :active="request()->routeIs('turno')" wire:navigate>
                         {{ __('Turnos') }}
                     </x-nav-link>
                 </div>
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+
+                <div class="hidden space-x-8 lg:-my-px lg:ms-10 lg:flex">
                     <x-nav-link :href="route('guias')" :active="request()->routeIs('guias')" wire:navigate>
                         {{ __('Guias') }}
                     </x-nav-link>
                 </div>
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+
+                <div class="hidden space-x-8 lg:-my-px lg:ms-10 lg:flex">
                     <x-nav-link :href="route('AdmAudv')" :active="request()->routeIs('AdmAudv')" wire:navigate>
                         {{ __('Audiencias') }}
                     </x-nav-link>
                 </div>
-                
             </div>
 
-            <!-- Settings Dropdown -->
-            <div class="hidden sm:flex sm:items-center sm:ms-6">
+            <!-- Settings Dropdown (DESKTOP ≥1024px) -->
+            <div class="hidden lg:flex lg:items-center lg:ms-6">
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
                         <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
                             <div x-data="{{ json_encode(['name' => auth()->user()->name]) }}" x-text="name" x-on:profile-updated.window="name = $event.detail.name"></div>
-
                             <div class="ms-1">
                                 <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
@@ -88,19 +87,15 @@ new class extends Component
                         <x-dropdown-link :href="route('profile')" wire:navigate>
                             {{ __('Perfil') }}
                         </x-dropdown-link>
-
-                        <!-- Authentication -->
                         <button wire:click="logout" class="w-full text-start">
-                            <x-dropdown-link>
-                                {{ __('Salir') }}
-                            </x-dropdown-link>
+                            <x-dropdown-link>{{ __('Salir') }}</x-dropdown-link>
                         </button>
                     </x-slot>
                 </x-dropdown>
             </div>
 
-            <!-- Hamburger -->
-            <div class="-me-2 flex items-center sm:hidden">
+            <!-- Hamburger (MÓVIL <1024px) -->
+            <div class="-me-2 flex items-center lg:hidden">
                 <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 transition duration-150 ease-in-out">
                     <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                         <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
@@ -111,53 +106,60 @@ new class extends Component
         </div>
     </div>
 
-    <!--menu hamburguesaaaa Responsive Navigation Menu -->
-    <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
+    <!-- Responsive Navigation Menu (MÓVIL <1024px) -->
+    <div :class="{'block': open, 'hidden': ! open}" class="hidden lg:hidden">
         <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
                 {{ __('Inicio') }}
             </x-responsive-nav-link>
         </div>
-    
-        <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
-        <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link :href="route('oficio')" :active="request()->routeIs('oficio')" wire:navigate>
-                {{ __('ADM Oficios') }}
-            </x-responsive-nav-link>
+
+        <div :class="{'block': open, 'hidden': ! open}" class="hidden lg:hidden">
+            <div class="pt-2 pb-3 space-y-1">
+                <x-responsive-nav-link :href="route('oficio')" :active="request()->routeIs('oficio')" wire:navigate>
+                    {{ __('ADM Oficios') }}
+                </x-responsive-nav-link>
+            </div>
         </div>
 
-        <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
-        <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link :href="route('libertad')" :active="request()->routeIs('libertad')" wire:navigate>
-                {{ __('ADM Libertades') }}
-            </x-responsive-nav-link>
+        <div :class="{'block': open, 'hidden': ! open}" class="hidden lg:hidden">
+            <div class="pt-2 pb-3 space-y-1">
+                <x-responsive-nav-link :href="route('libertad')" :active="request()->routeIs('libertad')" wire:navigate>
+                    {{ __('ADM Libertades') }}
+                </x-responsive-nav-link>
+            </div>
         </div>
 
-        <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
-        <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link :href="route('addfuncionario')" :active="request()->routeIs('addfuncionario')" wire:navigate>
-                {{ __('Funcionarios') }}
-            </x-responsive-nav-link>
+        <div :class="{'block': open, 'hidden': ! open}" class="hidden lg:hidden">
+            <div class="pt-2 pb-3 space-y-1">
+                <x-responsive-nav-link :href="route('addfuncionario')" :active="request()->routeIs('addfuncionario')" wire:navigate>
+                    {{ __('Funcionarios') }}
+                </x-responsive-nav-link>
+            </div>
         </div>
 
-        <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
-        <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link :href="route('turno')" :active="request()->routeIs('turno')" wire:navigate>
-                {{ __('Turnos') }}
-            </x-responsive-nav-link>
+        <div :class="{'block': open, 'hidden': ! open}" class="hidden lg:hidden">
+            <div class="pt-2 pb-3 space-y-1">
+                <x-responsive-nav-link :href="route('turno')" :active="request()->routeIs('turno')" wire:navigate>
+                    {{ __('Turnos') }}
+                </x-responsive-nav-link>
+            </div>
         </div>
 
-        <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
-        <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link :href="route('guias')" :active="request()->routeIs('guias')" wire:navigate>
-                {{ __('Guias') }}
-            </x-responsive-nav-link>
+        <div :class="{'block': open, 'hidden': ! open}" class="hidden lg:hidden">
+            <div class="pt-2 pb-3 space-y-1">
+                <x-responsive-nav-link :href="route('guias')" :active="request()->routeIs('guias')" wire:navigate>
+                    {{ __('Guias') }}
+                </x-responsive-nav-link>
+            </div>
         </div>
-        <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
-        <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link :href="route('AdmAudv')" :active="request()->routeIs('AdmAudv')" wire:navigate>
-                {{ __('Audiencias') }}
-            </x-responsive-nav-link>
+
+        <div :class="{'block': open, 'hidden': ! open}" class="hidden lg:hidden">
+            <div class="pt-2 pb-3 space-y-1">
+                <x-responsive-nav-link :href="route('AdmAudv')" :active="request()->routeIs('AdmAudv')" wire:navigate>
+                    {{ __('Audiencias') }}
+                </x-responsive-nav-link>
+            </div>
         </div>
 
         <!-- Responsive Settings Options -->
@@ -172,7 +174,6 @@ new class extends Component
                     {{ __('Perfil') }}
                 </x-responsive-nav-link>
 
-                <!-- Authentication -->
                 <button wire:click="logout" class="w-full text-start">
                     <x-responsive-nav-link>
                         {{ __('Salir') }}
