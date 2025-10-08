@@ -72,11 +72,11 @@ class ProgramacionDiariaExport implements WithEvents, WithTitle
         $tipo = $this->normalizeTipo($tipo);
 
         $base = [
-            'DURACION'  => ['label' => 'DURACIÓN',               'value' => $aud->duracion ?? null],
-            'TESTIGOS'  => ['label' => 'TESTIGOS',               'value' => $aud->num_testigos ?? null],
-            'PERITOS'   => ['label' => 'PERITOS',                'value' => $aud->num_peritos ?? null],
-            'DELITO'    => ['label' => 'DELITO',                 'value' => $aud->delito ?? null],
-            'INHABS'    => ['label' => 'JUECES INHABILITADOS',   'value' => collect($aud->jueces_inhabilitados ?? [])
+            'DURACION'  => ['label' => 'duracion',               'value' => $aud->duracion ?? null],
+            'TESTIGOS'  => ['label' => 'Testigos',               'value' => $aud->num_testigos ?? null],
+            'PERITOS'   => ['label' => 'Peritos',                'value' => $aud->num_peritos ?? null],
+            'DELITO'    => ['label' => 'Delito',                 'value' => $aud->delito ?? null],
+            'INHABS'    => ['label' => 'Jueces Inhabilitados',   'value' => collect($aud->jueces_inhabilitados ?? [])
                 ->map(function ($item) {
                     return is_array($item) ? ($item['nombre_completo'] ?? null) : $item;
                 })
@@ -84,15 +84,15 @@ class ProgramacionDiariaExport implements WithEvents, WithTitle
                 ->values()
                 ->all(),
             ],
-            'JUEZP'     => ['label' => 'JUEZ PRESIDENTE',        'value' => $aud->JuezP ?? null],
-            'JUEZR'     => ['label' => 'JUEZ REDACTOR',          'value' => $aud->JuezR ?? null],
-            'JUEZI'     => ['label' => 'JUEZ INTEGRANTE',        'value' => $aud->JuezI ?? null],
-            'ENC_CAUSA' => ['label' => 'ENCARGADO CAUSA',        'value' => $aud->encargado_causa ?? null],
-            'ACTA'      => ['label' => 'ACTA DE AUDIENCIA',      'value' => $aud->acta ?? null],
-            'ENC_TT'    => ['label' => 'ENCARGADOS DE TTPP',     'value' => $aud->encargado_ttp ?? null],
-            'ENC_TTZ'   => ['label' => 'ENCARGADO TTPP (Zoom)',  'value' => $aud->encargado_ttp_zoom ?? null],
-            'CTA_ZOOM'  => ['label' => 'CUENTA ZOOM',            'value' => $aud->cta_zoom ?? null],
-            'ANFIT'     => ['label' => 'ANFITRIÓN',              'value' => $aud->anfitrion ?? null],
+            'JUEZP'     => ['label' => 'Juez Presidente',        'value' => $aud->JuezP ?? null],
+            'JUEZR'     => ['label' => 'Juez Redactor',          'value' => $aud->JuezR ?? null],
+            'JUEZI'     => ['label' => 'Juez Integrante',        'value' => $aud->JuezI ?? null],
+            'ENC_CAUSA' => ['label' => 'Encargado causa',        'value' => $aud->encargado_causa ?? null],
+            'ACTA'      => ['label' => 'Acta de audiencia',      'value' => $aud->acta ?? null],
+            'ENC_TT'    => ['label' => 'Encargado de TTyPP',     'value' => $aud->encargado_ttp ?? null],
+            'ENC_TTZ'   => ['label' => 'Encargado de Zoom',  'value' => $aud->encargado_ttp_zoom ?? null],
+            'CTA_ZOOM'  => ['label' => 'Cuenta Zoom',            'value' => $aud->cta_zoom ?? null],
+            'ANFIT'     => ['label' => 'Anfitrión',              'value' => $aud->anfitrion ?? null],
         ];
 
         switch ($tipo) {
