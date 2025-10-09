@@ -45,6 +45,11 @@ class LecturasSentenciaBatch extends Component
         $this->items[$i]['ruc']   = $this->items[$i]['ruc']   ?: ($aud->ruc ?? '');
         $this->items[$i]['acta']  = $this->items[$i]['acta']  ?: ($aud->acta ?? '');
         $this->items[$i]['obs']   = $this->items[$i]['obs']   ?: ($aud->obs ?? '');
+        $this->items[$i]['hora_inicio']   = $this->items[$i]['hora_inicio']   ?: ($aud->hora_inicio ?? ''); 
+        $this->items[$i]['encargado_sala']   = $this->items[$i]['encargado_sala']   ?: ($aud->encargado_causa ?? ''); 
+        $this->items[$i]['JuezR']   = $this->items[$i]['JuezR']   ?: ($aud->JuezR ?? '');
+        $this->items[$i]['sala']   = $this->items[$i]['sala']   ?: ($aud->sala ?? '');
+        $this->items[$i]['cta_zoom']   = $this->items[$i]['cta_zoom']   ?: ($aud->cta_zoom ?? ''); 
         $this->items[$i]['acusados'] = is_array($aud->acusados) ? $aud->acusados : [];
     }
 
