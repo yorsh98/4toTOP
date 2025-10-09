@@ -230,16 +230,16 @@ class AudienciaForm extends Component
     public function buscarPorRit()
     {
         if (!empty($this->rit)) {
-            $audienciaExistente = Audiencia::where('rit', $this->rit)->first();
-            
+            $audienciaExistente = Audiencia::where('rit', $this->rit)
+                ->latest('created_at') // la más recientemente creada
+                ->first();
+
             if ($audienciaExistente) {
                 $this->editAudiencia($audienciaExistente->id);
-                // Opcional: Mostrar mensaje informativo
-                session()->flash('info', 'Se cargó una audiencia existente. Puedes modificar los datos y se guardará como nueva versión.');
+                session()->flash('info', 'Se cargó la última audiencia ingresada para este RIT.');
             }
         }
     }
-
 
     public function render()
     {   if (!Auth::check()) {
