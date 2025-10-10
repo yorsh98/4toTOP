@@ -112,7 +112,12 @@
                     </div>       
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Encargado de Causa*</label>
-                        <input type="text" wire:model.defer="items.{{ $i }}.encargado_causa" required class="{{ $baseInput }}">
+                        <input type="text" wire:model.defer="items.{{ $i }}.encargado_causa" required list="tiposencargados" class="{{ $baseInput }}">
+                        <datalist id="tiposencargados">
+                            @foreach($tiposencargados as $tipo)
+                                <option value="{{ $tipo }}">
+                            @endforeach
+                        </datalist>
                         @error("items.$i.encargado_causa") <span data-error class="text-red-500 text-xs">{{ $message }}</span> @enderror
                     </div>
                     <div>

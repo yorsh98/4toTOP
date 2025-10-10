@@ -27,6 +27,14 @@ class AudienciasCortasBatch extends Component
     /** Filas a crear */
     public $items = [];
 
+    public $tiposencargados =[
+        'Hortencia Garrido',
+        'Maricela Santos',
+        'Carlos Donoso',
+        'Mauricio Fernandez',
+        'Leonardo Morales'
+    ];
+
     /** Sugerencias */
     public array $situaciones = ['Libre', 'P.Prev.', 'P.x OC.'];
 

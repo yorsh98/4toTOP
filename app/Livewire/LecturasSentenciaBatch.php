@@ -16,6 +16,14 @@ class LecturasSentenciaBatch extends Component
     /** Sugerencias */
     public array $situaciones = ['Libre', 'P.Prev.', 'P.x OC.'];
 
+    public $tiposencargados =[
+        'Hortencia Garrido',
+        'Maricela Santos',
+        'Carlos Donoso',
+        'Mauricio Fernandez',
+        'Leonardo Morales'
+    ];
+
     public function mount(): void
     {
         abort_unless(Auth::check(), 403, 'No autorizado.');
