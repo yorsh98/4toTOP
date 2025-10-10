@@ -19,6 +19,10 @@ class ProgramacionDiariaExport implements WithEvents, WithTitle
 
     protected string $fecha; // YYYY-MM-DD
 
+    // === Colores solicitados para "Acusados" ===
+    private const ACUSADOS_HEAD_BG = '9CA3AF'; // gris más oscuro (Tailwind gray-400)
+    private const ACUSADOS_ROW_BG  = 'D1D5DB'; // gris claro (Tailwind gray-300)
+
     public function __construct(string $fecha)
     {
         $this->fecha = $fecha;
@@ -45,7 +49,7 @@ class ProgramacionDiariaExport implements WithEvents, WithTitle
         return $t;
     }
 
-    /** Siempre alinearemos valores a la izquierda, ya no centramos nada especial */
+    /** Siempre alinearemos valores a la izquierda */
     private function shouldCenter(string $label): bool
     {
         return false;
@@ -64,6 +68,13 @@ class ProgramacionDiariaExport implements WithEvents, WithTitle
                     ],
                 ],
             ]);
+    }
+
+    /** Relleno sin tocar bordes */
+    private function fillRange(Worksheet $sheet, string $range, string $rgb): void
+    {
+        $sheet->getStyle($range)->getFill()->setFillType(Fill::FILL_SOLID);
+        $sheet->getStyle($range)->getFill()->getStartColor()->setRGB($rgb);
     }
 
     /** Filas (label/value) según tipo */
@@ -90,7 +101,7 @@ class ProgramacionDiariaExport implements WithEvents, WithTitle
             'ENC_CAUSA' => ['label' => 'Encargado causa',        'value' => $aud->encargado_causa ?? null],
             'ACTA'      => ['label' => 'Acta de audiencia',      'value' => $aud->acta ?? null],
             'ENC_TT'    => ['label' => 'Encargado de TTyPP',     'value' => $aud->encargado_ttp ?? null],
-            'ENC_TTZ'   => ['label' => 'Encargado de Zoom',  'value' => $aud->encargado_ttp_zoom ?? null],
+            'ENC_TTZ'   => ['label' => 'Encargado de Zoom',      'value' => $aud->encargado_ttp_zoom ?? null],
             'CTA_ZOOM'  => ['label' => 'Cuenta Zoom',            'value' => $aud->cta_zoom ?? null],
             'ANFIT'     => ['label' => 'Anfitrión',              'value' => $aud->anfitrion ?? null],
         ];
@@ -129,7 +140,7 @@ class ProgramacionDiariaExport implements WithEvents, WithTitle
                     $base['JUEZR'],
                     $base['ENC_TT'],
                     $base['JUEZI'],
-                    $base['ENC_TTZ'],                    
+                    $base['ENC_TTZ'],
                 ];
 
             default:
@@ -166,13 +177,18 @@ class ProgramacionDiariaExport implements WithEvents, WithTitle
                     'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => 'D1D5DB']]],
                 ];
                 $titleStyle = [
-                    'font' => ['bold' => true, 'size' => 16],
+                    'font' => [
+                        'bold' => true,           // si quieres también la fecha en bold, cambia a false abajo
+                        'size' => 18,
+                        'name' => 'Aptos Display',
+                    ],
                     'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
                 ];
+
                 $labelCellStyle = [
                     'font' => ['bold' => true],
                     'alignment' => [
-                        'horizontal' => Alignment::HORIZONTAL_LEFT,  // <- antes RIGHT
+                        'horizontal' => Alignment::HORIZONTAL_LEFT,
                         'vertical'   => Alignment::VERTICAL_TOP,
                         'wrapText'   => true,
                     ],
@@ -228,18 +244,26 @@ class ProgramacionDiariaExport implements WithEvents, WithTitle
                 $sheet->getStyle("A{$row}:H{$row}")->applyFromArray($titleStyle);
                 $row++;
 
-                $sheet->setCellValue("A{$row}", Carbon::parse($this->fecha)->format('d-m-Y'));
+                $sheet->setCellValue("A{$row}", Carbon::parse($this->fecha)->format('d/m/Y'));
                 $sheet->mergeCells("A{$row}:H{$row}");
                 $sheet->getStyle("A{$row}:H{$row}")
                     ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle("A{$row}:H{$row}")->applyFromArray([
+                    'font' => [
+                        'bold' => true,          // pon true si quieres que la fecha también vaya en negrita
+                        'size' => 18,
+                        'name' => 'Aptos Display',
+                    ],
+                ]);
+    
                 $row += 2;
 
-                // Orden visible: Juicio Oral, Cont. Juicio Oral, Audiencia Corta, Lectura
+                // Orden visible
                 $priority = [
                     'JUICIO ORAL'               => 1,
                     'CONTINUACION JUICIO ORAL'  => 2,
                     'CONT. JUICIO ORAL'         => 2,
-                    'CONTINUACIÓN JUICIO ORAL'  => 2,                    
+                    'CONTINUACIÓN JUICIO ORAL'  => 2,
                     'LECTURA DE SENTENCIA'      => 3,
                     'LECTURA SENTENCIA'         => 3,
                     'LECTURA'                   => 3,
@@ -254,7 +278,7 @@ class ProgramacionDiariaExport implements WithEvents, WithTitle
                         $rank     = $priority[$tipoNorm] ?? 99;
                         $sala = (string) ($a->sala ?? '');
                         $hora = optional(
-                            $a->hora_inicio instanceof \DateTimeInterface ? $a->hora_inicio : \Carbon\Carbon::parse($a->hora_inicio)
+                            $a->hora_inicio instanceof \DateTimeInterface ? $a->hora_inicio : Carbon::parse($a->hora_inicio)
                         )->format('H:i');
                         return [$rank, $sala, $hora];
                     })
@@ -264,17 +288,13 @@ class ProgramacionDiariaExport implements WithEvents, WithTitle
                     $sheet->setCellValue("A{$row}", 'No se encontraron audiencias para la fecha seleccionada.');
                     $sheet->mergeCells("A{$row}:H{$row}");
                     $sheet->getStyle("A{$row}:H{$row}")->applyFromArray($mutedStyle);
-                    // A la izquierda también aquí
                     $sheet->getStyle("A{$row}:H{$row}")->applyFromArray($valueCellLeft);
 
-                    // Marco negro alrededor de todo lo generado (desde el título hasta este mensaje)
                     $lastRowIfEmpty = $row;
                     $this->applyOuterMargin($sheet, 1, $lastRowIfEmpty);
-
                     return;
                 }
 
-                // Títulos de sección: imprimir una vez
                 $printedSection = [
                     'AUDIENCIA CORTA'      => false,
                     'LECTURA DE SENTENCIA' => false,
@@ -291,7 +311,7 @@ class ProgramacionDiariaExport implements WithEvents, WithTitle
                 foreach ($audiencias as $aud) {
                     $tipo = $this->normalizeTipo($aud->tipo_audiencia ?? '');
 
-                    // Color de cabecera por tipo
+                    // Color cabecera por tipo
                     if (in_array($tipo, ['JUICIO ORAL','CONTINUACION JUICIO ORAL','CONT. JUICIO ORAL','CONTINUACIÓN JUICIO ORAL'], true)) {
                         $headerColor = '3B82F6'; // azul
                     } elseif ($tipo === 'AUDIENCIA CORTA') {
@@ -299,10 +319,10 @@ class ProgramacionDiariaExport implements WithEvents, WithTitle
                     } elseif (in_array($tipo, ['LECTURA DE SENTENCIA','LECTURA SENTENCIA','LECTURA'], true)) {
                         $headerColor = 'A78BFA'; // lila
                     } else {
-                        $headerColor = '00A3A3'; // fallback (teal)
+                        $headerColor = '00A3A3'; // teal
                     }
 
-                    // ===== Títulos de sección (una vez) =====
+                    // Secciones únicas
                     if ($tipo === 'AUDIENCIA CORTA' && !$printedSection['AUDIENCIA CORTA']) {
                         $sheet->setCellValue("A{$row}", "↙  AUDIENCIAS CORTAS  ↘");
                         $sheet->mergeCells("A{$row}:H{$row}");
@@ -310,7 +330,6 @@ class ProgramacionDiariaExport implements WithEvents, WithTitle
                         $sheet->getRowDimension($row)->setRowHeight(22);
                         $row++;
 
-                        // Subtítulos centrados (se mantienen)
                         if (!$printedSubtitle['AUDIENCIA CORTA']) {
                             $sheet->setCellValue("A{$row}", 'Anfitrión: ' . ($aud->anfitrion ?? '—'));
                             $sheet->mergeCells("A{$row}:H{$row}");
@@ -332,7 +351,6 @@ class ProgramacionDiariaExport implements WithEvents, WithTitle
 
                             $printedSubtitle['AUDIENCIA CORTA'] = true;
                         }
-
                         $printedSection['AUDIENCIA CORTA'] = true;
                     }
 
@@ -368,7 +386,6 @@ class ProgramacionDiariaExport implements WithEvents, WithTitle
                     }
 
                     // ===== Cabecera de cada audiencia =====
-                   // Construcción segura de la cabecera sin guiones colgando
                     $partes = [
                         sprintf('Sala %s y %s',
                             (string)($aud->sala ?? '—'),
@@ -381,22 +398,13 @@ class ProgramacionDiariaExport implements WithEvents, WithTitle
                         'RIT ' . $this->dash($aud->rit ?? null),
                         'RUC ' . $this->dash($aud->ruc ?? null),
                     ];
-
-                    // Agrega "Duración" solo para Juicios/Continuaciones y si trae algo
                     if (in_array($tipo, ['JUICIO ORAL','CONTINUACION JUICIO ORAL','CONT. JUICIO ORAL','CONTINUACIÓN JUICIO ORAL'], true)) {
                         $dur = $this->dash($aud->duracion ?? null);
-                        if ($dur !== '—') {
-                            $partes[] = 'Duración: ' . $dur;
-                        }
+                        if ($dur !== '—') $partes[] = 'Duración: ' . $dur;
                     }
-
-                    // Agrega "Obs" solo si viene con texto no vacío
                     $obs = isset($aud->obs) ? trim((string)$aud->obs) : '';
-                    if ($obs !== '') {
-                        $partes[] = ' ' . $obs;
-                    }
+                    if ($obs !== '') $partes[] = ' ' . $obs;
 
-                    // Une todo con " - " (sin guión final)
                     $cabecera = implode(' - ', $partes);
 
                     $sheet->setCellValue("A{$row}", $cabecera);
@@ -418,7 +426,6 @@ class ProgramacionDiariaExport implements WithEvents, WithTitle
 
                         if ($isDelito) {
                             if ($carry) {
-                                // IZQ pendiente
                                 $sheet->setCellValue("A{$row}", $carry['label']);
                                 $sheet->mergeCells("A{$row}:B{$row}");
                                 $sheet->getStyle("A{$row}:B{$row}")->applyFromArray($labelCellStyle);
@@ -427,14 +434,12 @@ class ProgramacionDiariaExport implements WithEvents, WithTitle
                                 $sheet->mergeCells("C{$row}:D{$row}");
                                 $sheet->getStyle("C{$row}:D{$row}")->applyFromArray($valueCellLeft);
 
-                                // derecha vacía
                                 $sheet->mergeCells("E{$row}:H{$row}");
                                 $sheet->getStyle("A{$row}:H{$row}")->applyFromArray($borderThin);
                                 $row++;
                                 $carry = null;
                             }
 
-                            // DELITO en toda la fila (valor a la izquierda)
                             $sheet->setCellValue("A{$row}", $label);
                             $sheet->mergeCells("A{$row}:B{$row}");
                             $sheet->getStyle("A{$row}:B{$row}")->applyFromArray($labelCellStyle);
@@ -452,7 +457,6 @@ class ProgramacionDiariaExport implements WithEvents, WithTitle
                             $carry = $r;
                         } else {
                             // par en una fila
-                            // IZQ
                             $sheet->setCellValue("A{$row}", $carry['label']);
                             $sheet->mergeCells("A{$row}:B{$row}");
                             $sheet->getStyle("A{$row}:B{$row}")->applyFromArray($labelCellStyle);
@@ -461,7 +465,6 @@ class ProgramacionDiariaExport implements WithEvents, WithTitle
                             $sheet->mergeCells("C{$row}:D{$row}");
                             $sheet->getStyle("C{$row}:D{$row}")->applyFromArray($valueCellLeft);
 
-                            // DER
                             $sheet->setCellValue("E{$row}", $label);
                             $sheet->mergeCells("E{$row}:F{$row}");
                             $sheet->getStyle("E{$row}:F{$row}")->applyFromArray($labelCellStyle);
@@ -476,7 +479,6 @@ class ProgramacionDiariaExport implements WithEvents, WithTitle
                         }
                     }
 
-                    // si quedó uno sin par
                     if ($carry) {
                         $sheet->setCellValue("A{$row}", $carry['label']);
                         $sheet->mergeCells("A{$row}:B{$row}");
@@ -486,13 +488,12 @@ class ProgramacionDiariaExport implements WithEvents, WithTitle
                         $sheet->mergeCells("C{$row}:D{$row}");
                         $sheet->getStyle("C{$row}:D{$row}")->applyFromArray($valueCellLeft);
 
-                        // derecha vacía
                         $sheet->mergeCells("E{$row}:H{$row}");
                         $sheet->getStyle("A{$row}:H{$row}")->applyFromArray($borderThin);
                         $row++;
                     }
 
-                    // wrap + vertical top en toda la ficha
+                    // Alineación general de la ficha
                     $sheet->getStyle("A{$start}:H".($row-1))->getAlignment()->setWrapText(true);
                     $sheet->getStyle("A{$start}:H".($row-1))->getAlignment()->setVertical(Alignment::VERTICAL_TOP);
 
@@ -500,26 +501,30 @@ class ProgramacionDiariaExport implements WithEvents, WithTitle
                     $acusados = array_values((array)($aud->acusados ?? []));
                     $layout = $this->accusedLayout($tipo);
 
+                    // Marcaremos inicio/fin para excluir este bloque del fondo de card
+                    $acusadosStart = $row;
+                    $acusadosEnd   = $row - 1; // se actualizará según agreguemos filas
+
                     if (empty($acusados)) {
                         $sheet->setCellValue("A{$row}", '— Sin acusados —');
                         $sheet->mergeCells("A{$row}:H{$row}");
                         $sheet->getStyle("A{$row}:H{$row}")->applyFromArray($borderThin);
                         $sheet->getStyle("A{$row}:H{$row}")->applyFromArray($mutedStyle);
                         $sheet->getStyle("A{$row}:H{$row}")->applyFromArray($valueCellLeft);
+                        // Encabezado no aplica; dejamos en blanco esta fila (sin gris)
+                        $acusadosEnd = $row;
                         $row++;
+
                     } elseif (count($acusados) <= 4) {
-                        // Detallado (una sección)
-                        $sheet->setCellValue("A{$row}", 'Acusado');
-                        $sheet->mergeCells("A{$row}:C{$row}");
-                        $sheet->setCellValue("D{$row}", 'Situación');
-                        $sheet->mergeCells("D{$row}:E{$row}");
-                        $sheet->setCellValue("F{$row}", 'Medidas cautelares');
-                        $sheet->mergeCells("F{$row}:G{$row}");
+                        // Encabezado de columnas (gris oscuro)
+                        $sheet->setCellValue("A{$row}", 'Acusado');     $sheet->mergeCells("A{$row}:C{$row}");
+                        $sheet->setCellValue("D{$row}", 'Situación');   $sheet->mergeCells("D{$row}:E{$row}");
+                        $sheet->setCellValue("F{$row}", 'Medidas cautelares'); $sheet->mergeCells("F{$row}:G{$row}");
                         $sheet->setCellValue("H{$row}", 'Forma notificación');
                         $sheet->getStyle("A{$row}:H{$row}")->applyFromArray($borderThin);
                         $sheet->getStyle("A{$row}:H{$row}")->getFont()->setBold(true);
-                        // Encabezados también a la izquierda
                         $sheet->getStyle("A{$row}:H{$row}")->applyFromArray($valueCellLeft);
+                        $this->fillRange($sheet, "A{$row}:H{$row}", self::ACUSADOS_HEAD_BG);
                         $row++;
 
                         foreach ($acusados as $ac) {
@@ -533,20 +538,23 @@ class ProgramacionDiariaExport implements WithEvents, WithTitle
                             $sheet->mergeCells("F{$row}:G{$row}");
 
                             $sheet->setCellValue("H{$row}", $this->dash($ac['forma_notificacion'] ?? null));
+
                             $sheet->getStyle("A{$row}:H{$row}")->applyFromArray($borderThin);
                             $sheet->getStyle("A{$row}:H{$row}")->applyFromArray($valueCellLeft);
+                            $this->fillRange($sheet, "A{$row}:H{$row}", self::ACUSADOS_ROW_BG); // fila gris claro
+                            $acusadosEnd = $row;
                             $row++;
                         }
+
                     } else {
-                        // Compacto
                         if ($layout === 'single') {
-                            $sheet->setCellValue("A{$row}", 'Acusados');
-                            $sheet->mergeCells("A{$row}:E{$row}");
-                            $sheet->setCellValue("F{$row}", 'Situación de Libertad');
-                            $sheet->mergeCells("F{$row}:H{$row}");
+                            // Encabezado (gris oscuro)
+                            $sheet->setCellValue("A{$row}", 'Acusados'); $sheet->mergeCells("A{$row}:E{$row}");
+                            $sheet->setCellValue("F{$row}", 'Situación de Libertad'); $sheet->mergeCells("F{$row}:H{$row}");
                             $sheet->getStyle("A{$row}:H{$row}")->applyFromArray($borderThin);
                             $sheet->getStyle("A{$row}:H{$row}")->getFont()->setBold(true);
                             $sheet->getStyle("A{$row}:H{$row}")->applyFromArray($valueCellLeft);
+                            $this->fillRange($sheet, "A{$row}:H{$row}", self::ACUSADOS_HEAD_BG);
                             $row++;
 
                             foreach ($acusados as $ac) {
@@ -554,20 +562,23 @@ class ProgramacionDiariaExport implements WithEvents, WithTitle
                                 $sheet->mergeCells("A{$row}:E{$row}");
                                 $sheet->setCellValue("F{$row}", $this->dash($ac['situacion'] ?? null));
                                 $sheet->mergeCells("F{$row}:H{$row}");
+
                                 $sheet->getStyle("A{$row}:H{$row}")->applyFromArray($borderThin);
                                 $sheet->getStyle("A{$row}:H{$row}")->applyFromArray($valueCellLeft);
+                                $this->fillRange($sheet, "A{$row}:H{$row}", self::ACUSADOS_ROW_BG);
+                                $acusadosEnd = $row;
                                 $row++;
                             }
                         } else {
-                            $sheet->setCellValue("A{$row}", 'Acusados');
-                            $sheet->mergeCells("A{$row}:C{$row}");
+                            // Encabezado (gris oscuro)
+                            $sheet->setCellValue("A{$row}", 'Acusados'); $sheet->mergeCells("A{$row}:C{$row}");
                             $sheet->setCellValue("D{$row}", 'Situación');
-                            $sheet->setCellValue("E{$row}", 'Acusados');
-                            $sheet->mergeCells("E{$row}:G{$row}");
+                            $sheet->setCellValue("E{$row}", 'Acusados'); $sheet->mergeCells("E{$row}:G{$row}");
                             $sheet->setCellValue("H{$row}", 'Situación');
                             $sheet->getStyle("A{$row}:H{$row}")->applyFromArray($borderThin);
                             $sheet->getStyle("A{$row}:H{$row}")->getFont()->setBold(true);
                             $sheet->getStyle("A{$row}:H{$row}")->applyFromArray($valueCellLeft);
+                            $this->fillRange($sheet, "A{$row}:H{$row}", self::ACUSADOS_HEAD_BG);
                             $row++;
 
                             $n   = count($acusados);
@@ -595,21 +606,37 @@ class ProgramacionDiariaExport implements WithEvents, WithTitle
 
                                 $sheet->getStyle("A{$row}:H{$row}")->applyFromArray($borderThin);
                                 $sheet->getStyle("A{$row}:H{$row}")->applyFromArray($valueCellLeft);
+                                $this->fillRange($sheet, "A{$row}:H{$row}", self::ACUSADOS_ROW_BG);
+                                $acusadosEnd = $row;
                                 $row++;
                             }
                         }
                     }
 
-                    // ===== Card: borde + fondo de cuerpo (sin pisar cabecera) =====
+                    // ===== Card: borde + fondo de cuerpo (sin pisar la sección "Acusados") =====
                     $cardTop    = $headerRow;
                     $cardBottom = $row - 1;
 
                     $sheet->getStyle("A{$cardTop}:H{$cardBottom}")->applyFromArray($cardOutlineOnly);
 
+                    // Aplicar fondo de card a todo el cuerpo EXCEPTO el bloque de Acusados
                     $bodyStart = $cardTop + 1;
                     if ($bodyStart <= $cardBottom) {
-                        $sheet->getStyle("A{$bodyStart}:H{$cardBottom}")->applyFromArray($cardBodyFill);
-                        // Indent + asegurar izquierda para todo el cuerpo de la card
+                        if (isset($acusadosStart, $acusadosEnd) && $acusadosStart <= $acusadosEnd) {
+                            // tramo antes de Acusados
+                            if ($bodyStart <= $acusadosStart - 1) {
+                                $sheet->getStyle("A{$bodyStart}:H".($acusadosStart - 1))->applyFromArray($cardBodyFill);
+                            }
+                            // tramo después de Acusados
+                            if ($acusadosEnd + 1 <= $cardBottom) {
+                                $sheet->getStyle("A".($acusadosEnd + 1).":H{$cardBottom}")->applyFromArray($cardBodyFill);
+                            }
+                        } else {
+                            // no hubo bloque de Acusados (caso raro)
+                            $sheet->getStyle("A{$bodyStart}:H{$cardBottom}")->applyFromArray($cardBodyFill);
+                        }
+
+                        // Indent + izquierda para cuerpo (se mantiene)
                         $sheet->getStyle("C{$bodyStart}:H{$cardBottom}")->getAlignment()->setIndent(1);
                         $sheet->getStyle("C{$bodyStart}:H{$cardBottom}")->applyFromArray($valueCellLeft);
                     }
@@ -618,10 +645,9 @@ class ProgramacionDiariaExport implements WithEvents, WithTitle
                     $row += 1;
                 }
 
-                // ===== Marco negro alrededor de TODO el contenido generado =====
+                // ===== Marco negro alrededor de TODO =====
                 $lastRowUsed = max(1, $row - 1);
                 $this->applyOuterMargin($sheet, 1, $lastRowUsed);
-
             },
         ];
     }
