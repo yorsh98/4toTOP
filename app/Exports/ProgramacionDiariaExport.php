@@ -23,6 +23,9 @@ class ProgramacionDiariaExport implements WithEvents, WithTitle
     private const ACUSADOS_HEAD_BG = '9CA3AF'; // gris más oscuro (Tailwind gray-400)
     private const ACUSADOS_ROW_BG  = 'D1D5DB'; // gris claro (Tailwind gray-300)
 
+    // Color de la línea separadora entre acusados: 'FFFFFF' blanca o '000000' negra
+    private const ACUSADOS_SEP_RGB = 'FFFFFF';
+
     public function __construct(string $fecha)
     {
         $this->fecha = $fecha;
@@ -47,6 +50,26 @@ class ProgramacionDiariaExport implements WithEvents, WithTitle
         $t = mb_strtoupper(trim((string)$tipo));
         $t = str_replace(['Á','É','Í','Ó','Ú'], ['A','E','I','O','U'], $t);
         return $t;
+    }
+
+    /** Bordes para filas de ACUSADOS: verticales grises + separador horizontal (top/bottom) blanco/negro */
+    private function applyAccusadosRowBorders(Worksheet $sheet, int $row): void
+    {
+        $sheet->getStyle("A{$row}:H{$row}")->applyFromArray([
+            'borders' => [
+                // verticales internas (entre columnas)
+                'vertical' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color'       => ['rgb' => 'D1D5DB'], // gris
+                ],
+                // contorno lateral
+                'left'  => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => 'D1D5DB']],
+                'right' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => 'D1D5DB']],
+                // separadores horizontales visibles
+                'top'    => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => self::ACUSADOS_SEP_RGB]],
+                'bottom' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => self::ACUSADOS_SEP_RGB]],
+            ],
+        ]);
     }
 
     /** Siempre alinearemos valores a la izquierda */
@@ -178,7 +201,7 @@ class ProgramacionDiariaExport implements WithEvents, WithTitle
                 ];
                 $titleStyle = [
                     'font' => [
-                        'bold' => true,           // si quieres también la fecha en bold, cambia a false abajo
+                        'bold' => true,
                         'size' => 18,
                         'name' => 'Aptos Display',
                     ],
@@ -250,12 +273,12 @@ class ProgramacionDiariaExport implements WithEvents, WithTitle
                     ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
                 $sheet->getStyle("A{$row}:H{$row}")->applyFromArray([
                     'font' => [
-                        'bold' => true,          // pon true si quieres que la fecha también vaya en negrita
+                        'bold' => true,
                         'size' => 18,
                         'name' => 'Aptos Display',
                     ],
                 ]);
-    
+
                 $row += 2;
 
                 // Orden visible
@@ -539,9 +562,12 @@ class ProgramacionDiariaExport implements WithEvents, WithTitle
 
                             $sheet->setCellValue("H{$row}", $this->dash($ac['forma_notificacion'] ?? null));
 
-                            $sheet->getStyle("A{$row}:H{$row}")->applyFromArray($borderThin);
+                            // === Bordes específicos para filas de Acusados ===
+                            $this->applyAccusadosRowBorders($sheet, $row);
+
                             $sheet->getStyle("A{$row}:H{$row}")->applyFromArray($valueCellLeft);
                             $this->fillRange($sheet, "A{$row}:H{$row}", self::ACUSADOS_ROW_BG); // fila gris claro
+
                             $acusadosEnd = $row;
                             $row++;
                         }
@@ -563,9 +589,12 @@ class ProgramacionDiariaExport implements WithEvents, WithTitle
                                 $sheet->setCellValue("F{$row}", $this->dash($ac['situacion'] ?? null));
                                 $sheet->mergeCells("F{$row}:H{$row}");
 
-                                $sheet->getStyle("A{$row}:H{$row}")->applyFromArray($borderThin);
+                                // === Bordes específicos para filas de Acusados ===
+                                $this->applyAccusadosRowBorders($sheet, $row);
+
                                 $sheet->getStyle("A{$row}:H{$row}")->applyFromArray($valueCellLeft);
                                 $this->fillRange($sheet, "A{$row}:H{$row}", self::ACUSADOS_ROW_BG);
+
                                 $acusadosEnd = $row;
                                 $row++;
                             }
@@ -604,9 +633,12 @@ class ProgramacionDiariaExport implements WithEvents, WithTitle
                                     $sheet->mergeCells("E{$row}:G{$row}");
                                 }
 
-                                $sheet->getStyle("A{$row}:H{$row}")->applyFromArray($borderThin);
+                                // === Bordes específicos para filas de Acusados ===
+                                $this->applyAccusadosRowBorders($sheet, $row);
+
                                 $sheet->getStyle("A{$row}:H{$row}")->applyFromArray($valueCellLeft);
                                 $this->fillRange($sheet, "A{$row}:H{$row}", self::ACUSADOS_ROW_BG);
+
                                 $acusadosEnd = $row;
                                 $row++;
                             }
