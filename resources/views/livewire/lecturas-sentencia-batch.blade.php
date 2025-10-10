@@ -103,7 +103,13 @@
                             <label class="block text-sm font-medium text-gray-700 mb-1">Encargado de causa*</label>
                             <input type="text" required class="{{ $baseInput }}"
                                    placeholder="Nombre completo"
+                                   list="tiposencargados"
                                    wire:model.defer="items.{{ $i }}.encargado_sala">
+                                   <datalist id="tiposencargados">
+                                    @foreach($tiposencargados as $tipo)
+                                        <option value="{{ $tipo }}">
+                                    @endforeach
+                                </datalist>
                             @error("items.$i.encargado_sala") <span data-error class="text-red-500 text-xs">{{ $message }}</span> @enderror
                         </div>
 
