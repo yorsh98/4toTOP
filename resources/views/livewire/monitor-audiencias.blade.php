@@ -172,9 +172,9 @@
                 if (hours < 12 || hours > 16) return;
 
                 // Llamada a Livewire para actualizar estados según la hora
-                if (time === '12:30') {
+                if (time === '13:30') {
                     @this.actualizarEstadoAudienciasCortas('EN_CURSO');
-                } else if (time === '12:35') {
+                } else if (time === '15:00') {
                     @this.actualizarEstadoAudienciasCortas('FINALIZADA');
                 }
             };
