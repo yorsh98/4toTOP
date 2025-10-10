@@ -35,7 +35,12 @@
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Duración*</label>
-                <input type="text" wire:model.defer="duracion" required placeholder="Ej: 2 horas, 1 día" class="{{ $baseInput }} {{ $errors->has('duracion') ? 'border-red-500 ring-red-300' : '' }}" aria-invalid="{{ $errors->has('duracion') ? 'true' : 'false' }}">
+                <input type="text" wire:model.defer="duracion" required list="tiposduracion" placeholder="Ej: 2 horas, 1 día" class="{{ $baseInput }} {{ $errors->has('duracion') ? 'border-red-500 ring-red-300' : '' }}" aria-invalid="{{ $errors->has('duracion') ? 'true' : 'false' }}">
+                <datalist id="tiposduracion">
+                    @foreach($tiposduracion as $tipo)
+                        <option value="{{ $tipo }}">
+                    @endforeach
+                </datalist>
                 @error('duracion') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
             </div> 
             <div>
@@ -117,7 +122,12 @@
         <div class="grid grid-cols-2 md:grid-cols-3 gap-6">
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Encargado de Causa*</label>
-                <input type="text" wire:model.defer="encargado_causa" required class="{{ $baseInput }} {{ $errors->has('encargado_causa') ? 'border-red-500 ring-red-300' : '' }}" aria-invalid="{{ $errors->has('encargado_causa') ? 'true' : 'false' }}">
+                <input type="text" wire:model.defer="encargado_causa" required list="tiposencargados" class="{{ $baseInput }} {{ $errors->has('encargado_causa') ? 'border-red-500 ring-red-300' : '' }}" aria-invalid="{{ $errors->has('encargado_causa') ? 'true' : 'false' }}">
+                <datalist id="tiposencargados">
+                    @foreach($tiposencargados as $tipo)
+                        <option value="{{ $tipo }}">
+                    @endforeach
+                </datalist>
                 @error('encargado_causa') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
             </div>            
             <div>

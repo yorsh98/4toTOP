@@ -62,6 +62,18 @@ class AudienciaForm extends Component
         'Lectura de Sentencia'
     ];
 
+    public $tiposduracion = [
+        '½'
+    ];
+
+    public $tiposencargados =[
+        'Hortencia Garrido',
+        'Maricela Santos',
+        'Carlos Donoso',
+        'Mauricio Fernandez',
+        'Leonardo Morales'
+    ];
+
     protected $listeners = ['editAudiencia'];
     
     protected $messages = [
