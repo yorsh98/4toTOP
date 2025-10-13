@@ -20,7 +20,7 @@ use App\Http\Controllers\prograController;
 use App\Http\Controllers\AdmAudvController;
 use App\Http\Controllers\MonitorController;
 use App\Http\Controllers\AudienciasExportController;
-
+use App\Http\Controllers\ausentismoController;
 
 Route::view('/', 'welcome');
 
@@ -87,6 +87,9 @@ Route::get('/csrf-refresh', function () {
 //ruta para la generacion del excel
 Route::get('/audiencias/export/diaria', [AudienciasExportController::class, 'diaria'])
 ->name('audiencias.export.diaria');
+
+//Ruta para Sist Ausentismo
+Route::get('/ausentismo', [ausentismoController::class, 'index' ])->name('ausentismo')->middleware(['auth']);
 
 Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
