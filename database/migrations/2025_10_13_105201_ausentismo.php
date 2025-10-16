@@ -11,6 +11,7 @@ return new class extends Migration {
             $table->id();
             $table->string('funcionario_nombre', 150);
             $table->string('cargo', 120);
+            $table->string('tipo_permiso');
             $table->date('fecha_inicio');
             $table->date('fecha_termino');
             $table->text('observacion')->nullable(); // tipo de permiso / motivo
