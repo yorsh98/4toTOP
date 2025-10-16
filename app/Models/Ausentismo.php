@@ -15,6 +15,7 @@ class Ausentismo extends Model
         'fecha_inicio',
         'fecha_termino',
         'observacion',
+        'tipo_permiso',
     ];
 
     protected $casts = [

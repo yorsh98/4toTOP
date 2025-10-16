@@ -293,15 +293,38 @@
                             </div>
                             </div> 
                             <a
-                                href="http://www2.intranet.pjud/"
+                                href="{{ url('/ausencias') }}"
                                 class="flex items-start gap-4 rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] transition duration-300 hover:text-black/70 hover:ring-black/20 focus:outline-none focus-visible:ring-[#FF2D20] lg:pb-10 dark:bg-zinc-900 dark:ring-zinc-800 dark:hover:text-white/70 dark:hover:ring-zinc-700 dark:focus-visible:ring-[#FF2D20]"
                             >
-                                <div class="flex size-12 shrink-0 items-center justify-center rounded-full bg-[#FF2D20]/10 sm:size-16">
-                                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M2.99902 3L20.999 21M9.8433 9.91364C9.32066 10.4536 8.99902 11.1892 8.99902 12C8.99902 13.6569 10.3422 15 11.999 15C12.8215 15 13.5667 14.669 14.1086 14.133M6.49902 6.64715C4.59972 7.90034 3.15305 9.78394 2.45703 12C3.73128 16.0571 7.52159 19 11.9992 19C13.9881 19 15.8414 18.4194 17.3988 17.4184M10.999 5.04939C11.328 5.01673 11.6617 5 11.9992 5C16.4769 5 20.2672 7.94291 21.5414 12C21.2607 12.894 20.8577 13.7338 20.3522 14.5" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
+                                <div class="flex size-12 shrink-0 items-center justify-center rounded-full sm:size-16">
+                                    <svg width="60" height="60" viewBox="0 0 24 24" role="img" aria-label="Calendario con X"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <!-- Sombra suave -->
+                                        <rect x="2" y="3" width="20" height="18" rx="3" fill="#0F172A" opacity="0.08"/>
+                                        <!-- Cuerpo del calendario -->
+                                        <rect x="2" y="3" width="20" height="18" rx="3" fill="#FFFFFF"/>
+                                        <!-- Cabecera -->
+                                        <rect x="2" y="3" width="20" height="5" rx="3" fill="#E11D48"/>
+                                        <!-- Aros (anillas) -->
+                                        <rect x="6" y="2" width="2" height="3" rx="1" fill="#334155"/>
+                                        <rect x="16" y="2" width="2" height="3" rx="1" fill="#334155"/>
+
+                                        <!-- Líneas guía de la grilla (decorativo) -->
+                                        <path d="M4 10.5H20" stroke="#E5E7EB" stroke-width="1"/>
+                                        <path d="M4 14.5H20" stroke="#E5E7EB" stroke-width="1"/>
+
+                                        <!-- La X (usa currentColor para que puedas cambiarla con Tailwind) -->
+                                        <g transform="translate(0,1)">
+                                            <path d="M9 9 L15 15 M15 9 L9 15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                        </g>
+
+                                        <!-- Borde -->
+                                        <rect x="2" y="3" width="20" height="18" rx="3" fill="none" stroke="#CBD5E1"/>
+                                    </svg>
                                 </div>
 
                                 <div class="pt-3 sm:pt-5">
-                                    <h2 class="text-xl font-semibold text-black dark:text-white">PROXIMAMENTE</h2>
+                                    <h2 class="text-xl font-semibold text-black dark:text-white">AUSENCIAS</h2>
 
                                     <p class="mt-4 text-sm/relaxed">
                                         AGENDA DIARIA
