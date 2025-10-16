@@ -91,18 +91,40 @@
                                         
                                     </div>
                                 </a>
-
-                                <a  id="3"
-                                    href="{{ url('/acc') }}" 
+                                                                <a  id="9"
+                                    href="{{ url('/ausencias') }}" 
                                     class="flex items-center gap-4 rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] transition duration-300 hover:text-black/70 hover:ring-black/20 focus:outline-none focus-visible:ring-[#FF2D20] lg:pb-10 dark:bg-zinc-900 dark:ring-zinc-800 dark:hover:text-white/70 dark:hover:ring-zinc-700 dark:focus-visible:ring-[#FF2D20]">
-                                    <div class="size-12 shrink-0 flex items-center justify-center rounded-full ">
-                                        <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512" xml:space="preserve" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <polygon style="fill:#BFDCFF;" points="0,66.783 0,512 256,512 278.261,44.522 "></polygon> <polygon style="fill:#8BC0FF;" points="512,66.783 256,44.522 256,512 512,512 "></polygon> <polygon style="fill:#446080;" points="256,0 0,0 0,66.783 256,66.783 278.261,33.391 "></polygon> <polygon style="fill:#324860;" points="422.957,66.783 445.217,33.391 422.957,0 256,0 256,66.783 "></polygon> <rect x="422.957" style="fill:#FF562B;" width="89.043" height="66.783"></rect> <path style="fill:#8BC0FF;" d="M256,150.261V116.87c-95.128,0-172.522,77.392-172.522,172.522S160.871,461.913,256,461.913v-33.391 c-13.952,0-28.591-13.272-40.16-36.411c-11.624-23.247-18.759-53.333-20.578-86.024H256v-33.391h-60.738 c1.82-32.692,8.954-62.777,20.578-86.024C227.409,163.533,242.048,150.261,256,150.261z M185.974,407.043 c0.609,1.218,1.229,2.413,1.854,3.593c-37.718-21.29-64.561-59.666-69.954-104.549h43.938 C163.728,344.005,172.135,379.365,185.974,407.043z M117.875,272.696c5.393-44.883,32.236-83.259,69.954-104.549 c-0.626,1.18-1.245,2.375-1.854,3.593c-13.838,27.678-22.246,63.038-24.16,100.956H117.875z"></path> <path style="fill:#3897FF;" d="M256,116.87h-16.696v345.043H256c95.128,0,172.522-77.392,172.522-172.522S351.128,116.87,256,116.87 z M394.131,272.696h-43.945c-1.913-37.918-10.321-73.278-24.16-100.956c-0.611-1.221-1.232-2.42-1.86-3.603 C361.889,189.427,388.739,227.807,394.131,272.696z M272.696,422.46V306.087h44.042c-1.82,32.692-8.954,62.777-20.578,86.024 C289.181,406.069,281.084,416.43,272.696,422.46z M272.696,272.696V156.322c8.388,6.029,16.485,16.391,23.464,30.349 c11.624,23.247,18.759,53.333,20.578,86.024H272.696z M324.166,410.646c0.628-1.183,1.249-2.382,1.86-3.603 c13.839-27.678,22.246-63.038,24.16-100.956h43.945C388.739,350.976,361.889,389.357,324.166,410.646z"></path> </g></svg>
+                                    <div class="size-12  shrink-0 flex items-center justify-center rounded-full">
+                                        <svg width="60" height="60" viewBox="0 0 24 24" role="img" aria-label="Calendario con X" xmlns="http://www.w3.org/2000/svg">
+                                            <!-- Sombra suave -->
+                                            <rect x="2" y="3" width="20" height="18" rx="3" fill="#0F172A" opacity="0.08"/>
+                                            <!-- Cuerpo del calendario -->
+                                            <rect x="2" y="3" width="20" height="18" rx="3" fill="#FFFFFF"/>
+                                            <!-- Cabecera -->
+                                            <rect x="2" y="3" width="20" height="5" rx="3" fill="#E11D48"/>
+                                            <!-- Aros (anillas) -->
+                                            <rect x="6" y="2" width="2" height="3" rx="1" fill="#334155"/>
+                                            <rect x="16" y="2" width="2" height="3" rx="1" fill="#334155"/>
+
+                                            <!-- Líneas guía de la grilla (decorativo) -->
+                                            <path d="M4 10.5H20" stroke="#E5E7EB" stroke-width="1"/>
+                                            <path d="M4 14.5H20" stroke="#E5E7EB" stroke-width="1"/>
+
+                                            <!-- La X (usa currentColor para que puedas cambiarla con Tailwind) -->
+                                            <g transform="translate(0,1)">
+                                                <path d="M9 9 L15 15 M15 9 L9 15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                            </g>
+
+                                            <!-- Borde -->
+                                            <rect x="2" y="3" width="20" height="18" rx="3" fill="none" stroke="#CBD5E1"/>
+                                        </svg>
                                     </div>
                                     <div class="overflow-hidden break-words">
-                                        <h2 class="text-xl font-semibold text-black">ACCESOS DIRECTOS</h2>
+                                        <h2 class="text-xl font-semibold text-black">AUSENCIAS</h2>
                                         
                                     </div>
-                                </a>
+                                </a> 
+                                
                             </div>
 
                             <a  id="4"
@@ -131,14 +153,14 @@
                                         <h2 class="text-xl font-semibold text-black ">PROCEDIMIENTOS TRIBUNAL</h2>                                        
                                     </div>
                                 </a>
-                                <a  id="6"
-                                    href="{{ url('/doc') }}" 
+                                <a  id="3"
+                                    href="{{ url('/acc') }}" 
                                     class="flex items-center gap-4 rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] transition duration-300 hover:text-black/70 hover:ring-black/20 focus:outline-none focus-visible:ring-[#FF2D20] lg:pb-10 dark:bg-zinc-900 dark:ring-zinc-800 dark:hover:text-white/70 dark:hover:ring-zinc-700 dark:focus-visible:ring-[#FF2D20]">
-                                    <div class="size-12  shrink-0 flex items-center justify-center rounded-full">
-                                        <svg height="200px" width="200px" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512.001 512.001" xml:space="preserve" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path style="fill:#0084FF;" d="M332.803,10.449H95.726c-22.275,0-40.334,18.06-40.334,40.335v410.434 c0,22.276,18.059,40.334,40.334,40.334h320.546c22.275,0,40.334-18.059,40.334-40.334V134.253L332.803,10.449z"></path> <path style="fill:#10BAFC;" d="M373.139,134.253h83.467L332.806,10.451v83.47C332.803,116.195,350.861,134.253,373.139,134.253z"></path> <path d="M463.996,126.864L340.192,3.061C338.231,1.101,335.574,0,332.803,0H95.726C67.724,0,44.944,22.782,44.944,50.784v410.434 c0,28.001,22.781,50.783,50.783,50.783h320.546c28.002,0,50.783-22.781,50.783-50.783V134.253 C467.056,131.482,465.955,128.824,463.996,126.864z M343.255,35.679l88.127,88.126H373.14c-7.984,0-15.49-3.109-21.134-8.753 c-5.643-5.643-8.752-13.148-8.751-21.131L343.255,35.679L343.255,35.679z M416.274,491.102H95.726 c-16.479,0-29.885-13.406-29.885-29.885V50.784c0.001-16.479,13.407-29.886,29.885-29.886h226.631v73.021 c-0.002,13.565,5.28,26.318,14.871,35.909c9.592,9.592,22.345,14.874,35.911,14.874h73.018v316.515 C446.158,477.696,432.752,491.102,416.274,491.102z"></path> <path d="M275.092,351.492h-4.678c-5.77,0-10.449,4.678-10.449,10.449c0,5.771,4.679,10.449,10.449,10.449h4.678 c5.77,0,10.449-4.678,10.449-10.449C285.541,356.17,280.862,351.492,275.092,351.492z"></path> <path d="M236.61,351.492H135.118c-5.77,0-10.449,4.678-10.449,10.449c0,5.771,4.679,10.449,10.449,10.449H236.61 c5.77,0,10.449-4.678,10.449-10.449C247.059,356.17,242.381,351.492,236.61,351.492z"></path> <path d="M376.882,303.747H135.119c-5.77,0-10.449,4.678-10.449,10.449c0,5.771,4.679,10.449,10.449,10.449h241.763 c5.77,0,10.449-4.678,10.449-10.449C387.331,308.425,382.652,303.747,376.882,303.747z"></path> <path d="M376.882,256H135.119c-5.77,0-10.449,4.678-10.449,10.449s4.679,10.449,10.449,10.449h241.763 c5.77,0,10.449-4.678,10.449-10.449S382.652,256,376.882,256z"></path> <path d="M376.882,208.255H135.119c-5.77,0-10.449,4.678-10.449,10.449s4.679,10.449,10.449,10.449h241.763 c5.77,0,10.449-4.678,10.449-10.449C387.331,212.933,382.652,208.255,376.882,208.255z"></path> </g></svg>
+                                    <div class="size-12 shrink-0 flex items-center justify-center rounded-full ">
+                                        <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512" xml:space="preserve" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <polygon style="fill:#BFDCFF;" points="0,66.783 0,512 256,512 278.261,44.522 "></polygon> <polygon style="fill:#8BC0FF;" points="512,66.783 256,44.522 256,512 512,512 "></polygon> <polygon style="fill:#446080;" points="256,0 0,0 0,66.783 256,66.783 278.261,33.391 "></polygon> <polygon style="fill:#324860;" points="422.957,66.783 445.217,33.391 422.957,0 256,0 256,66.783 "></polygon> <rect x="422.957" style="fill:#FF562B;" width="89.043" height="66.783"></rect> <path style="fill:#8BC0FF;" d="M256,150.261V116.87c-95.128,0-172.522,77.392-172.522,172.522S160.871,461.913,256,461.913v-33.391 c-13.952,0-28.591-13.272-40.16-36.411c-11.624-23.247-18.759-53.333-20.578-86.024H256v-33.391h-60.738 c1.82-32.692,8.954-62.777,20.578-86.024C227.409,163.533,242.048,150.261,256,150.261z M185.974,407.043 c0.609,1.218,1.229,2.413,1.854,3.593c-37.718-21.29-64.561-59.666-69.954-104.549h43.938 C163.728,344.005,172.135,379.365,185.974,407.043z M117.875,272.696c5.393-44.883,32.236-83.259,69.954-104.549 c-0.626,1.18-1.245,2.375-1.854,3.593c-13.838,27.678-22.246,63.038-24.16,100.956H117.875z"></path> <path style="fill:#3897FF;" d="M256,116.87h-16.696v345.043H256c95.128,0,172.522-77.392,172.522-172.522S351.128,116.87,256,116.87 z M394.131,272.696h-43.945c-1.913-37.918-10.321-73.278-24.16-100.956c-0.611-1.221-1.232-2.42-1.86-3.603 C361.889,189.427,388.739,227.807,394.131,272.696z M272.696,422.46V306.087h44.042c-1.82,32.692-8.954,62.777-20.578,86.024 C289.181,406.069,281.084,416.43,272.696,422.46z M272.696,272.696V156.322c8.388,6.029,16.485,16.391,23.464,30.349 c11.624,23.247,18.759,53.333,20.578,86.024H272.696z M324.166,410.646c0.628-1.183,1.249-2.382,1.86-3.603 c13.839-27.678,22.246-63.038,24.16-100.956h43.945C388.739,350.976,361.889,389.357,324.166,410.646z"></path> </g></svg>
                                     </div>
                                     <div class="overflow-hidden break-words">
-                                        <h2 class="text-xl font-semibold text-black">DOCUMENTOS</h2>
+                                        <h2 class="text-xl font-semibold text-black">ACCESOS DIRECTOS</h2>
                                         
                                     </div>
                                 </a>
@@ -252,7 +274,7 @@
                         <div class="grid gap-6 pt-6 lg:grid-cols-3 lg:gap-8">
                             <div 
                                 x-data="{ open: false }" 
-                                class="relative flex items-start gap-4 rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] transition duration-300 hover:text-black/70 hover:ring-black/20 focus:outline-none focus-visible:ring-[#FF2D20] lg:pb-10 dark:bg-zinc-900 dark:ring-zinc-800 dark:hover:text-white/70 dark:hover:ring-zinc-700 dark:focus-visible:ring-[#FF2D20]"
+                                class="relative flex items-center gap-4 rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] transition duration-300 hover:text-black/70 hover:ring-black/20 focus:outline-none focus-visible:ring-[#FF2D20] lg:pb-10 dark:bg-zinc-900 dark:ring-zinc-800 dark:hover:text-white/70 dark:hover:ring-zinc-700 dark:focus-visible:ring-[#FF2D20]"
                             >
                                 <!-- Cabecera clickable -->
                                 <button 
@@ -292,51 +314,21 @@
                                 </div>
                             </div>
                             </div> 
-                            <a
-                                href="{{ url('/ausencias') }}"
-                                class="flex items-start gap-4 rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] transition duration-300 hover:text-black/70 hover:ring-black/20 focus:outline-none focus-visible:ring-[#FF2D20] lg:pb-10 dark:bg-zinc-900 dark:ring-zinc-800 dark:hover:text-white/70 dark:hover:ring-zinc-700 dark:focus-visible:ring-[#FF2D20]"
+                            <a  id="6"
+                                href="{{ url('/doc') }}" 
+                                class="flex items-center gap-4 rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] transition duration-300 hover:text-black/70 hover:ring-black/20 focus:outline-none focus-visible:ring-[#FF2D20] lg:pb-10 dark:bg-zinc-900 dark:ring-zinc-800 dark:hover:text-white/70 dark:hover:ring-zinc-700 dark:focus-visible:ring-[#FF2D20]"
                             >
                                 <div class="flex size-12 shrink-0 items-center justify-center rounded-full sm:size-16">
-                                    <svg width="60" height="60" viewBox="0 0 24 24" role="img" aria-label="Calendario con X"
-                                    xmlns="http://www.w3.org/2000/svg">
-                                    <!-- Sombra suave -->
-                                        <rect x="2" y="3" width="20" height="18" rx="3" fill="#0F172A" opacity="0.08"/>
-                                        <!-- Cuerpo del calendario -->
-                                        <rect x="2" y="3" width="20" height="18" rx="3" fill="#FFFFFF"/>
-                                        <!-- Cabecera -->
-                                        <rect x="2" y="3" width="20" height="5" rx="3" fill="#E11D48"/>
-                                        <!-- Aros (anillas) -->
-                                        <rect x="6" y="2" width="2" height="3" rx="1" fill="#334155"/>
-                                        <rect x="16" y="2" width="2" height="3" rx="1" fill="#334155"/>
-
-                                        <!-- Líneas guía de la grilla (decorativo) -->
-                                        <path d="M4 10.5H20" stroke="#E5E7EB" stroke-width="1"/>
-                                        <path d="M4 14.5H20" stroke="#E5E7EB" stroke-width="1"/>
-
-                                        <!-- La X (usa currentColor para que puedas cambiarla con Tailwind) -->
-                                        <g transform="translate(0,1)">
-                                            <path d="M9 9 L15 15 M15 9 L9 15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                                        </g>
-
-                                        <!-- Borde -->
-                                        <rect x="2" y="3" width="20" height="18" rx="3" fill="none" stroke="#CBD5E1"/>
-                                    </svg>
+                                  <svg height="200px" width="200px" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512.001 512.001" xml:space="preserve" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path style="fill:#0084FF;" d="M332.803,10.449H95.726c-22.275,0-40.334,18.06-40.334,40.335v410.434 c0,22.276,18.059,40.334,40.334,40.334h320.546c22.275,0,40.334-18.059,40.334-40.334V134.253L332.803,10.449z"></path> <path style="fill:#10BAFC;" d="M373.139,134.253h83.467L332.806,10.451v83.47C332.803,116.195,350.861,134.253,373.139,134.253z"></path> <path d="M463.996,126.864L340.192,3.061C338.231,1.101,335.574,0,332.803,0H95.726C67.724,0,44.944,22.782,44.944,50.784v410.434 c0,28.001,22.781,50.783,50.783,50.783h320.546c28.002,0,50.783-22.781,50.783-50.783V134.253 C467.056,131.482,465.955,128.824,463.996,126.864z M343.255,35.679l88.127,88.126H373.14c-7.984,0-15.49-3.109-21.134-8.753 c-5.643-5.643-8.752-13.148-8.751-21.131L343.255,35.679L343.255,35.679z M416.274,491.102H95.726 c-16.479,0-29.885-13.406-29.885-29.885V50.784c0.001-16.479,13.407-29.886,29.885-29.886h226.631v73.021 c-0.002,13.565,5.28,26.318,14.871,35.909c9.592,9.592,22.345,14.874,35.911,14.874h73.018v316.515 C446.158,477.696,432.752,491.102,416.274,491.102z"></path> <path d="M275.092,351.492h-4.678c-5.77,0-10.449,4.678-10.449,10.449c0,5.771,4.679,10.449,10.449,10.449h4.678 c5.77,0,10.449-4.678,10.449-10.449C285.541,356.17,280.862,351.492,275.092,351.492z"></path> <path d="M236.61,351.492H135.118c-5.77,0-10.449,4.678-10.449,10.449c0,5.771,4.679,10.449,10.449,10.449H236.61 c5.77,0,10.449-4.678,10.449-10.449C247.059,356.17,242.381,351.492,236.61,351.492z"></path> <path d="M376.882,303.747H135.119c-5.77,0-10.449,4.678-10.449,10.449c0,5.771,4.679,10.449,10.449,10.449h241.763 c5.77,0,10.449-4.678,10.449-10.449C387.331,308.425,382.652,303.747,376.882,303.747z"></path> <path d="M376.882,256H135.119c-5.77,0-10.449,4.678-10.449,10.449s4.679,10.449,10.449,10.449h241.763 c5.77,0,10.449-4.678,10.449-10.449S382.652,256,376.882,256z"></path> <path d="M376.882,208.255H135.119c-5.77,0-10.449,4.678-10.449,10.449s4.679,10.449,10.449,10.449h241.763 c5.77,0,10.449-4.678,10.449-10.449C387.331,212.933,382.652,208.255,376.882,208.255z"></path> </g></svg>  
                                 </div>
 
                                 <div class="pt-3 sm:pt-5">
-                                    <h2 class="text-xl font-semibold text-black dark:text-white">AUSENCIAS</h2>
-
-                                    <p class="mt-4 text-sm/relaxed">
-                                        AGENDA DIARIA
-                                    </p>
-                                </div>
-
-                                <svg class="size-6 shrink-0 self-center stroke-[#FF2D20]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75"/></svg>
+                                    <h2 class="text-xl font-semibold text-black dark:text-white">DOCUMENTOS</h2>                                    
+                                </div>                                
                             </a>
                             <a
                                 href="http://www2.intranet.pjud/"
-                                class="flex items-start gap-4 rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] transition duration-300 hover:text-black/70 hover:ring-black/20 focus:outline-none focus-visible:ring-[#FF2D20] lg:pb-10 dark:bg-zinc-900 dark:ring-zinc-800 dark:hover:text-white/70 dark:hover:ring-zinc-700 dark:focus-visible:ring-[#FF2D20]"
-                            >
+                                class="flex items-start gap-4 rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] transition duration-300 hover:text-black/70 hover:ring-black/20 focus:outline-none focus-visible:ring-[#FF2D20] lg:pb-10 dark:bg-zinc-900 dark:ring-zinc-800 dark:hover:text-white/70 dark:hover:ring-zinc-700 dark:focus-visible:ring-[#FF2D20]">
                                 <div class="flex size-12 shrink-0 items-center justify-center rounded-full bg-[#FF2D20]/10 sm:size-16">
                                     <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M2.99902 3L20.999 21M9.8433 9.91364C9.32066 10.4536 8.99902 11.1892 8.99902 12C8.99902 13.6569 10.3422 15 11.999 15C12.8215 15 13.5667 14.669 14.1086 14.133M6.49902 6.64715C4.59972 7.90034 3.15305 9.78394 2.45703 12C3.73128 16.0571 7.52159 19 11.9992 19C13.9881 19 15.8414 18.4194 17.3988 17.4184M10.999 5.04939C11.328 5.01673 11.6617 5 11.9992 5C16.4769 5 20.2672 7.94291 21.5414 12C21.2607 12.894 20.8577 13.7338 20.3522 14.5" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
                                 </div>
