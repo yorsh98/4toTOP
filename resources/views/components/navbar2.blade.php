@@ -32,4 +32,19 @@
                     <a href="{{ url('/#7') }}" class="nav-icon flex size-12 shrink-0 items-center justify-center rounded-full bg-[#FF2D20]/10 sm:size-16">
                         <svg viewBox="0 0 1024 1024" class="icon" version="1.1" xmlns="http://www.w3.org/2000/svg" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M106.666667 810.666667V298.666667h810.666666v512c0 46.933333-38.4 85.333333-85.333333 85.333333H192c-46.933333 0-85.333333-38.4-85.333333-85.333333z" fill="#CFD8DC"></path><path d="M917.333333 213.333333v128H106.666667v-128c0-46.933333 38.4-85.333333 85.333333-85.333333h640c46.933333 0 85.333333 38.4 85.333333 85.333333z" fill="#F44336"></path><path d="M704 213.333333m-64 0a64 64 0 1 0 128 0 64 64 0 1 0-128 0Z" fill="#B71C1C"></path><path d="M320 213.333333m-64 0a64 64 0 1 0 128 0 64 64 0 1 0-128 0Z" fill="#B71C1C"></path><path d="M704 64c-23.466667 0-42.666667 19.2-42.666667 42.666667v106.666666c0 23.466667 19.2 42.666667 42.666667 42.666667s42.666667-19.2 42.666667-42.666667V106.666667c0-23.466667-19.2-42.666667-42.666667-42.666667zM320 64c-23.466667 0-42.666667 19.2-42.666667 42.666667v106.666666c0 23.466667 19.2 42.666667 42.666667 42.666667s42.666667-19.2 42.666667-42.666667V106.666667c0-23.466667-19.2-42.666667-42.666667-42.666667z" fill="#B0BEC5"></path><path d="M277.333333 426.666667h85.333334v85.333333h-85.333334zM405.333333 426.666667h85.333334v85.333333h-85.333334zM533.333333 426.666667h85.333334v85.333333h-85.333334zM661.333333 426.666667h85.333334v85.333333h-85.333334zM277.333333 554.666667h85.333334v85.333333h-85.333334zM405.333333 554.666667h85.333334v85.333333h-85.333334zM533.333333 554.666667h85.333334v85.333333h-85.333334zM661.333333 554.666667h85.333334v85.333333h-85.333334zM277.333333 682.666667h85.333334v85.333333h-85.333334zM405.333333 682.666667h85.333334v85.333333h-85.333334zM533.333333 682.666667h85.333334v85.333333h-85.333334zM661.333333 682.666667h85.333334v85.333333h-85.333334z" fill="#90A4AE"></path></g></svg>
                     </a>
+                    <a href="{{ url('/ausencias') }}"  class="nav-icon flex size-12 shrink-0 items-center justify-center rounded-full bg-[#FF2D20]/10 sm:size-16">
+                        <svg width="60" height="60" viewBox="0 0 24 24" role="img" aria-label="Calendario con X" xmlns="http://www.w3.org/2000/svg">                    
+                            <rect x="2" y="3" width="20" height="18" rx="3" fill="#0F172A" opacity="0.08"/>
+                            <rect x="2" y="3" width="20" height="18" rx="3" fill="#FFFFFF"/>
+                            <rect x="2" y="3" width="20" height="5" rx="3" fill="#E11D48"/>
+                            <rect x="6" y="2" width="2" height="3" rx="1" fill="#334155"/>
+                            <rect x="16" y="2" width="2" height="3" rx="1" fill="#334155"/>
+                            <path d="M4 10.5H20" stroke="#E5E7EB" stroke-width="1"/>
+                            <path d="M4 14.5H20" stroke="#E5E7EB" stroke-width="1"/>
+                            <g transform="translate(0,1)">
+                                <path d="M9 9 L15 15 M15 9 L9 15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            </g>
+                            <rect x="2" y="3" width="20" height="18" rx="3" fill="none" stroke="#CBD5E1"/>
+                        </svg>
+                    </a>
                 </nav>
