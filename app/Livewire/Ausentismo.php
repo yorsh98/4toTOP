@@ -132,23 +132,33 @@ class Ausentismo extends Component
 
     public function render()
     {
+        // Vigentes o futuras: término hoy o más adelante (excluye terminadas)
+        $hoy = now()->toDateString();
+
         $items = AusentismoModel::query()
+            ->where(function ($q) use ($hoy) {
+                $q->whereNull('fecha_termino')                  // si manejas ausencias “abiertas”
+                ->orWhereDate('fecha_termino', '>=', $hoy);   // o con término en el futuro/actual
+            })
             ->when($this->q, function ($q) {
                 $q->where(function ($qq) {
                     $qq->where('funcionario_nombre', 'like', "%{$this->q}%")
-                       ->orWhere('cargo', 'like', "%{$this->q}%")
-                       ->orWhere('tipo_permiso', 'like', "%{$this->q}%") // <-- también busca por tipo
-                       ->orWhere('observacion', 'like', "%{$this->q}%");
+                    ->orWhere('cargo', 'like', "%{$this->q}%")
+                    ->orWhere('tipo_permiso', 'like', "%{$this->q}%")
+                    ->orWhere('observacion', 'like', "%{$this->q}%");
                 });
             })
-            ->orderByDesc('fecha_inicio')
+            // Orden: primero las más antiguas (fecha_inicio asc), luego por fecha_termino asc
+            ->orderBy('fecha_inicio', 'asc')
+            ->orderBy('fecha_termino', 'asc')
             ->paginate($this->perPage);
 
-        // Dejo explícito el pase de variables por si quieres usarlas en el Blade
         return view('livewire.ausentismo', [
-            'items'           => $items,
-            'cargos'          => $this->cargos,
-            'tipos_ausencia'  => $this->tipos_ausencia,
+            'items'          => $items,
+            'cargos'         => $this->cargos,
+            'tipos_ausencia' => $this->tipos_ausencia,
         ]);
     }
+
+
 }
