@@ -21,6 +21,8 @@ use App\Http\Controllers\AdmAudvController;
 use App\Http\Controllers\MonitorController;
 use App\Http\Controllers\AudienciasExportController;
 use App\Http\Controllers\ausentismoController;
+use App\Http\Controllers\ausenciasController;
+
 
 Route::view('/', 'welcome');
 
@@ -90,6 +92,9 @@ Route::get('/audiencias/export/diaria', [AudienciasExportController::class, 'dia
 
 //Ruta para Sist Ausentismo
 Route::get('/ausentismo', [ausentismoController::class, 'index' ])->name('ausentismo')->middleware(['auth']);
+
+//Ruta para vista del sistema de ausentismo
+Route::get('/ausencias', [ausenciasController::class, 'index' ])->name('ausencias');
 
 Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
