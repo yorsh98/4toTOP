@@ -118,7 +118,7 @@
                         @endfor
 
                         <button type="submit" class="btn btn-success py-2 mt-2">
-                            Enviar Turno 3 (actualiza ID 2)
+                            Enviar Turno 3
                         </button>
                     </form>
                 </div>
