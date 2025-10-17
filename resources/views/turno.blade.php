@@ -98,7 +98,7 @@
                 </div>
             </details>
 
-            {{-- Módulo 3 (colapsable) -> usa TM1, TM2, TM3 con id=2 --}}
+            {{-- Módulo 3 (colapsable) -> usa TM1, TM2, TM3 con id=2 (turno 3 utiliza misma porcion en BD de turno ACD) --}}
             <details class="bg-white shadow-md rounded-lg">
                 <summary class="cursor-pointer select-none px-6 py-4 flex items-center justify-between">
                     <span class="text-lg font-semibold text-gray-700">Turno 3</span>
