@@ -91,7 +91,7 @@
         </div>
     </div>
     <!-- Tabla de guías -->
-    <div class="table-responsive rounded">
+    <div class="table-responsive rounded border">
         <table class="table table-striped table-hover">
             <thead class="table-light">
                 <tr>

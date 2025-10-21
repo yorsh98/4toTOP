@@ -7,8 +7,7 @@ use Illuminate\Support\Facades\Log;
 use GuzzleHttp\Exception\RequestException;
 use Illuminate\Support\Facades\Http;
 use App\Models\Funcionario;
-use App\Services\OService;
-use App\Services\LService;
+
 
 
 class SistOficioLibertadesController extends Controller
