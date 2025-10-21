@@ -1,5 +1,4 @@
 <x-app-layout>
-<x-insertbootstrap />
     @push('styles')
         <link href="https://cdn.datatables.net/2.2.2/css/dataTables.dataTables.min.css" rel="stylesheet">
     @endpush

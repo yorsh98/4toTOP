@@ -33,14 +33,8 @@ new class extends Component
 
                 <!--botton en navbar-->
                 <div class="hidden space-x-8 lg:-my-px lg:ms-10 lg:flex">
-                    <x-nav-link :href="route('oficio')" :active="request()->routeIs('oficio')" wire:navigate>
-                        {{ __('ADM Oficios') }}
-                    </x-nav-link>
-                </div>
-
-                <div class="hidden space-x-8 lg:-my-px lg:ms-10 lg:flex">
-                    <x-nav-link :href="route('libertad')" :active="request()->routeIs('libertad')" wire:navigate>
-                        {{ __('ADM Libertades') }}
+                    <x-nav-link :href="route('oficiolibertad')" :active="request()->routeIs('oficiolibertad')" wire:navigate>
+                        {{ __('ADM Oficios / Libertades') }}
                     </x-nav-link>
                 </div>
 
@@ -122,16 +116,8 @@ new class extends Component
 
         <div :class="{'block': open, 'hidden': ! open}" class="hidden lg:hidden">
             <div class="pt-2 pb-3 space-y-1">
-                <x-responsive-nav-link :href="route('oficio')" :active="request()->routeIs('oficio')" wire:navigate>
-                    {{ __('ADM Oficios') }}
-                </x-responsive-nav-link>
-            </div>
-        </div>
-
-        <div :class="{'block': open, 'hidden': ! open}" class="hidden lg:hidden">
-            <div class="pt-2 pb-3 space-y-1">
-                <x-responsive-nav-link :href="route('libertad')" :active="request()->routeIs('libertad')" wire:navigate>
-                    {{ __('ADM Libertades') }}
+                <x-responsive-nav-link :href="route('oficiolibertad')" :active="request()->routeIs('oficiolibertad')" wire:navigate>
+                    {{ __('ADM Oficios / Libertades') }}
                 </x-responsive-nav-link>
             </div>
         </div>
