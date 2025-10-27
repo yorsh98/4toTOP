@@ -27,7 +27,7 @@ class addfuncionarioController extends Controller
             'nombre' => $request->input('nombre'),
         ]);
 
-        return redirect()->route('addfuncionario')->with('success', 'Funcionario agregado correctamente.');
+        return redirect()->route('addfuncionario.index')->with('success', 'Funcionario agregado correctamente.');
     }
 
     public function enviarSolicitantes()
@@ -48,7 +48,7 @@ class addfuncionarioController extends Controller
     $funcionario->delete();
 
     // Redirigir de nuevo con un mensaje de éxito
-    return redirect()->route('addfuncionario')->with('success', 'Funcionario eliminado correctamente.');
+    return redirect()->route('addfuncionario.index')->with('success', 'Funcionario eliminado correctamente.');
     }
 
 }
