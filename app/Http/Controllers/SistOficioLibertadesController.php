@@ -1,85 +1,111 @@
 <?php
 
 namespace App\Http\Controllers;
-use GuzzleHttp\Client;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use GuzzleHttp\Exception\RequestException;
-use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\DB;
 use App\Models\Funcionario;
-
-
+use App\Models\Oficio;
+use App\Models\Libertad;
 
 class SistOficioLibertadesController extends Controller
 {
     public function index()
     {
-        
-        return view('SistOficioLibertades');
-        
+        // Para los <select> de SOLICITANTE
+        $solicitantes = Funcionario::select('nombre')->orderBy('nombre')->get();
+
+        return view('SistOficioLibertades', [
+            'solicitantes' => $solicitantes,
+        ]);
     }
-    public function create(){
-        return view('SistOficioLibertades');
+
+    public function create()
+    {
+        // Mismo contenido que index()
+        $solicitantes = Funcionario::select('nombre')->orderBy('nombre')->get();
+
+        return view('SistOficioLibertades', [
+            'solicitantes' => $solicitantes,
+        ]);
     }
-    
+
     public function store(Request $request)
     {
-        // Obtener los nombres de los funcionarios válidos
+        // Lista blanca de solicitantes (evita manipulación del <select>)
         $validSolicitantes = Funcionario::pluck('nombre')->toArray();
 
-        // Validar los datos del formulario
         $validated = $request->validate([
-            'tipo' => ['required', 'in:oficio,libertad'], // Solo permite 'oficio' o 'libertad'
-            'CausaAsig' => ['required', 'string', 'regex:/^[a-zA-Z0-9\s\-]{1,10}$/'], // Letras, números, espacios y guiones medios (-)
-            'UserSolicitante' => ['required', 'string', 'in:' . implode(',', $validSolicitantes)], // Valores permitidos
-            'UserDirigido' => ['required', 'string', 'regex:/^[a-zA-Z0-9\s\-]+$/'], // Letras, números, espacios y guiones medios (-)
+            'tipo'            => ['required', 'in:oficio,libertad'],
+            'CausaAsig'       => ['required', 'string', 'regex:/^[a-zA-Z0-9\s\-]{1,10}$/'],
+            'UserSolicitante' => ['required', 'string', 'in:' . implode(',', $validSolicitantes)],
+            'UserDirigido'    => ['required', 'string', 'regex:/^[a-zA-Z0-9\s\-]+$/'],
         ], [
-            'tipo.in' => 'El tipo de solicitud no es válido.',
-            'CausaAsig.regex' => 'El campo CAUSA ASIGNADA solo permite letras, números, espacios y guiones medios (-).',
-            'UserSolicitante.in' => 'El SOLICITANTE seleccionado no es válido.',
-            'UserDirigido.regex' => 'El campo MOTIVO solo permite letras, números, espacios y guiones medios (-).',
+            'tipo.in'             => 'El tipo de solicitud no es válido.',
+            'CausaAsig.regex'     => 'CAUSA ASIGNADA permite letras/números/espacios/guion (-), máx 10.',
+            'UserSolicitante.in'  => 'El SOLICITANTE seleccionado no es válido.',
+            'UserDirigido.regex'  => 'MOTIVO permite letras/números/espacios/guion (-).',
         ]);
 
-        // Seleccionar la URL de la API según el tipo de solicitud
-        $url = $validated['tipo'] === 'oficio'
-            ? 'http://10.13.214.129:8082/api/Oficio'
-            : 'http://10.13.214.129:8082/api/Libertad';
-        
-            try {
-                // Enviar los datos validados a la API
-                $response = Http::post($url, [
-                    'CausaAsig' => $validated['CausaAsig'],
-                    'UserSolicitante' => $validated['UserSolicitante'],
-                    'UserDirigido' => $validated['UserDirigido'],
-                ]);
-    
-                if ($response->successful()) {
-                    // Extraer las variables de la respuesta de la API
-                    $data = $response->json();
-                    $numEntregado = $data[$validated['tipo']]['Numentregado'] ?? null;
-                    $año = $data[$validated['tipo']]['año'] ?? null;
-    
-                    // Pasar los valores a la vista
-                    return redirect()->route('SistOficioLibertades.index')->with([
-                        'success' => 'Oficio/Libertad enviado correctamente',
-                        'NumEntregado' => $numEntregado,
-                        'año' => $año,
-                    ]);
-                } else {
-                    Log::error('Error al enviar el oficio o libertad', [
-                        'status' => $response->status(),
-                        'body' => $response->body(),
-                    ]);
-                    return redirect()->route('SistOficioLibertades.index')->with('error', 'Error al enviar la libertad u oficio.');
+        // Año por defecto según America/Santiago (tu preferencia)
+        $anio = now('America/Santiago')->year;
+
+        // Selecciona modelo según el tipo
+        $modelClass = $validated['tipo'] === 'oficio' ? Oficio::class : Libertad::class;
+
+        try {
+            $registro = DB::transaction(function () use ($modelClass, $validated, $anio) {
+                // 1) ¿Existe un número borrado (soft) de este año para reutilizar?
+                /** @var \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Builder $modelClass */
+                $candidato = $modelClass::onlyTrashed()
+                    ->where('año', $anio)
+                    ->orderBy('deleted_at', 'asc')
+                    ->lockForUpdate()
+                    ->first();
+
+                if ($candidato) {
+                    // Restaurar y actualizar campos
+                    $candidato->restore();
+                    $candidato->fill([
+                        'CausaAsig'       => $validated['CausaAsig'],
+                        'UserSolicitante' => $validated['UserSolicitante'],
+                        'UserDirigido'    => $validated['UserDirigido'],
+                    ])->save();
+
+                    return $candidato;
                 }
-            } catch (\Exception $e) {
-                // Manejar errores de la API
-                Log::error('Error de conexión con la API', ['message' => $e->getMessage()]);
-                return redirect()->route('SistOficioLibertades.index')->with('error', 'Error de conexión con la API.');
-            }
+
+                // 2) Si no hay candidato, correlativo max+1 entre activos del año
+                $max = $modelClass::whereNull('deleted_at')
+                    ->where('año', $anio)
+                    ->max('Numentregado');
+
+                $nuevo = new $modelClass();
+                $nuevo->Numentregado    = $max ? $max + 1 : 1;
+                $nuevo->año             = $anio;
+                $nuevo->CausaAsig       = $validated['CausaAsig'];
+                $nuevo->UserSolicitante = $validated['UserSolicitante'];
+                $nuevo->UserDirigido    = $validated['UserDirigido'];
+                $nuevo->save();
+
+                return $nuevo;
+            }, 3);
+
+            return redirect()
+                ->route('SistOficioLibertades.index')
+                ->with([
+                    'success'      => 'Solicitud ingresada correctamente.',
+                    'tipo'         => $validated['tipo'], // para el título del modal
+                    'NumEntregado' => $registro->Numentregado,
+                    'año'          => $registro->año,
+                ]);
+
+        } catch (\Throwable $e) {
+            Log::error('Fallo en store SistOficioLibertades', ['msg' => $e->getMessage()]);
+            return redirect()
+                ->route('SistOficioLibertades.index')
+                ->with('error', 'No fue posible registrar la solicitud. Intenta nuevamente.');
         }
-    
+    }
 }
-
-
-
