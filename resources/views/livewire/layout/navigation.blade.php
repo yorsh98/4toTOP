@@ -39,7 +39,7 @@ new class extends Component
                 </div>
 
                 <div class="hidden space-x-8 lg:-my-px lg:ms-10 lg:flex">
-                    <x-nav-link :href="route('addfuncionario')" :active="request()->routeIs('addfuncionario')" wire:navigate>
+                    <x-nav-link :href="route('addfuncionario.index')" :active="request()->routeIs('addfuncionario')" wire:navigate>
                         {{ __('Funcionarios') }}
                     </x-nav-link>
                 </div>
@@ -124,7 +124,7 @@ new class extends Component
 
         <div :class="{'block': open, 'hidden': ! open}" class="hidden lg:hidden">
             <div class="pt-2 pb-3 space-y-1">
-                <x-responsive-nav-link :href="route('addfuncionario')" :active="request()->routeIs('addfuncionario')" wire:navigate>
+                <x-responsive-nav-link :href="route('addfuncionario.index')" :active="request()->routeIs('addfuncionario')" wire:navigate>
                     {{ __('Funcionarios') }}
                 </x-responsive-nav-link>
             </div>

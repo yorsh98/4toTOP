@@ -1,244 +1,265 @@
+<x-sist-layout>
+  <style>
+    /* === Flip en la TARJETA AZUL === */
+    #blueCard {
+      perspective: 500px;
+      position: relative;        /* contexto para faces absolutas */
+      overflow: hidden;          /* oculta scroll si las caras exceden */
+    }
+    #blueCard .flip-inner {
+      position: relative;
+      width: 100%;
+      min-height: 460px;         /* alto mínimo del panel */
+      transition: transform .6s ease;
+      transform-style: preserve-3d;
+    }
+    #blueCard.flipped .flip-inner {
+      transform: rotateY(180deg);
+    }
 
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solicitud OFICIO/LIBERTADES </title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto|Varela+Round">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-    <link rel="stylesheet" href="/css/app.css">
-    <link rel="icon" href="{{ asset('favicon.webp') }}" type="image/webp">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-</head>
-<body>
-    <x-headerSist />
-    <main class="container main-container" id="main-content">
-        <h1 class="text-3xl font-bold mb-4">SOLICITUD PARA NUMEROS OFICIO / LIBERTAD</h1>
-        <hr>
-        <button class="button-Principal" onclick="showElement('form1')" role="button">OFICIO</button>
-        <br><br>
-        <button class="button-Principal" onclick="showElement('form2')" role="button">LIBERTAD</button>
-    </main>
-            <div id="form1" class="hidden rotateY-180-reverse">
-                <main class="container main-container" id="main-content">
-                    <h1 class="text-3xl font-bold mb-4">SOLICITUD PARA NUMEROS OFICIO</h1>
-                    <hr>
-                            <div id="alert-message-form1" class="alert alert-danger d-none" role="alert">
-                                <span id="alert-text-form1"></span>
-                                <button type="button" class="btn-close" aria-label="Cerrar" onclick="closeAlert('form1')"></button>
-                            </div>
+    #blueCard .face {
+      position: absolute; inset: 0;
+      -webkit-backface-visibility: hidden; backface-visibility: hidden;
+      padding: 1.25rem;
+      display: flex; flex-direction: column;
+    }
+    #blueCard .back { transform: rotateY(180deg); }
 
-                            <form id="solicitudForm1" action="{{ route('SistOficioLibertades.store') }}" method="POST" class="form-container needs-validation" onsubmit="return validateForm(this, 'form1')">
-                                @csrf
-                                <input type="hidden" name="tipo" value="oficio">
-                                <div class="input-group input-group-lg">
-                                    <span class="input-group-text" id="inputGroup-sizing-lg">CAUSA ASIGNADA</span>
-                                    <input type="text" class="form-control" id="CausaAsig" name="CausaAsig"  required pattern="^[a-zA-Z0-9\s\-]{1,10}$" maxlength="10">
-                                </div><br>
+    /* Si contenido crece, que scrollee dentro de la cara, no fuera del card */
+    #blueCard .face { overflow: auto; }
+  </style>
 
-                                <select class="form-select form-select-lg mb-3" id="UserSolicitante" name="UserSolicitante" required>
-                                    <option value="" disabled selected>SOLICITANTE</option>
-                                    @foreach($solicitantes as $solicitante)
-                                        <option value="{{ $solicitante->nombre }}">{{ $solicitante->nombre }}</option>
-                                    @endforeach
-                                </select>
+  <!-- Contenedor normal (NO gira) -->
+  <main class="max-w-[680px] w-full mx-auto px-4 py-5">
 
-                                <div class="input-group input-group-lg">
-                                    <span class="input-group-text" id="inputGroup-sizing-lg">MOTIVO</span>
-                                    <input type="text" class="form-control" id="UserDirigido" name="UserDirigido" required pattern="^[a-zA-Z0-9\s\-]+$">
-                                </div><hr>
+    <!-- TARJETA AZUL que gira -->
+    <div id="blueCard"
+         class="border-3 rounded-[15px] p-1 bg-[#95b9d3] max-w-[600px] w-full mx-auto text-center">
 
-                                <button type="submit" class="button-73">ENVIAR SOLICITUD</button>
-                                <div id="alert-message" class="hidden">
-                                    <p id="alert-text"></p>
-                                    <button onclick="closeAlert()">Cerrar</button>
-                                </div>
-                            </form>
+      <div class="flip-inner">
+        <!-- Cara FRONTAL (botones) -->
+        <section class="face">
+          <div class="mb-3">
+            <h1 class="text-3xl fw-bold">SOLICITUD PARA NÚMEROS</h1>
+            <h1 class="text-3xl fw-bold">OFICIO / LIBERTAD</h1>
+          </div>
 
+          <!-- panel blanco interno solo para contraste visual -->
+          <div class=" rounded-3 p-2 mx-auto w-full">           
+            <div class="d-flex flex-wrap gap-3 justify-content-center">
+              <button type="button" class="button-Principal" onclick="selectForm('oficio')">OFICIO</button>
+              <button type="button" class="button-Principal" onclick="selectForm('libertad')">LIBERTAD</button>
+            </div>
+          </div>
+        </section>
 
-                </main>
+        <!-- Cara POSTERIOR (formularios) -->
+        <section class="face back text-start">
+          <div class="d-flex align-items-center justify-content-between mb-3">
+            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="flipBack()">← Volver</button>
+            <div class="text-end">
+              <span class="text-muted small">Módulo:</span>
+              <strong id="flipTitle" class="ms-1">—</strong>
+            </div>
+          </div>
+
+          <!-- Alertas -->
+          <div id="alert-message-form1" class="alert alert-danger d-none mb-3" role="alert">
+            <span id="alert-text-form1"></span>
+            <button type="button" class="btn-close float-end" aria-label="Cerrar" onclick="closeAlert('form1')"></button>
+          </div>
+          <div id="alert-message-form2" class="alert alert-danger d-none mb-3" role="alert">
+            <span id="alert-text-form2"></span>
+            <button type="button" class="btn-close float-end" aria-label="Cerrar" onclick="closeAlert('form2')"></button>
+          </div>
+
+          <!-- ===== FORM OFICIO ===== -->
+          <form id="form1"
+                class="needs-validation d-none"
+                action="{{ route('SistOficioLibertades.store') }}"
+                method="POST"
+                novalidate
+                onsubmit="return validateForm(this, 'form1')">
+            @csrf
+            <input type="hidden" name="tipo" value="oficio">
+
+            <h3 class="h5 fw-semibold mb-2">Solicitud para números de OFICIO</h3>
+            <hr class="mt-0 mb-3">
+
+            <div class="input-group input-group-lg mb-3">
+              <span class="input-group-text">CAUSA ASIGNADA</span>
+              <input type="text" class="form-control"
+                     id="CausaAsigOf" name="CausaAsig"
+                     required pattern="^[a-zA-Z0-9\s\-]{1,10}$" maxlength="10">
+              <div class="invalid-feedback">Máx 10, letras/números/espacios/guion (-).</div>
             </div>
 
-            <div id="form2" class="hidden rotateY-180">
-                 <main class="container main-container" id="main-content">
-                    <h1 class="text-3xl font-bold mb-4">SOLICITUD PARA NUMEROS DE LIBERTAD</h1>
-                    <hr>
-                    <div id="alert-message-form2" class="alert alert-danger d-none" role="alert">
-                                <span id="alert-text-form2"></span>
-                                <button type="button" class="btn-close" aria-label="Cerrar" onclick="closeAlert('form2')"></button>
-                            </div>
+            <div class="mb-3">
+              <select class="form-select form-select-lg"
+                      id="UserSolicitanteOf" name="UserSolicitante" required>
+                <option value="" disabled selected>SOLICITANTE</option>
+                @foreach($solicitantes as $solicitante)
+                  <option value="{{ $solicitante->nombre }}">{{ $solicitante->nombre }}</option>
+                @endforeach
+              </select>
+              <div class="invalid-feedback">Seleccione un solicitante válido.</div>
+            </div>
 
-                            <form id="solicitudForm2" action="{{ route('SistOficioLibertades.store') }}" method="POST" class="form-container needs-validation" onsubmit="return validateForm(this, 'form2')">
-                                @csrf
-                                <input type="hidden" name="tipo" value="libertad">
-                                <div class="input-group input-group-lg">
-                                    <span class="input-group-text" id="inputGroup-sizing-lg">CAUSA ASIGNADA</span>
-                                    <input type="text" class="form-control" id="CausaAsig" name="CausaAsig" required pattern="^[a-zA-Z0-9\s\-]{1,10}$" maxlength="10">
-                                </div><br>
+            <div class="input-group input-group-lg mb-3">
+              <span class="input-group-text">MOTIVO</span>
+              <input type="text" class="form-control"
+                     id="UserDirigidoOf" name="UserDirigido"
+                     required pattern="^[a-zA-Z0-9\s\-]+$">
+              <div class="invalid-feedback">Solo letras/números/espacios/guion (-).</div>
+            </div>
 
-                                <select class="form-select form-select-lg mb-3" id="UserSolicitante" name="UserSolicitante" required>
-                                <option value="" disabled selected>SOLICITANTE</option>
-                                    @foreach($solicitantes as $solicitante)
-                                        <option value="{{ $solicitante->nombre }}">{{ $solicitante->nombre }}</option>
-                                    @endforeach
-                                </select>
+            <div class="d-flex justify-content-center">
+              <button type="submit" class="button-73">ENVIAR SOLICITUD</button>
+            </div>
+          </form>
 
-                                <div class="input-group input-group-lg">
-                                    <span class="input-group-text" id="inputGroup-sizing-lg">MOTIVO</span>
-                                    <input type="text" class="form-control" id="UserDirigido" name="UserDirigido" required pattern="^[a-zA-Z0-9\s\-]+$">
-                                </div><hr>
+          <!-- ===== FORM LIBERTAD ===== -->
+          <form id="form2"
+                class="needs-validation d-none"
+                action="{{ route('SistOficioLibertades.store') }}"
+                method="POST"
+                novalidate
+                onsubmit="return validateForm(this, 'form2')">
+            @csrf
+            <input type="hidden" name="tipo" value="libertad">
 
-                                <button type="submit" class="button-73">ENVIAR SOLICITUD</button>
-                                <div id="alert-message" class="hidden">
-                                    <p id="alert-text"></p>
-                                    <button onclick="closeAlert()">Cerrar</button>
-                                </div>
-                            </form>
-                </main> 
-            
-             </div>
+            <h3 class="h5 fw-semibold mb-2">Solicitud para números de LIBERTAD</h3>
+            <hr class="mt-0 mb-3">
 
-        <div class="text-center">
-</div>
+            <div class="input-group input-group-lg mb-3">
+              <span class="input-group-text">CAUSA ASIGNADA</span>
+              <input type="text" class="form-control"
+                     id="CausaAsigLi" name="CausaAsig"
+                     required pattern="^[a-zA-Z0-9\s\-]{1,10}$" maxlength="10">
+              <div class="invalid-feedback">Máx 10, letras/números/espacios/guion (-).</div>
+            </div>
 
-<!-- Modal HTML -->
-<!-- Modal de éxito -->
-<div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-confirm"">
-    <div class="modal-content">
-      <div class="modal-header justify-content-center">
-                <div class="icon-box">
-					<i class="material-icons">&#xE876;</i>
-				</div>
-        <h5 class="modal-title" id="successModalLabel"></h5>
-        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-      </div>
-      <div class="modal-body text-center">
-        {{ session('success') }}
-				<h4>Solicitud exitosa!</h4>	
-				<p>Tu numero de OFICIO / LIBERTAD es: </p>
-                <h4><strong>{{ session('NumEntregado') }}-{{ session('año') }}</strong></h4>
-				<a class="btn btn-success" href="{{ url('/SistOficioLibertades') }}" data-dismiss="modal"><span>Volver al Inicio</span> <i class="material-icons">&#xE5C8;</i></a>                
-			</div>
-      </div>
-      <div class="modal-footer">
-        
-      </div>
-    </div>
-  </div>
-</div>
+            <div class="mb-3">
+              <select class="form-select form-select-lg"
+                      id="UserSolicitanteLi" name="UserSolicitante" required>
+                <option value="" disabled selected>SOLICITANTE</option>
+                @foreach($solicitantes as $solicitante)
+                  <option value="{{ $solicitante->nombre }}">{{ $solicitante->nombre }}</option>
+                @endforeach
+              </select>
+              <div class="invalid-feedback">Seleccione un solicitante válido.</div>
+            </div>
 
-<!-- Modal de error -->
-<div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header bg-danger text-white">
-        <h5 class="modal-title" id="errorModalLabel">Error</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-      </div>
-      <div class="modal-body">
-        {{ session('error') }}
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            <div class="input-group input-group-lg mb-3">
+              <span class="input-group-text">MOTIVO</span>
+              <input type="text" class="form-control"
+                     id="UserDirigidoLi" name="UserDirigido"
+                     required pattern="^[a-zA-Z0-9\s\-]+$">
+              <div class="invalid-feedback">Solo letras/números/espacios/guion (-).</div>
+            </div>
+
+            <div class="d-flex justify-content-center">
+              <button type="submit" class="button-73">ENVIAR SOLICITUD</button>
+            </div>
+          </form>
+        </section>
       </div>
     </div>
-  </div>
-</div>
-    <x-footer-sol />
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
-    <script src="/js/app.js"></script>
-    
-    <script>
 
-function solicitarOtroNumero() {
-        
-    $(document).on('click', '[data-dismiss="modal"]', function() {
-    $('#successModal').modal('hide');
-});
+    <!-- Modales Bootstrap (como los tenías) -->
+    <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-confirm">
+        <div class="modal-content">
+          <div class="modal-header justify-content-center">
+            <div class="icon-box"><i class="material-icons">&#xE876;</i></div>
+            <h5 class="modal-title" id="successModalLabel">
+              {{ session('tipo') === 'oficio' ? 'Oficio creado' : (session('tipo') === 'libertad' ? 'Libertad creada' : '') }}
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+          </div>
+          <div class="modal-body text-center">
+            {{ session('success') }}
+            <h4 class="mt-2">¡Solicitud exitosa!</h4>
+            <p class="mb-1">Tu número de {{ session('tipo') === 'oficio' ? 'OFICIO' : 'LIBERTAD' }} es:</p>
+            <h4 class="mb-3"><strong>{{ session('NumEntregado') }}-{{ session('año') }}</strong></h4>
+            <a class="btn btn-success" href="{{ url('/SistOficioLibertades') }}">Volver al Inicio</a>
+          </div>
+        </div>
+      </div>
+    </div>
 
-    
-        // Cerrar el modal
-        $('successModal').modal('hide');  // Reemplaza 'myModal' con el ID real de tu modal
-       
+    <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header bg-danger text-white">
+            <h5 class="modal-title" id="errorModalLabel">Error</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+          </div>
+          <div class="modal-body">{{ session('error') }}</div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  {{-- Bootstrap bundle (si no está en tu layout) --}}
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+          crossorigin="anonymous"></script>
+
+  <script>
+    let currentForm = null; // 'oficio' | 'libertad'
+
+    function selectForm(tipo){
+      currentForm = tipo;
+
+      // Título módulo
+      document.getElementById('flipTitle').textContent = (tipo === 'oficio') ? 'OFICIO' : 'LIBERTAD';
+
+      // Mostrar solo el formulario elegido
+      document.getElementById('form1').classList.toggle('d-none', !(tipo === 'oficio'));
+      document.getElementById('form2').classList.toggle('d-none', !(tipo === 'libertad'));
+
+      // ✅ Voltear la TARJETA AZUL
+      document.getElementById('blueCard').classList.add('flipped');
+
+      // Limpiar alertas
+      closeAlert('form1'); closeAlert('form2');
     }
-    
-    document.addEventListener("DOMContentLoaded", function() {
-        // Comprobar si existen mensajes de éxito o error desde PHP con valores en atributos data
-        var successMessage = "{{ session('success') }}";
-        var errorMessage = "{{ session('error') }}";
 
-        if (successMessage) {
-            var successModal = new bootstrap.Modal(document.getElementById('successModal'));
-            successModal.show();
-        }
+    function flipBack(){
+      document.getElementById('blueCard').classList.remove('flipped');
+      currentForm = null;
+    }
 
-        if (errorMessage) {
-            var errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
-            errorModal.show();
+    function validateForm(form, formId){
+      if (!form.checkValidity()) {
+        const alertBox = document.getElementById(`alert-message-${formId}`);
+        const alertTxt  = document.getElementById(`alert-text-${formId}`);
+        if (alertBox && alertTxt) {
+          alertTxt.textContent = 'Revisa los campos marcados en rojo. Respeta los formatos solicitados.';
+          alertBox.classList.remove('d-none');
         }
+        form.classList.add('was-validated');
+        return false;
+      }
+      return true;
+    }
+
+    function closeAlert(formId){
+      const alertBox = document.getElementById(`alert-message-${formId}`);
+      if (alertBox) alertBox.classList.add('d-none');
+    }
+
+    // Mostrar modales según flash (si sigues usando Bootstrap)
+    document.addEventListener('DOMContentLoaded', () => {
+      const success = @json(session('success'));
+      const error   = @json(session('error'));
+      if (success) bootstrap.Modal.getOrCreateInstance('#successModal').show();
+      if (error)   bootstrap.Modal.getOrCreateInstance('#errorModal').show();
     });
-
-    // Bootstrap 5 validation
-    (function() {
-        'use strict'
-        var forms = document.querySelectorAll('.needs-validation')
-        Array.prototype.slice.call(forms).forEach(function(form) {
-            form.addEventListener('submit', function(event) {
-                if (!form.checkValidity()) {
-                    event.preventDefault()
-                    event.stopPropagation()
-                }
-                form.classList.add('was-validated')
-            }, false)
-        })
-    })()
-
-
-    
-    /*
-    document.getElementById('solicitudForm').addEventListener('submit', async function (e) {
-    e.preventDefault(); // Evita el envío tradicional del formulario
-
-    let formData = new FormData(this);
-
-    try {
-        let response = await fetch(this.action, {
-            method: 'POST',
-            body: formData,
-        });
-
-        let result = await response.json();
-
-        if (result.success) {
-            alert('Solicitud enviada con éxito');
-            console.log('Datos recibidos:', result.data);
-        } else {
-            alert('Error: ' + result.message);
-        }
-    } catch (error) {
-        alert('Error al enviar la solicitud');
-        console.error('Error:', error);
-    }
-});  */
-
-//axios.defaults.headers.common['X-CSRF-TOKEN'] = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-
-</script>
-
-    
-</body>
-</html>
-
-
-
-
+  </script>
+</x-sist-layout>

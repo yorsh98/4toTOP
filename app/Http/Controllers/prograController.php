@@ -9,7 +9,7 @@ class prograController extends Controller{
     
     public function index(){
        
-        return view('progra');
+        return redirect()->route('progra.mostrar');
     }
 
     public function mostrar()

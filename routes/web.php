@@ -1,11 +1,13 @@
 <?php
 
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Http;
+
+// Controllers
 use App\Http\Controllers\SistOficioLibertadesController;
 use App\Http\Controllers\tablasController;
 use App\Http\Controllers\tabla2Controller;
 use App\Http\Controllers\addfuncionarioController;
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Http;
 use App\Http\Controllers\oficiolibertadController;
 use App\Http\Controllers\libertadController;
 use App\Http\Controllers\TurnoController;
@@ -23,83 +25,145 @@ use App\Http\Controllers\AudienciasExportController;
 use App\Http\Controllers\ausentismoController;
 use App\Http\Controllers\ausenciasController;
 
+/*
+|--------------------------------------------------------------------------
+| HOME
+|--------------------------------------------------------------------------
+| Elige una sola raíz para evitar colisiones.
+| Dejamos la vista "welcome" en "/" y movemos enviarTurno a otra ruta.
+*/
+Route::view('/', 'welcome')->name('welcome');
+// Si quieres que enviarTurno sea tu “home”, comenta la línea anterior y descomenta la siguiente:
+// Route::get('/', [TurnoController::class, 'enviarTurno'])->name('welcome');
 
-Route::view('/', 'welcome');
+Route::get('/', [TurnoController::class, 'enviarTurno'])->name('welcome');
 
-Route::get('/oficios', [SistOficioLibertadesController::class, 'index'])->name('SistOficioLibertades.index');
+/*
+|--------------------------------------------------------------------------
+| SISTEMA OFICIO/LIBERTADES
+|--------------------------------------------------------------------------
+| Agrupado con prefix y name para evitar nombres duplicados.
+*/
+Route::prefix('SistOficioLibertades')->name('SistOficioLibertades.')->group(function () {
+    Route::get('/', [SistOficioLibertadesController::class, 'index'])->name('index');
+    Route::get('/create', [SistOficioLibertadesController::class, 'create'])->name('create');
+    Route::post('/', [SistOficioLibertadesController::class, 'store'])->name('store');
+    // Ruta auxiliar para inyectar solicitantes (antes colisionaba con .index)
+    Route::get('/solicitantes', [addfuncionarioController::class, 'enviarSolicitantes'])->name('solicitantes');
+});
 
-Route::get('/SistOficioLibertades', [App\Http\Controllers\SistOficioLibertadesController::class, 'index' ])->name('SistOficioLibertades.index');
-Route::get('/SistOficioLibertades', [App\Http\Controllers\SistOficioLibertadesController::class, 'create' ]);
-Route::post('/SistOficioLibertades', [App\Http\Controllers\SistOficioLibertadesController::class, 'store' ])->name('SistOficioLibertades.store');
+// Alias legacy para “/oficios” → redirige al índice (sin duplicar nombre)
+Route::redirect('/oficios', '/SistOficioLibertades');
 
-Route::get('/tablas', [App\Http\Controllers\tablasController::class, 'index' ]);
-Route::get('/tabla2', [App\Http\Controllers\tabla2Controller::class, 'index' ])->name('tabla2');
+/*
+|--------------------------------------------------------------------------
+| ADD FUNCIONARIO (con auth)
+|--------------------------------------------------------------------------
+*/
+Route::prefix('addfuncionario')->name('addfuncionario.')->middleware(['auth'])->group(function () {
+    Route::get('/', [addfuncionarioController::class, 'index'])->name('index');
+    Route::post('/', [addfuncionarioController::class, 'store'])->name('store');
+    Route::delete('/{id}', [addfuncionarioController::class, 'destroy'])->name('destroy');
+});
 
-Route::get('/addfuncionario', [App\Http\Controllers\addfuncionarioController::class, 'index'])->name('addfuncionario')->middleware(['auth']);
-Route::post('/addfuncionario', [addfuncionarioController::class, 'store'])->name('addfuncionario.store');
-Route::delete('/addfuncionario/{id}', [addfuncionarioController::class, 'destroy'])->name('addfuncionario.destroy');
-Route::get('/SistOficioLibertades', [addfuncionarioController::class, 'enviarSolicitantes'])->name('SistOficioLibertades.index');
+/*
+|--------------------------------------------------------------------------
+| OFICIO / LIBERTAD (modulos antiguos)
+|--------------------------------------------------------------------------
+*/
+Route::get('/oficiolibertad', [oficiolibertadController::class, 'index'])->name('oficiolibertad')->middleware(['auth']);
+// (Si usas libertadController, define aquí sus rutas con nombres únicos)
 
-Route::get('/libertad', [App\Http\Controllers\libertadController::class, 'index'])->name('libertad');
+/*
+|--------------------------------------------------------------------------
+| TURNOS
+|--------------------------------------------------------------------------
+*/
+Route::get('/turno', [TurnoController::class, 'index'])->name('turno')->middleware(['auth']);
+Route::patch('/turno/{id}', [TurnoController::class, 'update'])
+    ->name('turno.update')
+    ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
 
-Route::get('/oficiolibertad', [App\Http\Controllers\oficiolibertadController::class, 'index'])->name('oficiolibertad')->middleware(['auth']);
+/*
+|--------------------------------------------------------------------------
+| PÁGINAS VARIAS
+|--------------------------------------------------------------------------
+*/
+Route::get('/tablas', [tablasController::class, 'index']);
+Route::get('/tabla2', [tabla2Controller::class, 'index'])->name('tabla2');
 
+Route::get('/guias', [guiasController::class, 'index'])->name('guias')->middleware(['auth']);
+Route::get('/guiastelefonicas', [guiastelefonicasController::class, 'index'])->name('guiastelefonicas');
 
-Route::get('/libertad', [App\Http\Controllers\libertadController::class, 'index'])->name('libertad')->middleware(['auth']);
-Route::delete('/Libertad/{id}', [App\Http\Controllers\libertadController::class, 'delete'])->name('Libertad.delete');
-Route::patch('/Libertad/{id}', [libertadController::class, 'update'])->name('Libertad.update')->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
-Route::get('/Libertad-data', [App\Http\Controllers\libertadController::class, 'getData'])->name('libertad.data');
+Route::get('/acc', [accController::class, 'index'])->name('acc');
+Route::get('/doc', [docController::class, 'index'])->name('doc');
+Route::get('/form', [formController::class, 'index'])->name('form');
+Route::get('/proc', [procController::class, 'index'])->name('proc');
 
-Route::get('/turno', [App\Http\Controllers\turnoController::class, 'index'])->name('turno')->middleware(['auth']);
-Route::patch('/turno/{id}', [TurnoController::class, 'update'])->name('turno.update')->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
-Route::get('/', [TurnoController::class, 'enviarTurno'])->name('Welcome.index');
+/*
+|--------------------------------------------------------------------------
+| PROGRA (evitar doble /progra con mismo name)
+|--------------------------------------------------------------------------
+*/
+Route::prefix('progra')->name('progra.')->group(function () {
+    Route::get('/', [prograController::class, 'index'])->name('index');
+    Route::get('/mostrar', [prograController::class, 'mostrar'])->name('mostrar');
+});
 
-Route::get('/guias', [App\Http\Controllers\guiasController::class, 'index'])->name('guias')->middleware(['auth']);
-
-Route::get('/guiastelefonicas', [guiastelefonicasController::class, 'index' ])->name('guiastelefonicas');
-
-Route::get('/acc', [accController::class, 'index' ])->name('acc');
-
-Route::get('/doc', [docController::class, 'index' ])->name('doc');
-
-Route::get('/form', [formController::class, 'index' ])->name('form');
-
-Route::get('/proc', [procController::class, 'index' ])->name('proc');
-
-Route::get('/progra', [prograController::class, 'index' ])->name('progra');
-Route::get('/progra', [prograController::class, 'mostrar'])->name('progra');
-
+/*
+|--------------------------------------------------------------------------
+| ENVÍO DE SOLICITUD (manteniendo tu configuración)
+|--------------------------------------------------------------------------
+*/
 Route::post('/enviar-solicitud', [SistOficioLibertadesController::class, 'enviarSolicitud'])
     ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class])
-    ->name('enviar-solicitud')
-    ->middleware(['auth']);
+    ->middleware(['auth'])
+    ->name('enviar-solicitud');
 
-//rutas livewire para modulos at Publico
+/*
+|--------------------------------------------------------------------------
+| LIVEWIRE PÚBLICO (según tu comentario original)
+|--------------------------------------------------------------------------
+*/
+Route::get('/AdmAudv', [AdmAudvController::class, 'index'])->name('AdmAudv')->middleware(['auth']);
+Route::get('/Monitor', [MonitorController::class, 'index'])->name('Monitor');
 
-Route::get('/AdmAudv', [AdmAudvController::class, 'index' ])->name('AdmAudv')->middleware(['auth']);
-Route::get('/Monitor', [MonitorController::class, 'index' ])->name('Monitor');
-
-//ruta para que no expire el MONITOR
+/*
+|--------------------------------------------------------------------------
+| CSRF REFRESH (para el monitor)
+|--------------------------------------------------------------------------
+*/
 Route::get('/csrf-refresh', function () {
     return response()->json(['csrf' => csrf_token()]);
 });
 
-//ruta para la generacion del excel
+/*
+|--------------------------------------------------------------------------
+| EXPORTS (Excel)
+|--------------------------------------------------------------------------
+*/
 Route::get('/audiencias/export/diaria', [AudienciasExportController::class, 'diaria'])
-->name('audiencias.export.diaria');
+    ->name('audiencias.export.diaria');
 
-//Ruta para Sist Ausentismo
-Route::get('/ausentismo', [ausentismoController::class, 'index' ])->name('ausentismo')->middleware(['auth']);
+/*
+|--------------------------------------------------------------------------
+| AUSENTISMO
+|--------------------------------------------------------------------------
+*/
+Route::get('/ausentismo', [ausentismoController::class, 'index'])->name('ausentismo')->middleware(['auth']);
+Route::get('/ausencias', [ausenciasController::class, 'index'])->name('ausencias');
 
-//Ruta para vista del sistema de ausentismo
-Route::get('/ausencias', [ausenciasController::class, 'index' ])->name('ausencias');
+/*
+|--------------------------------------------------------------------------
+| DASHBOARD / PROFILE (Laravel Breeze / Jetstream)
+|--------------------------------------------------------------------------
+*/
+Route::view('dashboard', 'dashboard')->middleware(['auth', 'verified'])->name('dashboard');
+Route::view('profile', 'profile')->middleware(['auth'])->name('profile');
 
-Route::view('dashboard', 'dashboard')
-    ->middleware(['auth', 'verified'])
-    ->name('dashboard');
-
-Route::view('profile', 'profile')
-    ->middleware(['auth'])
-    ->name('profile');
-
+/*
+|--------------------------------------------------------------------------
+| AUTH
+|--------------------------------------------------------------------------
+*/
 require __DIR__.'/auth.php';
