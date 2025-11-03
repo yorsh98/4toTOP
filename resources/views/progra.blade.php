@@ -133,6 +133,17 @@
 .progra .juez-info h4{font-size:16px;font-weight:600;margin:0 0 4px;color:var(--texto)}
 .progra .juez-info p{font-size:14px;color:var(--sec);font-weight:500;margin:0}
 
+/*BTN excel */
+.progra .fecha-toolbar .btn-excel{
+  background:#10b981;           /* verde */
+  color:#fff;
+  border:1px solid #10b981;
+}
+.progra .fecha-toolbar .btn-excel:hover{
+  background:#059669;
+  border-color:#059669;
+}
+
 /* Responsive */
 @media(max-width:768px){
   .progra .card-header{font-size:15px}
@@ -183,14 +194,40 @@
             $nextStr = \Carbon\Carbon::parse($fecha, $tz)->addDay()->toDateString();
           @endphp
           <div class="fecha-toolbar">
-            <a class="btn" href="{{ url()->current() }}?fecha={{ $prevStr }}"><i class="fa-solid fa-chevron-left"></i> Anterior</a>
-            <form method="GET" action="{{ url()->current() }}" style="display:flex; gap:10px; align-items:center;">
-              <input type="date" name="fecha" value="{{ $fecha }}" />
-              <button type="submit" class="btn"><i class="fa-regular fa-calendar"></i> Ver</button>
-            </form>
-            <a class="btn" href="{{ url()->current() }}?fecha={{ $hoyStr }}"><i class="fa-regular fa-clock"></i> Hoy</a>
-            <a class="btn" href="{{ url()->current() }}?fecha={{ $nextStr }}">Siguiente <i class="fa-solid fa-chevron-right"></i></a>
-          </div>
+  {{-- Anterior --}}
+  <a class="btn" href="{{ url()->current() }}?fecha={{ $prevStr }}">
+    <i class="fa-solid fa-chevron-left"></i> Anterior
+  </a>
+
+  {{-- Selector + Ver --}}
+  <form method="GET" action="{{ url()->current() }}" style="display:flex; gap:10px; align-items:center;">
+    <input type="date" name="fecha" value="{{ $fecha }}" />
+    <button type="submit" class="btn">
+      <i class="fa-regular fa-calendar"></i> Ver
+    </button>
+  </form>
+
+  {{-- Hoy --}}
+  <a class="btn" href="{{ url()->current() }}?fecha={{ $hoyStr }}">
+    <i class="fa-regular fa-clock"></i> Hoy
+  </a>
+
+  {{-- Siguiente --}}
+  <a class="btn" href="{{ url()->current() }}?fecha={{ $nextStr }}">
+    Siguiente <i class="fa-solid fa-chevron-right"></i>
+  </a>
+
+  {{-- Exportar Excel: toma la fecha seleccionada sin necesidad de presionar "Ver" --}}
+  <form method="GET"
+        action="{{ route('audiencias.export.diaria') }}"
+        onsubmit="this.fecha.value = document.querySelector('.fecha-toolbar input[name=fecha]').value;"
+        style="display:flex;">
+    <input type="hidden" name="fecha" value="{{ $fecha }}">
+    <button type="submit" class="btn btn-excel" title="Exportar a Excel">
+      <i class="fa-solid fa-file-excel"></i> Exportar Excel
+    </button>
+  </form>
+</div>
         </div>
 
         {{-- Turnos --}}
