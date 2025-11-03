@@ -35,7 +35,7 @@ use App\Http\Controllers\ausenciasController;
 Route::view('/', 'welcome')->name('welcome');
 // Si quieres que enviarTurno sea tu “home”, comenta la línea anterior y descomenta la siguiente:
 // Route::get('/', [TurnoController::class, 'enviarTurno'])->name('welcome');
-
+// Aca enviaamos la informacion de TURNOS a la vista principal
 Route::get('/', [TurnoController::class, 'enviarTurno'])->name('welcome');
 
 /*
