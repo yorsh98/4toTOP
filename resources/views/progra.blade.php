@@ -155,29 +155,27 @@
 </style>
 
 {{-- Volver + Título --}}
-<div class="grid gap-6 pt-5 mb-6 lg:grid-cols-1 lg:gap-8">
-  <div class="absolute top-4 left-4">
-    <a href="{{ url('/') }}" class="bg-white text-black font-semibold py-1 px-3 rounded-md shadow-md flex items-center text-sm hover:bg-blue-700 hover:text-white transition">
-      <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path></svg>
-      INICIO
-    </a>
-  </div>
-
-  <div class="flex justify-center items-start gap-4 rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] w-full">
-    <div class="flex size-12 shrink-0 items-center justify-center rounded-full sm:size-16">
-      <svg fill="#FFFFFF" viewBox="-2.4 -2.4 28.80 28.80" role="img" xmlns="http://www.w3.org/2000/svg" stroke="#FFFFFF" stroke-width="0.00024">
-        <rect x="-2.4" y="-2.4" width="28.8" height="28.8" rx="14.4" fill="#2D8CFF"></rect>
-        <path d="M4.587 13.63l-.27-.012H1.89l3.235-3.235-.013-.27a.815.815 0 0 0-.795-.795l-.27-.013H.004l.014.27c.034.438.353.77.794.795l.27.013H3.51L.273 13.618l.014.269c.015.433.362.78.795.796l.27.013h4.044l-.014-.27c-.036-.443-.35-.767-.795-.795zm3.237-4.325H7.82a2.695 2.695 0 1 0 .003 0zm1.141 3.839a1.618 1.618 0 1 1-2.288-2.287 1.618 1.618 0 0 1 2.288 2.287zm12.872-3.838a2.157 2.157 0 0 0-1.615.729 2.152 2.152 0 0 0-1.618-.731 2.147 2.147 0 0 0-1.208.37c-.21-.233-.68-.37-.948-.37v5.392l.27-.013c.45-.03.777-.349.795-.796l.013-.27V11.73l.014-.27c.01-.202.04-.382.132-.54a1.078 1.078 0 0 1 1.473-.393 1.078 1.078 0 0 1 .392.392c.093.16.12.339.132.54l.014.271v1.887l.013.269c.027.44.35.768.795.796l.27.013V11.46a2.157 2.157 0 0 0-2.16-2.155zm-10.26.788a2.696 2.696 0  1 0 3.81 3.813 2.696 2.696 0 0 0-3.81-3.813zm3.049 3.05a1.618 1.618 0 1 1-2.288-2.288 1.618 1.618 0 0 1 2.288 2.288z"/>
-      </svg>
+<div class="grid gap-6 pt-5 mb-6 lg:grid-cols-1 lg:gap-8 animate__animated animate__backInUp animate__delay-0_3s">
+    <div class="absolute top-4 left-4">
+        <a href="{{ url('/') }}" class="bg-white text-black font-semibold py-1 px-3 rounded-md shadow-md flex items-center text-sm hover:bg-blue-700 hover:text-white transition">
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path>
+            </svg>
+            INICIO
+        </a>
     </div>
-    <div class="pt-3 sm:pt-5">
-      <h2 class="text-xl font-semibold text-black">PROGRAMACIÓN DE AUDIENCIAS</h2>
+    <div class="flex justify-center items-start gap-4 rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] transition duration-300 hover:text-black/70 hover:ring-black/20 focus:outline-none focus-visible:ring-[#FF2D20] lg:pb-10 dark:bg-zinc-900 dark:ring-zinc-800 dark:hover:text-white/70 dark:hover:ring-zinc-700 dark:focus-visible:ring-[#FF2D20]">
+        <div class="flex size-12 shrink-0 items-center justify-center rounded-full sm:size-16">    
+        <svg fill="#FFFFFF"  viewBox="-2.4 -2.4 28.80 28.80" role="img" xmlns="http://www.w3.org/2000/svg" stroke="#FFFFFF" stroke-width="0.00024000000000000003"><g id="SVGRepo_bgCarrier" stroke-width="0"><rect x="-2.4" y="-2.4" width="28.80" height="28.80" rx="14.4" fill="#2D8CFF" strokewidth="0"></rect></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round" stroke="#CCCCCC" stroke-width="0.9600000000000002"></g><g id="SVGRepo_iconCarrier"><title>Zoom icon</title><path d="M4.587 13.63l-.27-.012H1.89l3.235-3.235-.013-.27a.815.815 0 0 0-.795-.795l-.27-.013H.004l.014.27c.034.438.353.77.794.795l.27.013H3.51L.273 13.618l.014.269c.015.433.362.78.795.796l.27.013h4.044l-.014-.27c-.036-.443-.35-.767-.795-.795zm3.237-4.325H7.82a2.695 2.695 0 1 0 .003 0zm1.141 3.839a1.618 1.618 0 1 1-2.288-2.287 1.618 1.618 0 0 1 2.288 2.287zm12.872-3.838a2.157 2.157 0 0 0-1.615.729 2.152 2.152 0 0 0-1.618-.731 2.147 2.147 0 0 0-1.208.37c-.21-.233-.68-.37-.948-.37v5.392l.27-.013c.45-.03.777-.349.795-.796l.013-.27V11.73l.014-.27c.01-.202.04-.382.132-.54a1.078 1.078 0 0 1 1.473-.393 1.078 1.078 0 0 1 .392.392c.093.16.12.339.132.54l.014.271v1.887l.013.269c.027.44.35.768.795.796l.27.013V11.73l.012-.27c.01-.2.04-.384.134-.543.299-.514.959-.69 1.473-.39a1.078 1.078 0 0 1 .392.393c.092.16.12.343.131.54l.014.27v1.887l.013.269c.028.443.35.77.796.796l.27.013V11.46a2.157 2.157 0 0 0-2.16-2.155zm-10.26.788a2.696 2.696 0 1 0 3.81 3.813 2.696 2.696 0 0 0-3.81-3.813zm3.049 3.05a1.618 1.618 0 1 1-2.288-2.288 1.618 1.618 0 0 1 2.288 2.288z"></path></g></svg>
+        </div>
+        <div class="pt-3 sm:pt-5">
+            <h2 class="text-xl font-semibold text-black dark:text-white">PROGRAMACION DE AUDIENCIAS</h2>
+        </div>
     </div>
-  </div>
 </div>
 
 {{-- Card principal --}}
-<div class="grid gap-6 lg:grid-cols-1 lg:gap-8">
+<div class="grid gap-6 lg:grid-cols-1 lg:gap-8 animate__animated animate__backInUp animate__delay-0_3s">
   <div class="flex flex-col gap-6 overflow-hidden rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] md:row-span-3 lg:p-10 lg:pb-10 w-full">
     <div class="progra">
       <div class="container">
@@ -352,64 +350,108 @@
             @endforelse
           </div>
 
-          {{-- ================ LECTURAS ================ --}}
-          <div class="seccion-audiencias">
-            <div class="seccion-titulo titulo-lectura"><span class="icono">📄</span> Lecturas de Sentencia</div>
+{{-- ================ LECTURAS ================ --}}
+<div class="seccion-audiencias">
+  <div class="seccion-titulo titulo-lectura">
+    <span class="icono">📄</span> Lecturas de Sentencia
+  </div>
 
-            @forelse($lecturas as $l)
-              <div class="audiencia-card">
-                <div class="card-header header-lectura">{{ $l['encabezado'] }}</div>
-                <div class="card-body">
-                  <table class="tabla-juicio">
-                    <tr>
-                      <th>Acta de Audiencia</th>
-                      <td>{{ $l['acta'] ?? '—' }}</td>
-                      <th>Encargado Causa</th>
-                      <td colspan="3">{{ $l['encargado'] ?? '—' }}</td>
-                    </tr>
-                    <tr>
-                      <th>Juez Redactor</th>
-                      <td>{{ $l['juez_r'] ?? '—' }}</td>
-                      <td colspan="2">
-                        <a href="https://zoom.us/j/96002644455?pwd=TVpxNG5td010ekRwV0RzZzdiRXVSQT09" class="btn-zoom" target="_blank" rel="noopener noreferrer">Unirse a Zoom</a>
-                      </td>
-                    </tr>
-                  </table>
+  @forelse($lecturas as $l)
+    <div class="audiencia-card">
+      <div class="card-header header-lectura">{{ $l['encabezado'] }}</div>
+      <div class="card-body">
+        <table class="tabla-juicio">
+          <tr>
+            <th>Acta de Audiencia</th>
+            <td>{{ $l['acta'] ?? '—' }}</td>
+            <th>Encargado Causa</th>
+            <td colspan="3">{{ $l['encargado'] ?? '—' }}</td>
+          </tr>
+          <tr>
+            <th>Juez Redactor</th>
+            <td>{{ $l['juez_r'] ?? '—' }}</td>
+            <td colspan="2">
+              <a href="https://zoom.us/j/96002644455?pwd=TVpxNG5td010ekRwV0RzZzdiRXVSQT09" class="btn-zoom" target="_blank" rel="noopener noreferrer">
+                Unirse a Zoom
+              </a>
+            </td>
+          </tr>
+        </table>
 
-                  @if(!empty($l['acusados']))
-                    <div class="acusados-section">
-                      @php
-                        $acusadosArr = array_values(is_array($l['acusados']) ? $l['acusados'] : []);
-                        $total = count($acusadosArr);
-                      @endphp
+        {{-- ==================== ACUSADOS ==================== --}}
+        @if(!empty($l['acusados']))
+          <div class="acusados-section">
+            <div class="acusados-title">Acusados</div>
+            @php
+              $acusadosArr = array_values(is_array($l['acusados']) ? $l['acusados'] : []);
+              $total = count($acusadosArr);
+            @endphp
 
-                      @if ($total <= 4)
-                        <table class="tabla-juicio">
-                          <tr><th>Acusados</th></tr>
-                          @foreach($acusadosArr as $a)
-                            <tr><td>{{ $a['nombre'] ?? '—' }}</td></tr>
-                          @endforeach
-                        </table>
+            {{-- <=4: tabla simple (Nombre + Situación) --}}
+            @if ($total <= 4)
+              <table class="tabla-juicio">
+                <tr>
+                  <th>Acusados</th>
+                  <th>Situación</th>
+                </tr>
+                @foreach($acusadosArr as $a)
+                  <tr>
+                    <td><strong>{{ $a['nombre'] ?? '—' }}</strong></td>
+                    <td>
+                      @if(!empty($a['situacion']))
+                        <span class="tag situacion">{{ $a['situacion'] }}</span>
                       @else
-                        <table class="tabla-juicio">
-                          <tr><th>Acusados</th><th>Acusados</th></tr>
-                          @for ($i = 0; $i < $total; $i += 2)
-                            @php $a1 = $acusadosArr[$i] ?? null; $a2 = $acusadosArr[$i+1] ?? null; @endphp
-                            <tr>
-                              <td>@if($a1) {{ $a1['nombre'] ?? '—' }} @else — @endif</td>
-                              <td>@if($a2) {{ $a2['nombre'] ?? '—' }} @else — @endif</td>
-                            </tr>
-                          @endfor
-                        </table>
+                        —
                       @endif
-                    </div>
-                  @endif
-                </div>
-              </div>
-            @empty
-              <p style="color:var(--sec);padding:16px">No hay Lecturas de Sentencia para esta fecha.</p>
-            @endforelse
+                    </td>
+                  </tr>
+                @endforeach
+              </table>
+
+            {{-- >4: tabla agrupada (4 columnas como la foto) --}}
+            @else
+              <table class="tabla-juicio">
+                <tr>
+                  <th>Acusados</th><th>Situación</th>
+                  <th>Acusados</th><th>Situación</th>
+                </tr>
+                @for ($i = 0; $i < $total; $i += 2)
+                  @php
+                    $a1 = $acusadosArr[$i] ?? null;
+                    $a2 = $acusadosArr[$i+1] ?? null;
+                  @endphp
+                  <tr>
+                    <td>@if($a1) <strong>{{ $a1['nombre'] ?? '—' }}</strong> @else — @endif</td>
+                    <td>
+                      @if($a1 && !empty($a1['situacion']))
+                        <span class="tag situacion">{{ $a1['situacion'] }}</span>
+                      @else
+                        —
+                      @endif
+                    </td>
+                    <td>@if($a2) <strong>{{ $a2['nombre'] ?? '—' }}</strong> @else — @endif</td>
+                    <td>
+                      @if($a2 && !empty($a2['situacion']))
+                        <span class="tag situacion">{{ $a2['situacion'] }}</span>
+                      @else
+                        —
+                      @endif
+                    </td>
+                  </tr>
+                @endfor
+              </table>
+            @endif
           </div>
+        @endif
+        {{-- ================= FIN ACUSADOS ================= --}}
+      </div>
+    </div>
+  @empty
+    <p style="color:var(--sec);padding:16px">
+      No hay Lecturas de Sentencia para esta fecha.
+    </p>
+  @endforelse
+</div>
 
           {{-- ================ CORTAS ================ --}}
           <div class="seccion-audiencias">
