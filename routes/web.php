@@ -3,6 +3,12 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Http;
 
+//Seccion de use de MAIL
+use Illuminate\Support\Facades\Mail;
+use Carbon\Carbon;
+use App\Http\Controllers\PrograMailController;
+//
+
 // Controllers
 use App\Http\Controllers\SistOficioLibertadesController;
 use App\Http\Controllers\tablasController;
@@ -152,6 +158,20 @@ Route::get('/audiencias/export/diaria', [AudienciasExportController::class, 'dia
 */
 Route::get('/ausentismo', [ausentismoController::class, 'index'])->name('ausentismo')->middleware(['auth']);
 Route::get('/ausencias', [ausenciasController::class, 'index'])->name('ausencias');
+
+/*
+|--------------------------------------------------------------------------
+| Correo Sistema de Audiencia.
+|--------------------------------------------------------------------------
+*/
+Route::get('/programacion/mail/{fecha}', [PrograMailController::class, 'enviarProgramacionPorCorreo'])
+    ->where('fecha', '\d{4}-\d{2}-\d{2}')
+    ->name('programacion.mail');
+
+//TEST
+Route::get('/preview/progra/{fecha?}', [PrograMailController::class, 'preview'])
+    ->name('preview.progra');    
+
 
 /*
 |--------------------------------------------------------------------------
