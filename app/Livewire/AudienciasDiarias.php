@@ -1,16 +1,22 @@
 <?php
 
+// app/Livewire/AudienciasDiarias.php
 namespace App\Livewire;
 
 use Livewire\Component;
 use App\Models\Audiencia;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use App\Http\Controllers\PrograMailController;
 
 class AudienciasDiarias extends Component
 {
     public string $fecha;
     public $audiencias = [];
+
+    // NUEVO: UI del slide-over + correo
+    public bool $showSend = false;
+    public string $toEmail = '';
 
     public function mount(): void
     {
@@ -19,10 +25,7 @@ class AudienciasDiarias extends Component
         $this->buscar();
     }
 
-    public function updatedFecha(): void
-    {
-        $this->buscar();
-    }
+    public function updatedFecha(): void { $this->buscar(); }
 
     public function hoy(): void
     {
@@ -64,6 +67,26 @@ class AudienciasDiarias extends Component
         $aud->delete();
         $this->buscar();
         $this->dispatch('audiencia-eliminada');
+    }
+
+    // NUEVO: envío individual usando el controlador directamente (sin hardcodear URL)
+    public function enviarCorreoIndividual(): void
+    {
+        $this->validate([
+            'toEmail' => ['required','email','max:190'],
+            'fecha'   => ['required'],
+        ], [
+            'toEmail.required' => 'Ingresa un correo.',
+            'toEmail.email'    => 'Formato de correo no válido.',
+        ]);
+
+        // Llama al controlador y pasa el correo como $singleTo
+        app(PrograMailController::class)->enviarProgramacionPorCorreo($this->fecha, $this->toEmail);
+
+        $this->reset('toEmail');
+        $this->showSend = false;
+
+        $this->dispatch('correo-enviado');
     }
 
     public function render()
