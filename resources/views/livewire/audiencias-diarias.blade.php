@@ -1,4 +1,5 @@
-<div>
+{{-- resources/views/livewire/audiencias-diarias.blade.php --}}
+<div x-data="{ open: @entangle('showSend') }">
     @php
         // Helper para mostrar "vacío" en letra muy chica cuando el valor venga null o vacío
         $fmt = function ($v) {
@@ -24,24 +25,27 @@
 
         <div class="flex items-center gap-2">
             <a
-            href="{{ route('audiencias.export.diaria', ['fecha' => $fecha]) }}"
-            target="_blank"
-            class="inline-flex items-center justify-center rounded-md px-3 py-2
-                    transition-transform duration-200 ease-out
-                    motion-safe:hover:-translate-y-0.5 motion-safe:hover:scale-105
-                    focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-            title="Exportar Excel"
-            aria-label="Exportar Excel"
-            >
-            <i class="fas fa-file-excel inline-block" style="color:#217346; font-size:32px;"></i>
+              href="{{ route('audiencias.export.diaria', ['fecha' => $fecha]) }}"
+              target="_blank"
+              class="inline-flex items-center justify-center rounded-md px-3 py-2
+                      transition-transform duration-200 ease-out
+                      motion-safe:hover:-translate-y-0.5 motion-safe:hover:scale-105
+                      focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+              title="Exportar Excel"
+              aria-label="Exportar Excel">
+              <i class="fas fa-file-excel inline-block" style="color:#217346; font-size:32px;"></i>
             </a>
 
-            <button type="button" wire:click="diaAnterior"
-                    class="px-3 py-2 border rounded-md hover:bg-gray-50">← Día anterior</button>
-            <button type="button" wire:click="hoy"
-                    class="px-3 py-2 border rounded-md hover:bg-gray-50">Hoy</button>
-            <button type="button" wire:click="diaSiguiente"
-                    class="px-3 py-2 border rounded-md hover:bg-gray-50">Día siguiente →</button>
+            <button type="button" wire:click="diaAnterior" class="px-3 py-2 border rounded-md hover:bg-gray-50">← Día anterior</button>
+            <button type="button" wire:click="hoy"         class="px-3 py-2 border rounded-md hover:bg-gray-50">Hoy</button>
+            <button type="button" wire:click="diaSiguiente" class="px-3 py-2 border rounded-md hover:bg-gray-50">Día siguiente →</button>
+
+            {{-- NUEVO: abre el slide-over para enviar correo a un destinatario --}}
+            <button type="button"
+                    class="px-3 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    x-on:click="open = true">
+                Enviar por correo
+            </button>
         </div>
     </div>
 
@@ -222,10 +226,81 @@
         </div>
     @endif
 
+    {{-- ================= SLIDE-OVER DERECHO ================= --}}
+    <div class="fixed inset-0 z-40" x-show="open" x-transition.opacity x-cloak aria-modal="true" role="dialog">
+        {{-- Backdrop --}}
+        <div class="absolute inset-0 bg-black/30" x-on:click="open = false"></div>
+
+        {{-- Panel --}}
+        <div class="absolute inset-y-0 right-0 w-full max-w-md bg-white shadow-xl flex flex-col"
+             x-show="open"
+             x-transition:enter="transform transition ease-out duration-300"
+             x-transition:enter-start="translate-x-full"
+             x-transition:enter-end="translate-x-0"
+             x-transition:leave="transform transition ease-in duration-200"
+             x-transition:leave-start="translate-x-0"
+             x-transition:leave-end="translate-x-full">
+
+            {{-- Header --}}
+            <div class="px-4 py-3 border-b flex items-center justify-between">
+                <h3 class="text-base font-semibold">Enviar programación por correo</h3>
+                <button class="p-2 rounded hover:bg-gray-100" x-on:click="open = false" aria-label="Cerrar">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 011.414 
+                        1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 
+                        4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 
+                        5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                </button>
+            </div>
+
+            {{-- Body --}}
+            <div class="p-4 space-y-4 flex-1 overflow-y-auto">
+                <div class="text-sm text-gray-600">
+                    Se enviará la programación del <span class="font-semibold">
+                      {{ \Carbon\Carbon::parse($fecha)->format('d-m-Y') }}
+                    </span> al correo que indiques abajo.
+                </div>
+
+                <div>
+                    <label class="block text-sm text-gray-700 mb-1">Correo destinatario</label>
+                    <input type="email"
+                           wire:model.defer="toEmail"
+                           placeholder="correo@dominio.cl"
+                           class="w-full px-3 py-2 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    @error('toEmail')
+                      <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div class="text-xs text-gray-500">
+                    * Se adjuntará el Excel generado para la fecha seleccionada.
+                </div>
+            </div>
+
+            {{-- Footer --}}
+            <div class="px-4 py-3 border-t flex items-center justify-end gap-2">
+                <button type="button" class="px-3 py-2 rounded-md border hover:bg-gray-50"
+                        x-on:click="open = false">
+                    Cancelar
+                </button>
+
+                <button type="button"
+                        wire:click="enviarCorreoIndividual"
+                        class="px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700">
+                    Enviar ahora
+                </button>
+            </div>
+        </div>
+    </div>
+
     @script
     <script>
         document.addEventListener('audiencia-eliminada', () => {
             Swal?.fire?.({ icon:'success', title:'Eliminada', timer:1200, showConfirmButton:false });
+        });
+        document.addEventListener('correo-enviado', () => {
+            Swal?.fire?.({ icon:'success', title:'Correo enviado', timer:1500, showConfirmButton:false });
         });
     </script>
     @endscript
