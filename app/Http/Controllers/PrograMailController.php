@@ -173,7 +173,7 @@ class PrograMailController extends Controller
     }
 
     /** Acción pública que envía el correo + adjunta tu Excel */
-    public function enviarProgramacionPorCorreo(string $fecha)
+    public function enviarProgramacionPorCorreo(string $fecha, ?string $singleTo = null)
     {
         // 1) Datos para el cuerpo HTML
         $data = $this->buildDataForMail($fecha);
@@ -191,7 +191,7 @@ class PrograMailController extends Controller
             $data['turno3'],
         ))->from(env('MAIL_FROM_ADDRESS'), $fromName);
 
-        // 3) Adjunta el Excel usando tu export
+        // 3) Adjunta el Excel
         $excelBin = Excel::raw(new ProgramacionDiariaExport($fecha), ExcelFormat::XLSX);
         $mail->attachData(
             $excelBin,
@@ -199,10 +199,26 @@ class PrograMailController extends Controller
             ['mime' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']
         );
 
-        // 4) Destinatarios (ajusta)
-        $destinatarios = ['jorge.troncoso4@gmail.com'];
+        // 4) Destinatarios
+        // a) si Livewire te pasó $singleTo, úsalo
+        // b) si te llaman por GET /programacion/mail/{fecha}?to=alguien@dominio, úsalo
+        // c) fallback a la lista fija (o tu tabla si luego la integras)
+        $urlTo = request()->query('to'); // compat. con ruta pública
+        $to = $singleTo ?: $urlTo ?: null;
 
-        // 5) Enviar (puedes usar ->queue si tienes worker)
+        if ($to) {
+            $destinatarios = [trim($to)];
+        } else {
+            $destinatarios = ['jtroncosor@pjud.cl'];
+        }
+
+        // sanea
+        $destinatarios = array_values(array_filter($destinatarios, fn($e) => filter_var($e, FILTER_VALIDATE_EMAIL)));
+        if (empty($destinatarios)) {
+            return back()->with('error', 'No hay destinatarios válidos para el envío.');
+        }
+
+        // 5) Enviar
         Mail::to($destinatarios)->send($mail);
 
         return back()->with('ok', "Programación {$fecha} enviada por correo (con adjunto).");
