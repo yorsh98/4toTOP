@@ -4,6 +4,7 @@ namespace App\Exports;
 
 use App\Models\Audiencia;
 use App\Models\Turno;
+use App\Models\Ausentismo;
 use Carbon\Carbon;
 use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\WithEvents;
@@ -13,7 +14,6 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
-use App\Models\Ausentismo;
 
 
 class ProgramacionDiariaExport implements WithEvents, WithTitle
@@ -58,7 +58,7 @@ class ProgramacionDiariaExport implements WithEvents, WithTitle
 
     private function getJuecesAusentesFromDB(string $fecha): array
     {
-        // Se asume MySQL/MariaDB; LIKE cubrirá JUEZ/JUEZA (ajusta según tu base)
+        // Se asume MySQL/MariaDB; LIKE cubrirá JUEZ/JUEZA
         $q = Ausentismo::query()
             ->select(['funcionario_nombre','cargo','observacion','tipo_permiso', 'fecha_inicio','fecha_termino'])
             ->where(function ($qq) {
@@ -190,10 +190,21 @@ class ProgramacionDiariaExport implements WithEvents, WithTitle
     private function accusedLayout(string $tipo): string
     {
         $tipo = $this->normalizeTipo($tipo);
-        return in_array($tipo, ['JUICIO ORAL','CONTINUACION JUICIO ORAL','CONT. JUICIO ORAL','CONTINUACIÓN JUICIO ORAL'], true)
-            ? 'double'
-            : 'single';
+
+        // Usar layout "double" (dos columnas con Nombre/Situación)
+        // tanto para Juicio Oral como para Audiencias Cortas.
+        return in_array($tipo, [
+            'JUICIO ORAL',
+            'CONTINUACION JUICIO ORAL',
+            'CONT. JUICIO ORAL',
+            'CONTINUACIÓN JUICIO ORAL',
+            'AUDIENCIA CORTA', 
+            'LECTURA DE SENTENCIA',
+            'LECTURA SENTENCIA',
+            'LECTURA',
+        ], true) ? 'double' : 'single';
     }
+
 
     public function registerEvents(): array
     {
@@ -231,9 +242,15 @@ class ProgramacionDiariaExport implements WithEvents, WithTitle
                 $cardBodyFill    = ['fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'F9FAFB']]];
                 $headerStyle = fn(string $rgb) => [
                     'font' => ['bold' => true, 'size' => 12, 'color' => ['rgb' => 'FFFFFF']],
-                    'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
+                    'alignment' => [
+                        'horizontal' => Alignment::HORIZONTAL_LEFT,   // ← antes CENTER
+                        'vertical'   => Alignment::VERTICAL_CENTER,
+                        'wrapText'   => true,
+                        'indent'     => 1,                            // sangría suave
+                    ],
                     'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => $rgb]],
                 ];
+
 
                 // ===== Encabezado del documento =====
                 $row = 1;
@@ -252,12 +269,19 @@ class ProgramacionDiariaExport implements WithEvents, WithTitle
                 $row++; // espacio
                 $turno2 = Turno::find(2);
 
-                // Helper para pintar cada línea de turno
-                $paintTurno = function(string $etiqueta, array $nombres) use ($sheet, &$row) {
+                // tamaños más grandes para TURNOS
+                $turnoFontSize = 15;     // tamaño letra
+                $turnoRowHeight = 24;    // mayor altura de fila
+
+                // Helper para pintar cada línea de turno (más grande)
+                $paintTurno = function(string $etiqueta, array $nombres) use ($sheet, &$row, $turnoFontSize, $turnoRowHeight) {
                     // Label en A (rojo), contenido en B:H
                     $sheet->setCellValue("A{$row}", $etiqueta);
-                    $sheet->getStyle("A{$row}")->getFont()->setBold(true)->getColor()->setRGB(self::RED_LABEL);
-                    $sheet->getStyle("A{$row}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+                    $sheet->getStyle("A{$row}")->getFont()->setBold(true)->setSize($turnoFontSize)->getColor()->setRGB(self::RED_LABEL);
+                    $sheet->getStyle("A{$row}")->getAlignment()
+                          ->setHorizontal(Alignment::HORIZONTAL_LEFT)
+                          ->setVertical(Alignment::VERTICAL_CENTER);
+
                     $sheet->mergeCells("B{$row}:H{$row}");
 
                     $texto = 'NO HAY';
@@ -269,24 +293,40 @@ class ProgramacionDiariaExport implements WithEvents, WithTitle
                     }
 
                     $sheet->setCellValue("B{$row}", $texto);
+
+                    // bordes de la línea
                     $sheet->getStyle("A{$row}:H{$row}")->applyFromArray([
                         'borders' => [
                             'top'    => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => '000000']],
                             'bottom' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => '000000']],
                             'left'   => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => '000000']],
-                            'right   '=> ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => '000000']],
+                            'right'  => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => '000000']], // <- corregido (sin espacios extra)
                         ],
                     ]);
 
+                    // tipografía y alineación más grande para el contenido
+                    $sheet->getStyle("B{$row}:H{$row}")
+                          ->getFont()->setSize($turnoFontSize);
+                    $sheet->getStyle("B{$row}:H{$row}")
+                          ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT)
+                                          ->setVertical(Alignment::VERTICAL_CENTER)
+                                          ->setWrapText(true)
+                                          ->setIndent(1);
+
+                    // color “NO HAY”
                     if ($isEmpty) {
                         $sheet->getStyle("B{$row}")->getFont()->getColor()->setRGB(self::MUTED_GRAY);
                     } else {
                         $sheet->getStyle("B{$row}")->getFont()->getColor()->setRGB('000000');
                     }
 
+                    // altura de fila más grande
+                    $sheet->getRowDimension($row)->setRowHeight($turnoRowHeight);
+
                     $row++;
                 };
 
+                // Pinta los tres turnos (fuente +2 y altura aumentada)
                 $paintTurno('TURNO 1:', [$turno2->TM1 ?? null]);
                 $paintTurno('TURNO 2:', [$turno2->TM2 ?? null]);
                 $paintTurno('TURNO 3:', [$turno2->TM3 ?? null]);
