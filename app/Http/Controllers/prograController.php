@@ -27,7 +27,6 @@ class PrograController extends Controller
 
         $turnoFila = Turno::query()->where('id', 2)->first();
         if ($turnoFila) {
-            // Según lo solicitado: cada "turno" toma TMx del registro id=2
             $turno1 = $turnoFila->TM1 ?? null; // TURNO 1
             $turno2 = $turnoFila->TM2 ?? null; // TURNO 2
             $turno3 = $turnoFila->TM3 ?? null; // TURNO 3
@@ -57,12 +56,38 @@ class PrograController extends Controller
             });
 
         // =========================
-        // AUDIENCIAS (vista de causas)
+        // AUDIENCIAS (vista de causas) -> ORDEN POR SALA ASC y luego HORA
         // =========================
         $audiencias = Audiencia::query()
             ->whereDate('fecha', $fecha)
-            ->orderBy('hora_inicio')
             ->get();
+
+        // Normaliza y extrae el número de sala (ej. "Sala 801 (Zoom)" -> 801)
+        $parseSala = function ($raw) {
+            if ($raw === null) return null;
+            if (preg_match('/\d{3,}/', (string)$raw, $m)) {
+                return (int) $m[0];
+            }
+            return null;
+        };
+
+        $audiencias = $audiencias->sort(function ($a, $b) use ($parseSala) {
+            $sa = $parseSala($a->sala);
+            $sb = $parseSala($b->sala);
+
+            // 1) Con sala primero (grupo 0), sin sala al final (grupo 1)
+            $ga = is_null($sa) ? 1 : 0;
+            $gb = is_null($sb) ? 1 : 0;
+            if ($ga !== $gb) return $ga <=> $gb;
+
+            // 2) Ambas con sala: orden numérico ascendente
+            if ($ga === 0 && $sa !== $sb) return $sa <=> $sb;
+
+            // 3) Desempate por hora ascendente (si existe)
+            $ha = $a->hora_inicio ? (string)$a->hora_inicio : '';
+            $hb = $b->hora_inicio ? (string)$b->hora_inicio : '';
+            return strcmp($ha, $hb);
+        })->values();
 
         // Helper para convertir arrays/objetos a string legible (evita "Array to string conversion")
         $asText = function ($v) {
@@ -92,10 +117,8 @@ class PrograController extends Controller
                 ? \Carbon\Carbon::parse($a->hora_inicio)->format('H:i')
                 : ($a->hora_inicio ? (string)$a->hora_inicio : null);
 
-            // Inhabilitados: si viene vacío mostrará "NO"
             $inh = $asText($a->jueces_inhabilitados) ?: 'NO';
 
-            // Segmento "Sala X y <zoom>" solo si hay algo que mostrar
             $sala = $asText($a->sala);
             $zoom = $asText($a->cta_zoom);
             $segSala = implode(' y ', array_filter([
@@ -103,10 +126,8 @@ class PrograController extends Controller
                 $zoom ?: null,
             ], fn ($v) => $v !== null && $v !== ''));
 
-            // Tipo de audiencia (fallback a "JUICIO ORAL")
             $tipo = $asText($a->tipo_audiencia) ?: 'JUICIO ORAL';
 
-            // Identificadores causa (solo agrega los que existan)
             $rit = $asText($a->rit);
             $ruc = $asText($a->ruc);
             $segIds = implode(' - ', array_filter([
@@ -114,14 +135,11 @@ class PrograController extends Controller
                 $ruc ? 'RUC ' . $ruc : null,
             ], fn ($v) => $v !== null && $v !== ''));
 
-            // Duración (solo si existe)
             $duracion = $asText($a->duracion);
             $segDur = $duracion ? ('Duración ' . $duracion) : null;
 
-            // Observación (solo si existe)
             $obs = $asText($a->obs);
 
-            // Construimos partes sin guiones fijos
             $partes = array_filter([
                 $segSala ?: null,
                 $hora ? "$hora Horas" : null,
@@ -146,7 +164,6 @@ class PrograController extends Controller
                 'juez_i'       => $asText($a->JuezI),
                 'zoom'         => $asText($a->cta_zoom),
 
-                // Normaliza acusados a arreglo indexado
                 'acusados'     => collect($a->acusados ?? [])->map(function ($x) use ($asText) {
                     return [
                         'nombre'       => $asText($x['nombre_completo'] ?? ''),
@@ -158,13 +175,11 @@ class PrograController extends Controller
             ];
         };
 
-
         $mapLectura = function ($a) use ($asText) {
             $hora = $a->hora_inicio instanceof \DateTimeInterface
                 ? \Carbon\Carbon::parse($a->hora_inicio)->format('H:i')
                 : ($a->hora_inicio ? (string)$a->hora_inicio : null);
 
-            // Segmento "Sala X y <zoom>" solo si hay algo que mostrar
             $sala = $asText($a->sala);
             $zoom = $asText($a->cta_zoom);
             $segSala = implode(' y ', array_filter([
@@ -172,12 +187,11 @@ class PrograController extends Controller
                 $zoom ?: null,
             ], fn ($v) => $v !== null && $v !== ''));
 
-            // Partes del encabezado sin guiones fijos
             $partes = array_filter([
                 $segSala ?: null,
                 $hora ? "$hora Horas" : 'LECTURA DE SENTENCIA',
                 'RIT ' . $asText($a->rit) . ' - RUC ' . $asText($a->ruc),
-                $asText($a->obs) ?: null, // si no hay obs, no se agrega
+                $asText($a->obs) ?: null,
             ], fn ($v) => $v !== null && $v !== '');
 
             return [
@@ -191,13 +205,11 @@ class PrograController extends Controller
             ];
         };
 
-
         $mapCorta = function ($a) use ($asText) {
             $hora = $a->hora_inicio instanceof \DateTimeInterface
                 ? \Carbon\Carbon::parse($a->hora_inicio)->format('H:i')
                 : ($a->hora_inicio ? (string)$a->hora_inicio : null);
 
-            // Segmento "Sala X y <zoom>" solo si hay algo que mostrar
             $sala = $asText($a->sala);
             $zoom = $asText($a->cta_zoom);
             $segSala = implode(' y ', array_filter([
@@ -205,7 +217,6 @@ class PrograController extends Controller
                 $zoom ?: null,
             ], fn ($v) => $v !== null && $v !== ''));
 
-            // Identificadores causa (solo agrega los que existan)
             $rit = $asText($a->rit);
             $ruc = $asText($a->ruc);
             $segIds = implode(' - ', array_filter([
@@ -213,10 +224,8 @@ class PrograController extends Controller
                 $ruc ? 'RUC ' . $ruc : null,
             ], fn ($v) => $v !== null && $v !== ''));
 
-            // Observación (solo si existe)
             $obs = $asText($a->obs);
 
-            // Encabezado sin guiones fijos
             $partes = array_filter([
                 $segSala ?: null,
                 $hora ? "$hora Horas" : null,
@@ -235,7 +244,6 @@ class PrograController extends Controller
                 'juez_i'     => $asText($a->JuezI),
                 'zoom'       => $asText($a->cta_zoom),
 
-                // Normaliza acusados a arreglo indexado
                 'acusados'   => collect($a->acusados ?? [])->map(function ($x) use ($asText) {
                     return [
                         'nombre'    => $asText($x['nombre_completo'] ?? ''),
@@ -244,7 +252,6 @@ class PrograController extends Controller
                 })->values()->all(),
             ];
         };
-
 
         // Agrupación en el orden solicitado en la vista: Juicios -> Lecturas -> Cortas
         $juicios  = $audiencias->filter(fn($a) => $tipoGrupo($a->tipo_audiencia) === 'juicio')->map($mapJuicio)->values();
