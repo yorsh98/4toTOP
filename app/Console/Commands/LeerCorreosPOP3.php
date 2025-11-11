@@ -1,5 +1,6 @@
 <?php
-
+/* APARTADADO SIN USO YA QUE AHORA TODO SE LEE DESDE LA BD PERO SE DEJA EN CASO DE REUTILIZAR 
+EL CODIGO EN OTRO IMPLEMENTACION */
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
