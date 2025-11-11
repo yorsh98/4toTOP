@@ -15,12 +15,13 @@ use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use App\Models\Ausentismo;
 
+
 class ProgramacionDiariaExport implements WithEvents, WithTitle
 {
     use Exportable;
 
-    protected string $fecha;           // YYYY-MM-DD
-    protected ?array $juecesAusentes = null;  // si vienes con arreglo manual, se usa; si no, se consulta DB
+    protected string $fecha;                 // YYYY-MM-DD
+    protected ?array $juecesAusentes = null; // si vienes con arreglo manual, se usa; si no, se consulta DB
 
     // === Colores solicitados para "Acusados" ===
     private const ACUSADOS_HEAD_BG = '9CA3AF'; // gris más oscuro (Tailwind gray-400)
@@ -57,11 +58,12 @@ class ProgramacionDiariaExport implements WithEvents, WithTitle
 
     private function getJuecesAusentesFromDB(string $fecha): array
     {
-        // Se asume MySQL/MariaDB; LIKE cubrirá JUEZ y JUEZA
+        // Se asume MySQL/MariaDB; LIKE cubrirá JUEZ/JUEZA (ajusta según tu base)
         $q = Ausentismo::query()
             ->select(['funcionario_nombre','cargo','observacion','tipo_permiso', 'fecha_inicio','fecha_termino'])
             ->where(function ($qq) {
-                $qq->where('cargo', 'LIKE', '%Juez/a%'); // incluye JUEZA
+                $qq->where('cargo', 'LIKE', '%JUEZ%')
+                   ->orWhere('cargo', 'LIKE', '%JUEZA%');
             })
             ->whereDate('fecha_inicio', '<=', $fecha)
             ->where(function ($qq) use ($fecha) {
@@ -247,7 +249,7 @@ class ProgramacionDiariaExport implements WithEvents, WithTitle
                 $row++;
 
                 // ===== BLOQUE: Turnos (bajo título y fecha) =====
-                $row++; // espacio                
+                $row++; // espacio
                 $turno2 = Turno::find(2);
 
                 // Helper para pintar cada línea de turno
@@ -285,45 +287,63 @@ class ProgramacionDiariaExport implements WithEvents, WithTitle
                     $row++;
                 };
 
-                $paintTurno('TURNO 1:', [
-                    $turno2->TM1 ?? null,
-                ]);
-
-                // Turno 2: ACD (usa ACDM1..ACDM3)
-                $paintTurno('TURNO 2:', [
-                    $turno2->TM2?? null,
-                ]);
-
-                // Turno 3: TM1..TM3 de id=2 (como pediste)
-                $paintTurno('TURNO 3:', [
-                    $turno2->TM3 ?? null,
-                ]);
+                $paintTurno('TURNO 1:', [$turno2->TM1 ?? null]);
+                $paintTurno('TURNO 2:', [$turno2->TM2 ?? null]);
+                $paintTurno('TURNO 3:', [$turno2->TM3 ?? null]);
 
                 $row += 1; // espacio antes de las audiencias
 
                 // ===== ORDEN y recolección de audiencias =====
+                // 1) Prioridad de sección
                 $priority = [
                     'JUICIO ORAL'               => 1,
-                    'CONTINUACION JUICIO ORAL'  => 2,
-                    'CONT. JUICIO ORAL'         => 2,
-                    'CONTINUACIÓN JUICIO ORAL'  => 2,
-                    'LECTURA DE SENTENCIA'      => 3,
-                    'LECTURA SENTENCIA'         => 3,
-                    'LECTURA'                   => 3,
-                    'AUDIENCIA CORTA'           => 4,
+                    'CONTINUACION JUICIO ORAL'  => 1,
+                    'CONT. JUICIO ORAL'         => 1,
+                    'CONTINUACIÓN JUICIO ORAL'  => 1,
+
+                    'LECTURA DE SENTENCIA'      => 2,
+                    'LECTURA SENTENCIA'         => 2,
+                    'LECTURA'                   => 2,
+
+                    'AUDIENCIA CORTA'           => 3,
                 ];
 
+                // 2) Parse sala a número (p.ej. "Sala 801 (Zoom)" -> 801)
+                $parseSala = function ($raw) {
+                    if ($raw === null) return null;
+                    if (preg_match('/\d{3,}/', (string)$raw, $m)) {
+                        return (int) $m[0];
+                    }
+                    return null;
+                };
+
+                // 3) Recolección + orden por: sección → sala asc (num) → hora asc; sin sala al final
                 $audiencias = Audiencia::query()
                     ->whereDate('fecha', $this->fecha)
                     ->get()
-                    ->sortBy(function ($a) use ($priority) {
-                        $tipoNorm = $this->normalizeTipo($a->tipo_audiencia ?? '');
-                        $rank     = $priority[$tipoNorm] ?? 99;
-                        $sala = (string) ($a->sala ?? '');
-                        $hora = optional(
-                            $a->hora_inicio instanceof \DateTimeInterface ? $a->hora_inicio : Carbon::parse($a->hora_inicio)
-                        )->format('H:i');
-                        return [$rank, $sala, $hora];
+                    ->sort(function ($a, $b) use ($priority, $parseSala) {
+                        $ta = strtoupper(trim((string)($a->tipo_audiencia ?? '')));
+                        $tb = strtoupper(trim((string)($b->tipo_audiencia ?? '')));
+                        $ra = $priority[$ta] ?? 99;
+                        $rb = $priority[$tb] ?? 99;
+                        if ($ra !== $rb) return $ra <=> $rb;
+
+                        $sa = $parseSala($a->sala ?? null);
+                        $sb = $parseSala($b->sala ?? null);
+                        $ga = is_null($sa) ? 1 : 0;
+                        $gb = is_null($sb) ? 1 : 0;
+                        if ($ga !== $gb) return $ga <=> $gb;
+
+                        if ($ga === 0 && $sa !== $sb) return $sa <=> $sb;
+
+                        $ha = $a->hora_inicio instanceof \DateTimeInterface
+                            ? $a->hora_inicio->format('H:i')
+                            : (filled($a->hora_inicio) ? Carbon::parse($a->hora_inicio)->format('H:i') : '');
+                        $hb = $b->hora_inicio instanceof \DateTimeInterface
+                            ? $b->hora_inicio->format('H:i')
+                            : (filled($b->hora_inicio) ? Carbon::parse($b->hora_inicio)->format('H:i') : '');
+
+                        return strcmp($ha, $hb);
                     })
                     ->values();
 
@@ -667,15 +687,14 @@ class ProgramacionDiariaExport implements WithEvents, WithTitle
 
     /**
      * Renderiza la tabla final "JUEZ/JUEZA — FUNCIÓN" en un bloque angosto.
-     * Puedes elegir las columnas de inicio/fin (p.ej. 'C' a 'G') para que no ocupe todo el ancho.
      * Devuelve el siguiente $row disponible.
      */
     private function renderJuecesAusentes(
         Worksheet $sheet,
         int $row,
         array $borderThin,
-        string $firstCol = 'C',   // <— modifica si quieres otra posición/ancho
-        string $lastCol  = 'G'    // <— modifica si quieres otra posición/ancho
+        string $firstCol = 'C',
+        string $lastCol  = 'G'
     ): int {
         // Seguridad básica
         if (ord($firstCol) > ord($lastCol)) {
