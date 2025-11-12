@@ -636,5 +636,9 @@
     </td>
   </tr>
 </table>
+{{-- PIE DE FIRMA SELECCIONADO --}}
+@if(!empty($firmaHtml))
+  <div style="margin-top:24px">{!! $firmaHtml !!}</div>
+@endif
 </body>
 </html>
