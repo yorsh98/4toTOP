@@ -7,6 +7,7 @@ use App\Exports\ProgramacionDiariaExport;
 use App\Models\Audiencia;
 use App\Models\Ausentismo;
 use App\Models\Turno;
+use App\Models\MailSignature;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Mail;
 use Maatwebsite\Excel\Facades\Excel;
@@ -14,23 +15,25 @@ use Maatwebsite\Excel\Excel as ExcelFormat;
 
 class PrograMailController extends Controller
 {
-    /** Normaliza tipo de audiencia (como en tu export) */
+    /** ================== Helpers de normalización ================== */
+
     private function normalizeTipo(?string $tipo): string
     {
-        $t = mb_strtoupper(trim((string)$tipo), 'UTF-8');
-        // quita tildes comunes
-        $t = str_replace(['Á','É','Í','Ó','Ú'], ['A','E','I','O','U'], $t);
-        // normaliza algunos puntos y espacios
-        $t = preg_replace('/\s+/', ' ', $t);
-        return trim($t);
+        $t = trim((string)$tipo);
+        if (function_exists('mb_strtoupper')) {
+            $t = mb_strtoupper($t, 'UTF-8');
+            $t = str_replace(['Á','É','Í','Ó','Ú'], ['A','E','I','O','U'], $t);
+        } else {
+            $t = strtoupper($t);
+        }
+        $t = preg_replace('/\s+/', ' ', $t ?? '');
+        return trim($t ?? '');
     }
 
-    /** ¿Debemos mostrar el tipo en el encabezado? (solo Juicio Oral o su continuación) */
     private function shouldShowTipo(string $tipoNormalizado): bool
     {
         if ($tipoNormalizado === '') return false;
 
-        // Coincidencias exactas más comunes
         $permitidos = [
             'JUICIO ORAL',
             'CONTINUACION JUICIO ORAL',
@@ -38,19 +41,11 @@ class PrograMailController extends Controller
             'CONT. JUICIO ORAL',
             'CONT JUICIO ORAL',
         ];
-        if (in_array($tipoNormalizado, $permitidos, true)) {
-            return true;
-        }
+        if (in_array($tipoNormalizado, $permitidos, true)) return true;
 
-        // Respaldo por regex (por si llega alguna variante similar)
-        if (preg_match('/\b(CONT\.?\s*)?(DE\s*)?JUICIO\s+ORAL\b/u', $tipoNormalizado)) {
-            return true;
-        }
-
-        return false;
+        return (bool) preg_match('/\b(CONT\.?\s*)?(DE\s*)?JUICIO\s+ORAL\b/u', $tipoNormalizado);
     }
 
-    /** Jueces ausentes (misma lógica base que tu export) */
     private function getJuecesAusentesFromDB(string $fecha): array
     {
         $rows = Ausentismo::query()
@@ -65,14 +60,22 @@ class PrograMailController extends Controller
             ->get();
 
         return $rows->map(function ($r) {
-            $nombre  = mb_strtoupper(trim((string)($r->funcionario_nombre ?? '')), 'UTF-8');
+            $nombre  = trim((string)($r->funcionario_nombre ?? ''));
+            if (function_exists('mb_strtoupper')) {
+                $nombre = mb_strtoupper($nombre, 'UTF-8');
+            } else {
+                $nombre = strtoupper($nombre);
+            }
             $funcion = $r->observacion ?: $r->tipo_permiso;
-            $funcion = $funcion ? mb_strtoupper($funcion, 'UTF-8') : '—';
+            if ($funcion) {
+                $funcion = function_exists('mb_strtoupper') ? mb_strtoupper($funcion, 'UTF-8') : strtoupper($funcion);
+            } else {
+                $funcion = '—';
+            }
             return ['nombre' => $nombre !== '' ? $nombre : '—', 'funcion' => $funcion];
         })->values()->all();
     }
 
-    /** Arma arrays para la vista HTML del correo */
     private function buildDataForMail(string $fechaYmd): array
     {
         $audiencias = Audiencia::query()
@@ -88,35 +91,30 @@ class PrograMailController extends Controller
         foreach ($audiencias as $a) {
             $tipoN = $this->normalizeTipo($a->tipo_audiencia ?? '');
 
-            // Hora segura (evita parsear null)
+            // Hora segura
             $horaTxt = '—';
             if ($a->hora_inicio instanceof \DateTimeInterface) {
                 $horaTxt = $a->hora_inicio->format('H:i') . ' Horas';
             } elseif (!empty($a->hora_inicio)) {
-                try {
-                    $horaTxt = Carbon::parse($a->hora_inicio)->format('H:i') . ' Horas';
-                } catch (\Throwable $e) {
-                    $horaTxt = '—';
-                }
+                try { $horaTxt = Carbon::parse($a->hora_inicio)->format('H:i') . ' Horas'; }
+                catch (\Throwable $e) { $horaTxt = '—'; }
             }
 
-            // Solo mostrar tipo si es Juicio Oral / Continuación Juicio Oral
             $mostrarTipo = $this->shouldShowTipo($tipoN);
 
             $encabezadoPartes = [
                 sprintf('Sala %s y %s', (string)($a->sala ?? '—'), (string)($a->cta_zoom ?? '—')),
                 $horaTxt,
-                $mostrarTipo ? (string)($a->tipo_audiencia ?? null) : null, // <- regla aplicada
+                $mostrarTipo ? (string)($a->tipo_audiencia ?? null) : null,
                 'RIT ' . ($a->rit ?? '—'),
                 'RUC ' . ($a->ruc ?? '—'),
                 $a->duracion ? ('Duración: ' . $a->duracion) : null,
                 $a->obs ?: null,
             ];
-            // limpia vacíos y une
-            $encabezado = implode(' - ', array_values(array_filter($encabezadoPartes, fn($v) => !is_null($v) && $v !== '')));
+            $encabezado = implode(' - ', array_values(array_filter($encabezadoPartes, static fn($v) => !is_null($v) && $v !== '')));
 
-            // mapea acusados (según tu export)
-            $acusados = collect((array)($a->acusados ?? []))->map(function ($ac) {
+            $acusados = collect((array)($a->acusados ?? []))->map(static function ($ac) {
+                $ac = (array)$ac;
                 return [
                     'nombre'        => $ac['nombre_completo'] ?? ($ac['nombre'] ?? '—'),
                     'situacion'     => $ac['situacion'] ?? ($ac['situacion_libertad'] ?? null),
@@ -138,8 +136,8 @@ class PrograMailController extends Controller
                     'num_testigos' => $a->num_testigos ?? null,
                     'num_peritos'  => $a->num_peritos ?? null,
                     'inhabil'      => collect($a->jueces_inhabilitados ?? [])
-                                        ->map(fn($i) => is_array($i) ? ($i['nombre_completo'] ?? null) : $i)
-                                        ->filter()->values()->implode(', '),
+                        ->map(static fn($i) => is_array($i) ? ($i['nombre_completo'] ?? null) : $i)
+                        ->filter()->values()->implode(', '),
                     'juez_p'       => $a->JuezP ?? null,
                     'juez_r'       => $a->JuezR ?? null,
                     'juez_i'       => $a->JuezI ?? null,
@@ -147,10 +145,8 @@ class PrograMailController extends Controller
                     'ttpp_zoom'    => $a->encargado_ttp_zoom ?? null,
                 ]);
             } elseif (in_array($tipoN, ['LECTURA DE SENTENCIA','LECTURA SENTENCIA','LECTURA'], true)) {
-                $lecturas[] = array_merge($common, [
-                    'juez_r' => $a->JuezR ?? null,
-                ]);
-            } else { // AUDIENCIA CORTA u otros
+                $lecturas[] = array_merge($common, ['juez_r' => $a->JuezR ?? null]);
+            } else {
                 $cortas[] = array_merge($common, [
                     'juez_p'   => $a->JuezP ?? null,
                     'juez_r'   => $a->JuezR ?? null,
@@ -160,11 +156,11 @@ class PrograMailController extends Controller
             }
         }
 
-        // Turnos (ajusta según tu lógica real)
-        $turno = Turno::find(2); // según tu export, usas id=2 como base
-        $turno1 = $turno->TM1 ?? null;
-        $turno2 = $turno->TM2 ?? null;
-        $turno3 = $turno->TM3 ?? null;
+        // Turnos (null-safe)
+        $turno  = Turno::find(2);
+        $turno1 = $turno?->TM1 ?? null;
+        $turno2 = $turno?->TM2 ?? null;
+        $turno3 = $turno?->TM3 ?? null;
 
         // Jueces ausentes
         $juecesAusentes = $this->getJuecesAusentesFromDB($fechaYmd);
@@ -172,67 +168,142 @@ class PrograMailController extends Controller
         return compact('juicios','lecturas','cortas','juecesAusentes','turno1','turno2','turno3');
     }
 
-    /** Acción pública que envía el correo + adjunta tu Excel */
-    public function enviarProgramacionPorCorreo(string $fecha, ?string $singleTo = null)
+    /** ================== Helper de firma/mailer/from ================== */
+
+    /**
+     * Devuelve el HTML de firma, el mailer a usar y el from address para una firma.
+     * - Si $firmaId es null o no existe, devuelve valores por defecto.
+     */
+    private function resolveSignatureConfig(?int $firmaId, string $fechaYmd): array
     {
-        // 1) Datos para el cuerpo HTML
-        $data = $this->buildDataForMail($fecha);
+        $firmaHtml = '';
+        $mailerKey = config('mail.default');                          // mailer por defecto
+        $fromAddr  = config('mail.from.address');                     // from por defecto
+        $fromName  = "Programación Diaria 4°TOP (" . Carbon::parse($fechaYmd,'America/Santiago')->format('Y-m-d') . ")";
 
-        // 2) Arma el mailable con tu vista HTML
-        $fromName = "Programación Diaria 4°TOP (" . Carbon::parse($fecha,'America/Santiago')->format('Y-m-d') . ")";
-        $mail = (new ProgramacionDiariaHtmlMail(
-            $fecha,
-            $data['juicios'],
-            $data['lecturas'],
-            $data['cortas'],
-            $data['juecesAusentes'],
-            $data['turno1'],
-            $data['turno2'],
-            $data['turno3'],
-        ))->from(env('MAIL_FROM_ADDRESS'), $fromName);
+        if ($firmaId) {
+            $firma = MailSignature::query()->where('activo', true)->find($firmaId);
+            if ($firma) {
+                $firmaHtml = (string)($firma->html ?? '');
 
-        // 3) Adjunta el Excel
-        $excelBin = Excel::raw(new ProgramacionDiariaExport($fecha), ExcelFormat::XLSX);
-        $mail->attachData(
-            $excelBin,
-            "Programacion_{$fecha}.xlsx",
-            ['mime' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']
-        );
+                // mailer específico
+                if (!empty($firma->mailer)) {
+                    $mailerKey = trim((string)$firma->mailer);
+                }
 
-        // 4) Destinatarios
-        // a) si Livewire te pasó $singleTo, úsalo
-        // b) si te llaman por GET /programacion/mail/{fecha}?to=alguien@dominio, úsalo
-        // c) fallback a la lista fija (o tu tabla si luego la integras)
-        $urlTo = request()->query('to'); // compat. con ruta pública
-        $to = $singleTo ?: $urlTo ?: null;
-
-        if ($to) {
-            $destinatarios = [trim($to)];
-        } else {
-            $destinatarios = ['jtroncosor@pjud.cl'];
+                // from específico desde env
+                if (!empty($firma->from_env)) {
+                    $envVal = env($firma->from_env);
+                    if (!empty($envVal)) {
+                        $fromAddr = $envVal;
+                    }
+                }
+            }
         }
 
-        // sanea
-        $destinatarios = array_values(array_filter($destinatarios, fn($e) => filter_var($e, FILTER_VALIDATE_EMAIL)));
-        if (empty($destinatarios)) {
-            return back()->with('error', 'No hay destinatarios válidos para el envío.');
-        }
-
-        // 5) Enviar
-        Mail::to($destinatarios)->send($mail);
-
-        return back()->with('ok', "Programación {$fecha} enviada por correo (con adjunto).");
+        return [$firmaHtml, $mailerKey, $fromAddr, $fromName];
     }
 
-    /** Vista previa en el navegador usando la misma vista del correo */
+    /** ================== Envíos ================== */
+
+    /** Envío rápido a un correo (o ?to=) — usa mailer/from si pasas ?firma_id= */
+    public function enviarProgramacionPorCorreo(string $fecha, ?string $singleTo = null)
+    {
+        try {
+            $data = $this->buildDataForMail($fecha);
+
+            // Permite elegir firma por query param en este flujo también (?firma_id=123)
+            $firmaId = request()->query('firma_id') ? (int) request()->query('firma_id') : null;
+            [$firmaHtml, $mailerKey, $fromAddr, $fromName] = $this->resolveSignatureConfig($firmaId, $fecha);
+
+            $mail = (new ProgramacionDiariaHtmlMail(
+                $fecha,
+                $data['juicios'],
+                $data['lecturas'],
+                $data['cortas'],
+                $data['juecesAusentes'],
+                $data['turno1'] ?? null,
+                $data['turno2'] ?? null,
+                $data['turno3'] ?? null,
+                $firmaHtml
+            ))->from($fromAddr, $fromName);
+
+            // Adjunta Excel
+            $excelBin = Excel::raw(new ProgramacionDiariaExport($fecha), ExcelFormat::XLSX);
+            $mail->attachData($excelBin, "Programacion_{$fecha}.xlsx", [
+                'mime' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            ]);
+
+            // Destinatarios
+            $urlTo = request()->query('to');
+            $to = $singleTo ?: $urlTo ?: null;
+            $destinatarios = $to ? [trim($to)] : [config('mail.from.address')];
+            $destinatarios = array_values(array_filter($destinatarios, static fn($e) => filter_var($e, FILTER_VALIDATE_EMAIL)));
+            if (empty($destinatarios)) return back()->with('error', 'No hay destinatarios válidos para el envío.');
+
+            // ¡Usa el mailer correcto!
+            Mail::mailer($mailerKey)->to($destinatarios)->send($mail);
+
+            return back()->with('ok', "Programación {$fecha} enviada por correo (con adjunto).");
+        } catch (\Throwable $ex) {
+            return back()->with('error', 'Fallo envío: '.$ex->getMessage());
+        }
+    }
+
+    /** Envío a lista (To + BCC) con firma seleccionada desde el slider */
+    public function enviarProgramacionPorCorreoLista(string $fecha, array $destinatarios, ?int $firmaId = null)
+    {
+        try {
+            $destinatarios = array_values(array_unique(array_filter(
+                $destinatarios,
+                static fn($e) => filter_var(trim($e ?? ''), FILTER_VALIDATE_EMAIL)
+            )));
+            if (empty($destinatarios)) return back()->with('error','No hay destinatarios válidos.');
+
+            $data = $this->buildDataForMail($fecha);
+
+            // Resuelve firma/mailer/from
+            [$firmaHtml, $mailerKey, $fromAddr, $fromName] = $this->resolveSignatureConfig($firmaId, $fecha);
+
+            $mail = (new ProgramacionDiariaHtmlMail(
+                $fecha,
+                $data['juicios'],
+                $data['lecturas'],
+                $data['cortas'],
+                $data['juecesAusentes'],
+                $data['turno1'] ?? null,
+                $data['turno2'] ?? null,
+                $data['turno3'] ?? null,
+                $firmaHtml
+            ))->from($fromAddr, $fromName);
+
+            // Adjunta Excel
+            $excelBin = Excel::raw(new ProgramacionDiariaExport($fecha), ExcelFormat::XLSX);
+            $mail->attachData($excelBin, "Programacion_{$fecha}.xlsx", [
+                'mime' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            ]);
+
+            // To + BCC
+            $to  = array_shift($destinatarios);
+            $bcc = $destinatarios;
+
+            $m = Mail::mailer($mailerKey)->to($to);
+            if (!empty($bcc)) $m->bcc($bcc);
+            $m->send($mail);
+
+            return back()->with('ok', "Programación {$fecha} enviada (difusión).");
+        } catch (\Throwable $ex) {
+            return back()->with('error', 'Fallo envío (lista): '.$ex->getMessage());
+        }
+    }
+
+    /** ================== Vista previa navegador ================== */
+
     public function preview(?string $fecha = null)
     {
         $fecha = $fecha ?: Carbon::now('America/Santiago')->toDateString();
-
-        // Usa la MISMA fuente de datos que el envío real
         $data = $this->buildDataForMail($fecha);
 
-        // Renderiza la MISMA vista del correo
         return response()->view('emails.programacion-diaria-html', [
             'fechaHuman'     => Carbon::parse($fecha,'America/Santiago')->isoFormat('dddd D [de] MMMM YYYY'),
             'juicios'        => $data['juicios'],
@@ -242,6 +313,7 @@ class PrograMailController extends Controller
             'turno1'         => $data['turno1'] ?? null,
             'turno2'         => $data['turno2'] ?? null,
             'turno3'         => $data['turno3'] ?? null,
+            // Si quieres previsualizar firmas aquí, pasa 'firmaHtml' a la vista también
         ]);
     }
 }
