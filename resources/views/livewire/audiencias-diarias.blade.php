@@ -223,20 +223,59 @@
               </button>
             </div>
 
-            {{-- chips resumidos (lo que se usará para ESTE envío) --}}
-            <div class="flex flex-wrap gap-2">
-              @forelse($recipients as $i => $rcpt)
-                <span wire:key="chip-{{ $i }}-{{ md5($rcpt) }}"
-                      class="inline-flex items-center gap-2 bg-blue-50 text-blue-800 border border-blue-200 px-2 py-1 rounded">
-                  {{ $rcpt }}
-                  <button type="button" class="text-blue-700 hover:text-blue-900" wire:click="removeRecipient({{ $i }})" aria-label="Quitar">
-                    ✕
-                  </button>
-                </span>
-              @empty
-                <p class="text-xs text-gray-500">Sin destinatarios. Usa “Administrar lista…” para cargar los predeterminados o agregar.</p>
-              @endforelse
-            </div>
+            {{-- resumen compacto de destinatarios (botón + popover) --}}
+<div class="relative" x-data="{ showList:false, q:'' }">
+  <button type="button"
+          class="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border border-gray-300 hover:bg-gray-50"
+          x-on:click="showList = !showList"
+          :aria-expanded="showList ? 'true' : 'false'">
+    Ver destinatarios
+    <span class="text-xs bg-blue-50 border border-blue-200 text-blue-800 rounded px-1">
+      {{ count($recipients) }}
+    </span>
+    <svg x-show="!showList" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+    <svg x-show="showList"  xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
+  </button>
+
+  <!-- Popover -->
+  <div x-show="showList" x-transition x-cloak
+       x-on:click.outside="showList=false"
+       class="absolute z-50 mt-2 right-0 w-[28rem] max-w-[86vw] bg-white border rounded-lg shadow-lg">
+    <div class="p-3 border-b flex items-center gap-2">
+      <input type="text" x-model="q"
+             placeholder="Buscar correo…"
+             class="flex-1 px-2 py-1.5 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">     
+    </div>
+
+    <div class="max-h-72 overflow-y-auto text-sm border rounded-lg">
+  <ul class="divide-y">
+    @forelse($recipients as $i => $rcpt)
+      @php $rc = trim($rcpt ?? ''); @endphp
+      <li class="flex items-center justify-between px-3 py-2"
+          x-show="q === '' || '{{ strtolower($rc) }}'.includes(q.toLowerCase())"
+          data-email="{{ $rc }}">
+        <span class="truncate mr-2">{{ $rc }}</span>
+        <div class="flex items-center gap-2">
+          <button type="button" class="text-red-600 hover:text-red-800"
+                  wire:click="removeRecipient({{ $i }})"
+                  title="Quitar de este envío">
+            Quitar
+          </button>
+        </div>
+      </li>
+    @empty
+      <li class="px-3 py-2 text-gray-500">Sin destinatarios.</li>
+    @endforelse
+  </ul>
+</div>
+
+
+    <div class="p-3 border-t text-xs text-gray-500">
+      Se listan sólo los destinatarios de <strong>este envío</strong>. Para editar la lista base, usa “Administrar lista…”.
+    </div>
+  </div>
+</div>
+
 
             {{-- agregar puntuales solo para este envío --}}
             <div class="flex gap-2">
