@@ -62,6 +62,7 @@
             <table class="min-w-full divide-y divide-gray-200 text-sm">
                 <thead class="bg-gray-50">
                     <tr class="text-left text-gray-600">
+                        <th class="px-3 py-2 text-right">Acciones</th>
                         <th class="px-3 py-2">Hora</th>
                         <th class="px-3 py-2">Sala</th>
                         <th class="px-3 py-2">Ubicación</th>
@@ -82,13 +83,22 @@
                         <th class="px-3 py-2">Delito</th>
                         <th class="px-3 py-2">Jueces inhabilitados</th>
                         <th class="px-3 py-2">Observaciones</th>
-                        <th class="px-3 py-2">Acusados</th>
-                        <th class="px-3 py-2 text-right">Acciones</th>
+                        <th class="px-3 py-2">Acusados</th>                        
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-100">
                     @foreach ($audiencias as $aud)
                         <tr>
+                            <td class="px-3 py-2 text-right">
+                                <button type="button"
+                                    class="inline-flex items-center gap-1 text-red-600 transition-transform duration-150 ease-out hover:-translate-y-0.5 hover:shadow-sm active:translate-y-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400/50 transform-gpu"
+                                    x-on:click="
+                                        if (confirm('¿Eliminar esta audiencia (RIT {{ $aud->rit }})?')) {
+                                            $wire.eliminar({{ $aud->id }});
+                                        }">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
                             <td class="px-3 py-2">{!! $fmt($aud->hora_inicio) !!}</td>
                             <td class="px-3 py-2">{!! $fmt($aud->sala) !!}</td>
                             <td class="px-3 py-2">{!! $fmt($aud->ubicacion) !!}</td>
@@ -168,17 +178,7 @@
                                         </div>
                                     </div>
                                 @endif
-                            </td>
-                            <td class="px-3 py-2 text-right">
-                                <button type="button"
-                                    class="inline-flex items-center gap-1 text-red-600 transition-transform duration-150 ease-out hover:-translate-y-0.5 hover:shadow-sm active:translate-y-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400/50 transform-gpu"
-                                    x-on:click="
-                                        if (confirm('¿Eliminar esta audiencia (RIT {{ $aud->rit }})?')) {
-                                            $wire.eliminar({{ $aud->id }});
-                                        }">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </td>
+                            </td>                            
                         </tr>
                     @endforeach
                 </tbody>
