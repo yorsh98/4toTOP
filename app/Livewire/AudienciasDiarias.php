@@ -9,6 +9,7 @@ use App\Models\MailRecipient;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use App\Http\Controllers\PrograMailController;
+use Illuminate\Support\Facades\DB;
 
 class AudienciasDiarias extends Component
 {
@@ -153,26 +154,53 @@ class AudienciasDiarias extends Component
     public function addRecipientToDb(): void
     {
         $email = trim($this->newEmailDb);
+
         if (!$email || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $this->addError('newEmailDb', 'Correo inválido.');
             return;
         }
 
-        // Evitar duplicados si ya existe activo
-        $exists = MailRecipient::query()->where('email', $email)->where('activo', true)->exists();
-        if ($exists) {
+        // 1) Si ya está ACTIVO, avisamos y no hacemos nada
+        $yaActivo = MailRecipient::query()
+            ->where('email', $email)
+            ->where('activo', true)
+            ->exists();
+
+        if ($yaActivo) {
             $this->addError('newEmailDb', 'Ese correo ya existe en la lista.');
             return;
         }
 
-        $maxOrden = (int) (MailRecipient::query()->max('orden') ?? 0);
+        // 2) Transacción: o reactivamos (si existe inactivo) o creamos
+        DB::transaction(function () use ($email) {
+            // bloqueamos por email para evitar race condition
+            $row = MailRecipient::query()
+                ->where('email', $email)
+                ->lockForUpdate()
+                ->first();
 
-        MailRecipient::create([
-            'email'  => $email,
-            'activo' => true,
-            'orden'  => $maxOrden + 1,
-        ]);
+            if ($row) {
+                // existe pero estaba inactivo -> reactivar
+                $row->activo = true;
 
+                if (empty($row->orden) || $row->orden <= 0) {
+                    $row->orden = ((int) MailRecipient::max('orden')) + 1;
+                }
+
+                $row->save();
+            } else {
+                // no existe -> crear
+                $maxOrden = (int) (MailRecipient::query()->max('orden') ?? 0);
+
+                MailRecipient::create([
+                    'email'  => $email,
+                    'activo' => true,
+                    'orden'  => $maxOrden + 1,
+                ]);
+            }
+        });
+
+        // limpiar input y refrescar listado del modal
         $this->newEmailDb = '';
         $this->refreshRecipientsFromDb();
     }
