@@ -12,6 +12,8 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Mail;
 use Maatwebsite\Excel\Facades\Excel;
 use Maatwebsite\Excel\Excel as ExcelFormat;
+use Illuminate\Support\Facades\Log;
+
 
 class PrograMailController extends Controller
 {
@@ -243,9 +245,27 @@ class PrograMailController extends Controller
 
             // ¡Usa el mailer correcto!
             Mail::mailer($mailerKey)->to($destinatarios)->send($mail);
-
+            
+            // logs para ver envio de correo
+            Log::info('Programación diaria enviada (rápida)', [
+                'fecha'      => $fecha,
+                'mailer'     => $mailerKey,
+                'from'       => $fromAddr,
+                'destinos'   => $destinatarios,
+                'contexto'   => 'enviarProgramacionPorCorreo',
+            ]);
+            
             return back()->with('ok', "Programación {$fecha} enviada por correo (con adjunto).");
         } catch (\Throwable $ex) {
+            Log::error('Fallo envío programación diaria (rápida)', [
+                'fecha'    => $fecha,
+                'mailer'   => $mailerKey ?? null,
+                'from'     => $fromAddr ?? null,
+                'error'    => $ex->getMessage(),
+                'trace'    => $ex->getTraceAsString(),
+                'contexto' => 'enviarProgramacionPorCorreo',
+            ]);
+
             return back()->with('error', 'Fallo envío: '.$ex->getMessage());
         }
     }
@@ -290,9 +310,31 @@ class PrograMailController extends Controller
             $m = Mail::mailer($mailerKey)->to($to);
             if (!empty($bcc)) $m->bcc($bcc);
             $m->send($mail);
+            
+            //log para verificar envio de correo
+            Log::info('Programación diaria enviada (lista)', [
+                'fecha'      => $fecha,
+                'mailer'     => $mailerKey,
+                'from'       => $fromAddr,
+                'to'         => $to,
+                'bcc'        => $bcc,
+                'total_dest' => 1 + count($bcc),
+                'contexto'   => 'enviarProgramacionPorCorreoLista',
+            ]);
 
             return back()->with('ok', "Programación {$fecha} enviada (difusión).");
         } catch (\Throwable $ex) {
+            Log::error('Fallo envío programación diaria (lista)', [
+                'fecha'    => $fecha,
+                'mailer'   => $mailerKey ?? null,
+                'from'     => $fromAddr ?? null,
+                'to'       => $to ?? null,
+                'bcc'      => $bcc ?? [],
+                'error'    => $ex->getMessage(),
+                'trace'    => $ex->getTraceAsString(),
+                'contexto' => 'enviarProgramacionPorCorreoLista',
+            ]);
+
             return back()->with('error', 'Fallo envío (lista): '.$ex->getMessage());
         }
     }
