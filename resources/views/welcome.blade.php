@@ -291,7 +291,7 @@
                                             ESTADO DE AUDIENCIAS
                                         </h2>                                    
                                         <p class="mt-4 text-sm/relaxed">
-                                            PRECIONA ACA 👇🏻
+                                            PRESIONE ACA 👇🏻
                                         </p>
                                     </div>
                                 </button>
