@@ -62,3 +62,28 @@ main{
     opacity: 1;
 }
 
+.nav-icon {
+    position: relative;
+}
+
+.nav-icon .tooltip {
+    position: absolute;
+    bottom: 0px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.85);
+    color: white;
+    padding: 2px 5px;
+    border-radius: 6px;
+    font-size: 8px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    transform: translateX(-50%) translateY(5px);
+}
+
+.nav-icon:hover .tooltip {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
