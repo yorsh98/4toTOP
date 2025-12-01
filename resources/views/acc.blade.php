@@ -80,13 +80,13 @@
                                     <div class="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
                                         <img src="/favicon.webp" alt="Gestión Penal" class="w-6 h-6">
                                     </div>
-                                    <span class="font-medium text-gray-700 dark:text-gray-300">SUSPENCION DE ABOGADOS</span>
+                                    <span class="font-medium text-gray-700 dark:text-gray-300">SUSPENSION DE ABOGADOS</span>
                                 </a>
                                 <a href="http://prod.intranet.pjud/suspension_abogados/" target="_blank" class="flex items-center p-3 space-x-3 rounded-xl transition-all shadow-sm hover:bg-gray-100 hover:-translate-y-0.5 border border-gray-100 dark:border-gray-700">
                                     <div class="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
                                         <img src="/favicon.webp" alt="Gestión Penal" class="w-6 h-6">
                                     </div>
-                                    <span class="font-medium text-gray-700 dark:text-gray-300">AGREGAR SUSPENCION DE ABOGADO</span>
+                                    <span class="font-medium text-gray-700 dark:text-gray-300">AGREGAR SUSPENSION DE ABOGADO</span>
                                 </a>
                                 <a href="https://repoupenal.pjud.cl/" target="_blank" class="flex items-center p-3 space-x-3 rounded-xl transition-all shadow-sm hover:bg-gray-100 hover:-translate-y-0.5 border border-gray-100 dark:border-gray-700">
                                     <div class="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
