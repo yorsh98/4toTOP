@@ -106,6 +106,27 @@ class MailSignaturesSeeder extends Seeder
                 'from_env' => 'MAIL_FROM_AMELIA_JEFE',
                 'mailer'   => 'amelia_jefe',
             ],
+            [
+                'nombre'   => 'Johanna Isaac Rosas — Administradora (S)',
+                'html'     => <<<'HTML'
+                <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="font-family:Arial,Helvetica,sans-serif;">
+                <tr>
+                    <td align="left" style="padding-top:8px;color:#274b7a;font-size:14px;">Atentamente,</td>
+                </tr>
+                <tr>
+                    <td align="center" style="padding-top:6px;color:#274b7a;">
+                    <div style="font-size:18px;font-weight:700;">Johanna Isaac Rosas</div>
+                    <div style="font-size:14px;margin-top:6px;">Administradora (S)</div>
+                    <div style="font-size:14px;margin-top:2px;">Cuarto Tribunal de Juicio Oral en lo Penal de Santiago</div>
+                    </td>
+                </tr>
+                </table>
+                HTML,
+                'activo'   => true,
+                'orden'    => 6,
+                'from_env' => 'MAIL_FROM_JOHANNA_ADMIN',
+                'mailer'   => 'johanna_admin',
+            ],
         ];
 
         foreach ($data as $row) {

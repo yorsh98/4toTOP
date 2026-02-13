@@ -69,7 +69,7 @@ class AudienciaForm extends Component
     public $tiposencargados =[
         'Hortencia Garrido',
         'Maricela Santos',
-        'Carlos Donoso',
+        'Loreto Marroquín',
         'Mauricio Fernandez',
         'Leonardo Morales'
     ];
