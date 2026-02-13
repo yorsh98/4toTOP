@@ -143,6 +143,18 @@ return [
             'auth_mode'  => null,
         ],
 
+        // ===== JOHANNA ADM =====
+        'johanna_admin' => [
+            'transport'  => 'smtp',
+            'host'       => env('JOHANNA_JEFE_SMTP_HOST', 'mail.pjud.cl'),
+            'port'       => env('JOHANNA_JEFE_SMTP_PORT', 465),
+            'encryption' => env('JOHANNA_JEFE_SMTP_ENCRYPTION', 'ssl'),
+            'username'   => env('JOHANNA_JEFE_SMTP_USERNAME'),
+            'password'   => env('JOHANNA_JEFE_SMTP_PASSWORD'),
+            'timeout'    => null,
+            'auth_mode'  => null,
+        ],
+
     ],
 
     /*
