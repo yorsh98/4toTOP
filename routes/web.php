@@ -30,6 +30,7 @@ use App\Http\Controllers\MonitorController;
 use App\Http\Controllers\AudienciasExportController;
 use App\Http\Controllers\ausentismoController;
 use App\Http\Controllers\ausenciasController;
+use App\Http\Controllers\migraunijudController;
 
 /*
 |--------------------------------------------------------------------------
@@ -105,6 +106,7 @@ Route::get('/acc', [accController::class, 'index'])->name('acc');
 Route::get('/doc', [docController::class, 'index'])->name('doc');
 Route::get('/form', [formController::class, 'index'])->name('form');
 Route::get('/proc', [procController::class, 'index'])->name('proc');
+Route::get('/migraunijud', [migraunijudController::class, 'index'])->name('migraunijud');
 
 /*
 |--------------------------------------------------------------------------

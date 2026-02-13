@@ -303,22 +303,24 @@ class PrograMailController extends Controller
                 'mime' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
             ]);
 
-            // To + BCC
-            $to  = array_shift($destinatarios);
-            $bcc = $destinatarios;
+            //destinatatios(solo sera visible el propio y todos los demas ocultos)
+            $to  = $fromAddr;        // correo ancla (visible solo para el receptor)
+            $bcc = $destinatarios;  // TODOS ocultos
 
-            $m = Mail::mailer($mailerKey)->to($to);
-            if (!empty($bcc)) $m->bcc($bcc);
-            $m->send($mail);
+            Mail::mailer($mailerKey)
+                ->to($to)
+                ->bcc($bcc)
+                ->send($mail);
+
             
             //log para verificar envio de correo
             Log::info('Programación diaria enviada (lista)', [
                 'fecha'      => $fecha,
                 'mailer'     => $mailerKey,
                 'from'       => $fromAddr,
-                'to'         => $to,
+                'to'         => $fromAddr,
                 'bcc'        => $bcc,
-                'total_dest' => 1 + count($bcc),
+                'total_dest' => count($bcc),
                 'contexto'   => 'enviarProgramacionPorCorreoLista',
             ]);
 
