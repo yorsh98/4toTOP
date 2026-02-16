@@ -52,6 +52,12 @@
             [                
                 'nombre' => 'Juzgado de Garantía de Tocopilla',
             ],
+            [                
+                'nombre' => 'Juzgado de Garantía de Punta Arenas',
+            ],
+            [                
+                'nombre' => 'Juzgado de Garantía de Diego de Almagro',
+            ],
             /*[                
                 'nombre' => 'Juzgado de Garantía de ',
             ],*/
@@ -77,7 +83,13 @@
                 'nombre' => 'Juzgado de Letras y Garantía de Mejillones ',                
             ],
             [                
-                'nombre' => 'Juzgado de Letras y Garantía de Taltal',                
+                'nombre' => 'Juzgado de Letras y Garantía de Cabo de Hornos',                
+            ],
+            [                
+                'nombre' => 'Juzgado de Letras y Garantía de Porvenir',                
+            ],
+            [                
+                'nombre' => 'Juzgado de Letras y Garantía de Chile Chico',                
             ],
             /*[                
                 'nombre' => '',                
@@ -110,7 +122,7 @@
                                     <h2 class="text-xl font-semibold text-black dark:text-white">LISTADO DE TRIBUNALES MIGRADOS A UNIJUD</h2>
                                 </div>                                
                             </div>
-                            <span class="bg-white rounded-lg pt-2 pb-2">Fecha de actualizacion 29-01-2026</span>
+                            <span class="bg-white rounded-lg pt-2 pb-2">Fecha de actualizacion 16-02-2026</span>
                         </div>
                         <div class="grid gap-6 lg:grid-cols-1 lg:gap-8 animate__animated animate__zoomInDown animate__delay-0.8s">
                             <div class="grid gap-6 lg:grid-cols-1 lg:gap-8 animate__animated animate__zoomInDown animate__delay-0.8s">
