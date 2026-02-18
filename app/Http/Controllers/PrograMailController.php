@@ -304,7 +304,7 @@ class PrograMailController extends Controller
             ]);
 
             //destinatatios(solo sera visible el propio y todos los demas ocultos)
-            $to  = $fromAddr;        // correo ancla (visible solo para el receptor)
+            $to  = 'notifica_4top_santiago@pjud.cl';        // correo ancla (visible solo para el receptor)
             $bcc = $destinatarios;  // TODOS ocultos
 
             Mail::mailer($mailerKey)
