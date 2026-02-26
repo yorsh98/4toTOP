@@ -131,6 +131,81 @@
           if (!document.hidden) tryPlay();
         });
       });
+
+      /**
+       * AUTO-REFRESH (2 casos)
+       * 1) Si el servidor responde 500 / 502 / 503 / 504 o falla el fetch -> reload
+       * 2) Todos los días a las 08:00 (hora local del equipo) -> reload
+       */
+
+      // --- (A) Healthcheck para detectar caídas tipo 500 ---
+      const HEALTHCHECK_URL = '/csrf-refresh'; // usa uno que siempre responda (idealmente 200)
+      const HEALTHCHECK_EVERY_MS = 30 * 1000;  // cada 30s (ajusta si quieres)
+
+      let healthFailStreak = 0;
+      const MAX_FAILS_BEFORE_RELOAD = 2;       // 2 fallos seguidos -> recarga
+
+      async function healthCheck() {
+        try {
+          const res = await fetch(HEALTHCHECK_URL, {
+            method: 'GET',
+            cache: 'no-store',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+          });
+
+          // Si es un error 5xx, contamos fallo
+          if (res.status >= 500) {
+            healthFailStreak++;
+          } else {
+            healthFailStreak = 0;
+          }
+
+          // (opcional) si tu endpoint devuelve csrf, mantenemos el token
+          // (esto conserva lo que ya hacías)
+          if (res.ok) {
+            const data = await res.json().catch(() => null);
+            if (data?.csrf) {
+              document.querySelector('meta[name="csrf-token"]')
+                ?.setAttribute('content', data.csrf);
+            }
+          }
+
+          if (healthFailStreak >= MAX_FAILS_BEFORE_RELOAD) {
+            location.reload();
+          }
+        } catch (e) {
+          // Si no hay respuesta (red caída / server abajo), también cuenta
+          healthFailStreak++;
+          if (healthFailStreak >= MAX_FAILS_BEFORE_RELOAD) {
+            location.reload();
+          }
+        }
+      }
+
+      setInterval(healthCheck, HEALTHCHECK_EVERY_MS);
+      // dispara uno al inicio para no esperar 30s
+      healthCheck();
+
+
+      // --- (B) Recarga diaria a las 08:00 AM ---
+      function scheduleDailyReload(hour = 8, minute = 0) {
+        const now = new Date();
+        const next = new Date(now);
+        next.setHours(hour, minute, 0, 0);
+
+        // si ya pasó hoy, programa para mañana
+        if (next <= now) next.setDate(next.getDate() + 1);
+
+        const msUntil = next.getTime() - now.getTime();
+
+        setTimeout(() => {
+          location.reload();
+          // por seguridad, vuelve a agendar (por si el reload no ocurre por alguna razón)
+          scheduleDailyReload(hour, minute);
+        }, msUntil);
+      }
+
+      scheduleDailyReload(8, 0);
     </script>
   </body>
 </html>
