@@ -322,8 +322,16 @@
           </button>
           <button type="button"
                   wire:click="enviarCorreoDifusion"
-                  class="px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700">
-            Enviar difusión
+                  wire:loading.attr="disabled"
+                  wire:target="enviarCorreoDifusion"
+                  class="px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed">
+              <span wire:loading.remove wire:target="enviarCorreoDifusion">
+                  Enviar difusión
+              </span>
+
+              <span wire:loading wire:target="enviarCorreoDifusion">
+                  Enviando...
+              </span>
           </button>
         </div>
       </div>
