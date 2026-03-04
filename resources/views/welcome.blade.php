@@ -144,13 +144,13 @@
                             </a>
                             <div class="grid grid-cols-2 gap-4 ">
                                 <a  id="5"
-                                    href="{{ url('/proc') }}" 
+                                    href="{{ url('/buscadorsentencias') }}" 
                                     class="flex items-center gap-3 rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] transition duration-300 hover:text-black/70 hover:ring-black/20 focus:outline-none focus-visible:ring-[#FF2D20] lg:pb-10 dark:bg-zinc-900 dark:ring-zinc-800 dark:hover:text-white/70 dark:hover:ring-zinc-700 dark:focus-visible:ring-[#FF2D20]">
                                     <div class="size-12 shrink-0 flex items-center justify-center rounded-full">
-                                        <svg viewBox="0 0 1024 1024" class="icon" version="1.1" xmlns="http://www.w3.org/2000/svg" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M832 960H192s-64-2.133333-64-170.666667h768c0 168.533333-64 170.666667-64 170.666667z" fill="#42A5F5"></path><path d="M170.666667 64h682.666666v725.333333H170.666667z" fill="#90CAF9"></path><path d="M384 320h341.333333v42.666667H384zM384 405.333333h341.333333v42.666667H384zM384 490.666667h341.333333v42.666666H384zM384 576h341.333333v42.666667H384zM384 661.333333h341.333333v42.666667H384z" fill="#1976D2"></path><path d="M298.666667 320h42.666666v42.666667h-42.666666zM298.666667 405.333333h42.666666v42.666667h-42.666666zM298.666667 490.666667h42.666666v42.666666h-42.666666zM298.666667 576h42.666666v42.666667h-42.666666zM298.666667 661.333333h42.666666v42.666667h-42.666666z" fill="#1976D2"></path></g></svg>
+                                        <svg fill="#000000" viewBox="-1 0 19 19" xmlns="http://www.w3.org/2000/svg" class="cf-icon-svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M16.417 9.579A7.917 7.917 0 1 1 8.5 1.662a7.917 7.917 0 0 1 7.917 7.917zm-6.37 2.817a.317.317 0 0 0-.316-.317H4.15a.318.318 0 0 0-.317.317v.715a.318.318 0 0 0 .317.317h5.58a.317.317 0 0 0 .317-.317zM5.362 8.655l2.362 2.362a.396.396 0 0 0 .56-.56L5.921 8.096a.396.396 0 1 0-.56.56zm8.05 3.235-3.285-3.285.81-.81L8.593 5.45 6.398 7.644l2.345 2.344.823-.823 3.285 3.285a.396.396 0 1 0 .56-.56zM9.056 4.96l2.363 2.362a.396.396 0 1 0 .56-.56L9.615 4.4a.396.396 0 1 0-.56.56z"></path></g></svg>
                                     </div>
                                     <div class="overflow-hidden break-words ">
-                                        <h2 class="text-xl font-semibold text-black ">PROCEDIMIENTOS TRIBUNAL</h2>                                        
+                                        <h2 class="text-xl font-semibold text-black ">BUSCADOR SENTENCIAS</h2>                                        
                                     </div>
                                 </a>
                                 <a  id="3"
@@ -344,7 +344,22 @@
                                 <svg class="size-6 shrink-0 self-center stroke-[#FF2D20]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75"/></svg>
                             </a>
                             
-                        </div>   
+                        </div>  
+                        <div class="grid gap-6 pt-6 lg:grid-cols-3 lg:gap-8">
+                            
+                            <a  id="6"
+                                href="{{ url('/proc') }}" 
+                                class="flex items-center gap-4 rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] transition duration-300 hover:text-black/70 hover:ring-black/20 focus:outline-none focus-visible:ring-[#FF2D20] lg:pb-10 dark:bg-zinc-900 dark:ring-zinc-800 dark:hover:text-white/70 dark:hover:ring-zinc-700 dark:focus-visible:ring-[#FF2D20]"
+                            >
+                                <div class="flex size-12 shrink-0 items-center justify-center rounded-full sm:size-16">
+                                  <svg viewBox="0 0 1024 1024" class="icon" version="1.1" xmlns="http://www.w3.org/2000/svg" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M832 960H192s-64-2.133333-64-170.666667h768c0 168.533333-64 170.666667-64 170.666667z" fill="#42A5F5"></path><path d="M170.666667 64h682.666666v725.333333H170.666667z" fill="#90CAF9"></path><path d="M384 320h341.333333v42.666667H384zM384 405.333333h341.333333v42.666667H384zM384 490.666667h341.333333v42.666666H384zM384 576h341.333333v42.666667H384zM384 661.333333h341.333333v42.666667H384z" fill="#1976D2"></path><path d="M298.666667 320h42.666666v42.666667h-42.666666zM298.666667 405.333333h42.666666v42.666667h-42.666666zM298.666667 490.666667h42.666666v42.666666h-42.666666zM298.666667 576h42.666666v42.666667h-42.666666zM298.666667 661.333333h42.666666v42.666667h-42.666666z" fill="#1976D2"></path></g></svg>
+                                </div>
+
+                                <div class="pt-3 sm:pt-5">
+                                    <h2 class="text-xl font-semibold text-black dark:text-white">PROCEDIMIENTOS TRIBUNAL</h2>                                    
+                                </div>                                
+                            </a>                                                        
+                        </div> 
                     </main>
 
                     <footer class="py-16 text-center text-sm text-black dark:text-white/70">
