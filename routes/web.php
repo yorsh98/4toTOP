@@ -31,6 +31,7 @@ use App\Http\Controllers\AudienciasExportController;
 use App\Http\Controllers\ausentismoController;
 use App\Http\Controllers\ausenciasController;
 use App\Http\Controllers\migraunijudController;
+use App\Http\Controllers\buscadorsentenciasController;
 
 /*
 |--------------------------------------------------------------------------
@@ -107,6 +108,7 @@ Route::get('/doc', [docController::class, 'index'])->name('doc');
 Route::get('/form', [formController::class, 'index'])->name('form');
 Route::get('/proc', [procController::class, 'index'])->name('proc');
 Route::get('/migraunijud', [migraunijudController::class, 'index'])->name('migraunijud');
+Route::get('/buscadorsentencias', [buscadorsentenciasController::class, 'index'])->name('buscadorsentencias');
 
 /*
 |--------------------------------------------------------------------------
