@@ -38,6 +38,34 @@ class LoginForm extends Form
             ]);
         }
 
+        $user = Auth::user();
+        if ($user?->isRejected()) {
+            Auth::logout();
+            RateLimiter::hit($this->throttleKey());
+
+            throw ValidationException::withMessages([
+                'form.email' => 'Tu cuenta fue rechazada por un administrador.',
+            ]);
+        }
+
+        if (! $user?->isApproved()) {
+            Auth::logout();
+            RateLimiter::hit($this->throttleKey());
+
+            throw ValidationException::withMessages([
+                'form.email' => 'Tu cuenta está pendiente de aprobación por un administrador.',
+            ]);
+        }
+
+        if ($user?->isSuspended()) {
+            Auth::logout();
+            RateLimiter::hit($this->throttleKey());
+
+            throw ValidationException::withMessages([
+                'form.email' => 'Tu cuenta se encuentra suspendida. Contacta al administrador.',
+            ]);
+        }
+
         RateLimiter::clear($this->throttleKey());
     }
 

@@ -1,42 +1,51 @@
 <?php
+
 // app/Livewire/AudienciasDiarias.php
+
 namespace App\Livewire;
 
-use Livewire\Component;
-use App\Models\Audiencia;
-use App\Models\MailSignature;
-use App\Models\MailRecipient;
-use Illuminate\Support\Facades\Auth;
-use Carbon\Carbon;
 use App\Http\Controllers\PrograMailController;
+use App\Models\Audiencia;
+use App\Models\MailRecipient;
+use App\Models\MailSignature;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
+use Livewire\Component;
 
 class AudienciasDiarias extends Component
 {
     public string $fecha;
+
     public $audiencias = [];
 
     // Slide-over y difusión
     public bool $showSend = false;
+
     public bool $listModal = false;
 
     // Lista de este envío (chips)
     public string $newEmail = '';
+
     public array $recipients = [];
+
     public string $bulk = '';
 
     // Lista de BD (administración)
     public array $recipientsDb = [];
+
     public string $newEmailDb = '';
 
     // Firmas
     public array $signatures = [];
+
     public ?int $firmaId = null;
+
     public string $firmaPreview = '';
 
     public function mount(): void
     {
-        abort_unless(Auth::check(), 403, 'No autorizado.');
+        Gate::authorize('audiencias.ver');
         $this->fecha = now()->toDateString();
         $this->buscar();
 
@@ -46,11 +55,11 @@ class AudienciasDiarias extends Component
             : MailSignature::query()->where('activo', true);
 
         $this->signatures = $querySig
-            ->orderBy('id')->get(['id','nombre','html'])
-            ->map(fn($s) => ['id'=>$s->id,'nombre'=>$s->nombre,'html'=>$s->html])
+            ->orderBy('id')->get(['id', 'nombre', 'html'])
+            ->map(fn ($s) => ['id' => $s->id, 'nombre' => $s->nombre, 'html' => $s->html])
             ->all();
 
-        if (!empty($this->signatures)) {
+        if (! empty($this->signatures)) {
             $this->firmaId = $this->signatures[0]['id'];
             $this->firmaPreview = $this->signatures[0]['html'];
         }
@@ -59,7 +68,10 @@ class AudienciasDiarias extends Component
         $this->refreshRecipientsFromDb();
     }
 
-    public function updatedFecha(): void { $this->buscar(); }
+    public function updatedFecha(): void
+    {
+        $this->buscar();
+    }
 
     public function hoy(): void
     {
@@ -91,9 +103,11 @@ class AudienciasDiarias extends Component
 
     public function eliminar(int $id): void
     {
-        abort_unless(Auth::check(), 403);
+        Gate::authorize('audiencias.editar');
         $aud = Audiencia::find($id);
-        if (!$aud) return;
+        if (! $aud) {
+            return;
+        }
 
         $aud->delete();
         $this->buscar();
@@ -105,7 +119,7 @@ class AudienciasDiarias extends Component
     {
         $email = trim($this->newEmail);
         if ($email && filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            if (!in_array($email, $this->recipients, true)) {
+            if (! in_array($email, $this->recipients, true)) {
                 $this->recipients[] = $email;
             }
             $this->resetErrorBag('newEmail');
@@ -128,12 +142,14 @@ class AudienciasDiarias extends Component
         $ok = 0;
         foreach ($candidatos as $c) {
             $c = trim($c);
-            if (filter_var($c, FILTER_VALIDATE_EMAIL) && !in_array($c, $this->recipients, true)) {
+            if (filter_var($c, FILTER_VALIDATE_EMAIL) && ! in_array($c, $this->recipients, true)) {
                 $this->recipients[] = $c;
                 $ok++;
             }
         }
-        if ($ok === 0) $this->addError('bulk', 'No se detectaron correos válidos.');
+        if ($ok === 0) {
+            $this->addError('bulk', 'No se detectaron correos válidos.');
+        }
         $this->bulk = '';
     }
 
@@ -146,17 +162,20 @@ class AudienciasDiarias extends Component
 
         $this->recipientsDb = $query
             ->orderBy('orden')->orderBy('id')
-            ->get(['id','email'])
-            ->map(fn($r) => ['id' => $r->id, 'email' => $r->email])
+            ->get(['id', 'email'])
+            ->map(fn ($r) => ['id' => $r->id, 'email' => $r->email])
             ->all();
     }
 
     public function addRecipientToDb(): void
     {
+        Gate::authorize('progra.mail.enviar');
+
         $email = trim($this->newEmailDb);
 
-        if (!$email || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        if (! $email || ! filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $this->addError('newEmailDb', 'Correo inválido.');
+
             return;
         }
 
@@ -168,6 +187,7 @@ class AudienciasDiarias extends Component
 
         if ($yaActivo) {
             $this->addError('newEmailDb', 'Ese correo ya existe en la lista.');
+
             return;
         }
 
@@ -193,9 +213,9 @@ class AudienciasDiarias extends Component
                 $maxOrden = (int) (MailRecipient::query()->max('orden') ?? 0);
 
                 MailRecipient::create([
-                    'email'  => $email,
+                    'email' => $email,
                     'activo' => true,
-                    'orden'  => $maxOrden + 1,
+                    'orden' => $maxOrden + 1,
                 ]);
             }
         });
@@ -207,28 +227,36 @@ class AudienciasDiarias extends Component
 
     public function removeRecipientFromDb(int $id): void
     {
+        Gate::authorize('progra.mail.enviar');
+
         $row = MailRecipient::find($id);
-        if (!$row) return;
+        if (! $row) {
+            return;
+        }
 
         // baja lógica (recomendado)
         $row->activo = false;
         $row->save();
 
         // quitar también de la lista de ENVÍO si estaba
-        $this->recipients = array_values(array_filter($this->recipients, fn($e) => $e !== $row->email));
+        $this->recipients = array_values(array_filter($this->recipients, fn ($e) => $e !== $row->email));
 
         $this->refreshRecipientsFromDb();
     }
 
     public function openListModal(): void
     {
+        Gate::authorize('progra.mail.enviar');
+
         $this->refreshRecipientsFromDb();
         $this->listModal = true;
     }
 
     public function loadDbIntoSendList(): void
     {
-        $dbEmails = array_map(fn($r) => $r['email'], $this->recipientsDb);
+        Gate::authorize('progra.mail.enviar');
+
+        $dbEmails = array_map(fn ($r) => $r['email'], $this->recipientsDb);
         $this->recipients = array_values(array_unique(array_merge($dbEmails, $this->recipients)));
         // no cierro el modal automáticamente; si quieres, descomenta:
         // $this->listModal = false;
@@ -244,12 +272,15 @@ class AudienciasDiarias extends Component
     /* ===================== Envío ===================== */
     public function enviarCorreoDifusion(): void
     {
+        Gate::authorize('progra.mail.enviar');
+
         $limpios = array_values(array_unique(array_filter(
-            $this->recipients, fn($e)=> filter_var($e, FILTER_VALIDATE_EMAIL)
+            $this->recipients, fn ($e) => filter_var($e, FILTER_VALIDATE_EMAIL)
         )));
 
         if (empty($limpios)) {
             $this->addError('recipients', 'Agrega al menos un destinatario válido.');
+
             return;
         }
 
@@ -262,6 +293,8 @@ class AudienciasDiarias extends Component
     /* ===================== Slide-over ===================== */
     public function openSend(): void
     {
+        Gate::authorize('progra.mail.enviar');
+
         // Carga predeterminada de la BD (activos) y mergea con lo ya agregado manualmente
         $query = method_exists(MailRecipient::class, 'scopeActivos')
             ? MailRecipient::query()->activos()
@@ -275,7 +308,8 @@ class AudienciasDiarias extends Component
 
     public function render()
     {
-        abort_unless(Auth::check(), 403, 'No autorizado.');
+        Gate::authorize('audiencias.ver');
+
         return view('livewire.audiencias-diarias');
     }
 }

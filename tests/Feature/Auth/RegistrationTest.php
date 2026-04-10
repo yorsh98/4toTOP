@@ -21,7 +21,12 @@ test('new users can register', function () {
 
     $component->call('register');
 
-    $component->assertRedirect(route('dashboard', absolute: false));
+    $component->assertRedirect(route('login', absolute: false));
 
-    $this->assertAuthenticated();
+    $this->assertGuest();
+
+    $this->assertDatabaseHas('users', [
+        'email' => 'test@example.com',
+        'approved_at' => null,
+    ]);
 });

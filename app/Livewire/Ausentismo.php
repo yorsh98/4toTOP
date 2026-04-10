@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Ausentismo as AusentismoModel;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -12,16 +13,24 @@ class Ausentismo extends Component
 
     // Filtros/UI
     public string $q = '';
+
     public int $perPage = 10;
+
     protected $paginationTheme = 'bootstrap';
 
     // Formulario
     public ?int $editingId = null;
+
     public string $funcionario_nombre = '';
+
     public string $cargo = '';
+
     public string $tipo_permiso = '';   // <-- NUEVO nombre correcto
+
     public string $fecha_inicio = '';
+
     public string $fecha_termino = '';
+
     public ?string $observacion = null;
 
     // Listas para selects
@@ -38,26 +47,33 @@ class Ausentismo extends Component
     protected function rules(): array
     {
         return [
-            'funcionario_nombre' => ['required','string','min:3','max:150'],
-            'cargo'              => ['required','string','min:2','max:120'],
-            'tipo_permiso'      => ['required','string'], // <-- actualizado
-            'fecha_inicio'       => ['required','date'],
-            'fecha_termino'      => ['required','date','after_or_equal:fecha_inicio'],
-            'observacion'        => ['nullable','string'],
+            'funcionario_nombre' => ['required', 'string', 'min:3', 'max:150'],
+            'cargo' => ['required', 'string', 'min:2', 'max:120'],
+            'tipo_permiso' => ['required', 'string'], // <-- actualizado
+            'fecha_inicio' => ['required', 'date'],
+            'fecha_termino' => ['required', 'date', 'after_or_equal:fecha_inicio'],
+            'observacion' => ['nullable', 'string'],
         ];
     }
 
     protected $validationAttributes = [
         'funcionario_nombre' => 'nombre del funcionario',
-        'cargo'              => 'cargo',
-        'tipo_permiso'      => 'tipo de permiso', // <-- actualizado
-        'fecha_inicio'       => 'fecha de inicio',
-        'fecha_termino'      => 'fecha de término',
-        'observacion'        => 'observación',
+        'cargo' => 'cargo',
+        'tipo_permiso' => 'tipo de permiso', // <-- actualizado
+        'fecha_inicio' => 'fecha de inicio',
+        'fecha_termino' => 'fecha de término',
+        'observacion' => 'observación',
     ];
 
-    public function updatingQ(): void { $this->resetPage(); }
-    public function updatingPerPage(): void { $this->resetPage(); }
+    public function updatingQ(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatingPerPage(): void
+    {
+        $this->resetPage();
+    }
 
     public function resetForm(): void
     {
@@ -73,15 +89,17 @@ class Ausentismo extends Component
 
     public function create(): void
     {
+        Gate::authorize('ausentismo.editar');
+
         $this->validate();
 
         AusentismoModel::create([
             'funcionario_nombre' => $this->funcionario_nombre,
-            'cargo'              => $this->cargo,
-            'tipo_permiso'      => $this->tipo_permiso, // <-- actualizado
-            'fecha_inicio'       => $this->fecha_inicio,
-            'fecha_termino'      => $this->fecha_termino,
-            'observacion'        => $this->observacion,
+            'cargo' => $this->cargo,
+            'tipo_permiso' => $this->tipo_permiso, // <-- actualizado
+            'fecha_inicio' => $this->fecha_inicio,
+            'fecha_termino' => $this->fecha_termino,
+            'observacion' => $this->observacion,
         ]);
 
         $this->dispatch('toast', message: 'Ausentismo registrado.');
@@ -90,13 +108,15 @@ class Ausentismo extends Component
 
     public function edit(int $id): void
     {
+        Gate::authorize('ausentismo.editar');
+
         $a = AusentismoModel::findOrFail($id);
         $this->editingId = $a->id;
         $this->funcionario_nombre = $a->funcionario_nombre;
         $this->cargo = $a->cargo;
         $this->tipo_permiso = $a->tipo_permiso; // <-- actualizado
         // Si tienes casts a date en el modelo, esto funciona. Si no, asegurarse de formatear strings.
-        $this->fecha_inicio  = $a->fecha_inicio?->format('Y-m-d')  ?? (is_string($a->fecha_inicio)  ? substr($a->fecha_inicio, 0, 10)  : '');
+        $this->fecha_inicio = $a->fecha_inicio?->format('Y-m-d') ?? (is_string($a->fecha_inicio) ? substr($a->fecha_inicio, 0, 10) : '');
         $this->fecha_termino = $a->fecha_termino?->format('Y-m-d') ?? (is_string($a->fecha_termino) ? substr($a->fecha_termino, 0, 10) : '');
         $this->observacion = $a->observacion;
 
@@ -105,18 +125,22 @@ class Ausentismo extends Component
 
     public function update(): void
     {
-        if (!$this->editingId) return;
+        Gate::authorize('ausentismo.editar');
+
+        if (! $this->editingId) {
+            return;
+        }
 
         $this->validate();
 
         $a = AusentismoModel::findOrFail($this->editingId);
         $a->update([
             'funcionario_nombre' => $this->funcionario_nombre,
-            'cargo'              => $this->cargo,
-            'tipo_permiso'      => $this->tipo_permiso, // <-- actualizado
-            'fecha_inicio'       => $this->fecha_inicio,
-            'fecha_termino'      => $this->fecha_termino,
-            'observacion'        => $this->observacion,
+            'cargo' => $this->cargo,
+            'tipo_permiso' => $this->tipo_permiso, // <-- actualizado
+            'fecha_inicio' => $this->fecha_inicio,
+            'fecha_termino' => $this->fecha_termino,
+            'observacion' => $this->observacion,
         ]);
 
         $this->dispatch('toast', message: 'Ausentismo actualizado.');
@@ -125,6 +149,8 @@ class Ausentismo extends Component
 
     public function delete(int $id): void
     {
+        Gate::authorize('ausentismo.editar');
+
         AusentismoModel::whereKey($id)->delete();
         $this->dispatch('toast', message: 'Registro eliminado.');
         $this->resetPage();
@@ -132,20 +158,22 @@ class Ausentismo extends Component
 
     public function render()
     {
+        Gate::authorize('ausentismo.ver');
+
         // Vigentes o futuras: término hoy o más adelante (excluye terminadas)
         $hoy = now()->toDateString();
 
         $items = AusentismoModel::query()
             ->where(function ($q) use ($hoy) {
                 $q->whereNull('fecha_termino')                  // si manejas ausencias “abiertas”
-                ->orWhereDate('fecha_termino', '>=', $hoy);   // o con término en el futuro/actual
+                    ->orWhereDate('fecha_termino', '>=', $hoy);   // o con término en el futuro/actual
             })
             ->when($this->q, function ($q) {
                 $q->where(function ($qq) {
                     $qq->where('funcionario_nombre', 'like', "%{$this->q}%")
-                    ->orWhere('cargo', 'like', "%{$this->q}%")
-                    ->orWhere('tipo_permiso', 'like', "%{$this->q}%")
-                    ->orWhere('observacion', 'like', "%{$this->q}%");
+                        ->orWhere('cargo', 'like', "%{$this->q}%")
+                        ->orWhere('tipo_permiso', 'like', "%{$this->q}%")
+                        ->orWhere('observacion', 'like', "%{$this->q}%");
                 });
             })
             // Orden: primero las más antiguas (fecha_inicio asc), luego por fecha_termino asc
@@ -154,11 +182,9 @@ class Ausentismo extends Component
             ->paginate($this->perPage);
 
         return view('livewire.ausentismo', [
-            'items'          => $items,
-            'cargos'         => $this->cargos,
+            'items' => $items,
+            'cargos' => $this->cargos,
             'tipos_ausencia' => $this->tipos_ausencia,
         ]);
     }
-
-
 }

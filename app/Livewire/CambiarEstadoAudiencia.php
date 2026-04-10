@@ -2,20 +2,24 @@
 
 namespace App\Livewire;
 
-use Livewire\Component;
 use App\Models\Audiencia;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Gate;
+use Livewire\Component;
 
 class CambiarEstadoAudiencia extends Component
 {
     public $audiencias = [];
+
     public $ultimaActualizacion;
+
     public $filtro = null; // <-- filtro por tipo de audiencia
+
     public $tiposAudiencia = [
         'Juicio Oral',
         'Cont. Juicio Oral',
         'Audiencia Corta',
-        'Lectura de Sentencia'
+        'Lectura de Sentencia',
     ];
 
     public function mount()
@@ -31,14 +35,15 @@ class CambiarEstadoAudiencia extends Component
 
     public function cargarAudiencias($forceRefresh = false)
     {
-            if ($forceRefresh) {
+        if ($forceRefresh) {
             Audiencia::all()->each->refresh();
         }
 
         // Si no hay filtro seleccionado, no mostrar audiencias
-        if (!$this->filtro) {
+        if (! $this->filtro) {
             $this->audiencias = collect(); // colección vacía
             $this->ultimaActualizacion = now()->format('H:i:s');
+
             return;
         }
 
@@ -55,6 +60,8 @@ class CambiarEstadoAudiencia extends Component
 
     public function cambiarEstado($id, $nuevoEstado)
     {
+        Gate::authorize('audiencias.estado.cambiar');
+
         $audiencia = Audiencia::findOrFail($id);
         $audiencia->update(['estado' => $nuevoEstado]);
         $audiencia->refresh();
@@ -63,12 +70,12 @@ class CambiarEstadoAudiencia extends Component
 
         $this->dispatch('notificacion', [
             'tipo' => 'success',
-            'mensaje' => 'Estado actualizado correctamente'
+            'mensaje' => 'Estado actualizado correctamente',
         ]);
     }
 
     public function render()
-    {      
+    {
         return view('livewire.cambiar-estado-audiencia');
     }
 }

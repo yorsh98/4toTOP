@@ -25,48 +25,70 @@ new class extends Component
                 </div>
 
                 <!-- Navigation Links (DESKTOP ≥1024px) -->
-                <div class="hidden space-x-8 lg:-my-px lg:ms-10 lg:flex">
-                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
-                        {{ __('Inicio') }}
-                    </x-nav-link>
-                </div>
+                @canany(['navbar.inicio.visible', 'navbar.inicio.editable'])
+                    <div class="hidden space-x-8 lg:-my-px lg:ms-10 lg:flex">
+                        <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
+                            {{ __('Inicio') }}
+                        </x-nav-link>
+                    </div>
+                @endcanany
 
                 <!--botton en navbar-->
-                <div class="hidden space-x-8 lg:-my-px lg:ms-10 lg:flex">
-                    <x-nav-link :href="route('oficiolibertad')" :active="request()->routeIs('oficiolibertad')" wire:navigate>
-                        {{ __('ADM Oficios / Libertades') }}
-                    </x-nav-link>
-                </div>
+                @canany(['navbar.oficios_libertades.visible', 'navbar.oficios_libertades.editable'])
+                    <div class="hidden space-x-8 lg:-my-px lg:ms-10 lg:flex">
+                        <x-nav-link :href="route('oficiolibertad')" :active="request()->routeIs('oficiolibertad')" wire:navigate>
+                            {{ __('ADM Oficios / Libertades') }}
+                        </x-nav-link>
+                    </div>
+                @endcanany
 
-                <div class="hidden space-x-8 lg:-my-px lg:ms-10 lg:flex">
-                    <x-nav-link :href="route('addfuncionario.index')" :active="request()->routeIs('addfuncionario')" wire:navigate>
-                        {{ __('Funcionarios') }}
-                    </x-nav-link>
-                </div>
+                @canany(['navbar.funcionarios.visible', 'navbar.funcionarios.editable'])
+                    <div class="hidden space-x-8 lg:-my-px lg:ms-10 lg:flex">
+                        <x-nav-link :href="route('addfuncionario.index')" :active="request()->routeIs('addfuncionario')" wire:navigate>
+                            {{ __('Funcionarios') }}
+                        </x-nav-link>
+                    </div>
+                @endcanany
 
-                <div class="hidden space-x-8 lg:-my-px lg:ms-10 lg:flex">
-                    <x-nav-link :href="route('turno')" :active="request()->routeIs('turno')" wire:navigate>
-                        {{ __('Turnos') }}
-                    </x-nav-link>
-                </div>
+                @canany(['navbar.turnos.visible', 'navbar.turnos.editable'])
+                    <div class="hidden space-x-8 lg:-my-px lg:ms-10 lg:flex">
+                        <x-nav-link :href="route('turno')" :active="request()->routeIs('turno')" wire:navigate>
+                            {{ __('Turnos') }}
+                        </x-nav-link>
+                    </div>
+                @endcanany
 
-                <div class="hidden space-x-8 lg:-my-px lg:ms-10 lg:flex">
-                    <x-nav-link :href="route('guias')" :active="request()->routeIs('guias')" wire:navigate>
-                        {{ __('Guias') }}
-                    </x-nav-link>
-                </div>
+                @canany(['navbar.guias.visible', 'navbar.guias.editable'])
+                    <div class="hidden space-x-8 lg:-my-px lg:ms-10 lg:flex">
+                        <x-nav-link :href="route('guias')" :active="request()->routeIs('guias')" wire:navigate>
+                            {{ __('Guias') }}
+                        </x-nav-link>
+                    </div>
+                @endcanany
 
-                <div class="hidden space-x-8 lg:-my-px lg:ms-10 lg:flex">
-                    <x-nav-link :href="route('AdmAudv')" :active="request()->routeIs('AdmAudv')" wire:navigate>
-                        {{ __('Audiencias') }}
-                    </x-nav-link>
-                </div>
+                @canany(['navbar.audiencias.visible', 'navbar.audiencias.editable'])
+                    <div class="hidden space-x-8 lg:-my-px lg:ms-10 lg:flex">
+                        <x-nav-link :href="route('AdmAudv')" :active="request()->routeIs('AdmAudv')" wire:navigate>
+                            {{ __('Audiencias') }}
+                        </x-nav-link>
+                    </div>
+                @endcanany
 
-                <div class="hidden space-x-8 lg:-my-px lg:ms-10 lg:flex">
-                    <x-nav-link :href="route('ausentismo')" :active="request()->routeIs('ausentismo')" wire:navigate>
-                        {{ __('Ausencias') }}
-                    </x-nav-link>
-                </div>
+                @canany(['navbar.ausencias.visible', 'navbar.ausencias.editable'])
+                    <div class="hidden space-x-8 lg:-my-px lg:ms-10 lg:flex">
+                        <x-nav-link :href="route('ausentismo')" :active="request()->routeIs('ausentismo')" wire:navigate>
+                            {{ __('Ausencias') }}
+                        </x-nav-link>
+                    </div>
+                @endcanany
+
+                @canany(['navbar.seguridad.visible', 'navbar.seguridad.editable'])
+                    <div class="hidden space-x-8 lg:-my-px lg:ms-10 lg:flex">
+                        <x-nav-link :href="route('seguridad.roles.index')" :active="request()->routeIs('seguridad.*')" wire:navigate>
+                            {{ __('Seguridad') }}
+                        </x-nav-link>
+                    </div>
+                @endcanany
             </div>
 
             <!-- Settings Dropdown (DESKTOP ≥1024px) -->
@@ -108,59 +130,84 @@ new class extends Component
 
     <!-- Responsive Navigation Menu (MÓVIL <1024px) -->
     <div :class="{'block': open, 'hidden': ! open}" class="hidden lg:hidden">
-        <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
-                {{ __('Inicio') }}
-            </x-responsive-nav-link>
-        </div>
-
-        <div :class="{'block': open, 'hidden': ! open}" class="hidden lg:hidden">
+        @canany(['navbar.inicio.visible', 'navbar.inicio.editable'])
             <div class="pt-2 pb-3 space-y-1">
-                <x-responsive-nav-link :href="route('oficiolibertad')" :active="request()->routeIs('oficiolibertad')" wire:navigate>
-                    {{ __('ADM Oficios / Libertades') }}
+                <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
+                    {{ __('Inicio') }}
                 </x-responsive-nav-link>
             </div>
-        </div>
+        @endcanany
 
-        <div :class="{'block': open, 'hidden': ! open}" class="hidden lg:hidden">
-            <div class="pt-2 pb-3 space-y-1">
-                <x-responsive-nav-link :href="route('addfuncionario.index')" :active="request()->routeIs('addfuncionario')" wire:navigate>
-                    {{ __('Funcionarios') }}
-                </x-responsive-nav-link>
+        @canany(['navbar.oficios_libertades.visible', 'navbar.oficios_libertades.editable'])
+            <div :class="{'block': open, 'hidden': ! open}" class="hidden lg:hidden">
+                <div class="pt-2 pb-3 space-y-1">
+                    <x-responsive-nav-link :href="route('oficiolibertad')" :active="request()->routeIs('oficiolibertad')" wire:navigate>
+                        {{ __('ADM Oficios / Libertades') }}
+                    </x-responsive-nav-link>
+                </div>
             </div>
-        </div>
+        @endcanany
 
-        <div :class="{'block': open, 'hidden': ! open}" class="hidden lg:hidden">
-            <div class="pt-2 pb-3 space-y-1">
-                <x-responsive-nav-link :href="route('turno')" :active="request()->routeIs('turno')" wire:navigate>
-                    {{ __('Turnos') }}
-                </x-responsive-nav-link>
+        @canany(['navbar.funcionarios.visible', 'navbar.funcionarios.editable'])
+            <div :class="{'block': open, 'hidden': ! open}" class="hidden lg:hidden">
+                <div class="pt-2 pb-3 space-y-1">
+                    <x-responsive-nav-link :href="route('addfuncionario.index')" :active="request()->routeIs('addfuncionario')" wire:navigate>
+                        {{ __('Funcionarios') }}
+                    </x-responsive-nav-link>
+                </div>
             </div>
-        </div>
+        @endcanany
 
-        <div :class="{'block': open, 'hidden': ! open}" class="hidden lg:hidden">
-            <div class="pt-2 pb-3 space-y-1">
-                <x-responsive-nav-link :href="route('guias')" :active="request()->routeIs('guias')" wire:navigate>
-                    {{ __('Guias') }}
-                </x-responsive-nav-link>
+        @canany(['navbar.turnos.visible', 'navbar.turnos.editable'])
+            <div :class="{'block': open, 'hidden': ! open}" class="hidden lg:hidden">
+                <div class="pt-2 pb-3 space-y-1">
+                    <x-responsive-nav-link :href="route('turno')" :active="request()->routeIs('turno')" wire:navigate>
+                        {{ __('Turnos') }}
+                    </x-responsive-nav-link>
+                </div>
             </div>
-        </div>
+        @endcanany
 
-        <div :class="{'block': open, 'hidden': ! open}" class="hidden lg:hidden">
-            <div class="pt-2 pb-3 space-y-1">
-                <x-responsive-nav-link :href="route('AdmAudv')" :active="request()->routeIs('AdmAudv')" wire:navigate>
-                    {{ __('Audiencias') }}
-                </x-responsive-nav-link>
+        @canany(['navbar.guias.visible', 'navbar.guias.editable'])
+            <div :class="{'block': open, 'hidden': ! open}" class="hidden lg:hidden">
+                <div class="pt-2 pb-3 space-y-1">
+                    <x-responsive-nav-link :href="route('guias')" :active="request()->routeIs('guias')" wire:navigate>
+                        {{ __('Guias') }}
+                    </x-responsive-nav-link>
+                </div>
             </div>
-        </div>
+        @endcanany
 
-        <div :class="{'block': open, 'hidden': ! open}" class="hidden lg:hidden">
-            <div class="pt-2 pb-3 space-y-1">
-                <x-responsive-nav-link :href="route('ausentismo')" :active="request()->routeIs('ausentismo')" wire:navigate>
-                    {{ __('Ausencias') }}
-                </x-responsive-nav-link>
+        @canany(['navbar.audiencias.visible', 'navbar.audiencias.editable'])
+            <div :class="{'block': open, 'hidden': ! open}" class="hidden lg:hidden">
+                <div class="pt-2 pb-3 space-y-1">
+                    <x-responsive-nav-link :href="route('AdmAudv')" :active="request()->routeIs('AdmAudv')" wire:navigate>
+                        {{ __('Audiencias') }}
+                    </x-responsive-nav-link>
+                </div>
             </div>
-        </div>        
+        @endcanany
+
+        @canany(['navbar.ausencias.visible', 'navbar.ausencias.editable'])
+            <div :class="{'block': open, 'hidden': ! open}" class="hidden lg:hidden">
+                <div class="pt-2 pb-3 space-y-1">
+                    <x-responsive-nav-link :href="route('ausentismo')" :active="request()->routeIs('ausentismo')" wire:navigate>
+                        {{ __('Ausencias') }}
+                    </x-responsive-nav-link>
+                </div>
+            </div>
+        @endcanany
+
+        @canany(['navbar.seguridad.visible', 'navbar.seguridad.editable'])
+            <div :class="{'block': open, 'hidden': ! open}" class="hidden lg:hidden">
+                <div class="pt-2 pb-3 space-y-1">
+                    <x-responsive-nav-link :href="route('seguridad.roles.index')" :active="request()->routeIs('seguridad.*')" wire:navigate>
+                        {{ __('Seguridad') }}
+                    </x-responsive-nav-link>
+                </div>
+            </div>
+        @endcanany
+
         <!-- Responsive Settings Options -->
         <div class="pt-4 pb-1 border-t border-gray-200">
             <div class="px-4">

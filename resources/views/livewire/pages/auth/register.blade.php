@@ -1,7 +1,6 @@
 <?php
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Livewire\Attributes\Layout;
@@ -10,8 +9,11 @@ use Livewire\Volt\Component;
 new #[Layout('layouts.guest')] class extends Component
 {
     public string $name = '';
+
     public string $email = '';
+
     public string $password = '';
+
     public string $password_confirmation = '';
 
     /**
@@ -21,14 +23,22 @@ new #[Layout('layouts.guest')] class extends Component
     {
         $validated = $this->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'string', 'confirmed', Rules\Password::defaults()],
         ]);
 
         $validated['password'] = Hash::make($validated['password']);
-        event(new Registered($user = User::create($validated)));
-        Auth::login($user);
-        $this->redirect(route('dashboard', absolute: false), navigate: true);
+        $validated['approved_at'] = null;
+        $validated['approved_by'] = null;
+        $validated['approval_note'] = null;
+        $validated['rejected_at'] = null;
+        $validated['rejected_by'] = null;
+        $validated['rejection_note'] = null;
+
+        event(new Registered(User::create($validated)));
+
+        session()->flash('status', 'Cuenta registrada. Debe ser aprobada por un administrador antes de iniciar sesión.');
+        $this->redirect(route('login', absolute: false), navigate: true);
     }
 };
 ?>
