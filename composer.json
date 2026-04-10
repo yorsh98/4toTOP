@@ -11,17 +11,16 @@
     "require": {
         "php": "^8.3",
         "guzzlehttp/guzzle": "^7.9",
-        "laravel/framework": "^12.0",
-        "laravel/tinker": "^2.11",
+        "laravel/framework": "^13.0",
+        "laravel/tinker": "^3.0",
         "livewire/livewire": "^3.6",
         "livewire/volt": "^1.10",
         "maatwebsite/excel": "^3.1",
         "php-imap/php-imap": "^5.0",
         "phpoffice/phpspreadsheet": "^1.30",
-        "rappasoft/laravel-livewire-tables": "^3.7",
         "spatie/laravel-permission": "^6.25",
         "webklex/laravel-imap": "^6.1",
-        "yajra/laravel-datatables-oracle": "^12.7"
+        "yajra/laravel-datatables-oracle": "^13.0"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

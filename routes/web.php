@@ -27,7 +27,7 @@ use App\Http\Controllers\SistOficioLibertadesController;
 use App\Http\Controllers\tabla2Controller;
 use App\Http\Controllers\tablasController;
 use App\Http\Controllers\TurnoController;
-use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
+use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 
@@ -86,7 +86,7 @@ Route::get('/turno', [TurnoController::class, 'index'])->name('turno')->middlewa
 Route::patch('/turno/{id}', [TurnoController::class, 'update'])
     ->name('turno.update')
     ->middleware(['auth', 'can:navbar.turnos.editable'])
-    ->withoutMiddleware([VerifyCsrfToken::class]);
+    ->withoutMiddleware([PreventRequestForgery::class]);
 
 /*
 |--------------------------------------------------------------------------
@@ -122,7 +122,7 @@ Route::prefix('progra')->name('progra.')->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::post('/enviar-solicitud', [SistOficioLibertadesController::class, 'enviarSolicitud'])
-    ->withoutMiddleware([VerifyCsrfToken::class])
+    ->withoutMiddleware([PreventRequestForgery::class])
     ->middleware(['auth', 'can:navbar.oficios_libertades.editable'])
     ->name('enviar-solicitud');
 
