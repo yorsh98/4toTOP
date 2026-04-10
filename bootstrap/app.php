@@ -16,11 +16,3 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withExceptions(function (Exceptions $exceptions) {
         //
     })->create();
-
-    $app->middleware([
-        \Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class => [
-            'except' => [
-                '/enviar-solicitud',  // Excluye esta ruta de la verificación CSRF
-            ],
-        ],
-    ]);
