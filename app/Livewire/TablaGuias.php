@@ -2,40 +2,55 @@
 
 namespace App\Livewire;
 
+use App\Models\Guias;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 use Livewire\WithPagination;
-use App\Models\Guias;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Auth;
-
 
 class TablaGuias extends Component
 {
     use WithPagination;
 
     public $modo = 'full'; // 'full' o 'lectura'
+
     public $search = '';
+
     public $perPage = 10;
+
     public $sortField = 'nombre_completo';
+
     public $sortDirection = 'asc';
+
     public $filtroInstitucion = '';
 
     // Campos para edición
     public $editId;
+
     public $editNombre;
+
     public $editRut;
+
     public $editEmail;
+
     public $editTelefono1;
+
     public $editTelefono2;
+
     public $editInstitucion;
-    
+
     // Campos para creación
     public $showCreateForm = false;
+
     public $newNombre;
+
     public $newRut;
+
     public $newEmail;
+
     public $newTelefono1;
+
     public $newTelefono2;
+
     public $newInstitucion;
 
     protected $rules = [
@@ -45,7 +60,7 @@ class TablaGuias extends Component
         'editTelefono1' => 'nullable|max:20',
         'editTelefono2' => 'nullable|max:20',
         'editInstitucion' => 'required|numeric|between:1,11',
-        
+
         'newNombre' => 'required|min:3|max:100',
         'newRut' => 'nullable|max:20',
         'newEmail' => 'nullable|email|max:100',
@@ -65,6 +80,19 @@ class TablaGuias extends Component
 
     protected $paginationTheme = 'bootstrap';
 
+    private function authorizeRead(): void
+    {
+        if ($this->modo === 'full') {
+            Gate::authorize('guias.ver');
+        }
+    }
+
+    private function authorizeWrite(): void
+    {
+        abort_unless($this->modo === 'full', 403, 'No autorizado.');
+        Gate::authorize('guias.editar');
+    }
+
     public function sortBy($campo)
     {
         if ($this->sortField === $campo) {
@@ -75,21 +103,19 @@ class TablaGuias extends Component
         }
     }
 
-
-
     public function mount($modo = 'full')
     {
-        
-        $this->modo = $modo;
+        $this->modo = in_array($modo, ['full', 'lectura'], true) ? $modo : 'full';
+        $this->authorizeRead();
     }
 
     public function updatingFiltroInstitucion()
     {
         $this->resetPage();
     }
-    
+
     public function updatingSearch()
-    {   
+    {
         $this->resetPage();
     }
 
@@ -99,10 +125,9 @@ class TablaGuias extends Component
     }
 
     public function edit($id)
-    {   
-        if (!Auth::check()) {
-            abort(403, 'No autorizado.');
-        }
+    {
+        $this->authorizeWrite();
+
         $guia = Guias::findOrFail($id);
 
         // Asigna TODOS los campos incluyendo el ID
@@ -118,12 +143,10 @@ class TablaGuias extends Component
         $this->dispatch('open-edit-modal');
     }
 
-
     public function update()
-    {   
-        if (!Auth::check()) {
-            abort(403, 'No autorizado.');
-        }
+    {
+        $this->authorizeWrite();
+
         $this->validate([
             'editNombre' => 'required|min:3|max:100',
             'editRut' => 'nullable|max:20',
@@ -147,12 +170,10 @@ class TablaGuias extends Component
         $this->dispatch('alerta-exito');
     }
 
-
     public function confirmDelete($id)
-    {   
-       if (!Auth::check()) {
-            abort(403, 'No autorizado.');
-        } 
+    {
+        $this->authorizeWrite();
+
         $this->js("
             if (confirm('¿Estás seguro de eliminar esta guía?')) {
                 \$wire.call('performDelete', $id);}
@@ -160,19 +181,17 @@ class TablaGuias extends Component
     }
 
     public function performDelete($id)
-    {   
-        if (!Auth::check()) {
-            abort(403, 'No autorizado.');
-        }
+    {
+        $this->authorizeWrite();
+
         Guias::destroy($id);
         $this->dispatch('alerta-deleted');
     }
 
     public function create()
-    {   
-        if (!Auth::check()) {
-            abort(403, 'No autorizado.');
-        }
+    {
+        $this->authorizeWrite();
+
         $this->validate([
             'newNombre' => 'required|min:3|max:100',
             'newRut' => 'nullable|max:20',
@@ -181,7 +200,7 @@ class TablaGuias extends Component
             'newTelefono2' => 'nullable|max:20',
             'newInstitucion' => 'required|numeric|between:1,11',
         ]);
-        
+
         Guias::create([
             'nombre_completo' => $this->newNombre,
             'rut' => $this->newRut,
@@ -190,36 +209,37 @@ class TablaGuias extends Component
             'telefono2' => $this->newTelefono2,
             'institucion' => $this->newInstitucion,
         ]);
-        
+
         $this->resetCreateForm();
         $this->dispatch('alerta-exito');
     }
-    
+
     public function resetCreateForm()
     {
         $this->reset([
-            'newNombre', 'newRut', 'newEmail', 
-            'newTelefono1', 'newTelefono2', 'newInstitucion'
+            'newNombre', 'newRut', 'newEmail',
+            'newTelefono1', 'newTelefono2', 'newInstitucion',
         ]);
         $this->resetErrorBag();
         $this->showCreateForm = false;
     }
 
     public function render()
-    {   
-        
+    {
+        $this->authorizeRead();
+
         $query = Guias::query()
-            ->when($this->search, function($query) {
-                $query->where(function($q) {
+            ->when($this->search, function ($query) {
+                $query->where(function ($q) {
                     $q->where('nombre_completo', 'like', '%'.$this->search.'%')
-                      ->orWhere('rut', 'like', '%'.$this->search.'%')
-                      ->orWhere('email', 'like', '%'.$this->search.'%')
-                      ->orWhere('telefono1', 'like', '%'.$this->search.'%')
-                      ->orWhere('telefono2', 'like', '%'.$this->search.'%')
-                      ->orWhere('institucion', 'like', '%'.$this->search.'%');
+                        ->orWhere('rut', 'like', '%'.$this->search.'%')
+                        ->orWhere('email', 'like', '%'.$this->search.'%')
+                        ->orWhere('telefono1', 'like', '%'.$this->search.'%')
+                        ->orWhere('telefono2', 'like', '%'.$this->search.'%')
+                        ->orWhere('institucion', 'like', '%'.$this->search.'%');
                 });
             })
-            ->when($this->filtroInstitucion, function($query) {
+            ->when($this->filtroInstitucion, function ($query) {
                 $query->where('institucion', $this->filtroInstitucion);
             })
 
@@ -239,8 +259,8 @@ class TablaGuias extends Component
                 8 => 'C.D. Estado',
                 9 => 'Defensores Privados',
                 10 => 'PDI/Carabineros',
-                11 => 'SML'
-            ]
+                11 => 'SML',
+            ],
         ]);
     }
 }

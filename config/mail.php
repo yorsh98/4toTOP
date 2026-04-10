@@ -14,7 +14,7 @@ return [
     |
     */
 
-    'default' => env('MAIL_MAILER', 'log'),
+    'default' => env('MAIL_MAILER', 'escaner2'),
 
     /*
     |--------------------------------------------------------------------------
@@ -95,64 +95,75 @@ return [
             ],
         ],
 
+        'escaner2' => [
+            'transport' => 'smtp',
+            'host' => env('ESCANER2_SMTP_HOST', 'mail.pjud.cl'),
+            'port' => env('ESCANER2_SMTP_PORT', 465),
+            'encryption' => env('ESCANER2_SMTP_ENCRYPTION', 'ssl'),
+            'username' => env('ESCANER2_SMTP_USERNAME', 'escaner2@pjud.cl'),
+            'password' => env('ESCANER2_SMTP_PASSWORD'),
+            'timeout' => null,
+            'auth_mode' => null,
+        ],
+
         // ===== LUIS =====
         'luis' => [
-            'transport'  => 'smtp',
-            'host'       => env('LUIS_SMTP_HOST', 'mail.pjud.cl'),
-            'port'       => env('LUIS_SMTP_PORT', 465),
+            'transport' => 'smtp',
+            'host' => env('LUIS_SMTP_HOST', 'mail.pjud.cl'),
+            'port' => env('LUIS_SMTP_PORT', 465),
             'encryption' => env('LUIS_SMTP_ENCRYPTION', 'ssl'), // <- SSL
-            'username'   => env('LUIS_SMTP_USERNAME'),
-            'password'   => env('LUIS_SMTP_PASSWORD'),
-            'timeout'    => null,
-            'auth_mode'  => null,
+            'username' => env('LUIS_SMTP_USERNAME'),
+            'password' => env('LUIS_SMTP_PASSWORD'),
+            'timeout' => null,
+            'auth_mode' => null,
         ],
 
         // ===== EDUARDO =====
         'eduardo' => [
-            'transport'  => 'smtp',
-            'host'       => env('EDUARDO_SMTP_HOST', 'mail.pjud.cl'),
-            'port'       => env('EDUARDO_SMTP_PORT', 465),
+            'transport' => 'smtp',
+            'host' => env('EDUARDO_SMTP_HOST', 'mail.pjud.cl'),
+            'port' => env('EDUARDO_SMTP_PORT', 465),
             'encryption' => env('EDUARDO_SMTP_ENCRYPTION', 'ssl'),
-            'username'   => env('EDUARDO_SMTP_USERNAME'),
-            'password'   => env('EDUARDO_SMTP_PASSWORD'),
-            'timeout'    => null,
-            'auth_mode'  => null,
+            'username' => env('EDUARDO_SMTP_USERNAME'),
+            'password' => env('EDUARDO_SMTP_PASSWORD'),
+            'timeout' => null,
+            'auth_mode' => null,
         ],
 
         // ===== AMELIA ADMIN =====
         'amelia_admin' => [
-            'transport'  => 'smtp',
-            'host'       => env('AMELIA_ADMIN_SMTP_HOST', 'mail.pjud.cl'),
-            'port'       => env('AMELIA_ADMIN_SMTP_PORT', 465),
+            'transport' => 'smtp',
+            'host' => env('AMELIA_ADMIN_SMTP_HOST', 'mail.pjud.cl'),
+            'port' => env('AMELIA_ADMIN_SMTP_PORT', 465),
             'encryption' => env('AMELIA_ADMIN_SMTP_ENCRYPTION', 'ssl'),
-            'username'   => env('AMELIA_ADMIN_SMTP_USERNAME'),
-            'password'   => env('AMELIA_ADMIN_SMTP_PASSWORD'),
-            'timeout'    => null,
-            'auth_mode'  => null,
+            'username' => env('AMELIA_ADMIN_SMTP_USERNAME'),
+            'password' => env('AMELIA_ADMIN_SMTP_PASSWORD'),
+            'timeout' => null,
+            'auth_mode' => null,
         ],
 
         // ===== AMELIA JEFE =====
         'amelia_jefe' => [
-            'transport'  => 'smtp',
-            'host'       => env('AMELIA_JEFE_SMTP_HOST', 'mail.pjud.cl'),
-            'port'       => env('AMELIA_JEFE_SMTP_PORT', 465),
+            'transport' => 'smtp',
+            'host' => env('AMELIA_JEFE_SMTP_HOST', 'mail.pjud.cl'),
+            'port' => env('AMELIA_JEFE_SMTP_PORT', 465),
             'encryption' => env('AMELIA_JEFE_SMTP_ENCRYPTION', 'ssl'),
-            'username'   => env('AMELIA_JEFE_SMTP_USERNAME'),
-            'password'   => env('AMELIA_JEFE_SMTP_PASSWORD'),
-            'timeout'    => null,
-            'auth_mode'  => null,
+            'username' => env('AMELIA_JEFE_SMTP_USERNAME'),
+            'password' => env('AMELIA_JEFE_SMTP_PASSWORD'),
+            'timeout' => null,
+            'auth_mode' => null,
         ],
 
         // ===== JOHANNA ADM =====
         'johanna_admin' => [
-            'transport'  => 'smtp',
-            'host'       => env('JOHANNA_JEFE_SMTP_HOST', 'mail.pjud.cl'),
-            'port'       => env('JOHANNA_JEFE_SMTP_PORT', 465),
+            'transport' => 'smtp',
+            'host' => env('JOHANNA_JEFE_SMTP_HOST', 'mail.pjud.cl'),
+            'port' => env('JOHANNA_JEFE_SMTP_PORT', 465),
             'encryption' => env('JOHANNA_JEFE_SMTP_ENCRYPTION', 'ssl'),
-            'username'   => env('JOHANNA_JEFE_SMTP_USERNAME'),
-            'password'   => env('JOHANNA_JEFE_SMTP_PASSWORD'),
-            'timeout'    => null,
-            'auth_mode'  => null,
+            'username' => env('JOHANNA_JEFE_SMTP_USERNAME'),
+            'password' => env('JOHANNA_JEFE_SMTP_PASSWORD'),
+            'timeout' => null,
+            'auth_mode' => null,
         ],
 
     ],
@@ -169,8 +180,13 @@ return [
     */
 
     'from' => [
-        'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
-        'name' => env('MAIL_FROM_NAME', 'Example'),
+        'address' => env('MAIL_FROM_ADDRESS', 'escaner2@pjud.cl'),
+        'name' => env('MAIL_FROM_NAME', 'Sistema 4toTOP'),
+    ],
+
+    'notifications_from' => [
+        'address' => env('NOTIFICATIONS_FROM_ADDRESS', 'escaner2@pjud.cl'),
+        'name' => env('NOTIFICATIONS_FROM_NAME', 'Notificaciones 4°TOP'),
     ],
 
 ];

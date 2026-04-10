@@ -2,56 +2,80 @@
 
 namespace App\Livewire;
 
-use Livewire\Component;
 use App\Models\Audiencia;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
-use Illuminate\Support\Facades\Auth;
-
+use Livewire\Component;
 
 class AudienciaForm extends Component
 {
     public $audienciaId;
+
     public $fecha;
+
     public $rit;
+
     public $sala;
+
     public $ubicacion;
+
     public $hora_inicio = '09:00';
+
     public $ruc;
+
     public $cta_zoom;
+
     public $tipo_audiencia;
+
     public $num_testigos = 0;
+
     public $num_peritos = 0;
+
     public $duracion;
+
     public $delito;
+
     public $encargado_causa;
+
     public $encargado_ttp;
+
     public $encargado_ttp_zoom;
+
     public $estado = 'POR_REALIZARSE';
+
     public $JuezP;
+
     public $JuezR;
+
     public $JuezI;
+
     public $acta;
+
     public $anfitrion;
+
     public $obs;
 
-    //campo para juez
+    // campo para juez
     public $jueces_inhabilitados = [];
+
     public $Nuevosjueces_inhabilitados = [
-        'nombre_completo' => 'no'
-    ]; 
+        'nombre_completo' => 'no',
+    ];
 
     // Campos para acusados
     public $acusados = [];
+
     public $nuevoAcusado = [
         'nombre_completo' => '',
         'situacion' => '',
         'medida_cautelar' => '',
-        'forma_notificacion' => ''
+        'forma_notificacion' => '',
     ];
+
     public $tiposdelibertad = [
         'Libre',
         'P.Prev.',
-        'P.x OC.',        
+        'P.x OC.',
     ];
 
     // Tipos de audiencia sugeridos
@@ -59,23 +83,23 @@ class AudienciaForm extends Component
         'Juicio Oral',
         'Cont. Juicio Oral',
         'Audiencia Corta',
-        'Lectura de Sentencia'
+        'Lectura de Sentencia',
     ];
 
     public $tiposduracion = [
-        '½'
+        '½',
     ];
 
-    public $tiposencargados =[
+    public $tiposencargados = [
         'Hortencia Garrido',
         'Maricela Santos',
         'Loreto Marroquín',
         'Mauricio Fernandez',
-        'Leonardo Morales'
+        'Leonardo Morales',
     ];
 
     protected $listeners = ['editAudiencia'];
-    
+
     protected $messages = [
         'fecha.required' => 'La fecha es obligatoria.',
         'rit.required' => 'El RIT es obligatorio.',
@@ -84,30 +108,26 @@ class AudienciaForm extends Component
         'acta.required' => 'El Acta es obligatorio.',
         'ubicacion.required' => 'La ubicación es obligatoria.',
         'hora_inicio.required' => 'La hora de inicio es obligatoria.',
-        'tipo_audiencia.required' => 'El tipo de audiencia es obligatorio.',        
-        'delito.required' => 'El delito es obligatorio.',                
+        'tipo_audiencia.required' => 'El tipo de audiencia es obligatorio.',
+        'delito.required' => 'El delito es obligatorio.',
         'acusados.required' => 'Debe agregar al menos un acusado.',
         'nuevoAcusado.nombre_completo.required' => 'El nombre del acusado es obligatorio.',
         'nuevoAcusado.situacion' => 'Favor ingresar la situacion del acusado',
-        'JuezR.required' => 'El Juez Redactor es obligatorio.',   
+        'JuezR.required' => 'El Juez Redactor es obligatorio.',
         'cta_zoom' => 'La cuenta ZOOM es obligatoria',
         'encargado_causa' => 'El encargado de causa es obligatorio',
-        'Nuevosjueces_inhabilitados' => 'Debe agregar al menos un magistrado si no puede agregar a NO'
+        'Nuevosjueces_inhabilitados' => 'Debe agregar al menos un magistrado si no puede agregar a NO',
     ];
 
     public function mount()
-    {   
-        if (!Auth::check()) {
-            abort(403, 'No autorizado.');
-        }
+    {
+        Gate::authorize('audiencias.ver');
         $this->fecha = now()->addDay()->format('Y-m-d');
     }
 
     public function editAudiencia($id)
-    {   
-        if (!Auth::check()) {
-            abort(403, 'No autorizado.');
-        }
+    {
+        Gate::authorize('audiencias.editar');
         $audiencia = Audiencia::find($id);
         $this->audienciaId = $audiencia->id;
         $this->fecha = $audiencia->fecha->format('Y-m-d');
@@ -123,17 +143,17 @@ class AudienciaForm extends Component
         $this->duracion = $audiencia->duracion;
         $this->delito = $audiencia->delito;
         $this->jueces_inhabilitados = $audiencia->jueces_inhabilitados ?? [];
-        //$this->jueces_inhabilitados = is_string($audiencia->jueces_inhabilitados)
-        //? json_decode($audiencia->jueces_inhabilitados, true) ?? []
-        //: ($audiencia->jueces_inhabilitados ?? []);
+        // $this->jueces_inhabilitados = is_string($audiencia->jueces_inhabilitados)
+        // ? json_decode($audiencia->jueces_inhabilitados, true) ?? []
+        // : ($audiencia->jueces_inhabilitados ?? []);
         $this->encargado_causa = $audiencia->encargado_causa;
         $this->encargado_ttp = $audiencia->encargado_ttp;
         $this->encargado_ttp_zoom = $audiencia->encargado_ttp_zoom;
         $this->estado = $audiencia->estado;
         $this->acusados = $audiencia->acusados ?? [];
-        //$this->acusados = is_string($audiencia->acusados)
-        //? json_decode($audiencia->acusados, true) ?? []
-        //: ($audiencia->acusados ?? []);
+        // $this->acusados = is_string($audiencia->acusados)
+        // ? json_decode($audiencia->acusados, true) ?? []
+        // : ($audiencia->acusados ?? []);
         $this->JuezP = $audiencia->JuezP;
         $this->JuezR = $audiencia->JuezR;
         $this->JuezI = $audiencia->JuezI;
@@ -147,7 +167,7 @@ class AudienciaForm extends Component
         $this->validate([
             'nuevoAcusado.nombre_completo' => 'required',
             'nuevoAcusado.situacion' => 'required',
-            
+
         ]);
 
         $this->acusados[] = $this->nuevoAcusado;
@@ -177,18 +197,17 @@ class AudienciaForm extends Component
     }
 
     public function guardarAudiencia()
-    {   
-        if (!Auth::check()) {
-            abort(403, 'No autorizado.');
-        }
+    {
+        Gate::authorize($this->audienciaId ? 'audiencias.editar' : 'audiencias.crear');
+
         $validated = $this->validate([
-            'fecha' => 'required|date',           
-            'rit' => ['required',Rule::unique('audiencias')->where(function ($query) {
+            'fecha' => 'required|date',
+            'rit' => ['required', Rule::unique('audiencias')->where(function ($query) {
                 return $query->where('rit', $this->rit)
-                            ->whereDate('fecha', $this->fecha)
-                            ->where('tipo_audiencia', $this->tipo_audiencia);
-            })->ignore($this->audienciaId)
-        ],
+                    ->whereDate('fecha', $this->fecha)
+                    ->where('tipo_audiencia', $this->tipo_audiencia);
+            })->ignore($this->audienciaId),
+            ],
             'hora_inicio' => 'required',
             'sala' => 'required',
             'ruc' => 'required',
@@ -197,8 +216,8 @@ class AudienciaForm extends Component
             'encargado_causa' => 'required',
             'acta' => 'required',
             'acusados' => 'required|array|min:1',
-            'nuevoAcusado.nombre_completo' => 'required_if:acusados,[]',            
-            'JuezR' => 'required',                       
+            'nuevoAcusado.nombre_completo' => 'required_if:acusados,[]',
+            'JuezR' => 'required',
         ]);
 
         $data = [
@@ -225,10 +244,10 @@ class AudienciaForm extends Component
             'JuezI' => $this->JuezI,
             'acta' => $this->acta,
             'anfitrion' => $this->anfitrion,
-            'obs' => $this->obs
+            'obs' => $this->obs,
         ];
 
-        if (!empty($this->nuevoAcusado['nombre_completo'])) {
+        if (! empty($this->nuevoAcusado['nombre_completo'])) {
             $this->agregarAcusado();
         }
 
@@ -241,7 +260,9 @@ class AudienciaForm extends Component
 
     public function buscarPorRit()
     {
-        if (!empty($this->rit)) {
+        Gate::authorize('audiencias.ver');
+
+        if (! empty($this->rit)) {
             $audienciaExistente = Audiencia::where('rit', $this->rit)
                 ->latest('created_at') // la más recientemente creada
                 ->first();
@@ -254,9 +275,9 @@ class AudienciaForm extends Component
     }
 
     public function render()
-    {   if (!Auth::check()) {
-            abort(403, 'No autorizado.');
-        }
+    {
+        Gate::authorize('audiencias.ver');
+
         return view('livewire.audiencia-form');
     }
 }

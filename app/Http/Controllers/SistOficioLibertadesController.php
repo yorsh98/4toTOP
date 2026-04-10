@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\DB;
 use App\Models\Funcionario;
-use App\Models\Oficio;
 use App\Models\Libertad;
+use App\Models\Oficio;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class SistOficioLibertadesController extends Controller
 {
@@ -37,15 +37,15 @@ class SistOficioLibertadesController extends Controller
         $validSolicitantes = Funcionario::pluck('nombre')->toArray();
 
         $validated = $request->validate([
-            'tipo'            => ['required', 'in:oficio,libertad'],
-            'CausaAsig'       => ['required', 'string', 'regex:/^[a-zA-Z0-9\s\-]{1,10}$/'],
-            'UserSolicitante' => ['required', 'string', 'in:' . implode(',', $validSolicitantes)],
-            'UserDirigido'    => ['required', 'string', 'regex:/^[a-zA-Z0-9\s\-]+$/'],
+            'tipo' => ['required', 'in:oficio,libertad'],
+            'CausaAsig' => ['required', 'string', 'regex:/^[a-zA-Z0-9\s\-]{1,10}$/'],
+            'UserSolicitante' => ['required', 'string', 'in:'.implode(',', $validSolicitantes)],
+            'UserDirigido' => ['required', 'string', 'regex:/^[a-zA-Z0-9\s\-]+$/'],
         ], [
-            'tipo.in'             => 'El tipo de solicitud no es válido.',
-            'CausaAsig.regex'     => 'CAUSA ASIGNADA permite letras/números/espacios/guion (-), máx 10.',
-            'UserSolicitante.in'  => 'El SOLICITANTE seleccionado no es válido.',
-            'UserDirigido.regex'  => 'MOTIVO permite letras/números/espacios/guion (-).',
+            'tipo.in' => 'El tipo de solicitud no es válido.',
+            'CausaAsig.regex' => 'CAUSA ASIGNADA permite letras/números/espacios/guion (-), máx 10.',
+            'UserSolicitante.in' => 'El SOLICITANTE seleccionado no es válido.',
+            'UserDirigido.regex' => 'MOTIVO permite letras/números/espacios/guion (-).',
         ]);
 
         // Año por defecto según America/Santiago (tu preferencia)
@@ -68,9 +68,9 @@ class SistOficioLibertadesController extends Controller
                     // Restaurar y actualizar campos
                     $candidato->restore();
                     $candidato->fill([
-                        'CausaAsig'       => $validated['CausaAsig'],
+                        'CausaAsig' => $validated['CausaAsig'],
                         'UserSolicitante' => $validated['UserSolicitante'],
-                        'UserDirigido'    => $validated['UserDirigido'],
+                        'UserDirigido' => $validated['UserDirigido'],
                     ])->save();
 
                     return $candidato;
@@ -81,12 +81,12 @@ class SistOficioLibertadesController extends Controller
                     ->where('año', $anio)
                     ->max('Numentregado');
 
-                $nuevo = new $modelClass();
-                $nuevo->Numentregado    = $max ? $max + 1 : 1;
-                $nuevo->año             = $anio;
-                $nuevo->CausaAsig       = $validated['CausaAsig'];
+                $nuevo = new $modelClass;
+                $nuevo->Numentregado = $max ? $max + 1 : 1;
+                $nuevo->año = $anio;
+                $nuevo->CausaAsig = $validated['CausaAsig'];
                 $nuevo->UserSolicitante = $validated['UserSolicitante'];
-                $nuevo->UserDirigido    = $validated['UserDirigido'];
+                $nuevo->UserDirigido = $validated['UserDirigido'];
                 $nuevo->save();
 
                 return $nuevo;
@@ -95,17 +95,23 @@ class SistOficioLibertadesController extends Controller
             return redirect()
                 ->route('SistOficioLibertades.index')
                 ->with([
-                    'success'      => 'Solicitud ingresada correctamente.',
-                    'tipo'         => $validated['tipo'], // para el título del modal
+                    'success' => 'Solicitud ingresada correctamente.',
+                    'tipo' => $validated['tipo'], // para el título del modal
                     'NumEntregado' => $registro->Numentregado,
-                    'año'          => $registro->año,
+                    'año' => $registro->año,
                 ]);
 
         } catch (\Throwable $e) {
             Log::error('Fallo en store SistOficioLibertades', ['msg' => $e->getMessage()]);
+
             return redirect()
                 ->route('SistOficioLibertades.index')
                 ->with('error', 'No fue posible registrar la solicitud. Intenta nuevamente.');
         }
+    }
+
+    public function enviarSolicitud(Request $request)
+    {
+        return $this->store($request);
     }
 }

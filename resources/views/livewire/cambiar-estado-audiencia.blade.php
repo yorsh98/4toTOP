@@ -23,14 +23,20 @@
             </div>
             <!-- Estado -->
             <div wire:key="estado-{{ $audiencia->id }}-{{ $audiencia->updated_at->timestamp }}">
-                <select 
-                    wire:change="cambiarEstado({{ $audiencia->id }}, $event.target.value)"
-                    class="w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-zinc-800 dark:text-gray-200">
-                    <option value="POR_REALIZARSE" @selected($audiencia->estado === 'POR_REALIZARSE')>POR REALIZARSE</option>
-                    <option value="EN_CURSO" @selected($audiencia->estado === 'EN_CURSO')>EN CURSO</option>
-                    <option value="RECESO" @selected($audiencia->estado === 'RECESO')>RECESO</option>
-                    <option value="FINALIZADA" @selected($audiencia->estado === 'FINALIZADA')>FINALIZADA</option>
-                </select>
+                @auth
+                    <select
+                        wire:change="cambiarEstado({{ $audiencia->id }}, $event.target.value)"
+                        class="w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-zinc-800 dark:text-gray-200">
+                        <option value="POR_REALIZARSE" @selected($audiencia->estado === 'POR_REALIZARSE')>POR REALIZARSE</option>
+                        <option value="EN_CURSO" @selected($audiencia->estado === 'EN_CURSO')>EN CURSO</option>
+                        <option value="RECESO" @selected($audiencia->estado === 'RECESO')>RECESO</option>
+                        <option value="FINALIZADA" @selected($audiencia->estado === 'FINALIZADA')>FINALIZADA</option>
+                    </select>
+                @else
+                    <div class="text-xs rounded-md bg-gray-100 px-2 py-1 text-gray-700 dark:bg-zinc-800 dark:text-gray-200">
+                        {{ str_replace('_', ' ', $audiencia->estado) }}
+                    </div>
+                @endauth
             </div>
         </div>
     @empty
