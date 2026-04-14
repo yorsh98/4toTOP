@@ -2,19 +2,23 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Funcionario;
 use App\Models\Libertad;
 use App\Models\Oficio;
+use App\Services\FuncionarioCatalog;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rule;
 
 class SistOficioLibertadesController extends Controller
 {
+    public function __construct(private readonly FuncionarioCatalog $funcionarioCatalog) {}
+
     public function index()
     {
-        // Para los <select> de SOLICITANTE
-        $solicitantes = Funcionario::select('nombre')->orderBy('nombre')->get();
+        $solicitantes = $this->funcionarioCatalog->funcionariosByContext('oficios.solicitantes');
 
         return view('SistOficioLibertades', [
             'solicitantes' => $solicitantes,
@@ -23,8 +27,7 @@ class SistOficioLibertadesController extends Controller
 
     public function create()
     {
-        // Mismo contenido que index()
-        $solicitantes = Funcionario::select('nombre')->orderBy('nombre')->get();
+        $solicitantes = $this->funcionarioCatalog->funcionariosByContext('oficios.solicitantes');
 
         return view('SistOficioLibertades', [
             'solicitantes' => $solicitantes,
@@ -33,13 +36,18 @@ class SistOficioLibertadesController extends Controller
 
     public function store(Request $request)
     {
-        // Lista blanca de solicitantes (evita manipulación del <select>)
-        $validSolicitantes = Funcionario::pluck('nombre')->toArray();
+        $validSolicitantes = $this->funcionarioCatalog->nombresByContext('oficios.solicitantes');
+
+        if ($validSolicitantes === []) {
+            return redirect()
+                ->route('SistOficioLibertades.index')
+                ->with('error', 'No hay funcionarios habilitados para solicitar numeros.');
+        }
 
         $validated = $request->validate([
             'tipo' => ['required', 'in:oficio,libertad'],
             'CausaAsig' => ['required', 'string', 'regex:/^[a-zA-Z0-9\s\-]{1,10}$/'],
-            'UserSolicitante' => ['required', 'string', 'in:'.implode(',', $validSolicitantes)],
+            'UserSolicitante' => ['required', 'string', Rule::in($validSolicitantes)],
             'UserDirigido' => ['required', 'string', 'regex:/^[a-zA-Z0-9\s\-]+$/'],
         ], [
             'tipo.in' => 'El tipo de solicitud no es válido.',
@@ -57,7 +65,7 @@ class SistOficioLibertadesController extends Controller
         try {
             $registro = DB::transaction(function () use ($modelClass, $validated, $anio) {
                 // 1) ¿Existe un número borrado (soft) de este año para reutilizar?
-                /** @var \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Builder $modelClass */
+                /** @var Model|Builder $modelClass */
                 $candidato = $modelClass::onlyTrashed()
                     ->where('año', $anio)
                     ->orderBy('deleted_at', 'asc')

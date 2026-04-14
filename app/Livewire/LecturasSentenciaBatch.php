@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Audiencia;
+use App\Services\FuncionarioCatalog;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
@@ -16,18 +17,26 @@ class LecturasSentenciaBatch extends Component
     /** Sugerencias */
     public array $situaciones = ['Libre', 'P.Prev.', 'P.x OC.'];
 
-    public $tiposencargados = [
-        'Hortencia Garrido',
-        'Maricela Santos',
-        'Loreto Marroquín',
-        'Mauricio Fernandez',
-        'Leonardo Morales',
-    ];
+    public array $juecesOptions = [];
+
+    public array $actaOptions = [];
+
+    public array $encargadoCausaOptions = [];
 
     public function mount(): void
     {
         Gate::authorize('audiencias.crear');
+        $this->hydrateRoleOptions();
         $this->addRow();
+    }
+
+    public function hydrateRoleOptions(): void
+    {
+        $catalog = app(FuncionarioCatalog::class);
+
+        $this->juecesOptions = $catalog->nombresByContext('audiencias.jueces');
+        $this->actaOptions = $catalog->nombresByContext('audiencias.acta_anfitrion');
+        $this->encargadoCausaOptions = $catalog->nombresByContext('audiencias.encargado_causa');
     }
 
     /** Prefill por RIT (opcional): trae últimos datos de esa causa */
@@ -126,14 +135,14 @@ class LecturasSentenciaBatch extends Component
             'items' => 'required|array|min:1',
             'items.*.fecha' => 'required|date',
             'items.*.hora_inicio' => 'required|date_format:H:i',
-            'items.*.JuezR' => 'required|string',
+            'items.*.JuezR' => ['required', 'string', 'max:255'],
             'items.*.tipo_audiencia' => 'required|string',
             'items.*.sala' => 'required|string',
             'items.*.cta_zoom' => 'nullable|string',
             'items.*.rit' => 'required|string',
             'items.*.ruc' => 'required|string',
-            'items.*.encargado_sala' => 'required|string',
-            'items.*.acta' => 'required|string',
+            'items.*.encargado_sala' => ['required', 'string', 'max:255'],
+            'items.*.acta' => ['required', 'string', 'max:255'],
             'items.*.obs' => 'nullable|string',
             'items.*.acusados' => 'required|array|min:1',
             'items.*.acusados.*.nombre_completo' => 'required|string',

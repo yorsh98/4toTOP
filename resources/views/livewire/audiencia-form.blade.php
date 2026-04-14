@@ -21,7 +21,7 @@
     }
     $wire.guardarAudiencia();" class="space-y-6">
         <!-- Sección 1: Información Básica -->
-        <div class="grid grid-cols-2 md:grid-cols-3 gap-6">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">RIT*</label>
                 <input 
@@ -114,48 +114,70 @@
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Encargado de Acta*</label>
-                <input type="text" wire:model.defer="acta" required min="0" class="{{ $baseInput }} {{ $errors->has('acta') ? 'border-red-500 ring-red-300' : '' }}" aria-invalid="{{ $errors->has('acta') ? 'true' : 'false' }}">
+                <input type="text" wire:model.defer="acta" required list="actaAnfitrionList" class="{{ $baseInput }} {{ $errors->has('acta') ? 'border-red-500 ring-red-300' : '' }}" aria-invalid="{{ $errors->has('acta') ? 'true' : 'false' }}">
                 @error('acta') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
             </div>
         </div>
         <!-- Sección 4: Encargados -->
-        <div class="grid grid-cols-2 md:grid-cols-3 gap-6">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Encargado de Causa*</label>
-                <input type="text" wire:model.defer="encargado_causa" required list="tiposencargados" class="{{ $baseInput }} {{ $errors->has('encargado_causa') ? 'border-red-500 ring-red-300' : '' }}" aria-invalid="{{ $errors->has('encargado_causa') ? 'true' : 'false' }}">
-                <datalist id="tiposencargados">
-                    @foreach($tiposencargados as $tipo)
-                        <option value="{{ $tipo }}">
-                    @endforeach
-                </datalist>
+                <input type="text" wire:model.defer="encargado_causa" required list="encargadoCausaList" class="{{ $baseInput }} {{ $errors->has('encargado_causa') ? 'border-red-500 ring-red-300' : '' }}" aria-invalid="{{ $errors->has('encargado_causa') ? 'true' : 'false' }}">
                 @error('encargado_causa') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
             </div>            
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Encargado TTP*</label>
-                <input type="text" wire:model.defer="encargado_ttp" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                <input type="text" wire:model.defer="encargado_ttp" list="ttyppList" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                @error('encargado_ttp') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
             </div>            
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Encargado TTP Zoom</label>
-                <input type="text" wire:model.defer="encargado_ttp_zoom" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                <input type="text" wire:model.defer="encargado_ttp_zoom" list="ttyppList" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                @error('encargado_ttp_zoom') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
             </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Anfitrion</label>
+                <input type="text" wire:model.defer="anfitrion" list="actaAnfitrionList" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                @error('anfitrion') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+            </div>
+            <datalist id="encargadoCausaList">
+                @foreach($encargadoCausaOptions as $nombre)
+                    <option value="{{ $nombre }}">
+                @endforeach
+            </datalist>
+            <datalist id="ttyppList">
+                @foreach($ttyppOptions as $nombre)
+                    <option value="{{ $nombre }}">
+                @endforeach
+            </datalist>
+            <datalist id="actaAnfitrionList">
+                @foreach($actaAnfitrionOptions as $nombre)
+                    <option value="{{ $nombre }}">
+                @endforeach
+            </datalist>
         </div>
         <!-- Sección 5: Magistrados -->
         <div class="grid grid-cols-2 md:grid-cols-3 gap-6">
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Juez Presidente*</label>
-                <input type="text" wire:model.defer="JuezP" required class="{{ $baseInput }} {{ $errors->has('JuezP') ? 'border-red-500 ring-red-300' : '' }}" aria-invalid="{{ $errors->has('JuezP') ? 'true' : 'false' }}">
+                <input type="text" wire:model.defer="JuezP" required list="juecesList" class="{{ $baseInput }} {{ $errors->has('JuezP') ? 'border-red-500 ring-red-300' : '' }}" aria-invalid="{{ $errors->has('JuezP') ? 'true' : 'false' }}">
                 @error('JuezP') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
             </div>            
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Juez Redactor*</label>
-                <input type="text" wire:model.defer="JuezR" required class="{{ $baseInput }} {{ $errors->has('JuezR') ? 'border-red-500 ring-red-300' : '' }}" aria-invalid="{{ $errors->has('JuezR') ? 'true' : 'false' }}">
+                <input type="text" wire:model.defer="JuezR" required list="juecesList" class="{{ $baseInput }} {{ $errors->has('JuezR') ? 'border-red-500 ring-red-300' : '' }}" aria-invalid="{{ $errors->has('JuezR') ? 'true' : 'false' }}">
                 @error('JuezR') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
             </div>            
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Juez Integrante*</label>
-                <input type="text" wire:model.defer="JuezI" required class="{{ $baseInput }} {{ $errors->has('JuezI') ? 'border-red-500 ring-red-300' : '' }}" aria-invalid="{{ $errors->has('JuezI') ? 'true' : 'false' }}">
+                <input type="text" wire:model.defer="JuezI" required list="juecesList" class="{{ $baseInput }} {{ $errors->has('JuezI') ? 'border-red-500 ring-red-300' : '' }}" aria-invalid="{{ $errors->has('JuezI') ? 'true' : 'false' }}">
                 @error('JuezI') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
             </div>
+            <datalist id="juecesList">
+                @foreach($juecesOptions as $nombre)
+                    <option value="{{ $nombre }}">
+                @endforeach
+            </datalist>
         </div>
         <div class="border-t pt-6">
             <h3 class="text-lg font-medium text-gray-800 mb-4">Jueces inhabilitados*</h3>            
@@ -169,8 +191,14 @@
                             <input 
                                 type="text" 
                                 wire:model.defer="Nuevosjueces_inhabilitados.nombre_completo" 
+                                list="juecesInhabilitadosOpciones"
                                 placeholder="Nombre completo del magistrado"
                                 class="{{ $baseInput }} {{ $errors->has('Nuevosjueces_inhabilitados') ? 'border-red-500 ring-red-300' : '' }}" aria-invalid="{{ $errors->has('Nuevosjueces_inhabilitados') ? 'true' : 'false' }}">
+                            <datalist id="juecesInhabilitadosOpciones">
+                                @foreach($juecesOptions as $nombre)
+                                    <option value="{{ $nombre }}">
+                                @endforeach
+                            </datalist>
                             @error('Nuevosjueces_inhabilitados') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                         </div>
                         <div>

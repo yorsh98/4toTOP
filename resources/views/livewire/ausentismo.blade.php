@@ -46,8 +46,13 @@
         {{-- Nombre (4) --}}
         <div class="md:col-span-4">
             <label class="block text-sm text-gray-600 mb-1">Nombre del funcionario</label>
-            <input type="text" wire:model.defer="funcionario_nombre" required minlength="3" maxlength="150"
+            <input type="text" wire:model.defer="funcionario_nombre" required minlength="3" maxlength="150" list="funcionariosCatalogo"
                 class="w-full h-10 px-3 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('funcionario_nombre') ring-2 ring-red-500 @enderror">
+            <datalist id="funcionariosCatalogo">
+                @foreach($funcionarios_sugeridos as $nombre)
+                    <option value="{{ $nombre }}">
+                @endforeach
+            </datalist>
             @error('funcionario_nombre') <p class="text-red-600 text-xs mt-1">{{ $message }}</p> @enderror
         </div>
 

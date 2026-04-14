@@ -22,18 +22,18 @@ new class extends Component
             'permissions' => ['navbar.inicio.visible', 'navbar.inicio.editable'],
         ],
         [
-            'label' => __('Oficios / Libertades'),
-            'route' => 'oficiolibertad',
-            'active' => 'oficiolibertad',
-            'icon' => 'fa-solid fa-file-signature',
-            'permissions' => ['navbar.oficios_libertades.visible', 'navbar.oficios_libertades.editable'],
-        ],
-        [
             'label' => __('Funcionarios'),
             'route' => 'addfuncionario.index',
             'active' => 'addfuncionario*',
             'icon' => 'fa-solid fa-users',
             'permissions' => ['navbar.funcionarios.visible', 'navbar.funcionarios.editable'],
+        ],
+        [
+            'label' => __('Oficios / Libertades'),
+            'route' => 'oficiolibertad',
+            'active' => 'oficiolibertad',
+            'icon' => 'fa-solid fa-file-signature',
+            'permissions' => ['navbar.oficios_libertades.visible', 'navbar.oficios_libertades.editable'],
         ],
         [
             'label' => __('Turnos'),
@@ -179,7 +179,17 @@ new class extends Component
         </div>
     </aside>
 
-    <div :class="{ 'block': open, 'hidden': !open }" class="hidden border-b border-gray-200 bg-white lg:hidden">
+    <div
+        x-show="open"
+        x-transition:enter="transition ease-out duration-200"
+        x-transition:enter-start="opacity-0 -translate-y-1"
+        x-transition:enter-end="opacity-100 translate-y-0"
+        x-transition:leave="transition ease-in duration-150"
+        x-transition:leave-start="opacity-100 translate-y-0"
+        x-transition:leave-end="opacity-0 -translate-y-1"
+        x-cloak
+        class="border-b border-gray-200 bg-white lg:hidden"
+    >
         <div class="space-y-1 px-3 py-3">
             @foreach ($menuItems as $item)
                 @canany($item['permissions'])

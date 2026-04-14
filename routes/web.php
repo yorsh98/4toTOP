@@ -26,10 +26,12 @@ use App\Http\Controllers\SistOficioLibertadesController;
 use App\Http\Controllers\tabla2Controller;
 use App\Http\Controllers\tablasController;
 use App\Http\Controllers\TurnoController;
+use App\Livewire\FuncionariosPage;
 use App\Livewire\Security\AuditPage;
 use App\Livewire\Security\RolePermissionsPage;
 use App\Livewire\Security\RolesPage;
 use App\Livewire\Security\UsersRolesPage;
+use App\Livewire\TurnoPage;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
@@ -67,9 +69,7 @@ Route::redirect('/oficios', '/SistOficioLibertades');
 |--------------------------------------------------------------------------
 */
 Route::prefix('addfuncionario')->name('addfuncionario.')->middleware(['auth'])->group(function () {
-    Route::get('/', [addfuncionarioController::class, 'index'])->name('index')->middleware('can:navbar.funcionarios.visible');
-    Route::post('/', [addfuncionarioController::class, 'store'])->name('store')->middleware('can:navbar.funcionarios.editable');
-    Route::delete('/{id}', [addfuncionarioController::class, 'destroy'])->name('destroy')->middleware('can:navbar.funcionarios.editable');
+    Route::get('/', FuncionariosPage::class)->name('index')->middleware('can:navbar.funcionarios.visible');
 });
 
 /*
@@ -85,7 +85,7 @@ Route::get('/oficiolibertad', [oficiolibertadController::class, 'index'])->name(
 | TURNOS
 |--------------------------------------------------------------------------
 */
-Route::get('/turno', [TurnoController::class, 'index'])->name('turno')->middleware(['auth', 'can:navbar.turnos.visible']);
+Route::get('/turno', TurnoPage::class)->name('turno')->middleware(['auth', 'can:navbar.turnos.visible']);
 Route::patch('/turno/{id}', [TurnoController::class, 'update'])
     ->name('turno.update')
     ->middleware(['auth', 'can:navbar.turnos.editable'])

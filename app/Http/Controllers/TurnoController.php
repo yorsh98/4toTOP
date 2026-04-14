@@ -3,11 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\Turno;
+use App\Services\FuncionarioCatalog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
 class TurnoController extends Controller
 {
+    public function __construct(private readonly FuncionarioCatalog $funcionarioCatalog) {}
+
     public function index()
     {
         Gate::authorize('turnos.ver');
@@ -22,7 +25,11 @@ class TurnoController extends Controller
         $turno1 = Turno::find(1);
         $turno2 = Turno::find(2);
 
-        return view('turno', compact('turno1', 'turno2'));
+        $magistrados = $this->funcionarioCatalog->nombresByContext('turnos.magistrados');
+        $funcionarios = $this->funcionarioCatalog->nombresByContext('turnos.funcionarios');
+        $jefaturas = $this->funcionarioCatalog->nombresByContext('turnos.jefatura');
+
+        return view('turno', compact('turno1', 'turno2', 'magistrados', 'funcionarios', 'jefaturas'));
 
     }
 
@@ -40,16 +47,23 @@ class TurnoController extends Controller
     {
         Gate::authorize('turnos.editar');
 
-        // Validar los datos
-        $validatedData = $request->validate([
-            'TM1' => 'nullable|string', 'TM2' => 'nullable|string', 'TM3' => 'nullable|string',
-            'TF1' => 'nullable|string', 'TF2' => 'nullable|string', 'TF3' => 'nullable|string',
-            'TJ1' => 'nullable|string', 'TJ2' => 'nullable|string', 'TJ3' => 'nullable|string',
-            'ACDM1' => 'nullable|string', 'ACDM2' => 'nullable|string', 'ACDM3' => 'nullable|string',
-            'ACDF1' => 'nullable|string', 'ACDF2' => 'nullable|string', 'ACDF3' => 'nullable|string',
-            'ACDJ1' => 'nullable|string', 'ACDJ2' => 'nullable|string', 'ACDJ3' => 'nullable|string',
-            'FECHA' => 'nullable|string',
-        ]);
+        $rules = [
+            'FECHA' => ['nullable', 'string'],
+        ];
+
+        foreach (['TM1', 'TM2', 'TM3', 'ACDM1', 'ACDM2', 'ACDM3'] as $field) {
+            $rules[$field] = ['nullable', 'string', 'max:255'];
+        }
+
+        foreach (['TF1', 'TF2', 'TF3', 'ACDF1', 'ACDF2', 'ACDF3'] as $field) {
+            $rules[$field] = ['nullable', 'string', 'max:255'];
+        }
+
+        foreach (['TJ1', 'TJ2', 'TJ3', 'ACDJ1', 'ACDJ2', 'ACDJ3'] as $field) {
+            $rules[$field] = ['nullable', 'string', 'max:255'];
+        }
+
+        $validatedData = $request->validate($rules);
 
         // Buscar el turno y actualizarlo
         $turno = Turno::findOrFail($id);
