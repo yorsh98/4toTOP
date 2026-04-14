@@ -44,17 +44,17 @@
                 </div> 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Juez Presidente*</label>
-                    <input type="text" wire:model.defer="shared.JuezP" required class="{{ $baseInput }}">
+                    <input type="text" wire:model.defer="shared.JuezP" required list="juecesSharedList" class="{{ $baseInput }}">
                     @error('shared.JuezP') <span data-error class="text-red-500 text-xs">{{ $message }}</span> @enderror
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Juez Redactor*</label>
-                    <input type="text" wire:model.defer="shared.JuezR" required class="{{ $baseInput }}">
+                    <input type="text" wire:model.defer="shared.JuezR" required list="juecesSharedList" class="{{ $baseInput }}">
                     @error('shared.JuezR') <span data-error class="text-red-500 text-xs">{{ $message }}</span> @enderror
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Juez Integrante*</label>
-                    <input type="text" wire:model.defer="shared.JuezI" required class="{{ $baseInput }}">
+                    <input type="text" wire:model.defer="shared.JuezI" required list="juecesSharedList" class="{{ $baseInput }}">
                     @error('shared.JuezI') <span data-error class="text-red-500 text-xs">{{ $message }}</span> @enderror
                 </div>
                 <div>
@@ -69,7 +69,7 @@
                 </div> 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Anfitrión</label>
-                    <input type="text" wire:model.defer="shared.anfitrion" class="{{ $baseInput }}">
+                    <input type="text" wire:model.defer="shared.anfitrion" list="actaAnfitrionSharedList" class="{{ $baseInput }}">
                     @error('shared.anfitrion') <span data-error class="text-red-500 text-xs">{{ $message }}</span> @enderror
                 </div>
                 <div>
@@ -77,6 +77,16 @@
                     <input type="text" wire:model.defer="shared.cta_zoom" class="{{ $baseInput }}">
                     @error('shared.cta_zoom') <span data-error class="text-red-500 text-xs">{{ $message }}</span> @enderror
                 </div>                                               
+                <datalist id="juecesSharedList">
+                    @foreach($juecesOptions as $nombre)
+                        <option value="{{ $nombre }}">
+                    @endforeach
+                </datalist>
+                <datalist id="actaAnfitrionSharedList">
+                    @foreach($actaAnfitrionOptions as $nombre)
+                        <option value="{{ $nombre }}">
+                    @endforeach
+                </datalist>
             </div>
         </div>
         <hr>
@@ -112,19 +122,24 @@
                     </div>       
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Encargado de Causa*</label>
-                        <input type="text" wire:model.defer="items.{{ $i }}.encargado_causa" required list="tiposencargados" class="{{ $baseInput }}">
-                        <datalist id="tiposencargados">
-                            @foreach($tiposencargados as $tipo)
-                                <option value="{{ $tipo }}">
-                            @endforeach
-                        </datalist>
+                        <input type="text" wire:model.defer="items.{{ $i }}.encargado_causa" required list="encargadoCausaBatchList" class="{{ $baseInput }}">
                         @error("items.$i.encargado_causa") <span data-error class="text-red-500 text-xs">{{ $message }}</span> @enderror
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Acta*</label>
-                        <input type="text" wire:model.defer="items.{{ $i }}.acta" required class="{{ $baseInput }}">
+                        <input type="text" wire:model.defer="items.{{ $i }}.acta" required list="actaBatchList" class="{{ $baseInput }}">
                         @error("items.$i.acta") <span data-error class="text-red-500 text-xs">{{ $message }}</span> @enderror
                     </div>   
+                    <datalist id="encargadoCausaBatchList">
+                        @foreach($encargadoCausaOptions as $nombre)
+                            <option value="{{ $nombre }}">
+                        @endforeach
+                    </datalist>
+                    <datalist id="actaBatchList">
+                        @foreach($actaAnfitrionOptions as $nombre)
+                            <option value="{{ $nombre }}">
+                        @endforeach
+                    </datalist>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Observación</label>
                         <input type="text" wire:model.defer="items.{{ $i }}.obs" class="{{ $baseInput }}">                        

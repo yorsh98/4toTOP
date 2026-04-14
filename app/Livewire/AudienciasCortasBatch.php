@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Audiencia;
+use App\Services\FuncionarioCatalog;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
@@ -26,13 +27,11 @@ class AudienciasCortasBatch extends Component
     /** Filas a crear */
     public $items = [];
 
-    public $tiposencargados = [
-        'Hortencia Garrido',
-        'Maricela Santos',
-        'Loreto Marroquín',
-        'Mauricio Fernandez',
-        'Leonardo Morales',
-    ];
+    public array $juecesOptions = [];
+
+    public array $actaAnfitrionOptions = [];
+
+    public array $encargadoCausaOptions = [];
 
     /** Sugerencias */
     public array $situaciones = ['Libre', 'P.Prev.', 'P.x OC.'];
@@ -43,8 +42,18 @@ class AudienciasCortasBatch extends Component
     public function mount(): void
     {
         Gate::authorize('audiencias.crear');
+        $this->hydrateRoleOptions();
         $this->shared['fecha'] = now()->addDay()->toDateString();
         $this->addRow();
+    }
+
+    public function hydrateRoleOptions(): void
+    {
+        $catalog = app(FuncionarioCatalog::class);
+
+        $this->juecesOptions = $catalog->nombresByContext('audiencias.jueces');
+        $this->actaAnfitrionOptions = $catalog->nombresByContext('audiencias.acta_anfitrion');
+        $this->encargadoCausaOptions = $catalog->nombresByContext('audiencias.encargado_causa');
     }
 
     public function buscarPorRit(int $i): void
@@ -130,10 +139,10 @@ class AudienciasCortasBatch extends Component
             // Compartidos
             'shared.fecha' => 'required|date',
             'shared.sala' => 'required|string',
-            'shared.JuezP' => 'required|string',
-            'shared.JuezR' => 'required|string',
-            'shared.JuezI' => 'required|string',
-            'shared.anfitrion' => 'nullable|string',
+            'shared.JuezP' => ['required', 'string', 'max:255'],
+            'shared.JuezR' => ['required', 'string', 'max:255'],
+            'shared.JuezI' => ['required', 'string', 'max:255'],
+            'shared.anfitrion' => ['nullable', 'string', 'max:255'],
             'shared.cta_zoom' => 'nullable|string',
             'shared.ubicacion' => 'required|string',
             'shared.hora_inicio' => 'required|date_format:H:i',
@@ -142,8 +151,8 @@ class AudienciasCortasBatch extends Component
             'items' => 'required|array|min:1',
             'items.*.rit' => 'required|string',
             'items.*.ruc' => 'required|string',
-            'items.*.encargado_causa' => 'required|string',
-            'items.*.acta' => 'required|string',
+            'items.*.encargado_causa' => ['required', 'string', 'max:255'],
+            'items.*.acta' => ['required', 'string', 'max:255'],
             'items.*.obs' => 'nullable|string',
 
             // Acusados (mínimo 1 por fila)

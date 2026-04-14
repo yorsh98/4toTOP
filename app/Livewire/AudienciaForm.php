@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Audiencia;
+use App\Services\FuncionarioCatalog;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
@@ -90,13 +91,13 @@ class AudienciaForm extends Component
         '½',
     ];
 
-    public $tiposencargados = [
-        'Hortencia Garrido',
-        'Maricela Santos',
-        'Loreto Marroquín',
-        'Mauricio Fernandez',
-        'Leonardo Morales',
-    ];
+    public array $juecesOptions = [];
+
+    public array $actaAnfitrionOptions = [];
+
+    public array $ttyppOptions = [];
+
+    public array $encargadoCausaOptions = [];
 
     protected $listeners = ['editAudiencia'];
 
@@ -123,6 +124,17 @@ class AudienciaForm extends Component
     {
         Gate::authorize('audiencias.ver');
         $this->fecha = now()->addDay()->format('Y-m-d');
+        $this->hydrateRoleOptions();
+    }
+
+    public function hydrateRoleOptions(): void
+    {
+        $catalog = app(FuncionarioCatalog::class);
+
+        $this->juecesOptions = $catalog->nombresByContext('audiencias.jueces');
+        $this->actaAnfitrionOptions = $catalog->nombresByContext('audiencias.acta_anfitrion');
+        $this->ttyppOptions = $catalog->nombresByContext('audiencias.ttp');
+        $this->encargadoCausaOptions = $catalog->nombresByContext('audiencias.encargado_causa');
     }
 
     public function editAudiencia($id)
@@ -213,11 +225,16 @@ class AudienciaForm extends Component
             'ruc' => 'required',
             'tipo_audiencia' => 'required',
             'cta_zoom' => 'required',
-            'encargado_causa' => 'required',
-            'acta' => 'required',
+            'encargado_causa' => ['required', 'string', 'max:255'],
+            'acta' => ['required', 'string', 'max:255'],
             'acusados' => 'required|array|min:1',
             'nuevoAcusado.nombre_completo' => 'required_if:acusados,[]',
-            'JuezR' => 'required',
+            'JuezR' => ['required', 'string', 'max:255'],
+            'JuezP' => ['nullable', 'string', 'max:255'],
+            'JuezI' => ['nullable', 'string', 'max:255'],
+            'encargado_ttp' => ['nullable', 'string', 'max:255'],
+            'encargado_ttp_zoom' => ['nullable', 'string', 'max:255'],
+            'anfitrion' => ['nullable', 'string', 'max:255'],
         ]);
 
         $data = [

@@ -71,9 +71,7 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Juez Redactor*</label>
-                            <input type="text" required class="{{ $baseInput }}"
-                                   placeholder="Ej: Juez(a) Apellido"
-                                   wire:model.defer="items.{{ $i }}.JuezR">
+                            <input type="text" required class="{{ $baseInput }}" list="juecesLecturaList" wire:model.defer="items.{{ $i }}.JuezR">
                             @error("items.$i.JuezR") <span data-error class="text-red-500 text-xs">{{ $message }}</span> @enderror
                         </div>                    
                         <div>
@@ -101,24 +99,30 @@
 
                         <div class="md:col-span-2">
                             <label class="block text-sm font-medium text-gray-700 mb-1">Encargado de causa*</label>
-                            <input type="text" required class="{{ $baseInput }}"
-                                   placeholder="Nombre completo"
-                                   list="tiposencargados"
-                                   wire:model.defer="items.{{ $i }}.encargado_sala">
-                                   <datalist id="tiposencargados">
-                                    @foreach($tiposencargados as $tipo)
-                                        <option value="{{ $tipo }}">
-                                    @endforeach
-                                </datalist>
+                            <input type="text" required class="{{ $baseInput }}" list="encargadoCausaLecturaList" wire:model.defer="items.{{ $i }}.encargado_sala">
                             @error("items.$i.encargado_sala") <span data-error class="text-red-500 text-xs">{{ $message }}</span> @enderror
                         </div>
 
                         <div class="md:col-span-2">
                             <label class="block text-sm font-medium text-gray-700 mb-1">Acta*</label>
-                            <input type="text" required class="{{ $baseInput }}"
-                                   wire:model.defer="items.{{ $i }}.acta">
+                            <input type="text" required class="{{ $baseInput }}" list="actaLecturaList" wire:model.defer="items.{{ $i }}.acta">
                             @error("items.$i.acta") <span data-error class="text-red-500 text-xs">{{ $message }}</span> @enderror
                         </div>
+                        <datalist id="juecesLecturaList">
+                            @foreach($juecesOptions as $nombre)
+                                <option value="{{ $nombre }}">
+                            @endforeach
+                        </datalist>
+                        <datalist id="encargadoCausaLecturaList">
+                            @foreach($encargadoCausaOptions as $nombre)
+                                <option value="{{ $nombre }}">
+                            @endforeach
+                        </datalist>
+                        <datalist id="actaLecturaList">
+                            @foreach($actaOptions as $nombre)
+                                <option value="{{ $nombre }}">
+                            @endforeach
+                        </datalist>
                     </div>
 
                     <!-- Acusados -->

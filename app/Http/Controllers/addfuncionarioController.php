@@ -2,53 +2,50 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Funcionario;
-
+use App\Services\FuncionarioCatalog;
+use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class addfuncionarioController extends Controller
 {
+    public function __construct(private readonly FuncionarioCatalog $funcionarioCatalog) {}
 
     public function index()
     {
         $solicitantes = Funcionario::orderBy('nombre')->get();
-        return view('addfuncionario', compact('solicitantes'));
+        $roles = $this->funcionarioCatalog->roleOptions();
+
+        return view('addfuncionario', compact('solicitantes', 'roles'));
     }
 
     public function store(Request $request)
     {
-        // Validar la entrada del formulario
-        $request->validate([
-            'nombre' => 'required|string|max:255',
+        $validated = $request->validate([
+            'nombre' => ['required', 'string', 'max:255'],
+            'rol' => ['required', Rule::in($this->funcionarioCatalog->roles())],
+            'email' => ['required', 'email', 'max:255', 'unique:funcionarios,email'],
+            'fecha_cumpleanos' => ['required', 'date'],
         ]);
 
-        // Guardar el nuevo funcionario en la base de datos
-        Funcionario::create([
-            'nombre' => $request->input('nombre'),
-        ]);
+        Funcionario::create($validated);
 
         return redirect()->route('addfuncionario.index')->with('success', 'Funcionario agregado correctamente.');
     }
 
     public function enviarSolicitantes()
     {
-        // Obtener los funcionarios desde la base de datos
-        $solicitantes = Funcionario::orderby('nombre')->get();
+        $solicitantes = $this->funcionarioCatalog->funcionariosByContext('oficios.solicitantes');
 
-        
         return view('SistOficioLibertades', compact('solicitantes'));
     }
 
-    public function destroy($id)
+    public function destroy(int $id)
     {
-    // Buscar el funcionario por su ID
-    $funcionario = Funcionario::findOrFail($id);
+        $funcionario = Funcionario::findOrFail($id);
 
-    // Eliminar el funcionario
-    $funcionario->delete();
+        $funcionario->delete();
 
-    // Redirigir de nuevo con un mensaje de éxito
-    return redirect()->route('addfuncionario.index')->with('success', 'Funcionario eliminado correctamente.');
+        return redirect()->route('addfuncionario.index')->with('success', 'Funcionario eliminado correctamente.');
     }
-
 }

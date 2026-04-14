@@ -14,6 +14,10 @@ return new class extends Migration
         Schema::create('funcionarios', function (Blueprint $table) {
             $table->id();
             $table->string('nombre');
+            $table->string('rol');
+            $table->string('email')->unique();
+            $table->date('fecha_cumpleanos');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Ausentismo as AusentismoModel;
+use App\Services\FuncionarioCatalog;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -43,6 +44,14 @@ class Ausentismo extends Component
         'Licencia Medica', 'Permiso 347', 'Permiso sin goce de sueldo', 'Feriado Legal',
         'Curso Academia', 'Comision de servicio', 'Otro',
     ];
+
+    public array $funcionarios_sugeridos = [];
+
+    public function mount(): void
+    {
+        $catalog = app(FuncionarioCatalog::class);
+        $this->funcionarios_sugeridos = $catalog->nombresByRoles($catalog->roles());
+    }
 
     protected function rules(): array
     {
@@ -185,6 +194,7 @@ class Ausentismo extends Component
             'items' => $items,
             'cargos' => $this->cargos,
             'tipos_ausencia' => $this->tipos_ausencia,
+            'funcionarios_sugeridos' => $this->funcionarios_sugeridos,
         ]);
     }
 }
