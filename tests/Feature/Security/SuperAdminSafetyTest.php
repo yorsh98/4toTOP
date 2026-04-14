@@ -1,7 +1,9 @@
 <?php
 
+use App\Livewire\Security\UsersRolesPage;
 use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
+use Livewire\Livewire;
 
 beforeEach(function () {
     $this->seed(RolesAndPermissionsSeeder::class);
@@ -11,11 +13,12 @@ test('superadmin cannot remove own superadmin role from security module', functi
     $superAdmin = User::factory()->create();
     $superAdmin->assignRole('SuperAdmin');
 
-    $this->actingAs($superAdmin)
-        ->put(route('seguridad.users.roles.update', $superAdmin), [
-            'roles' => ['AdminOperacion'],
-        ])
-        ->assertSessionHas('error');
+    $this->actingAs($superAdmin);
+
+    Livewire::test(UsersRolesPage::class)
+        ->set("selectedRoles.{$superAdmin->id}", ['AdminOperacion'])
+        ->call('saveUserRoles', $superAdmin->id)
+        ->assertHasNoErrors();
 
     expect($superAdmin->fresh()->hasRole('SuperAdmin'))->toBeTrue();
 });
@@ -27,11 +30,12 @@ test('system cannot be left without at least one superadmin', function () {
     $actor->givePermissionTo('navbar.seguridad.visible', 'navbar.seguridad.editable');
     $targetSuperAdmin->assignRole('SuperAdmin');
 
-    $this->actingAs($actor)
-        ->put(route('seguridad.users.roles.update', $targetSuperAdmin), [
-            'roles' => ['Operador'],
-        ])
-        ->assertSessionHas('error');
+    $this->actingAs($actor);
+
+    Livewire::test(UsersRolesPage::class)
+        ->set("selectedRoles.{$targetSuperAdmin->id}", ['Operador'])
+        ->call('saveUserRoles', $targetSuperAdmin->id)
+        ->assertHasNoErrors();
 
     expect($targetSuperAdmin->fresh()->hasRole('SuperAdmin'))->toBeTrue();
 });

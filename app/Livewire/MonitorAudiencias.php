@@ -24,7 +24,6 @@ class MonitorAudiencias extends Component
 
     public function mount()
     {
-        Gate::authorize('audiencias.monitor.ver');
         $this->startRotation();
     }
 
@@ -51,8 +50,6 @@ class MonitorAudiencias extends Component
 
     public function render()
     {
-        Gate::authorize('audiencias.monitor.ver');
-
         $currentType = $this->getCurrentType();
         $audiencias = Audiencia::whereDate('fecha', Carbon::today())
             ->where('tipo_audiencia', $currentType)
@@ -72,9 +69,9 @@ class MonitorAudiencias extends Component
         Gate::authorize('audiencias.estado.cambiar');
 
         // Usa la zona horaria de la app (config/app.php => 'timezone' => 'America/Santiago')
-        $hoy = \Carbon\Carbon::today(config('app.timezone'));
+        $hoy = Carbon::today(config('app.timezone'));
 
-        \App\Models\Audiencia::where('tipo_audiencia', 'Audiencia Corta')
+        Audiencia::where('tipo_audiencia', 'Audiencia Corta')
             ->whereDate('fecha', $hoy) // 👈 filtra solo las de hoy
             ->when($estado === 'EN_CURSO', fn ($q) => $q->whereIn('estado', ['POR_REALIZARSE'])) // opcional, mantiene flujo lógico
             ->when($estado === 'FINALIZADA', fn ($q) => $q->whereIn('estado', ['EN_CURSO', 'RECESO'])) // opcional, evita tocar ya finalizadas
