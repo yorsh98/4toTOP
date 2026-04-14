@@ -36,10 +36,14 @@ test('public front routes remain accessible without authentication', function ()
     $this->get('/guiastelefonicas')->assertOk();
 });
 
-test('backoffice route monitor is forbidden for authenticated user without permission', function () {
+test('monitor route is publicly accessible without authentication', function () {
+    $this->get('/Monitor')->assertOk();
+});
+
+test('monitor route is accessible for authenticated user without permission', function () {
     $user = User::factory()->create();
 
     $this->actingAs($user)
         ->get('/Monitor')
-        ->assertForbidden();
+        ->assertOk();
 });

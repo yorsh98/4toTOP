@@ -20,7 +20,7 @@
                     @endif
 
                     <div class="mb-4">
-                        <a href="{{ route('seguridad.roles.index') }}" class="text-sm text-sky-700 hover:underline">← Volver a roles</a>
+                        <a href="{{ route('seguridad.roles.index') }}" wire:navigate class="text-sm text-sky-700 hover:underline">← Volver a roles</a>
                     </div>
 
                     <form action="{{ route('seguridad.roles.permissions.update', $role) }}" method="POST">

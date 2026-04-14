@@ -1,6 +1,8 @@
 <?php
 
+use App\Livewire\Security\UsersRolesPage;
 use App\Models\User;
+use Livewire\Livewire;
 use Livewire\Volt\Volt;
 
 test('pending user cannot authenticate until approved', function () {
@@ -31,9 +33,11 @@ test('superadmin can approve pending user from seguridad module', function () {
         'approved_by' => null,
     ]);
 
-    $this->actingAs($superAdmin)
-        ->patch(route('seguridad.users.approve', $pending))
-        ->assertSessionHas('ok');
+    $this->actingAs($superAdmin);
+
+    Livewire::test(UsersRolesPage::class)
+        ->call('approveUser', $pending->id)
+        ->assertHasNoErrors();
 
     $pending->refresh();
 

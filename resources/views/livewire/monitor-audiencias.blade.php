@@ -159,29 +159,34 @@
         Mostrando: {{ $currentType }} | Próximo cambio en: 
         <span x-text="countdown">{{ $rotationInterval }}</span>s
     </div>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Función para verificar y actualizar estados automáticamente
-            const checkAndAutoUpdateAudienciasCortas = () => {
-                const now = new Date();
-                const hours = now.getHours();
-                const minutes = now.getMinutes();
-                const time = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+    @auth
+        @can('audiencias.estado.cambiar')
+            <script>
+                document.addEventListener('DOMContentLoaded', () => {
+                    // Funcion para verificar y actualizar estados automaticamente
+                    const checkAndAutoUpdateAudienciasCortas = () => {
+                        const now = new Date();
+                        const hours = now.getHours();
+                        const minutes = now.getMinutes();
+                        const time = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
 
-                // Solo actuar si estamos en un rango razonable (ej. entre 12:00 y 16:00)
-                if (hours < 12 || hours > 16) return;
+                        // Solo actuar si estamos en un rango razonable (ej. entre 12:00 y 16:00)
+                        if (hours < 12 || hours > 16) return;
 
-                // Llamada a Livewire para actualizar estados según la hora
-                if (time === '13:30') {
-                    @this.actualizarEstadoAudienciasCortas('EN_CURSO');
-                } else if (time === '15:00') {
-                    @this.actualizarEstadoAudienciasCortas('FINALIZADA');
-                }
-            };
-            // Ejecutar cada minuto (para no perder el minuto exacto)
-            setInterval(checkAndAutoUpdateAudienciasCortas, 60000); // Cada 60 segundos
-            // Ejecutar inmediatamente al cargar
-            checkAndAutoUpdateAudienciasCortas();
-        });
-    </script>
+                        // Llamada a Livewire para actualizar estados segun la hora
+                        if (time === '13:30') {
+                            @this.actualizarEstadoAudienciasCortas('EN_CURSO');
+                        } else if (time === '15:00') {
+                            @this.actualizarEstadoAudienciasCortas('FINALIZADA');
+                        }
+                    };
+
+                    // Ejecutar cada minuto (para no perder el minuto exacto)
+                    setInterval(checkAndAutoUpdateAudienciasCortas, 60000);
+                    // Ejecutar inmediatamente al cargar
+                    checkAndAutoUpdateAudienciasCortas();
+                });
+            </script>
+        @endcan
+    @endauth
 </div>

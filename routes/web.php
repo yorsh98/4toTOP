@@ -22,11 +22,14 @@ use App\Http\Controllers\oficiolibertadController;
 use App\Http\Controllers\procController;
 use App\Http\Controllers\prograController;
 use App\Http\Controllers\PrograMailController;
-use App\Http\Controllers\SeguridadController;
 use App\Http\Controllers\SistOficioLibertadesController;
 use App\Http\Controllers\tabla2Controller;
 use App\Http\Controllers\tablasController;
 use App\Http\Controllers\TurnoController;
+use App\Livewire\Security\AuditPage;
+use App\Livewire\Security\RolePermissionsPage;
+use App\Livewire\Security\RolesPage;
+use App\Livewire\Security\UsersRolesPage;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
@@ -132,7 +135,7 @@ Route::post('/enviar-solicitud', [SistOficioLibertadesController::class, 'enviar
 |--------------------------------------------------------------------------
 */
 Route::get('/AdmAudv', [AdmAudvController::class, 'index'])->name('AdmAudv')->middleware(['auth', 'can:navbar.audiencias.visible']);
-Route::get('/Monitor', [MonitorController::class, 'index'])->name('Monitor')->middleware(['auth', 'can:navbar.audiencias.visible']);
+Route::get('/Monitor', [MonitorController::class, 'index'])->name('Monitor');
 
 /*
 |--------------------------------------------------------------------------
@@ -188,51 +191,19 @@ Route::view('profile', 'profile')->middleware(['auth'])->name('profile');
 |--------------------------------------------------------------------------
 */
 Route::prefix('seguridad')->name('seguridad.')->middleware(['auth'])->group(function () {
-    Route::get('/roles', [SeguridadController::class, 'rolesIndex'])
+    Route::get('/roles', RolesPage::class)
         ->middleware('can:navbar.seguridad.visible')
         ->name('roles.index');
 
-    Route::post('/roles', [SeguridadController::class, 'rolesStore'])
-        ->middleware('can:navbar.seguridad.editable')
-        ->name('roles.store');
-
-    Route::delete('/roles/{role}', [SeguridadController::class, 'rolesDestroy'])
-        ->middleware('can:navbar.seguridad.editable')
-        ->name('roles.destroy');
-
-    Route::get('/roles/{role}/permisos', [SeguridadController::class, 'rolePermissionsEdit'])
+    Route::get('/roles/{role}/permisos', RolePermissionsPage::class)
         ->middleware('can:navbar.seguridad.visible')
         ->name('roles.permissions.edit');
 
-    Route::put('/roles/{role}/permisos', [SeguridadController::class, 'rolePermissionsUpdate'])
-        ->middleware('can:navbar.seguridad.editable')
-        ->name('roles.permissions.update');
-
-    Route::get('/usuarios-roles', [SeguridadController::class, 'usersRolesIndex'])
+    Route::get('/usuarios-roles', UsersRolesPage::class)
         ->middleware('can:navbar.seguridad.visible')
         ->name('users.index');
 
-    Route::put('/usuarios/{user}/roles', [SeguridadController::class, 'usersRolesUpdate'])
-        ->middleware('can:navbar.seguridad.editable')
-        ->name('users.roles.update');
-
-    Route::post('/usuarios/{user}/send-reset-password', [SeguridadController::class, 'usersSendResetPasswordLink'])
-        ->middleware('can:navbar.seguridad.editable')
-        ->name('users.send-reset-password');
-
-    Route::patch('/usuarios/{user}/suspension', [SeguridadController::class, 'usersSetSuspension'])
-        ->middleware('can:navbar.seguridad.editable')
-        ->name('users.suspension');
-
-    Route::patch('/usuarios/{user}/approve', [SeguridadController::class, 'usersApprove'])
-        ->middleware('can:navbar.seguridad.editable')
-        ->name('users.approve');
-
-    Route::patch('/usuarios/{user}/reject', [SeguridadController::class, 'usersReject'])
-        ->middleware('can:navbar.seguridad.editable')
-        ->name('users.reject');
-
-    Route::get('/auditoria', [SeguridadController::class, 'auditIndex'])
+    Route::get('/auditoria', AuditPage::class)
         ->middleware('can:navbar.seguridad.visible')
         ->name('auditoria.index');
 });

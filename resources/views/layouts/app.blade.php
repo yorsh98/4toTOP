@@ -17,25 +17,26 @@
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="font-sans antialiased">
-        <div class="min-h-screen bg-gray-100">
+    <body class="font-sans antialiased bg-gray-100 text-gray-900">
+        <div class="min-h-screen bg-gray-100 lg:flex">
             <livewire:layout.navigation />
 
-            <!-- Page Heading -->
-            @if (isset($header))
-                <header class="bg-white shadow">
-                    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                        {{ $header }}
-                    </div>
-                </header>
-            @endif
+            <div class="min-w-0 flex-1">
+                <!-- Page Heading -->
+                @if (isset($header))
+                    <header class="bg-white shadow">
+                        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                            {{ $header }}
+                        </div>
+                    </header>
+                @endif
 
-            <!-- Page Content -->
-            <main>
-                {{ $slot }}
-            </main>
+                <!-- Page Content -->
+                <main>
+                    {{ $slot }}
+                </main>
+            </div>
         </div>
-        <script src="/js/app.js"></script>
         @stack('scripts')
         @livewireScripts
 
@@ -53,7 +54,7 @@
 <!-- Overlay a pantalla completa -->
 <div
   x-data
-  x-show="$store.busy.visible"
+  x-show="$store.busy && $store.busy.visible"
   x-transition.opacity
   x-cloak
   class="fixed inset-0 z-[9999] bg-white/70 backdrop-blur-sm flex items-center justify-center"
@@ -61,7 +62,7 @@
 >
   <div class="flex flex-col items-center gap-3">
     <div class="w-7 h-7 rounded-full border-2 border-gray-400 border-t-transparent animate-spin"></div>
-    <p class="text-sm text-gray-700">Cargando…</p>
+    <p class="text-sm text-gray-700">Cargando...</p>
   </div>
 
   <!-- Barra superior de progreso (decorativa) -->
@@ -71,43 +72,87 @@
 </div>
 
 <script>
-  // Store global de "ocupado": cuenta requests simultáneas y maneja antiflicker
-  document.addEventListener('alpine:init', () => {
-    Alpine.store('busy', {
-      pending: 1,       // empieza visible hasta que la página termine de cargar
-      visible: true,
-      _showTimer: null,
-
-      on(){
-        this.pending++;
-        if(this._showTimer) return;
-        // muestra si dura >120ms (evita parpadeo)
-        this._showTimer = setTimeout(() => { this.visible = true; this._showTimer = null; }, 120);
-      },
-      off(){
-        this.pending = Math.max(0, this.pending - 1);
-        if(this.pending === 0){
-          if(this._showTimer){ clearTimeout(this._showTimer); this._showTimer = null; }
-          // espera 150ms para salir suave si vienen más requests
-          setTimeout(() => { this.visible = false; }, 150);
-        }
+  (function () {
+    var initBusyStore = function () {
+      var alpine = window.Alpine;
+      if (!alpine) {
+        return;
       }
-    });
-  });
 
-  // Fin de carga de la página = libera un "pendiente"
-  window.addEventListener('load', () => {
-    try { Alpine.store('busy').off(); } catch(_) {}
-  });
+      if (alpine.store('busy')) {
+        return;
+      }
 
-  // Hooks Livewire (v3 compatible). Activa/Desactiva loader en cada request
-  document.addEventListener('livewire:load', () => {
-    try {
-      Livewire.hook('message.sent', () => Alpine.store('busy').on());
-      Livewire.hook('message.failed', () => Alpine.store('busy').off());
-      Livewire.hook('message.processed', () => Alpine.store('busy').off());
-    } catch(_) {}
-  });
+      alpine.store('busy', {
+        pending: 0,
+        visible: false,
+        _showTimer: null,
+
+        on() {
+          this.pending++;
+          if (this._showTimer) {
+            return;
+          }
+
+          this._showTimer = setTimeout(() => {
+            this.visible = true;
+            this._showTimer = null;
+          }, 120);
+        },
+        off() {
+          this.pending = Math.max(0, this.pending - 1);
+
+          if (this.pending === 0) {
+            if (this._showTimer) {
+              clearTimeout(this._showTimer);
+              this._showTimer = null;
+            }
+
+            setTimeout(() => {
+              this.visible = false;
+            }, 150);
+          }
+        },
+      });
+    };
+
+    var turnBusyOff = function () {
+      try {
+        initBusyStore();
+        window.Alpine.store('busy').off();
+      } catch (_) {}
+    };
+
+    var bindLivewireBusyHooks = function () {
+      if (window.__busyHooksBound || typeof window.Livewire === 'undefined') {
+        return;
+      }
+
+      window.__busyHooksBound = true;
+
+      Livewire.hook('message.sent', () => {
+        try {
+          initBusyStore();
+          window.Alpine.store('busy').on();
+        } catch (_) {}
+      });
+
+      Livewire.hook('message.failed', turnBusyOff);
+      Livewire.hook('message.processed', turnBusyOff);
+    };
+
+    initBusyStore();
+    document.addEventListener('alpine:init', initBusyStore);
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+      turnBusyOff();
+    } else {
+      window.addEventListener('load', turnBusyOff, { once: true });
+    }
+
+    document.addEventListener('livewire:navigated', turnBusyOff);
+    bindLivewireBusyHooks();
+    document.addEventListener('livewire:load', bindLivewireBusyHooks);
+  })();
 
   // (Opcional) Si también haces cargas manuales con Alpine (como tu switch de módulos),
   // puedes envolverlas así:
