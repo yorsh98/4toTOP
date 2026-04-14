@@ -10,16 +10,30 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
-                    
-                    <h1>Bienvenido al Backoffice de la web interna del 4to TOP</h1>
-                    <hr><br>
-                    <h1>Proximamente nuevas funcionalidades 😉</h1>
-                    <h2>Notas de la version:</h2>
-                    <li>Apartado de Administracion de Oficio/Libertades/Guias deben actualizar dos veces la pestaña para un correcto funcionamiento</li>
-                    <li>Seccion de buscar no realiza la busqueda por Numero entregado, pero si por los demas apartados</li>
-                    <li>Seccion Funcionarios funciona directamente con sistema de oficios y libertades</li>
-                    <li>Seccion turnos se debe actualizar cada semana para desplegar la informacion para los funcionarios</li>                   
-                    <li>Cualquier sugerencia u error encontrado favor avisar al correo jtroncosor@pjud.cl</li>
+                    <h1 class="mb-3 text-2xl font-semibold text-gray-900">Bienvenido(a) al Backoffice del 4to TOP</h1>
+
+                    <p class="mb-4 text-sm leading-6 text-gray-700">
+                        Este sistema centraliza la gestion operativa interna del tribunal en un solo lugar,
+                        con accesos y acciones controladas segun perfil de usuario.
+                    </p>
+
+                    <h2 class="mb-2 text-lg font-semibold text-gray-900">Modulos disponibles</h2>
+                    <ul class="mb-5 list-disc space-y-1 pl-6 text-sm text-gray-700">
+                        <li><strong>Funcionarios:</strong> catalogo global utilizado por Turnos, Audiencias y Oficios/Libertades.</li>
+                        <li><strong>Oficios / Libertades:</strong> administracion de registros, busqueda, filtros por año, edicion y restauracion.</li>
+                        <li><strong>Turnos:</strong> gestion de turnos semanales y asignaciones por rol.</li>
+                        <li><strong>Guias:</strong> administracion de guias telefonicas con busqueda, filtros y mantenimiento de datos.</li>
+                        <li><strong>Audiencias:</strong> carga y administracion diaria, exportacion de informacion y envio por correo.</li>
+                        <li><strong>Ausencias:</strong> registro y seguimiento de ausentismo del personal.</li>
+                        <li><strong>Seguridad:</strong> administracion de roles, permisos, usuarios y auditoria de acciones.</li>
+                    </ul>
+
+                    <h2 class="mb-2 text-lg font-semibold text-gray-900">Recomendaciones de uso</h2>
+                    <ul class="list-disc space-y-1 pl-6 text-sm text-gray-700">
+                        <li>Mantener actualizado el catalogo de Funcionarios para asegurar consistencia entre modulos.</li>
+                        <li>Verificar permisos y roles antes de habilitar nuevas acciones.</li>
+                        <li>Registrar incidencias o sugerencias al correo de soporte: <a href="mailto:jtroncosor@pjud.cl" class="font-medium text-sky-700 hover:text-sky-800">jtroncosor@pjud.cl</a>.</li>
+                    </ul>
                 </div>
             </div>
         </div>
