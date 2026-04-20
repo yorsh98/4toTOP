@@ -13,8 +13,10 @@ class Funcionario extends Model
 
     protected $fillable = [
         'nombre',
+        'run',
         'rol',
         'email',
+        'telefono',
         'fecha_cumpleanos',
     ];
 

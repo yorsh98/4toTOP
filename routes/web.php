@@ -18,6 +18,7 @@ use App\Http\Controllers\guiastelefonicasController;
 use App\Http\Controllers\libertadController;
 use App\Http\Controllers\migraunijudController;
 use App\Http\Controllers\MonitorController;
+use App\Http\Controllers\NotificationsV2PreviewController;
 use App\Http\Controllers\oficiolibertadController;
 use App\Http\Controllers\procController;
 use App\Http\Controllers\prograController;
@@ -27,6 +28,8 @@ use App\Http\Controllers\tabla2Controller;
 use App\Http\Controllers\tablasController;
 use App\Http\Controllers\TurnoController;
 use App\Livewire\FuncionariosPage;
+use App\Livewire\BitacoraPruebasPage;
+use App\Livewire\BitacoraPruebasPublicPage;
 use App\Livewire\Security\AuditPage;
 use App\Livewire\Security\RolePermissionsPage;
 use App\Livewire\Security\RolesPage;
@@ -136,6 +139,10 @@ Route::post('/enviar-solicitud', [SistOficioLibertadesController::class, 'enviar
 */
 Route::get('/AdmAudv', [AdmAudvController::class, 'index'])->name('AdmAudv')->middleware(['auth', 'can:navbar.audiencias.visible']);
 Route::get('/Monitor', [MonitorController::class, 'index'])->name('Monitor');
+Route::get('/bitacora-pruebas', BitacoraPruebasPublicPage::class)->name('bitacora-pruebas.public');
+Route::get('/backoffice/bitacora-pruebas', BitacoraPruebasPage::class)
+    ->name('bitacora-pruebas.index')
+    ->middleware(['auth', 'can:navbar.bitacora_pruebas.visible']);
 
 /*
 |--------------------------------------------------------------------------
@@ -176,6 +183,23 @@ Route::get('/programacion/mail/{fecha}', [PrograMailController::class, 'enviarPr
 // TEST
 Route::get('/preview/progra/{fecha?}', [PrograMailController::class, 'preview'])
     ->name('preview.progra');
+
+Route::prefix('preview/notificaciones-v2')
+    ->name('preview.notifications-v2.')
+    ->middleware(['auth', 'can:navbar.seguridad.visible'])
+    ->group(function () {
+        Route::get('/turno-asignado', [NotificationsV2PreviewController::class, 'turnoAsignado'])
+            ->name('turno-asignado');
+
+        Route::get('/turno2-acd', [NotificationsV2PreviewController::class, 'turno2Acd'])
+            ->name('turno2-acd');
+
+        Route::get('/ausentismo-resumen', [NotificationsV2PreviewController::class, 'ausentismoResumen'])
+            ->name('ausentismo-resumen');
+
+        Route::get('/user-status', [NotificationsV2PreviewController::class, 'userStatus'])
+            ->name('user-status');
+    });
 
 /*
 |--------------------------------------------------------------------------

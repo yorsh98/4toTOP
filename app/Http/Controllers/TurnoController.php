@@ -59,6 +59,10 @@ class TurnoController extends Controller
             $rules[$field] = ['nullable', 'string', 'max:255'];
         }
 
+        foreach (['TF1_CARGO', 'TF2_CARGO', 'TF3_CARGO'] as $field) {
+            $rules[$field] = ['nullable', 'string', 'max:255'];
+        }
+
         foreach (['TJ1', 'TJ2', 'TJ3', 'ACDJ1', 'ACDJ2', 'ACDJ3'] as $field) {
             $rules[$field] = ['nullable', 'string', 'max:255'];
         }

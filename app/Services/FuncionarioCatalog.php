@@ -83,7 +83,9 @@ class FuncionarioCatalog
             ->map(function (Funcionario $funcionario): array {
                 return [
                     'nombre' => $funcionario->nombre,
+                    'run' => $funcionario->run,
                     'email' => $funcionario->email,
+                    'telefono' => $funcionario->telefono,
                     'rol' => $funcionario->rol,
                     'rol_label' => $funcionario->rol_label,
                 ];
@@ -94,6 +96,59 @@ class FuncionarioCatalog
     public function destinatariosByContext(string $context): array
     {
         return $this->destinatariosByRoles($this->rolesForContext($context));
+    }
+
+    public function destinatarioByNombre(string $nombre): ?array
+    {
+        $nombre = trim($nombre);
+        if ($nombre === '') {
+            return null;
+        }
+
+        $funcionario = Funcionario::query()
+            ->where('nombre', $nombre)
+            ->whereNotNull('email')
+            ->orderBy('id')
+            ->first();
+
+        if (! $funcionario) {
+            return null;
+        }
+
+        return [
+            'nombre' => $funcionario->nombre,
+            'run' => $funcionario->run,
+            'email' => $funcionario->email,
+            'telefono' => $funcionario->telefono,
+            'rol' => $funcionario->rol,
+            'rol_label' => $funcionario->rol_label,
+        ];
+    }
+
+    public function perfilByNombre(string $nombre): ?array
+    {
+        $nombre = trim($nombre);
+        if ($nombre === '') {
+            return null;
+        }
+
+        $funcionario = Funcionario::query()
+            ->where('nombre', $nombre)
+            ->orderBy('id')
+            ->first();
+
+        if (! $funcionario) {
+            return null;
+        }
+
+        return [
+            'nombre' => $funcionario->nombre,
+            'run' => $funcionario->run,
+            'email' => $funcionario->email,
+            'telefono' => $funcionario->telefono,
+            'rol' => $funcionario->rol,
+            'rol_label' => $funcionario->rol_label,
+        ];
     }
 
     public function cumpleanerosDelDia(CarbonInterface|string|null $date = null): array

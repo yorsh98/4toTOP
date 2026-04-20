@@ -2,7 +2,6 @@
 
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
-use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Schedule as ScheduleFacade;
 
 Artisan::command('inspire', function () {
@@ -13,3 +12,13 @@ Artisan::command('inspire', function () {
 Artisan::command('correo:leer-ultimos-schedule', function () {
     Artisan::call('correo:leer-ultimos');
 })->purpose('Leer correo de audiencias diariamente')->everyMinute();
+
+ScheduleFacade::command('notificaciones:ausentismo-diario')
+    ->dailyAt((string) config('notifications_v2.schedule.daily_ausentismo_time', '08:05'))
+    ->timezone((string) config('notifications_v2.schedule.timezone', 'America/Santiago'))
+    ->withoutOverlapping();
+
+ScheduleFacade::command('notificaciones:turno1-semanal')
+    ->weeklyOn((int) config('notifications_v2.schedule.weekly_turno1_day', 5), (string) config('notifications_v2.schedule.weekly_turno1_time', '15:00'))
+    ->timezone((string) config('notifications_v2.schedule.timezone', 'America/Santiago'))
+    ->withoutOverlapping();

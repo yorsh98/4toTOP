@@ -1,0 +1,170 @@
+<x-slot:header>
+    <h2 class="font-semibold text-xl text-gray-800 leading-tight">Bitacora Pruebas</h2>
+</x-slot:header>
+
+<div class="py-2">
+    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-4">
+        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="p-6 text-gray-900">
+                @if (session('ok'))
+                    <div class="mb-4 rounded-md bg-green-100 px-4 py-2 text-sm text-green-800">{{ session('ok') }}</div>
+                @endif
+
+                <h3 class="text-lg font-semibold mb-4">Nuevo dia de bitacora</h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                    <div>
+                        <label class="block text-sm text-gray-700 mb-1">RIT</label>
+                        <input
+                            type="text"
+                            list="rit-options"
+                            wire:model.live="rit"
+                            class="w-full px-3 py-2 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                            placeholder="Ej: 123-2026"
+                        >
+                        <datalist id="rit-options">
+                            @foreach ($ritsSugeridosUsuario as $ritOption)
+                                <option value="{{ $ritOption }}"></option>
+                            @endforeach
+                        </datalist>
+                        @error('rit') <p class="text-xs text-red-600 mt-1">{{ $message }}</p> @enderror
+                    </div>
+
+                    <div>
+                        <label class="block text-sm text-gray-700 mb-1">Numero dia</label>
+                        <input
+                            type="number"
+                            min="1"
+                            wire:model.live="numeroDia"
+                            class="w-full px-3 py-2 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                        >
+                        @error('numeroDia') <p class="text-xs text-red-600 mt-1">{{ $message }}</p> @enderror
+                    </div>
+
+                    <div>
+                        <label class="block text-sm text-gray-700 mb-1">Fecha dia</label>
+                        <input
+                            type="date"
+                            wire:model.live="fechaDia"
+                            class="w-full px-3 py-2 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                        >
+                        @error('fechaDia') <p class="text-xs text-red-600 mt-1">{{ $message }}</p> @enderror
+                    </div>
+
+                    <div class="md:self-end">
+                        <button
+                            type="button"
+                            wire:click="createDia"
+                            class="w-full px-4 py-2 rounded-md bg-sky-600 text-white hover:bg-sky-700"
+                        >
+                            Agregar dia
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="p-6 text-gray-900">
+                <h3 class="text-lg font-semibold mb-4">Bitacora por RIT</h3>
+
+                @if ($rit === '')
+                    <p class="text-sm text-gray-600">Selecciona o escribe un RIT para ver y cargar informacion.</p>
+                @elseif ($dias->isEmpty())
+                    <p class="text-sm text-gray-600">No hay dias registrados para este RIT.</p>
+                @else
+                    <div class="space-y-4">
+                        @foreach ($dias as $dia)
+                            <div class="rounded-lg border border-gray-200">
+                                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2 px-4 py-3 bg-gray-50 border-b">
+                                    <div>
+                                        <p class="font-semibold">Dia {{ $dia->numero_dia }} - {{ $dia->fecha_dia?->format('d-m-Y') }}</p>
+                                        <p class="text-xs text-gray-500">RIT: {{ $dia->rit }}</p>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        wire:click="deleteDia({{ $dia->id }})"
+                                        wire:confirm="Se eliminara el dia y sus pruebas. Continuar?"
+                                        class="inline-flex items-center px-3 py-1.5 rounded-md border border-red-200 text-red-700 hover:bg-red-50"
+                                    >
+                                        Eliminar dia
+                                    </button>
+                                </div>
+
+                                <div class="p-4 space-y-3">
+                                    <div class="grid grid-cols-1 md:grid-cols-4 gap-2">
+                                        <input
+                                            type="text"
+                                            wire:model.live="newItems.{{ $dia->id }}.nombre_prueba"
+                                            placeholder="Nombre de la prueba"
+                                            class="md:col-span-2 px-3 py-2 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                                        >
+
+                                        <div>
+                                            <input
+                                                type="text"
+                                                wire:model.live="newItems.{{ $dia->id }}.institucion_exhibe"
+                                                list="instituciones-sugeridas"
+                                                placeholder="Institucion que exhibe"
+                                                class="w-full px-3 py-2 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                                            >
+                                        </div>
+
+                                        <button
+                                            type="button"
+                                            wire:click="addItem({{ $dia->id }})"
+                                            class="px-3 py-2 rounded-md bg-sky-600 text-white hover:bg-sky-700"
+                                        >
+                                            Agregar prueba
+                                        </button>
+                                    </div>
+
+                                    <datalist id="instituciones-sugeridas">
+                                        <option value="Min. Publico"></option>
+                                        <option value="Def. DPP"></option>
+                                    </datalist>
+
+                                    @if ($dia->items->isEmpty())
+                                        <p class="text-sm text-gray-500">Sin pruebas registradas para este dia.</p>
+                                    @else
+                                        <div class="overflow-x-auto border rounded-md">
+                                            <table class="min-w-full text-sm">
+                                                <thead class="bg-gray-50 text-gray-700">
+                                                    <tr>
+                                                        <th class="text-left px-3 py-2">Prueba</th>
+                                                        <th class="text-left px-3 py-2">Institucion exhibe</th>
+                                                        <th class="text-left px-3 py-2">Ingresado por</th>
+                                                        <th class="text-right px-3 py-2">Accion</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody class="divide-y">
+                                                    @foreach ($dia->items as $item)
+                                                        <tr>
+                                                            <td class="px-3 py-2">{{ $item->nombre_prueba }}</td>
+                                                            <td class="px-3 py-2">{{ $item->institucion_exhibe }}</td>
+                                                            <td class="px-3 py-2">{{ $item->usuario?->name ?? 'Usuario no disponible' }}</td>
+                                                            <td class="px-3 py-2 text-right">
+                                                                <button
+                                                                    type="button"
+                                                                    wire:click="deleteItem({{ $item->id }})"
+                                                                    wire:confirm="Se eliminara esta prueba. Continuar?"
+                                                                    class="text-red-700 hover:text-red-900"
+                                                                >
+                                                                    Eliminar
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                    @endforeach
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
+            </div>
+        </div>
+    </div>
+</div>

@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\SecurityAudit;
 use App\Models\User;
-use App\Notifications\UserAccountStatusNotification;
+use App\NotificationsV2\Application\Services\LegacyUserAccountStatusNotifier;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -25,6 +25,7 @@ class SeguridadController extends Controller
         'turnos' => 'Turnos',
         'guias' => 'Guias',
         'audiencias' => 'Audiencias',
+        'bitacora_pruebas' => 'Bitacora Pruebas',
         'ausencias' => 'Ausencias',
         'seguridad' => 'Seguridad',
     ];
@@ -42,11 +43,15 @@ class SeguridadController extends Controller
         'navbar.guias.editable' => ['guias.editar'],
         'navbar.audiencias.visible' => ['audiencias.ver', 'audiencias.monitor.ver'],
         'navbar.audiencias.editable' => ['audiencias.crear', 'audiencias.editar', 'audiencias.estado.cambiar', 'audiencias.exportar', 'progra.mail.enviar'],
+        'navbar.bitacora_pruebas.visible' => ['bitacora_pruebas.ver'],
+        'navbar.bitacora_pruebas.editable' => ['bitacora_pruebas.crear', 'bitacora_pruebas.editar'],
         'navbar.ausencias.visible' => ['ausentismo.ver'],
         'navbar.ausencias.editable' => ['ausentismo.editar'],
         'navbar.seguridad.visible' => ['seguridad.roles.ver', 'seguridad.permisos.ver', 'seguridad.auditoria.ver'],
         'navbar.seguridad.editable' => ['seguridad.roles.gestionar', 'seguridad.permisos.gestionar', 'seguridad.usuarios_roles.gestionar'],
     ];
+
+    public function __construct(private readonly LegacyUserAccountStatusNotifier $legacyUserAccountStatusNotifier) {}
 
     public function rolesIndex(): View
     {
@@ -339,7 +344,7 @@ class SeguridadController extends Controller
     private function sendStatusEmail(User $user, string $status): void
     {
         try {
-            $user->notify(new UserAccountStatusNotification($status, Auth::user()?->name));
+            $this->legacyUserAccountStatusNotifier->notify($user, $status, Auth::user()?->name);
         } catch (Throwable $e) {
             Log::warning('No fue posible enviar correo de estado de cuenta.', [
                 'user_id' => $user->id,

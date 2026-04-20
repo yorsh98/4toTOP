@@ -4,6 +4,14 @@ namespace App\Providers;
 
 use App\Models\Guias;
 use App\Models\User;
+use App\NotificationsV2\Application\Contracts\ChannelSender;
+use App\NotificationsV2\Application\Contracts\NotificationOrchestrator;
+use App\NotificationsV2\Application\Contracts\RecipientResolver;
+use App\NotificationsV2\Application\Contracts\TemplateRenderer;
+use App\NotificationsV2\Application\Services\CatalogRecipientResolver;
+use App\NotificationsV2\Application\Services\DatabaseNotificationOrchestrator;
+use App\NotificationsV2\Application\Services\SimpleTemplateRenderer;
+use App\NotificationsV2\Infrastructure\Mail\MailChannelSender;
 use App\Policies\GuiasPolicy;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Schema;
@@ -22,7 +30,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(NotificationOrchestrator::class, DatabaseNotificationOrchestrator::class);
+        $this->app->bind(RecipientResolver::class, CatalogRecipientResolver::class);
+        $this->app->bind(TemplateRenderer::class, SimpleTemplateRenderer::class);
+        $this->app->bind(ChannelSender::class, MailChannelSender::class);
     }
 
     /**
@@ -63,7 +74,9 @@ class AppServiceProvider extends ServiceProvider
 
             $this->syncFixedSuperAdmin($user);
         } catch (Throwable $e) {
-            report($e);
+            if (app()->isLocal() || app()->runningUnitTests()) {
+                report($e);
+            }
         }
     }
 

@@ -275,7 +275,6 @@ class PrograMailController extends Controller
                 'mailer' => $mailerKey ?? null,
                 'from' => $fromAddr ?? null,
                 'error' => $ex->getMessage(),
-                'trace' => $ex->getTraceAsString(),
                 'contexto' => 'enviarProgramacionPorCorreo',
             ]);
 
@@ -349,7 +348,6 @@ class PrograMailController extends Controller
                 'to' => $to ?? null,
                 'bcc' => $bcc ?? [],
                 'error' => $ex->getMessage(),
-                'trace' => $ex->getTraceAsString(),
                 'contexto' => 'enviarProgramacionPorCorreoLista',
             ]);
 
