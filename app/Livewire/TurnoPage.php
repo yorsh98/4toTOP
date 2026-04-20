@@ -3,6 +3,9 @@
 namespace App\Livewire;
 
 use App\Models\Turno;
+use App\NotificationsV2\Application\Services\TurnoOneWeeklySummaryNotifier;
+use App\NotificationsV2\Application\Services\TurnoTwoAcdWeeklySummaryNotifier;
+use App\NotificationsV2\Domain\Models\NotificationDispatch;
 use App\Services\FuncionarioCatalog;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Layout;
@@ -17,6 +20,8 @@ class TurnoPage extends Component
 
     public array $turno3 = [];
 
+    public string $semanaTurno = '';
+
     public function mount(): void
     {
         Gate::authorize('turnos.ver');
@@ -29,21 +34,89 @@ class TurnoPage extends Component
     {
         Gate::authorize('turnos.editar');
 
-        $data = $this->validateTurno1();
+        $validated = $this->validateTurno1();
+        $data = $validated['turno1'];
+        $semanaTurno = $this->normalizeSemanaTurno((string) ($validated['semanaTurno'] ?? ''));
 
-        Turno::query()->findOrFail(1)->update($data);
+        $turno1 = Turno::query()->findOrFail(1);
+
+        $turno1->update($data);
+
+        Turno::query()->findOrFail(2)->update([
+            'FECHA' => $semanaTurno,
+        ]);
 
         session()->flash('success', 'Turno 1 actualizado correctamente.');
         $this->hydrateState();
+    }
+
+    public function sendTurno1Summary(): void
+    {
+        Gate::authorize('turnos.editar');
+
+        $result = $this->turnoOneSummaryNotifier()->notifyForWeekWithResult(forceNewDispatch: true);
+
+        $skipped = $result['skipped'] ?? [];
+        $dispatch = $result['dispatch'] ?? null;
+
+        if ($dispatch && $dispatch->status === 'failed') {
+            session()->flash('error', 'No se pudo encolar el resumen semanal: '.($dispatch->failure_reason ?? 'sin destinatarios validos.'));
+
+            return;
+        }
+
+        if ($skipped !== []) {
+            $nombres = collect($skipped)
+                ->map(fn (array $item): string => (string) ($item['name'] ?? 'Sin nombre'))
+                ->filter()
+                ->implode(', ');
+
+            session()->flash('warning', 'Se omitieron destinatarios sin correo valido: '.$nombres.'.');
+        }
+
+        session()->flash('success', 'Resumen semanal de Turno 1 encolado correctamente.');
+    }
+
+    public function sendTurno2AcdSummary(): void
+    {
+        Gate::authorize('turnos.editar');
+
+        $result = $this->turnoTwoAcdSummaryNotifier()->notifyForWeekWithResult(forceNewDispatch: true);
+
+        $dispatch = $result['dispatch'] ?? null;
+
+        if ($dispatch && $dispatch->status === 'failed') {
+            session()->flash('error', 'No se pudo encolar el resumen Turno 2 ACD: '.($dispatch->failure_reason ?? 'sin destinatarios validos.'));
+
+            return;
+        }
+
+        $skipped = $result['skipped'] ?? [];
+
+        if ($skipped !== []) {
+            $nombres = collect($skipped)
+                ->map(fn (array $item): string => (string) ($item['name'] ?? 'Sin nombre'))
+                ->filter()
+                ->implode(', ');
+
+            session()->flash('warning', 'Turno 2 ACD: se omitieron destinatarios sin correo valido: '.$nombres.'.');
+        }
+
+        session()->flash('success', 'Resumen de Turno 2 ACD encolado correctamente.');
     }
 
     public function saveTurno2Acd(): void
     {
         Gate::authorize('turnos.editar');
 
-        $data = $this->validateTurno2();
+        $validated = $this->validateTurno2();
+        $data = $validated['turno2'];
+        $periodoTurno = $this->normalizeSemanaTurno((string) ($validated['semanaTurno'] ?? ''));
 
-        Turno::query()->findOrFail(2)->update($data);
+        $turno2 = Turno::query()->findOrFail(2);
+        $turno2->update(array_merge($data, [
+            'FECHA' => $periodoTurno,
+        ]));
 
         session()->flash('success', 'Turno 2 ACD actualizado correctamente.');
         $this->hydrateState();
@@ -71,6 +144,16 @@ class TurnoPage extends Component
             'magistrados' => $catalog->nombresByContext('turnos.magistrados'),
             'funcionarios' => $catalog->nombresByContext('turnos.funcionarios'),
             'jefaturas' => $catalog->nombresByContext('turnos.jefatura'),
+            'lastTurnoSummaryIssue' => NotificationDispatch::query()
+                ->where('event_key', 'like', 'turno1.resumen_semanal.%')
+                ->whereNotNull('failure_reason')
+                ->latest('id')
+                ->value('failure_reason'),
+            'lastTurno2AcdSummaryIssue' => NotificationDispatch::query()
+                ->where('event_key', 'like', 'turno2.acd.resumen_semanal.%')
+                ->whereNotNull('failure_reason')
+                ->latest('id')
+                ->value('failure_reason'),
         ]);
     }
 
@@ -97,7 +180,12 @@ class TurnoPage extends Component
             'TJ1' => $turno1?->TJ1 ?? '',
             'TJ2' => $turno1?->TJ2 ?? '',
             'TJ3' => $turno1?->TJ3 ?? '',
+            'TF1_CARGO' => $turno1?->TF1_CARGO ?? '',
+            'TF2_CARGO' => $turno1?->TF2_CARGO ?? '',
+            'TF3_CARGO' => $turno1?->TF3_CARGO ?? '',
         ];
+
+        $this->semanaTurno = (string) ($turno2?->FECHA ?? '');
 
         $this->turno2 = [
             'ACDM1' => $turno2?->ACDM1 ?? '',
@@ -106,10 +194,12 @@ class TurnoPage extends Component
             'ACDF1' => $turno2?->ACDF1 ?? '',
             'ACDF2' => $turno2?->ACDF2 ?? '',
             'ACDF3' => $turno2?->ACDF3 ?? '',
+            'ACDF1_CARGO' => $turno2?->ACDF1_CARGO ?? '',
+            'ACDF2_CARGO' => $turno2?->ACDF2_CARGO ?? '',
+            'ACDF3_CARGO' => $turno2?->ACDF3_CARGO ?? '',
             'ACDJ1' => $turno2?->ACDJ1 ?? '',
             'ACDJ2' => $turno2?->ACDJ2 ?? '',
             'ACDJ3' => $turno2?->ACDJ3 ?? '',
-            'FECHA' => $turno2?->FECHA ?? '',
         ];
 
         $this->turno3 = [
@@ -131,7 +221,11 @@ class TurnoPage extends Component
             'turno1.TJ1' => ['nullable', 'string', 'max:255'],
             'turno1.TJ2' => ['nullable', 'string', 'max:255'],
             'turno1.TJ3' => ['nullable', 'string', 'max:255'],
-        ])['turno1'];
+            'turno1.TF1_CARGO' => ['nullable', 'string', 'max:255'],
+            'turno1.TF2_CARGO' => ['nullable', 'string', 'max:255'],
+            'turno1.TF3_CARGO' => ['nullable', 'string', 'max:255'],
+            'semanaTurno' => ['nullable', 'string', 'max:255'],
+        ]);
     }
 
     private function validateTurno2(): array
@@ -143,11 +237,14 @@ class TurnoPage extends Component
             'turno2.ACDF1' => ['nullable', 'string', 'max:255'],
             'turno2.ACDF2' => ['nullable', 'string', 'max:255'],
             'turno2.ACDF3' => ['nullable', 'string', 'max:255'],
+            'turno2.ACDF1_CARGO' => ['nullable', 'string', 'max:255'],
+            'turno2.ACDF2_CARGO' => ['nullable', 'string', 'max:255'],
+            'turno2.ACDF3_CARGO' => ['nullable', 'string', 'max:255'],
             'turno2.ACDJ1' => ['nullable', 'string', 'max:255'],
             'turno2.ACDJ2' => ['nullable', 'string', 'max:255'],
             'turno2.ACDJ3' => ['nullable', 'string', 'max:255'],
-            'turno2.FECHA' => ['nullable', 'string'],
-        ])['turno2'];
+            'semanaTurno' => ['nullable', 'string', 'max:255'],
+        ]);
     }
 
     private function validateTurno3(): array
@@ -157,5 +254,25 @@ class TurnoPage extends Component
             'turno3.TM2' => ['nullable', 'string', 'max:255'],
             'turno3.TM3' => ['nullable', 'string', 'max:255'],
         ])['turno3'];
+    }
+
+    private function turnoOneSummaryNotifier(): TurnoOneWeeklySummaryNotifier
+    {
+        return app(TurnoOneWeeklySummaryNotifier::class);
+    }
+
+    private function turnoTwoAcdSummaryNotifier(): TurnoTwoAcdWeeklySummaryNotifier
+    {
+        return app(TurnoTwoAcdWeeklySummaryNotifier::class);
+    }
+
+    private function normalizeSemanaTurno(string $value): string
+    {
+        $value = trim($value);
+        if ($value === '') {
+            return '';
+        }
+
+        return (string) preg_replace('/^\s*semana\s+del\s+/i', '', $value);
     }
 }

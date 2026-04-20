@@ -18,6 +18,7 @@ return [
         'turnos.magistrados' => ['juez'],
         'turnos.funcionarios' => ['sala_causa', 'ttypp', 'informatico'],
         'turnos.jefatura' => ['encargado_causa', 'jefatura'],
+        'turnos.notificacion' => ['juez', 'sala_causa', 'ttypp', 'encargado_causa', 'jefatura', 'informatico'],
         'oficios.solicitantes' => ['sala_causa', 'ttypp', 'encargado_causa', 'jefatura', 'informatico'],
     ],
 ];

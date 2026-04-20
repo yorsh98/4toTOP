@@ -57,6 +57,13 @@ new class extends Component
             'permissions' => ['navbar.audiencias.visible', 'navbar.audiencias.editable'],
         ],
         [
+            'label' => __('Bitacora Pruebas'),
+            'route' => 'bitacora-pruebas.index',
+            'active' => 'bitacora-pruebas.*',
+            'icon' => 'fa-solid fa-clipboard-list',
+            'permissions' => ['navbar.bitacora_pruebas.visible', 'navbar.bitacora_pruebas.editable'],
+        ],
+        [
             'label' => __('Ausencias'),
             'route' => 'ausentismo',
             'active' => 'ausentismo',

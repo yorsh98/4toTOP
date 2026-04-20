@@ -22,6 +22,7 @@ class RolePermissionsPage extends Component
         'turnos' => 'Turnos',
         'guias' => 'Guias',
         'audiencias' => 'Audiencias',
+        'bitacora_pruebas' => 'Bitacora Pruebas',
         'ausencias' => 'Ausencias',
         'seguridad' => 'Seguridad',
     ];
@@ -39,6 +40,8 @@ class RolePermissionsPage extends Component
         'navbar.guias.editable' => ['guias.editar'],
         'navbar.audiencias.visible' => ['audiencias.ver', 'audiencias.monitor.ver'],
         'navbar.audiencias.editable' => ['audiencias.crear', 'audiencias.editar', 'audiencias.estado.cambiar', 'audiencias.exportar', 'progra.mail.enviar'],
+        'navbar.bitacora_pruebas.visible' => ['bitacora_pruebas.ver'],
+        'navbar.bitacora_pruebas.editable' => ['bitacora_pruebas.crear', 'bitacora_pruebas.editar'],
         'navbar.ausencias.visible' => ['ausentismo.ver'],
         'navbar.ausencias.editable' => ['ausentismo.editar'],
         'navbar.seguridad.visible' => ['seguridad.roles.ver', 'seguridad.permisos.ver', 'seguridad.auditoria.ver'],

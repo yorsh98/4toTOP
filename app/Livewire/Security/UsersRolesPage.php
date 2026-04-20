@@ -4,7 +4,7 @@ namespace App\Livewire\Security;
 
 use App\Livewire\Security\Concerns\LogsSecurityAudit;
 use App\Models\User;
-use App\Notifications\UserAccountStatusNotification;
+use App\NotificationsV2\Application\Services\LegacyUserAccountStatusNotifier;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
@@ -268,7 +268,7 @@ class UsersRolesPage extends Component
     private function sendStatusEmail(User $user, string $status): void
     {
         try {
-            $user->notify(new UserAccountStatusNotification($status, Auth::user()?->name));
+            app(LegacyUserAccountStatusNotifier::class)->notify($user, $status, Auth::user()?->name);
         } catch (Throwable $e) {
             Log::warning('No fue posible enviar correo de estado de cuenta.', [
                 'user_id' => $user->id,
