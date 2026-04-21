@@ -20,7 +20,9 @@ class TurnoPage extends Component
 
     public array $turno3 = [];
 
-    public string $semanaTurno = '';
+    public string $semanaTurno1 = '';
+
+    public string $periodoTurno2Acd = '';
 
     public function mount(): void
     {
@@ -36,15 +38,13 @@ class TurnoPage extends Component
 
         $validated = $this->validateTurno1();
         $data = $validated['turno1'];
-        $semanaTurno = $this->normalizeSemanaTurno((string) ($validated['semanaTurno'] ?? ''));
+        $semanaTurno = $this->normalizeSemanaTurno((string) ($validated['semanaTurno1'] ?? ''));
 
         $turno1 = Turno::query()->findOrFail(1);
 
-        $turno1->update($data);
-
-        Turno::query()->findOrFail(2)->update([
+        $turno1->update(array_merge($data, [
             'FECHA' => $semanaTurno,
-        ]);
+        ]));
 
         session()->flash('success', 'Turno 1 actualizado correctamente.');
         $this->hydrateState();
@@ -111,7 +111,7 @@ class TurnoPage extends Component
 
         $validated = $this->validateTurno2();
         $data = $validated['turno2'];
-        $periodoTurno = $this->normalizeSemanaTurno((string) ($validated['semanaTurno'] ?? ''));
+        $periodoTurno = $this->normalizeSemanaTurno((string) ($validated['periodoTurno2Acd'] ?? ''));
 
         $turno2 = Turno::query()->findOrFail(2);
         $turno2->update(array_merge($data, [
@@ -144,17 +144,27 @@ class TurnoPage extends Component
             'magistrados' => $catalog->nombresByContext('turnos.magistrados'),
             'funcionarios' => $catalog->nombresByContext('turnos.funcionarios'),
             'jefaturas' => $catalog->nombresByContext('turnos.jefatura'),
-            'lastTurnoSummaryIssue' => NotificationDispatch::query()
-                ->where('event_key', 'like', 'turno1.resumen_semanal.%')
-                ->whereNotNull('failure_reason')
-                ->latest('id')
-                ->value('failure_reason'),
-            'lastTurno2AcdSummaryIssue' => NotificationDispatch::query()
-                ->where('event_key', 'like', 'turno2.acd.resumen_semanal.%')
-                ->whereNotNull('failure_reason')
-                ->latest('id')
-                ->value('failure_reason'),
+            'lastTurnoSummaryIssue' => $this->latestDispatchIssue('turno1.resumen_semanal.%'),
+            'lastTurno2AcdSummaryIssue' => $this->latestDispatchIssue('turno2.acd.resumen_semanal.%'),
         ]);
+    }
+
+    private function latestDispatchIssue(string $eventKeyPattern): ?array
+    {
+        $dispatch = NotificationDispatch::query()
+            ->where('event_key', 'like', $eventKeyPattern)
+            ->whereNotNull('failure_reason')
+            ->latest('id')
+            ->first(['id', 'failure_reason']);
+
+        if ($dispatch === null) {
+            return null;
+        }
+
+        return [
+            'id' => (int) $dispatch->id,
+            'reason' => (string) $dispatch->failure_reason,
+        ];
     }
 
     private function ensureBaseRecords(): void
@@ -185,7 +195,8 @@ class TurnoPage extends Component
             'TF3_CARGO' => $turno1?->TF3_CARGO ?? '',
         ];
 
-        $this->semanaTurno = (string) ($turno2?->FECHA ?? '');
+        $this->semanaTurno1 = (string) ($turno1?->FECHA ?? '');
+        $this->periodoTurno2Acd = (string) ($turno2?->FECHA ?? '');
 
         $this->turno2 = [
             'ACDM1' => $turno2?->ACDM1 ?? '',
@@ -224,7 +235,7 @@ class TurnoPage extends Component
             'turno1.TF1_CARGO' => ['nullable', 'string', 'max:255'],
             'turno1.TF2_CARGO' => ['nullable', 'string', 'max:255'],
             'turno1.TF3_CARGO' => ['nullable', 'string', 'max:255'],
-            'semanaTurno' => ['nullable', 'string', 'max:255'],
+            'semanaTurno1' => ['nullable', 'string', 'max:255'],
         ]);
     }
 
@@ -243,7 +254,7 @@ class TurnoPage extends Component
             'turno2.ACDJ1' => ['nullable', 'string', 'max:255'],
             'turno2.ACDJ2' => ['nullable', 'string', 'max:255'],
             'turno2.ACDJ3' => ['nullable', 'string', 'max:255'],
-            'semanaTurno' => ['nullable', 'string', 'max:255'],
+            'periodoTurno2Acd' => ['nullable', 'string', 'max:255'],
         ]);
     }
 

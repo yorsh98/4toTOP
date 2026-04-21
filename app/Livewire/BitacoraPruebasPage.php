@@ -14,7 +14,11 @@ use Livewire\Component;
 #[Layout('layouts.app')]
 class BitacoraPruebasPage extends Component
 {
+    public bool $showViewer = false;
+
     public string $rit = '';
+
+    public string $enlaceActa = '';
 
     public string $fechaDia = '';
 
@@ -32,9 +36,19 @@ class BitacoraPruebasPage extends Component
     {
         return [
             'rit' => ['required', 'string', 'max:255'],
+            'enlaceActa' => ['nullable', 'url', 'max:2048'],
             'numeroDia' => ['required', 'integer', 'min:1'],
             'fechaDia' => ['required', 'date'],
         ];
+    }
+
+    public function updatedRit(): void
+    {
+        $this->enlaceActa = (string) (BitacoraPruebaDia::query()
+            ->where('rit', trim($this->rit))
+            ->whereNotNull('enlace_acta')
+            ->where('enlace_acta', '!=', '')
+            ->value('enlace_acta') ?? '');
     }
 
     public function createDia(): void
@@ -54,14 +68,31 @@ class BitacoraPruebasPage extends Component
             ]);
         }
 
+        $rit = trim($data['rit']);
+        $enlaceActa = trim($data['enlaceActa'] ?? '');
+
+        if ($enlaceActa === '') {
+            $enlaceActa = (string) (BitacoraPruebaDia::query()
+                ->where('rit', $rit)
+                ->whereNotNull('enlace_acta')
+                ->where('enlace_acta', '!=', '')
+                ->value('enlace_acta') ?? '');
+        } else {
+            BitacoraPruebaDia::query()
+                ->where('rit', $rit)
+                ->update(['enlace_acta' => $enlaceActa]);
+        }
+
         BitacoraPruebaDia::query()->create([
-            'rit' => trim($data['rit']),
+            'rit' => $rit,
+            'enlace_acta' => $enlaceActa !== '' ? $enlaceActa : null,
             'numero_dia' => $data['numeroDia'],
             'fecha_dia' => $data['fechaDia'],
         ]);
 
         $this->reset(['fechaDia']);
         $this->numeroDia = 1;
+        $this->enlaceActa = $enlaceActa;
         session()->flash('ok', 'Dia agregado correctamente.');
     }
 
@@ -111,6 +142,13 @@ class BitacoraPruebasPage extends Component
         $item->delete();
 
         session()->flash('ok', 'Prueba eliminada correctamente.');
+    }
+
+    public function toggleViewer(): void
+    {
+        Gate::authorize('bitacora_pruebas.ver');
+
+        $this->showViewer = ! $this->showViewer;
     }
 
     public function render()

@@ -11,6 +11,7 @@ return new class extends Migration
         Schema::create('bitacora_pruebas_dias', function (Blueprint $table) {
             $table->id();
             $table->string('rit');
+            $table->string('enlace_acta')->nullable();
             $table->unsignedInteger('numero_dia');
             $table->date('fecha_dia');
             $table->timestamps();

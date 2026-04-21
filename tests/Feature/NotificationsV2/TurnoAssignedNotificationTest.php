@@ -60,10 +60,10 @@ test('turno1 cargo-only updates do not create assignment dispatches', function (
 
 test('turno1 save normalizes week text before persisting', function () {
     Livewire::test(TurnoPage::class)
-        ->set('semanaTurno', 'Semana del 20-04-2026 al 24-04-2026')
+        ->set('semanaTurno1', 'Semana del 20-04-2026 al 24-04-2026')
         ->call('saveTurno1')
         ->assertHasNoErrors();
 
-    expect((string) DB::table('turno')->where('id', 2)->value('FECHA'))
+    expect((string) DB::table('turno')->where('id', 1)->value('FECHA'))
         ->toBe('20-04-2026 al 24-04-2026');
 });

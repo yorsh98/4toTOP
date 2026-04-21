@@ -2,7 +2,7 @@
     <h2 class="font-semibold text-xl text-gray-800 leading-tight">Panel Administrativo de los Turnos</h2>
 </x-slot:header>
 
-<div class="mx-auto max-w-6xl space-y-6 px-3 py-4 sm:px-6 lg:px-8">
+<div class="mx-auto max-w-6xl space-y-6 px-3 py-4 sm:px-6 lg:px-8" data-turno-page="1">
     <div class="rounded-xl border border-blue-100 bg-gradient-to-r from-blue-50 to-indigo-50 p-5">
         <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <div>
@@ -44,15 +44,63 @@
         </div>
     @endif
 
-    @if (!empty($lastTurnoSummaryIssue))
-        <div class="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-            Ultimo envio de tabla Turno 1 con observaciones: {{ $lastTurnoSummaryIssue }}
+    @if (!empty($lastTurnoSummaryIssue['reason'] ?? null))
+        <div
+            x-data="{
+                issueId: {{ (int) ($lastTurnoSummaryIssue['id'] ?? 0) }},
+                visible: true,
+                init() {
+                    this.visible = !window.turnoIssueState.isDismissed(this.issueId);
+                },
+                dismiss() {
+                    window.turnoIssueState.dismiss(this.issueId);
+                    this.visible = false;
+                }
+            }"
+            x-show="visible"
+            data-turno-issue-id="{{ (int) ($lastTurnoSummaryIssue['id'] ?? 0) }}"
+            class="flex items-start justify-between gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800"
+        >
+            <p>Ultimo envio de tabla Turno 1 con observaciones: {{ $lastTurnoSummaryIssue['reason'] }}</p>
+            <button
+                type="button"
+                class="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded text-amber-700 hover:bg-amber-100 hover:text-amber-900"
+                x-on:click="dismiss"
+                aria-label="Cerrar notificacion de Turno 1"
+                title="Cerrar"
+            >
+                <span aria-hidden="true">&times;</span>
+            </button>
         </div>
     @endif
 
-    @if (!empty($lastTurno2AcdSummaryIssue))
-        <div class="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-            Ultimo envio de tabla Turno 2 ACD con observaciones: {{ $lastTurno2AcdSummaryIssue }}
+    @if (!empty($lastTurno2AcdSummaryIssue['reason'] ?? null))
+        <div
+            x-data="{
+                issueId: {{ (int) ($lastTurno2AcdSummaryIssue['id'] ?? 0) }},
+                visible: true,
+                init() {
+                    this.visible = !window.turnoIssueState.isDismissed(this.issueId);
+                },
+                dismiss() {
+                    window.turnoIssueState.dismiss(this.issueId);
+                    this.visible = false;
+                }
+            }"
+            x-show="visible"
+            data-turno-issue-id="{{ (int) ($lastTurno2AcdSummaryIssue['id'] ?? 0) }}"
+            class="flex items-start justify-between gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800"
+        >
+            <p>Ultimo envio de tabla Turno 2 ACD con observaciones: {{ $lastTurno2AcdSummaryIssue['reason'] }}</p>
+            <button
+                type="button"
+                class="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded text-amber-700 hover:bg-amber-100 hover:text-amber-900"
+                x-on:click="dismiss"
+                aria-label="Cerrar notificacion de Turno 2 ACD"
+                title="Cerrar"
+            >
+                <span aria-hidden="true">&times;</span>
+            </button>
         </div>
     @endif
 
@@ -68,16 +116,16 @@
             <form wire:submit="saveTurno1" class="space-y-6">
                 <div class="rounded-lg border border-gray-200 p-4">
                     <h4 class="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-700">Semana del despacho</h4>
-                    <label for="semanaTurno" class="block text-sm font-medium text-gray-600">Rango semanal (formato libre)</label>
+                    <label for="semanaTurno1" class="block text-sm font-medium text-gray-600">Rango semanal (formato libre)</label>
                     <input
                         type="text"
-                        id="semanaTurno"
-                        wire:model="semanaTurno"
+                        id="semanaTurno1"
+                        wire:model="semanaTurno1"
                         class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                         placeholder="Ej: 13-04-2026 al 17-04-2026"
                     >
                     <p class="mt-2 text-xs text-gray-500">Este texto se usa en el encabezado de la tabla que se envia por correo.</p>
-                    @error('semanaTurno') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                    @error('semanaTurno1') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                 </div>
 
                 <div class="rounded-lg border border-gray-200 p-4">
@@ -197,12 +245,12 @@
                     <input
                         type="text"
                         id="semanaTurnoAcd"
-                        wire:model="semanaTurno"
+                        wire:model="periodoTurno2Acd"
                         class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                         placeholder="Ej: 13-04-2026 al 13-07-2026"
                     >
                     <p class="mt-2 text-xs text-gray-500">Este texto se usa en el encabezado de la tabla de Turno 2 ACD enviada por correo.</p>
-                    @error('semanaTurno') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                    @error('periodoTurno2Acd') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                 </div>
 
                 <div class="grid gap-3 md:grid-cols-3">
@@ -344,4 +392,50 @@
             <option value="{{ $nombre }}">
         @endforeach
     </datalist>
+
+    <script>
+        (function () {
+            if (window.__turnoIssueUiBound) {
+                return;
+            }
+
+            window.__turnoIssueUiBound = true;
+
+            const prefix = 'turno_issue_dismissed_';
+
+            window.turnoIssueState = {
+                isDismissed(issueId) {
+                    if (!issueId) {
+                        return false;
+                    }
+
+                    try {
+                        return window.sessionStorage.getItem(prefix + issueId) === '1';
+                    } catch (_) {
+                        return false;
+                    }
+                },
+                dismiss(issueId) {
+                    if (!issueId) {
+                        return;
+                    }
+
+                    try {
+                        window.sessionStorage.setItem(prefix + issueId, '1');
+                    } catch (_) {}
+                },
+            };
+
+            document.addEventListener('livewire:navigating', () => {
+                if (!document.querySelector('[data-turno-page="1"]')) {
+                    return;
+                }
+
+                document.querySelectorAll('[data-turno-issue-id]').forEach((element) => {
+                    const issueId = Number(element.getAttribute('data-turno-issue-id') || 0);
+                    window.turnoIssueState.dismiss(issueId);
+                });
+            });
+        })();
+    </script>
 </div>

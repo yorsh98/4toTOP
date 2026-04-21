@@ -15,6 +15,7 @@
         @stack('styles')
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         <link rel="icon" href="{{ asset('favicon.webp') }}" type="image/webp">
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
         <link rel="stylesheet" href="{{ asset('css/index.css') }}">
         <link rel="stylesheet" href="{{ asset('css/nav2.css') }}">
         <link rel="stylesheet" href="{{ asset('css/btn-1.css') }}">
@@ -50,4 +51,3 @@
     </body>
     @stack('scripts')    
 </html>
-

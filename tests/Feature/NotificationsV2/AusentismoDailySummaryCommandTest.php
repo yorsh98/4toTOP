@@ -9,7 +9,7 @@ beforeEach(function () {
     config()->set('notifications_v2.enabled', false);
 });
 
-test('daily ausentismo command creates dispatch with all catalog recipients', function () {
+test('daily ausentismo command excludes juez recipients from catalog delivery', function () {
     Funcionario::query()->create([
         'nombre' => 'Funcionario Uno',
         'rol' => 'juez',
@@ -22,6 +22,13 @@ test('daily ausentismo command creates dispatch with all catalog recipients', fu
         'rol' => 'sala_causa',
         'email' => 'dos@example.cl',
         'fecha_cumpleanos' => '1981-01-01',
+    ]);
+
+    Funcionario::query()->create([
+        'nombre' => 'Funcionario Tres',
+        'rol' => 'jefatura',
+        'email' => 'tres@example.cl',
+        'fecha_cumpleanos' => '1982-01-01',
     ]);
 
     Ausentismo::query()->create([
@@ -48,15 +55,20 @@ test('daily ausentismo command creates dispatch with all catalog recipients', fu
 
     expect(NotificationRecipient::query()->where('dispatch_id', $dispatch->id)->count())->toBe(2);
 
-    $this->assertDatabaseHas('notification_recipients', [
+    $this->assertDatabaseMissing('notification_recipients', [
         'dispatch_id' => $dispatch->id,
         'email' => 'uno@example.cl',
-        'status' => 'pending',
     ]);
 
     $this->assertDatabaseHas('notification_recipients', [
         'dispatch_id' => $dispatch->id,
         'email' => 'dos@example.cl',
+        'status' => 'pending',
+    ]);
+
+    $this->assertDatabaseHas('notification_recipients', [
+        'dispatch_id' => $dispatch->id,
+        'email' => 'tres@example.cl',
         'status' => 'pending',
     ]);
 });
@@ -67,6 +79,13 @@ test('daily ausentismo command sends control message when there are no absences'
         'rol' => 'juez',
         'email' => 'uno@example.cl',
         'fecha_cumpleanos' => '1980-01-01',
+    ]);
+
+    Funcionario::query()->create([
+        'nombre' => 'Funcionario Tres',
+        'rol' => 'jefatura',
+        'email' => 'tres@example.cl',
+        'fecha_cumpleanos' => '1982-01-01',
     ]);
 
     $this->artisan('notificaciones:ausentismo-diario', ['--date' => '2026-04-21'])
@@ -80,5 +99,16 @@ test('daily ausentismo command sends control message when there are no absences'
         'fecha_reporte' => '2026-04-21',
         'total_ausentes' => 0,
         'mensaje_sin_novedades' => 'no hay ausencias registradas',
+    ]);
+
+    $this->assertDatabaseMissing('notification_recipients', [
+        'dispatch_id' => $dispatch->id,
+        'email' => 'uno@example.cl',
+    ]);
+
+    $this->assertDatabaseHas('notification_recipients', [
+        'dispatch_id' => $dispatch->id,
+        'email' => 'tres@example.cl',
+        'status' => 'pending',
     ]);
 });

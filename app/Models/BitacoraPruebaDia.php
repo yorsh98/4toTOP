@@ -16,6 +16,7 @@ class BitacoraPruebaDia extends Model
 
     protected $fillable = [
         'rit',
+        'enlace_acta',
         'numero_dia',
         'fecha_dia',
     ];

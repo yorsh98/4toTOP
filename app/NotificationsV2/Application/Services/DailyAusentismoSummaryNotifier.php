@@ -2,42 +2,31 @@
 
 namespace App\NotificationsV2\Application\Services;
 
-use App\Models\Ausentismo;
 use App\NotificationsV2\Application\Contracts\NotificationOrchestrator;
 use App\NotificationsV2\Domain\Models\NotificationTemplate;
 use App\NotificationsV2\Domain\Models\NotificationType;
 use App\NotificationsV2\Support\DefaultEmailTemplates;
+use App\Services\DailyAusentismoSnapshotService;
+use App\Services\FuncionarioCatalog;
 use Carbon\CarbonInterface;
-use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 
 class DailyAusentismoSummaryNotifier
 {
-    public function __construct(private readonly NotificationOrchestrator $orchestrator) {}
+    public function __construct(
+        private readonly NotificationOrchestrator $orchestrator,
+        private readonly DailyAusentismoSnapshotService $snapshotService,
+        private readonly FuncionarioCatalog $funcionarioCatalog,
+    ) {}
 
-    public function notifyForDate(CarbonInterface|string|null $date = null): void
+    public function notifyForDate(CarbonInterface|string|null $date = null, bool $force = false): void
     {
         $this->ensureAusentismoTypeAndTemplate();
 
-        $targetDate = $date instanceof CarbonInterface ? Carbon::instance($date) : Carbon::parse($date ?? now());
-        $fechaReporte = $targetDate->toDateString();
-
-        $ausentes = Ausentismo::query()
-            ->whereDate('fecha_inicio', '<=', $fechaReporte)
-            ->whereDate('fecha_termino', '>=', $fechaReporte)
-            ->orderBy('funcionario_nombre')
-            ->get()
-            ->map(fn (Ausentismo $ausentismo): array => [
-                'funcionario_nombre' => $ausentismo->funcionario_nombre,
-                'cargo' => $ausentismo->cargo,
-                'tipo_permiso' => $ausentismo->tipo_permiso,
-                'fecha_inicio' => optional($ausentismo->fecha_inicio)->format('Y-m-d'),
-                'fecha_termino' => optional($ausentismo->fecha_termino)->format('Y-m-d'),
-                'observacion' => $ausentismo->observacion,
-            ])
-            ->values()
-            ->all();
-
-        $totalAusentes = count($ausentes);
+        $snapshot = $this->snapshotService->forDate($date);
+        $fechaReporte = (string) ($snapshot['fecha_reporte'] ?? now()->toDateString());
+        $ausentes = is_array($snapshot['ausentes'] ?? null) ? $snapshot['ausentes'] : [];
+        $totalAusentes = (int) ($snapshot['total_ausentes'] ?? count($ausentes));
         $sendWhenEmpty = (bool) config('notifications_v2.ausentismo.send_when_empty', true);
 
         if ($totalAusentes === 0 && ! $sendWhenEmpty) {
@@ -55,10 +44,33 @@ class DailyAusentismoSummaryNotifier
                 : '',
         ];
 
-        $this->orchestrator->dispatch('ausentismo.resumen_diario', $payload, [
+        $options = [
             'event_key' => 'ausentismo.resumen_diario.'.$fechaReporte,
-            'use_all_catalog' => true,
-        ]);
+            'recipients' => $this->catalogRecipientsWithoutJueces(),
+        ];
+
+        if ($force) {
+            $options['idempotency_key'] = 'force.ausentismo.resumen_diario.'.$fechaReporte.'.'.Str::uuid()->toString();
+        }
+
+        $this->orchestrator->dispatch('ausentismo.resumen_diario', $payload, $options);
+    }
+
+    private function catalogRecipientsWithoutJueces(): array
+    {
+        $roles = array_values(array_filter(
+            $this->funcionarioCatalog->roles(),
+            static fn (string $role): bool => $role !== 'juez',
+        ));
+
+        return array_map(static function (array $recipient): array {
+            return [
+                'type' => 'to',
+                'name' => $recipient['nombre'] ?? null,
+                'email' => $recipient['email'] ?? null,
+                'context' => 'all_catalog_without_juez',
+            ];
+        }, $this->funcionarioCatalog->destinatariosByRoles($roles));
     }
 
     private function ensureAusentismoTypeAndTemplate(): void
@@ -115,15 +127,11 @@ class DailyAusentismoSummaryNotifier
             $nombre = (string) ($ausente['funcionario_nombre'] ?? '');
             $cargo = (string) ($ausente['cargo'] ?? '');
             $tipoPermiso = (string) ($ausente['tipo_permiso'] ?? '');
-            $rango = trim(((string) ($ausente['fecha_inicio'] ?? '')).' a '.((string) ($ausente['fecha_termino'] ?? '')));
-            $observacion = (string) ($ausente['observacion'] ?? '');
 
             $rows .= '<tr>'
                 .'<td style="border:1px solid #e5e7eb;padding:8px;">'.e($nombre).'</td>'
                 .'<td style="border:1px solid #e5e7eb;padding:8px;">'.e($cargo).'</td>'
                 .'<td style="border:1px solid #e5e7eb;padding:8px;">'.e($tipoPermiso).'</td>'
-                .'<td style="border:1px solid #e5e7eb;padding:8px;">'.e($rango).'</td>'
-                .'<td style="border:1px solid #e5e7eb;padding:8px;">'.e($observacion).'</td>'
                 .'</tr>';
         }
 
@@ -132,8 +140,6 @@ class DailyAusentismoSummaryNotifier
             .'<th style="background:#f8fafc;border:1px solid #e5e7eb;padding:8px;text-align:left;">Funcionario</th>'
             .'<th style="background:#f8fafc;border:1px solid #e5e7eb;padding:8px;text-align:left;">Cargo</th>'
             .'<th style="background:#f8fafc;border:1px solid #e5e7eb;padding:8px;text-align:left;">Tipo permiso</th>'
-            .'<th style="background:#f8fafc;border:1px solid #e5e7eb;padding:8px;text-align:left;">Rango</th>'
-            .'<th style="background:#f8fafc;border:1px solid #e5e7eb;padding:8px;text-align:left;">Observacion</th>'
             .'</tr>'
             .$rows
             .'</table>';
@@ -149,11 +155,8 @@ class DailyAusentismoSummaryNotifier
             $nombre = (string) ($ausente['funcionario_nombre'] ?? '');
             $cargo = (string) ($ausente['cargo'] ?? '');
             $tipoPermiso = (string) ($ausente['tipo_permiso'] ?? '');
-            $fechaInicio = (string) ($ausente['fecha_inicio'] ?? '');
-            $fechaTermino = (string) ($ausente['fecha_termino'] ?? '');
-            $observacion = (string) ($ausente['observacion'] ?? '');
 
-            return "- {$nombre} | {$cargo} | {$tipoPermiso} | {$fechaInicio} a {$fechaTermino} | {$observacion}";
+            return "- {$nombre} | {$cargo} | {$tipoPermiso}";
         }, $ausentes);
 
         return implode(' ', $lines);
