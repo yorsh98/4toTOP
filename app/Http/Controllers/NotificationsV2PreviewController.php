@@ -80,7 +80,7 @@ class NotificationsV2PreviewController extends Controller
                 'nombre' => (string) ($payload['jefatura_nombre'] ?? '-'),
                 'telefono' => (string) ($payload['jefatura_telefono'] ?? '-'),
                 'correo' => (string) ($payload['jefatura_correo'] ?? '-'),
-                'cargo' => (string) ($payload['jefatura_observaciones'] ?? 'Jefatura 1'),
+                'cargo' => (string) ($payload['jefatura_observaciones'] ?? 'Jefe de Turno'),
             ],
             'funcionarios' => $funcionarios,
             'tribunalRowspan' => (int) ($payload['tribunal_rowspan'] ?? 7),

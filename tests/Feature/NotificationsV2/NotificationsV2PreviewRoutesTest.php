@@ -30,13 +30,13 @@ test('turno preview consumes real turno data from system', function () {
         'TJ1' => 'JEFE REAL',
         'TF1' => 'FUNCIONARIO REAL UNO',
         'TF1_CARGO' => 'Encargado de Acta',
+        'FECHA' => 'Semana del 20-04-2026 al 24-04-2026',
         'created_at' => now(),
         'updated_at' => now(),
     ]);
 
     DB::table('turno')->insert([
         'id' => 2,
-        'FECHA' => 'Semana del 20-04-2026 al 24-04-2026',
         'created_at' => now(),
         'updated_at' => now(),
     ]);
@@ -82,13 +82,13 @@ test('turno preview normalizes stored week prefix to avoid duplicated text', fun
         'id' => 1,
         'TM1' => 'JUEZ REAL',
         'TJ1' => 'JEFE REAL',
+        'FECHA' => 'Semana del 20-04-2026 al 24-04-2026',
         'created_at' => now(),
         'updated_at' => now(),
     ]);
 
     DB::table('turno')->insert([
         'id' => 2,
-        'FECHA' => 'Semana del 20-04-2026 al 24-04-2026',
         'created_at' => now(),
         'updated_at' => now(),
     ]);
@@ -123,13 +123,13 @@ test('turno preview supports date query when weekly text is empty', function () 
         'id' => 1,
         'TM1' => 'JUEZ REAL',
         'TJ1' => 'JEFE REAL',
+        'FECHA' => '',
         'created_at' => now(),
         'updated_at' => now(),
     ]);
 
     DB::table('turno')->insert([
         'id' => 2,
-        'FECHA' => '',
         'created_at' => now(),
         'updated_at' => now(),
     ]);

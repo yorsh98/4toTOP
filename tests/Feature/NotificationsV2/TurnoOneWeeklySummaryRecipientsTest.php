@@ -27,13 +27,13 @@ beforeEach(function () {
         'TJ1' => 'JEFE REAL',
         'TF1' => 'FUNCIONARIO REAL UNO',
         'TF2' => 'FUNCIONARIO SIN CORREO',
+        'FECHA' => 'Semana del 20-04-2026 al 24-04-2026',
         'created_at' => now(),
         'updated_at' => now(),
     ]);
 
     DB::table('turno')->insert([
         'id' => 2,
-        'FECHA' => 'Semana del 20-04-2026 al 24-04-2026',
         'created_at' => now(),
         'updated_at' => now(),
     ]);

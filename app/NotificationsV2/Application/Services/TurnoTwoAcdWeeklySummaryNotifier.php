@@ -61,7 +61,7 @@ class TurnoTwoAcdWeeklySummaryNotifier
             $this->personRow((string) ($turno2?->ACDM3 ?? ''), 'Magistrado 3'),
         ];
 
-        $jefatura = $this->personRow((string) ($turno2?->ACDJ1 ?? ''), 'Jefatura 1');
+        $jefatura = $this->personRow((string) ($turno2?->ACDJ1 ?? ''), 'Jefe de Turno');
 
         $funcionarios = [
             $this->personRow((string) ($turno2?->ACDF1 ?? ''), (string) ($turno2?->ACDF1_CARGO ?: 'Funcion de equipo 1')),

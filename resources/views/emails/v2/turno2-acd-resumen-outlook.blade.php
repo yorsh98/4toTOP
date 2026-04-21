@@ -25,13 +25,13 @@
                     <td style="padding:14px 16px 16px 16px;">
                         @php
                             $magistradosList = is_array($magistrados ?? null) ? $magistrados : [];
-                            if ($magistradosList === []) {
-                                $magistradosList = [
-                                    ['run' => '-', 'nombre' => '-', 'telefono' => '-', 'correo' => '-', 'cargo' => 'Magistrado 1'],
-                                    ['run' => '-', 'nombre' => '-', 'telefono' => '-', 'correo' => '-', 'cargo' => 'Magistrado 2'],
-                                    ['run' => '-', 'nombre' => '-', 'telefono' => '-', 'correo' => '-', 'cargo' => 'Magistrado 3'],
+                             if ($magistradosList === []) {
+                                 $magistradosList = [
+                                    ['run' => '-', 'nombre' => '-', 'telefono' => '-', 'correo' => '-', 'cargo' => 'Juez'],
+                                    ['run' => '-', 'nombre' => '-', 'telefono' => '-', 'correo' => '-', 'cargo' => 'Juez'],
+                                    ['run' => '-', 'nombre' => '-', 'telefono' => '-', 'correo' => '-', 'cargo' => 'Juez'],
                                 ];
-                            }
+                             }
 
                             $funcionariosList = is_array($funcionarios ?? null) ? $funcionarios : [];
                         @endphp
@@ -44,7 +44,7 @@
                             </tr>
                             <tr>
                                 <td style="border:1px solid #cbd5e1;padding:9px;text-align:center;font-weight:bold;background:#0d3b66;color:#ffffff;">Tribunal Oral</td>
-                                <td style="border:1px solid #cbd5e1;padding:9px;text-align:center;font-weight:bold;background:#0d3b66;color:#ffffff;">RUN</td>
+                                <td style="border:1px solid #cbd5e1;padding:9px;text-align:center;font-weight:bold;background:#0d3b66;color:#ffffff;width:132px;white-space:nowrap;">RUN</td>
                                 <td style="border:1px solid #cbd5e1;padding:9px;text-align:center;font-weight:bold;background:#0d3b66;color:#ffffff;">Magistrados ACD</td>
                                 <td style="border:1px solid #cbd5e1;padding:9px;text-align:center;font-weight:bold;background:#0d3b66;color:#ffffff;">TELEFONO</td>
                                 <td style="border:1px solid #cbd5e1;padding:9px;text-align:center;font-weight:bold;background:#0d3b66;color:#ffffff;">CORREO</td>
@@ -55,7 +55,7 @@
                                     @if ($index === 0)
                                         <td rowspan="{{ $tribunalRowspan }}" style="border:1px solid #cbd5e1;padding:8px;text-align:center;font-weight:bold;background:#f1f5f9;font-size:18px;line-height:22px;">{{ $tribunalOral }}</td>
                                     @endif
-                                    <td style="border:1px solid #cbd5e1;padding:8px;text-align:center;background:#ffffff;">{{ $magistrado['run'] ?? '-' }}</td>
+                                    <td style="border:1px solid #cbd5e1;padding:8px;text-align:center;background:#ffffff;width:132px;white-space:nowrap;word-break:normal;">{{ $magistrado['run'] ?? '-' }}</td>
                                     <td style="border:1px solid #cbd5e1;padding:8px;text-align:center;background:#ffffff;font-size:16px;line-height:20px;">{{ $magistrado['nombre'] ?? '-' }}</td>
                                     <td style="border:1px solid #cbd5e1;padding:8px;text-align:center;background:#ffffff;">{{ $magistrado['telefono'] ?? '-' }}</td>
                                     <td style="border:1px solid #cbd5e1;padding:8px;text-align:center;background:#ffffff;">
@@ -65,18 +65,18 @@
                                             -
                                         @endif
                                     </td>
-                                    <td style="border:1px solid #cbd5e1;padding:8px;text-align:center;background:#ffffff;">{{ $magistrado['cargo'] ?? '-' }}</td>
+                                    <td style="border:1px solid #cbd5e1;padding:8px;text-align:center;background:#ffffff;">Juez</td>
                                 </tr>
                             @endforeach
                             <tr>
-                                <td style="border:1px solid #cbd5e1;padding:8px;text-align:center;font-weight:bold;background:#dbeafe;">RUN</td>
+                                <td style="border:1px solid #cbd5e1;padding:8px;text-align:center;font-weight:bold;background:#dbeafe;width:132px;white-space:nowrap;">RUN</td>
                                 <td style="border:1px solid #cbd5e1;padding:8px;text-align:center;font-weight:bold;background:#dbeafe;">Jefatura</td>
                                 <td style="border:1px solid #cbd5e1;padding:8px;text-align:center;font-weight:bold;background:#dbeafe;">TELEFONO</td>
                                 <td style="border:1px solid #cbd5e1;padding:8px;text-align:center;font-weight:bold;background:#dbeafe;">CORREO</td>
                                 <td style="border:1px solid #cbd5e1;padding:8px;text-align:center;font-weight:bold;background:#dbeafe;">Observaciones</td>
                             </tr>
                             <tr>
-                                <td style="border:1px solid #cbd5e1;padding:8px;text-align:center;background:#ffffff;">{{ $jefatura['run'] ?? '-' }}</td>
+                                <td style="border:1px solid #cbd5e1;padding:8px;text-align:center;background:#ffffff;width:132px;white-space:nowrap;word-break:normal;">{{ $jefatura['run'] ?? '-' }}</td>
                                 <td style="border:1px solid #cbd5e1;padding:8px;text-align:center;background:#ffffff;font-size:16px;line-height:20px;">{{ $jefatura['nombre'] ?? '-' }}</td>
                                 <td style="border:1px solid #cbd5e1;padding:8px;text-align:center;background:#ffffff;">{{ $jefatura['telefono'] ?? '-' }}</td>
                                 <td style="border:1px solid #cbd5e1;padding:8px;text-align:center;background:#ffffff;">
@@ -89,15 +89,15 @@
                                 <td style="border:1px solid #cbd5e1;padding:8px;text-align:center;background:#ffffff;">{{ $jefatura['cargo'] ?? '-' }}</td>
                             </tr>
                             <tr>
-                                <td style="border:1px solid #cbd5e1;padding:8px;text-align:center;font-weight:bold;background:#fef3c7;">RUN</td>
-                                <td style="border:1px solid #cbd5e1;padding:8px;text-align:center;font-weight:bold;font-size:16px;line-height:20px;background:#fef3c7;color:#92400e;">Funcion de equipo 1</td>
+                                <td style="border:1px solid #cbd5e1;padding:8px;text-align:center;font-weight:bold;background:#fef3c7;width:132px;white-space:nowrap;">RUN</td>
+                                <td style="border:1px solid #cbd5e1;padding:8px;text-align:center;font-weight:bold;font-size:16px;line-height:20px;background:#fef3c7;color:#92400e;">Funcionarios</td>
                                 <td style="border:1px solid #cbd5e1;padding:8px;text-align:center;font-weight:bold;background:#fef3c7;">TELEFONO</td>
                                 <td style="border:1px solid #cbd5e1;padding:8px;text-align:center;font-weight:bold;background:#fef3c7;">CORREO</td>
                                 <td style="border:1px solid #cbd5e1;padding:8px;text-align:center;font-weight:bold;background:#fef3c7;">Funcion Equipo</td>
                             </tr>
                             @forelse($funcionariosList as $funcionario)
                                 <tr>
-                                    <td style="border:1px solid #cbd5e1;padding:8px;text-align:center;background:#ffffff;">{{ $funcionario['run'] ?? '-' }}</td>
+                                    <td style="border:1px solid #cbd5e1;padding:8px;text-align:center;background:#ffffff;width:132px;white-space:nowrap;word-break:normal;">{{ $funcionario['run'] ?? '-' }}</td>
                                     <td style="border:1px solid #cbd5e1;padding:8px;text-align:center;background:#ffffff;font-size:16px;line-height:20px;">{{ $funcionario['nombre'] ?? '-' }}</td>
                                     <td style="border:1px solid #cbd5e1;padding:8px;text-align:center;background:#ffffff;">{{ $funcionario['telefono'] ?? '-' }}</td>
                                     <td style="border:1px solid #cbd5e1;padding:8px;text-align:center;background:#ffffff;">

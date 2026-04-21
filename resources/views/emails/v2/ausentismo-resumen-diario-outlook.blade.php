@@ -28,16 +28,12 @@
                                     <th style="background:#f8fafc;border:1px solid #e5e7eb;padding:8px;text-align:left;">Funcionario</th>
                                     <th style="background:#f8fafc;border:1px solid #e5e7eb;padding:8px;text-align:left;">Cargo</th>
                                     <th style="background:#f8fafc;border:1px solid #e5e7eb;padding:8px;text-align:left;">Tipo permiso</th>
-                                    <th style="background:#f8fafc;border:1px solid #e5e7eb;padding:8px;text-align:left;">Rango</th>
-                                    <th style="background:#f8fafc;border:1px solid #e5e7eb;padding:8px;text-align:left;">Observacion</th>
                                 </tr>
                                 @foreach($ausentes as $ausente)
                                     <tr>
                                         <td style="border:1px solid #e5e7eb;padding:8px;">{{ $ausente['funcionario_nombre'] }}</td>
                                         <td style="border:1px solid #e5e7eb;padding:8px;">{{ $ausente['cargo'] }}</td>
                                         <td style="border:1px solid #e5e7eb;padding:8px;">{{ $ausente['tipo_permiso'] }}</td>
-                                        <td style="border:1px solid #e5e7eb;padding:8px;">{{ $ausente['fecha_inicio'] }} a {{ $ausente['fecha_termino'] }}</td>
-                                        <td style="border:1px solid #e5e7eb;padding:8px;">{{ $ausente['observacion'] }}</td>
                                     </tr>
                                 @endforeach
                             </table>

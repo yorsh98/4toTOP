@@ -54,7 +54,6 @@ class TurnoOneWeeklySummaryNotifier
         $endOfWeek = $startOfWeek->copy()->addDays(4);
 
         $turno1 = Turno::query()->find(1);
-        $turno2 = Turno::query()->find(2);
 
         $juezDespacho = $this->personRow(
             name: (string) ($turno1?->TM1 ?? ''),
@@ -77,7 +76,7 @@ class TurnoOneWeeklySummaryNotifier
             ->values()
             ->all();
 
-        $semanaRango = $this->resolveSemanaRango($turno2?->FECHA, $startOfWeek, $endOfWeek);
+        $semanaRango = $this->resolveSemanaRango($turno1?->FECHA, $startOfWeek, $endOfWeek);
 
         $payload = [
             'fecha_turno' => $baseDate->toDateString(),

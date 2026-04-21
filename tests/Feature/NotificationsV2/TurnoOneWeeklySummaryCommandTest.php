@@ -18,13 +18,13 @@ beforeEach(function () {
         'TF2_CARGO' => 'Atencion de Publico',
         'TF3' => 'JORGE ANDRES TRONCOSO REYES',
         'TF3_CARGO' => 'Funcion de equipo',
+        'FECHA' => 'Semana del 13-04-2026 al 17-04-2026',
         'created_at' => now(),
         'updated_at' => now(),
     ]);
 
     DB::table('turno')->insert([
         'id' => 2,
-        'FECHA' => 'Semana del 13-04-2026 al 17-04-2026',
         'created_at' => now(),
         'updated_at' => now(),
     ]);

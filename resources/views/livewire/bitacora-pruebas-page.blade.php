@@ -12,7 +12,17 @@
 
                 <h3 class="text-lg font-semibold mb-4">Nuevo dia de bitacora</h3>
 
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                <div class="mb-4 flex justify-end">
+                    <button
+                        type="button"
+                        wire:click="toggleViewer"
+                        class="inline-flex items-center px-4 py-2 rounded-md border border-sky-200 text-sky-700 bg-sky-50 hover:bg-sky-100"
+                    >
+                        {{ $showViewer ? 'Ocultar modo visualizacion' : 'Ver modo visualizacion' }}
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-6 gap-3">
                     <div>
                         <label class="block text-sm text-gray-700 mb-1">RIT</label>
                         <input
@@ -28,6 +38,17 @@
                             @endforeach
                         </datalist>
                         @error('rit') <p class="text-xs text-red-600 mt-1">{{ $message }}</p> @enderror
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <label class="block text-sm text-gray-700 mb-1">Enlace documentos</label>
+                        <input
+                            type="url"
+                            wire:model.live="enlaceActa"
+                            class="w-full px-3 py-2 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                            placeholder="https://..."
+                        >
+                        @error('enlaceActa') <p class="text-xs text-red-600 mt-1">{{ $message }}</p> @enderror
                     </div>
 
                     <div>
@@ -80,6 +101,11 @@
                                     <div>
                                         <p class="font-semibold">Dia {{ $dia->numero_dia }} - {{ $dia->fecha_dia?->format('d-m-Y') }}</p>
                                         <p class="text-xs text-gray-500">RIT: {{ $dia->rit }}</p>
+                                        @if (!empty($dia->enlace_acta))
+                                            <a href="{{ $dia->enlace_acta }}" target="_blank" rel="noopener noreferrer" class="text-xs text-sky-700 hover:underline">
+                                                Ver Pruebas del Juicio
+                                            </a>
+                                        @endif
                                     </div>
                                     <button
                                         type="button"
@@ -166,5 +192,13 @@
                 @endif
             </div>
         </div>
+
+        @if ($showViewer)
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-2 md:p-4">
+                    <livewire:bitacora-pruebas-viewer :show-hero="false" :wire:key="'bp-viewer-backoffice'" />
+                </div>
+            </div>
+        @endif
     </div>
 </div>
