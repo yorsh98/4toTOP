@@ -71,6 +71,13 @@ new class extends Component
             'permissions' => ['navbar.ausencias.visible', 'navbar.ausencias.editable'],
         ],
         [
+            'label' => __('Documentos'),
+            'route' => 'backoffice.documentos.index',
+            'active' => 'backoffice.documentos.*',
+            'icon' => 'fa-solid fa-folder-open',
+            'permissions' => ['navbar.documentos.visible', 'navbar.documentos.editable'],
+        ],
+        [
             'label' => __('Seguridad'),
             'route' => 'seguridad.roles.index',
             'active' => 'seguridad.*',

@@ -39,7 +39,7 @@ section{
   
   .flip-container {
     perspective: 1000px;
-    min-height: 180px; 
+    min-height: 240px; 
   }
   
   .flipper {
@@ -66,4 +66,14 @@ section{
   
   .back {
     transform: rotateY(180deg);
+  }
+
+  @media (max-width: 640px) {
+    .flip-container {
+      min-height: 320px;
+    }
+
+    .back {
+      overflow-y: auto;
+    }
   }

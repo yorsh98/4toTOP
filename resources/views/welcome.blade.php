@@ -26,9 +26,33 @@
         <img id="background" src="{{ asset('img/blue.webp') }}" alt="Fondo skyblue" class="absolute inset-0 w-full h-full object-cover "/>
             <div class="relative min-h-screen flex flex-col items-center justify-center selection:bg-[#FF2D20] selection:text-white">
                 <div class="relative w-full max-w-2xl px-6 pb-10 lg:max-w-7xl">
-                <header class="grid grid-cols-1 items-center gap-2 py-3 lg:grid-cols-3">
+                <header class="relative grid grid-cols-1 items-center gap-2 py-3 lg:grid-cols-3">
                     <div class="flex justify-center col-span-2 lg:col-span-1 lg:col-start-2"> <!-- Contenedor con ancho máximo -->
                         <x-application-logo />
+                    </div>
+
+                    <div class="mt-2 flex justify-end pr-1 lg:absolute lg:right-0 lg:top-3 lg:mt-0 lg:justify-end lg:pr-0">
+                        @guest
+                            <div class="flex items-center gap-2">
+                                <a
+                                    href="{{ route('login') }}"
+                                    class="inline-flex items-center justify-center gap-1.5 rounded-lg bg-[#FF2D20] px-2.5 py-1.5 text-xs font-semibold text-white shadow-[0_6px_14px_rgba(255,45,32,0.28)] transition-all duration-300 hover:brightness-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF2D20] focus-visible:ring-offset-2"
+                                >
+                                    <i class="fa-solid fa-right-to-bracket text-[11px]" aria-hidden="true"></i>
+                                    Ingresar
+                                </a>
+
+                                @if (Route::has('register'))
+                                    <a
+                                        href="{{ route('register') }}"
+                                        class="inline-flex items-center justify-center gap-1.5 rounded-lg bg-[#2D8CFF] px-2.5 py-1.5 text-xs font-semibold text-white shadow-[0_6px_14px_rgba(45,140,255,0.28)] transition-all duration-300 hover:brightness-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#2D8CFF] focus-visible:ring-offset-2"
+                                    >
+                                        <i class="fa-solid fa-user-plus text-[11px]" aria-hidden="true"></i>
+                                        Registrarse
+                                    </a>
+                                @endif
+                            </div>
+                        @endguest
                     </div>
                 </header>
                 <x-navbar />
@@ -79,7 +103,7 @@
                                 </div>
                             </div>
                             
-                            <div class="grid grid-cols-2 gap-4">
+                            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                 <a  id="2"
                                     href="{{ url('/guiastelefonicas') }}" 
                                     class="flex items-center gap-4 rounded-xl bg-white/92 p-6 shadow-[0_12px_30px_rgba(15,23,42,0.14)] ring-1 ring-slate-900/10 backdrop-blur-[2px] transition-all duration-300 hover:-translate-y-0.5 hover:text-black/80 hover:shadow-[0_18px_38px_rgba(15,23,42,0.2)] hover:ring-slate-900/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF2D20] lg:pb-10 dark:bg-zinc-900/90 dark:ring-zinc-700 dark:hover:text-white/80 dark:hover:ring-zinc-500">
@@ -142,7 +166,7 @@
                                     </p>
                                 </div>                                
                             </a>
-                            <div class="grid grid-cols-2 gap-4 ">
+                            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                 <a  id="5"
                                     href="{{ url('/buscadorsentencias') }}" 
                                     class="flex items-center gap-3 rounded-xl bg-white/92 p-6 shadow-[0_12px_30px_rgba(15,23,42,0.14)] ring-1 ring-slate-900/10 backdrop-blur-[2px] transition-all duration-300 hover:-translate-y-0.5 hover:text-black/80 hover:shadow-[0_18px_38px_rgba(15,23,42,0.2)] hover:ring-slate-900/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF2D20] lg:pb-10 dark:bg-zinc-900/90 dark:ring-zinc-700 dark:hover:text-white/80 dark:hover:ring-zinc-500">
@@ -360,7 +384,7 @@
                                 </div>                                
                             </a>
 
-                            <a
+                            <a  id="9"
                                 href="{{ url('/bitacora-pruebas') }}"
                                 class="flex items-center gap-4 rounded-xl bg-white/92 p-6 shadow-[0_12px_30px_rgba(15,23,42,0.14)] ring-1 ring-slate-900/10 backdrop-blur-[2px] transition-all duration-300 hover:-translate-y-0.5 hover:text-black/80 hover:shadow-[0_18px_38px_rgba(15,23,42,0.2)] hover:ring-slate-900/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF2D20] lg:pb-10 dark:bg-zinc-900/90 dark:ring-zinc-700 dark:hover:text-white/80 dark:hover:ring-zinc-500"
                             >

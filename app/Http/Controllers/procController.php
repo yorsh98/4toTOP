@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Services\BackofficeDocumentosCatalog;
 
 class procController extends Controller
 {
-    public function index()
+    public function index(BackofficeDocumentosCatalog $catalog)
     {
-        return view('proc');
+        return view('proc', [
+            'procedimientos' => $catalog->procedimientos(),
+        ]);
     }
 }
