@@ -30,6 +30,8 @@ class RolesAndPermissionsSeeder extends Seeder
             'navbar.bitacora_pruebas.editable',
             'navbar.ausencias.visible',
             'navbar.ausencias.editable',
+            'navbar.documentos.visible',
+            'navbar.documentos.editable',
             'navbar.seguridad.visible',
             'navbar.seguridad.editable',
             'seguridad.roles.ver',
@@ -63,6 +65,9 @@ class RolesAndPermissionsSeeder extends Seeder
             'progra.ver',
             'progra.mail.enviar',
             'sentencias.ver',
+            'documentos.ver',
+            'documentos.gestionar',
+            'sentencias.importar',
         ];
 
         foreach ($permissions as $permissionName) {
@@ -110,6 +115,8 @@ class RolesAndPermissionsSeeder extends Seeder
             'navbar.bitacora_pruebas.editable',
             'navbar.ausencias.visible',
             'navbar.ausencias.editable',
+            'navbar.documentos.visible',
+            'navbar.documentos.editable',
             'turnos.ver',
             'turnos.editar',
             'audiencias.ver',
@@ -135,6 +142,9 @@ class RolesAndPermissionsSeeder extends Seeder
             'progra.ver',
             'progra.mail.enviar',
             'sentencias.ver',
+            'documentos.ver',
+            'documentos.gestionar',
+            'sentencias.importar',
         ]);
 
         $operador->syncPermissions([

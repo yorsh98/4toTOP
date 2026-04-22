@@ -30,6 +30,7 @@ use App\Http\Controllers\TurnoController;
 use App\Livewire\FuncionariosPage;
 use App\Livewire\BitacoraPruebasPage;
 use App\Livewire\BitacoraPruebasPublicPage;
+use App\Livewire\DocumentosBackofficePage;
 use App\Livewire\Security\AuditPage;
 use App\Livewire\Security\RolePermissionsPage;
 use App\Livewire\Security\RolesPage;
@@ -143,6 +144,9 @@ Route::get('/bitacora-pruebas', BitacoraPruebasPublicPage::class)->name('bitacor
 Route::get('/backoffice/bitacora-pruebas', BitacoraPruebasPage::class)
     ->name('bitacora-pruebas.index')
     ->middleware(['auth', 'can:navbar.bitacora_pruebas.visible']);
+Route::get('/backoffice/documentos', DocumentosBackofficePage::class)
+    ->name('backoffice.documentos.index')
+    ->middleware(['auth', 'can:navbar.documentos.visible']);
 
 /*
 |--------------------------------------------------------------------------

@@ -2,12 +2,28 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Services\BackofficeDocumentosCatalog;
+use Illuminate\Support\Carbon;
 
 class migraunijudController extends Controller
 {
-    public function index()
+    public function index(BackofficeDocumentosCatalog $catalog)
     {
-        return view('migraunijud');
+        $catalogData = $catalog->all();
+        $updatedAtRaw = data_get($catalogData, 'meta.updated_at');
+        $updatedAt = null;
+
+        if (is_string($updatedAtRaw) && trim($updatedAtRaw) !== '') {
+            try {
+                $updatedAt = Carbon::parse($updatedAtRaw)->format('d-m-Y H:i');
+            } catch (\Throwable) {
+                $updatedAt = $updatedAtRaw;
+            }
+        }
+
+        return view('migraunijud', [
+            'tribunales' => $catalog->tribunales(),
+            'updatedAt' => $updatedAt,
+        ]);
     }
 }

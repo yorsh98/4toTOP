@@ -41,7 +41,7 @@
                         <span class="tooltip">Turnos</span>
                     </a>
 
-                    <a href="{{ url('/bitacora-pruebas') }}" class="nav-icon flex size-12 shrink-0 items-center justify-center rounded-full bg-[#FF2D20]/10 sm:size-16">
+                    <a href="#9" class="nav-icon flex size-12 shrink-0 items-center justify-center rounded-full bg-[#FF2D20]/10 sm:size-16">
                         <i class="fa-solid fa-clipboard-list text-[34px] leading-none text-[#2D8CFF]"></i>
                         <span class="tooltip">Bitacora Pruebas</span>
                     </a>

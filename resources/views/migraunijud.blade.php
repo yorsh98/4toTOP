@@ -1,110 +1,5 @@
 <x-in-layout>
-    @php
-        $tribunales = [
-            [                
-                'nombre' => '10° Juzgado de Garantía de Santiago',                
-            ],
-            [                
-                'nombre' => '11° Juzgado de Garantía de Santiago',                
-            ],
-            [                
-                'nombre' => '12° Juzgado de Garantía de Santiago',                
-            ],
-            [                
-                'nombre' => '15° Juzgado de Garantía de Santiago',                
-            ],
-            [                
-                'nombre' => 'Juzgado de Garantía de Illapel',                
-            ],
-            [                
-                'nombre' => 'Juzgado de Garantía de los Lagos',
-            ],
-            [                
-                'nombre' => 'Juzgado de Garantía de Valdivia',
-            ],
-            [                
-                'nombre' => 'Juzgado de Garantía de Osorno',
-            ],
-            [                
-                'nombre' => 'Juzgado de Garantía de Mariquina',
-            ],
-            [                
-                'nombre' => 'Juzgado de Garantía de Río Negro',
-            ],
-            [                
-                'nombre' => 'Juzgado de Garantía de Ovalle',
-            ],
-            [                
-                'nombre' => 'Juzgado de Garantía de Vicuña',
-            ],
-            [                
-                'nombre' => 'Juzgado de Garantía de Coquimbo',
-            ],
-            [                
-                'nombre' => 'Juzgado de Garantía de Antofagasta',
-            ],
-            [                
-                'nombre' => 'Juzgado de Garantía de La Serena',
-            ],
-            [                
-                'nombre' => 'Juzgado de Garantía de Calama',
-            ],
-            [                
-                'nombre' => 'Juzgado de Garantía de Tocopilla',
-            ],
-            [                
-                'nombre' => 'Juzgado de Garantía de Punta Arenas',
-            ],
-            [                
-                'nombre' => 'Juzgado de Garantía de Diego de Almagro',
-            ],
-            /*[                
-                'nombre' => 'Juzgado de Garantía de ',
-            ],*/
-            [                
-                'nombre' => 'Juzgado de Letras y Garantía de Panguipulli',                
-            ],
-            [                
-                'nombre' => 'Juzgado de Letras y Garantía de Andacollo',                
-            ],
-            [                
-                'nombre' => 'Juzgado de Letras y Garantía de Río Bueno',                
-            ],
-            [                
-                'nombre' => 'Juzgado de Letras y Garantía de La Unión',                
-            ],
-            [                
-                'nombre' => 'Juzgado de Letras y Garantía de Paillaco',                
-            ],
-            [                
-                'nombre' => 'Juzgado de Letras y Garantía de María Elena',                
-            ],
-            [                
-                'nombre' => 'Juzgado de Letras y Garantía de Mejillones ',                
-            ],
-            [                
-                'nombre' => 'Juzgado de Letras y Garantía de Cabo de Hornos',                
-            ],
-            [                
-                'nombre' => 'Juzgado de Letras y Garantía de Porvenir',                
-            ],
-            [                
-                'nombre' => 'Juzgado de Letras y Garantía de Chile Chico',                
-            ],
-            /*[                
-                'nombre' => '',                
-            ],
-            [                
-                'nombre' => '',                
-            ],
-            [                
-                'nombre' => '',                
-            ],*/
 
-            //si necesita agregar otro tribunal copiar desde y hasta [] para poder generar un nuevo modulo en la vista
-        ];
-    @endphp  
-    
                         <div class="grid gap-6 pt-5 mb-6 lg:grid-cols-1 lg:gap-8 animate__animated animate__zoomInDown animate__delay-0.5s">
                             <div class="absolute top-4 left-4">
                                 <a href="{{ url('/') }}" class="bg-white text-black font-semibold py-1 px-3 rounded-md shadow-md flex items-center text-sm hover:bg-blue-700 hover:text-white transition">
@@ -122,7 +17,9 @@
                                     <h2 class="text-xl font-semibold text-black dark:text-white">LISTADO DE TRIBUNALES MIGRADOS A UNIJUD</h2>
                                 </div>                                
                             </div>
-                            <span class="bg-white rounded-lg pt-2 pb-2">Fecha de actualizacion 16-02-2026</span>
+                            <span class="bg-white rounded-lg pt-2 pb-2">
+                                Fecha de actualizacion {{ $updatedAt ?? 'sin registro' }}
+                            </span>
                         </div>
                         <div class="grid gap-6 lg:grid-cols-1 lg:gap-8 animate__animated animate__zoomInDown animate__delay-0.8s">
                             <div class="grid gap-6 lg:grid-cols-1 lg:gap-8 animate__animated animate__zoomInDown animate__delay-0.8s">

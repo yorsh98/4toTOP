@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Services\BackofficeDocumentosCatalog;
 
 class docController extends Controller
 {
-    public function index()
+    public function index(BackofficeDocumentosCatalog $catalog)
     {
-        return view('doc');
+        return view('doc', [
+            'doc' => $catalog->documentos(),
+        ]);
     }
 }
