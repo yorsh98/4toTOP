@@ -99,13 +99,13 @@ new class extends Component
     :class="collapsed ? 'lg:w-20' : 'lg:w-72'"
     class="w-full transition-all duration-300 ease-in-out lg:shrink-0"
 >
-    <div class="flex h-16 items-center justify-between border-b border-gray-200 bg-white px-4 lg:hidden">
+    <div class="flex h-16 items-center justify-between border-b border-blue-300/25 bg-[#0A2E5D]/90 px-4 lg:hidden">
         <a href="{{ route('dashboard') }}" wire:navigate>
-            <x-application-logo class="block h-9 w-auto fill-current text-gray-800" />
+            <x-application-logo class="block h-9 w-auto rounded-md bg-white/85 px-2 py-1" />
         </a>
 
         <div class="flex items-center gap-2">
-            <button @click="open = ! open" class="inline-flex items-center justify-center rounded-md p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700 focus:outline-none transition duration-150 ease-in-out">
+            <button @click="open = ! open" class="inline-flex items-center justify-center rounded-md p-2 text-slate-300 hover:bg-slate-800 hover:text-white focus:outline-none transition duration-150 ease-in-out">
             <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                 <path :class="{ 'hidden': open, 'inline-flex': !open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                 <path :class="{ 'hidden': !open, 'inline-flex': open }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -114,8 +114,8 @@ new class extends Component
         </div>
     </div>
 
-    <aside class="hidden h-screen border-r border-gray-200 bg-white transition-all duration-300 ease-in-out lg:sticky lg:top-0 lg:flex lg:flex-col">
-        <div class="flex h-16 items-center border-b border-gray-200 px-3" :class="collapsed ? 'justify-end' : 'justify-between'">
+    <aside class="hidden h-screen border-r border-blue-300/25 bg-[#0A2E5D]/90 text-slate-100 transition-all duration-300 ease-in-out lg:sticky lg:top-0 lg:flex lg:flex-col">
+        <div class="flex h-16 items-center border-b border-blue-300/25 px-3" :class="collapsed ? 'justify-end' : 'justify-between'">
             <a
                 href="{{ route('dashboard') }}"
                 wire:navigate
@@ -126,7 +126,7 @@ new class extends Component
                 x-cloak
             >
                 <x-application-logo
-                    x-bind:class="collapsed ? 'h-7 w-auto fill-current text-gray-800 transition-all duration-300 ease-in-out' : 'h-9 w-auto fill-current text-gray-800 transition-all duration-300 ease-in-out'"
+                    x-bind:class="collapsed ? 'h-7 w-auto rounded-md bg-white/85 px-1.5 py-1 transition-all duration-300 ease-in-out' : 'h-9 w-auto rounded-md bg-white/85 px-2 py-1 transition-all duration-300 ease-in-out'"
                 />
             </a>
 
@@ -134,7 +134,7 @@ new class extends Component
                 <button
                     @click="toggleCollapsed"
                     type="button"
-                    class="inline-flex h-9 w-9 items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-800"
+                    class="inline-flex h-9 w-9 items-center justify-center rounded-md text-slate-300 hover:bg-slate-800 hover:text-white"
                     :title="collapsed ? 'Expandir menu' : 'Colapsar menu'"
                 >
                     <i class="fa-solid transition-transform duration-300" :class="collapsed ? 'fa-angles-right' : 'fa-angles-left'"></i>
@@ -152,7 +152,7 @@ new class extends Component
                             wire:navigate
                             title="{{ $item['label'] }}"
                             :class="collapsed ? 'justify-center' : ''"
-                            class="flex items-center rounded-md px-3 py-2 text-sm font-medium transition {{ $isActive ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900' }}"
+                            class="flex items-center rounded-md px-3 py-2 text-sm font-medium transition {{ $isActive ? 'bg-blue-300/15 text-blue-100 ring-1 ring-blue-300/25' : 'text-slate-200 hover:bg-slate-800/60 hover:text-white' }}"
                         >
                             <i class="{{ $item['icon'] }} text-base" :class="collapsed ? '' : 'mr-3'"></i>
                             <span x-show="!collapsed" x-transition.opacity.duration.200ms x-cloak>{{ $item['label'] }}</span>
@@ -162,10 +162,10 @@ new class extends Component
             </div>
         </div>
 
-        <div class="border-t border-gray-200 p-4">
+        <div class="border-t border-blue-300/25 p-4">
             <div class="mb-3" x-data="{{ json_encode(['name' => auth()->user()->name]) }}" x-show="!collapsed" x-cloak>
-                <p class="text-sm font-medium text-gray-800" x-text="name" x-on:profile-updated.window="name = $event.detail.name"></p>
-                <p class="text-xs text-gray-500">{{ auth()->user()->email }}</p>
+                <p class="text-sm font-medium text-slate-100" x-text="name" x-on:profile-updated.window="name = $event.detail.name"></p>
+                <p class="text-xs text-slate-300">{{ auth()->user()->email }}</p>
             </div>
 
             <div class="space-y-1">
@@ -174,7 +174,7 @@ new class extends Component
                     wire:navigate
                     title="{{ __('Perfil') }}"
                     :class="collapsed ? 'justify-center' : ''"
-                    class="flex items-center rounded-md px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition"
+                    class="flex items-center rounded-md px-3 py-2 text-sm text-slate-200 hover:bg-slate-800/60 hover:text-white transition"
                 >
                     <i class="fa-solid fa-user text-base" :class="collapsed ? '' : 'mr-3'"></i>
                     <span x-show="!collapsed" x-transition.opacity.duration.200ms x-cloak>{{ __('Perfil') }}</span>
@@ -184,7 +184,7 @@ new class extends Component
                     wire:click="logout"
                     title="{{ __('Salir') }}"
                     :class="collapsed ? 'justify-center' : ''"
-                    class="flex w-full items-center rounded-md px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50 transition"
+                    class="flex w-full items-center rounded-md px-3 py-2 text-left text-sm text-red-300 hover:bg-red-500/10 hover:text-red-200 transition"
                 >
                     <i class="fa-solid fa-right-from-bracket text-base" :class="collapsed ? '' : 'mr-3'"></i>
                     <span x-show="!collapsed" x-transition.opacity.duration.200ms x-cloak>{{ __('Salir') }}</span>
@@ -202,7 +202,7 @@ new class extends Component
         x-transition:leave-start="opacity-100 translate-y-0"
         x-transition:leave-end="opacity-0 -translate-y-1"
         x-cloak
-        class="border-b border-gray-200 bg-white lg:hidden"
+        class="border-b border-blue-300/25 bg-[#0A2E5D]/90 lg:hidden"
     >
         <div class="space-y-1 px-3 py-3">
             @foreach ($menuItems as $item)
@@ -217,10 +217,10 @@ new class extends Component
             @endforeach
         </div>
 
-        <div class="border-t border-gray-200 px-4 py-4">
+        <div class="border-t border-blue-300/25 px-4 py-4">
             <div class="mb-3" x-data="{{ json_encode(['name' => auth()->user()->name]) }}">
-                <p class="text-base font-medium text-gray-800" x-text="name" x-on:profile-updated.window="name = $event.detail.name"></p>
-                <p class="text-sm text-gray-500">{{ auth()->user()->email }}</p>
+                <p class="text-base font-medium text-slate-100" x-text="name" x-on:profile-updated.window="name = $event.detail.name"></p>
+                <p class="text-sm text-slate-300">{{ auth()->user()->email }}</p>
             </div>
 
             <div class="space-y-1">
@@ -231,7 +231,7 @@ new class extends Component
                     </span>
                 </x-responsive-nav-link>
 
-                <button wire:click="logout" class="block w-full rounded-md px-3 py-2 text-left text-base font-medium text-red-600 hover:bg-red-50 transition">
+                <button wire:click="logout" class="block w-full rounded-md px-3 py-2 text-left text-base font-medium text-red-300 hover:bg-red-500/10 hover:text-red-200 transition">
                     <span class="inline-flex items-center gap-2">
                         <i class="fa-solid fa-right-from-bracket"></i>
                         <span>{{ __('Salir') }}</span>
