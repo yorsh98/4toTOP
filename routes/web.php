@@ -27,16 +27,15 @@ use App\Http\Controllers\SistOficioLibertadesController;
 use App\Http\Controllers\tabla2Controller;
 use App\Http\Controllers\tablasController;
 use App\Http\Controllers\TurnoController;
-use App\Livewire\FuncionariosPage;
 use App\Livewire\BitacoraPruebasPage;
 use App\Livewire\BitacoraPruebasPublicPage;
 use App\Livewire\DocumentosBackofficePage;
+use App\Livewire\FuncionariosPage;
 use App\Livewire\Security\AuditPage;
 use App\Livewire\Security\RolePermissionsPage;
 use App\Livewire\Security\RolesPage;
 use App\Livewire\Security\UsersRolesPage;
 use App\Livewire\TurnoPage;
-use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 
@@ -92,8 +91,7 @@ Route::get('/oficiolibertad', [oficiolibertadController::class, 'index'])->name(
 Route::get('/turno', TurnoPage::class)->name('turno')->middleware(['auth', 'can:navbar.turnos.visible']);
 Route::patch('/turno/{id}', [TurnoController::class, 'update'])
     ->name('turno.update')
-    ->middleware(['auth', 'can:navbar.turnos.editable'])
-    ->withoutMiddleware([PreventRequestForgery::class]);
+    ->middleware(['auth', 'can:navbar.turnos.editable']);
 
 /*
 |--------------------------------------------------------------------------
@@ -129,7 +127,6 @@ Route::prefix('progra')->name('progra.')->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::post('/enviar-solicitud', [SistOficioLibertadesController::class, 'enviarSolicitud'])
-    ->withoutMiddleware([PreventRequestForgery::class])
     ->middleware(['auth', 'can:navbar.oficios_libertades.editable'])
     ->name('enviar-solicitud');
 
