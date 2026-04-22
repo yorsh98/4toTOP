@@ -31,6 +31,10 @@ class DocumentosBackofficePage extends Component
 
     public string $tribunalNombre = '';
 
+    public string $encargadoAudienciaNombre = '';
+
+    public string $encargadoAudienciaNumeros = '';
+
     public $sentenciasExcel;
 
     public function mount(BackofficeDocumentosCatalog $catalog): void
@@ -156,6 +160,31 @@ class DocumentosBackofficePage extends Component
         session()->flash('ok', 'Tribunal agregado correctamente.');
     }
 
+    public function addEncargadoAudiencia(BackofficeDocumentosCatalog $catalog): void
+    {
+        Gate::authorize('documentos.gestionar');
+
+        $validated = $this->validate([
+            'encargadoAudienciaNombre' => ['required', 'string', 'max:255'],
+            'encargadoAudienciaNumeros' => ['required', 'string', 'max:50'],
+        ]);
+
+        $data = $catalog->all();
+        $encargados = Arr::get($data, 'encargados_audiencia', []);
+
+        $encargados[] = [
+            'nombre' => trim($validated['encargadoAudienciaNombre']),
+            'numeros' => trim($validated['encargadoAudienciaNumeros']),
+            'activo' => true,
+        ];
+
+        $data['encargados_audiencia'] = $encargados;
+        $catalog->save($data);
+
+        $this->reset(['encargadoAudienciaNombre', 'encargadoAudienciaNumeros']);
+        session()->flash('ok', 'Encargado de audiencia agregado correctamente.');
+    }
+
     public function removeTribunal(int $index, BackofficeDocumentosCatalog $catalog): void
     {
         Gate::authorize('documentos.gestionar');
@@ -171,6 +200,23 @@ class DocumentosBackofficePage extends Component
         $data['tribunales'] = array_values($tribunales);
         $catalog->save($data);
         session()->flash('ok', 'Tribunal quitado del listado.');
+    }
+
+    public function removeEncargadoAudiencia(int $index, BackofficeDocumentosCatalog $catalog): void
+    {
+        Gate::authorize('documentos.gestionar');
+
+        $data = $catalog->all();
+        $encargados = Arr::get($data, 'encargados_audiencia', []);
+
+        if (! array_key_exists($index, $encargados)) {
+            return;
+        }
+
+        unset($encargados[$index]);
+        $data['encargados_audiencia'] = array_values($encargados);
+        $catalog->save($data);
+        session()->flash('ok', 'Encargado de audiencia quitado del listado.');
     }
 
     public function importSentencias(BuscadorSentenciasExcelImporter $importer): void
@@ -201,6 +247,7 @@ class DocumentosBackofficePage extends Component
             'procedimientos' => Arr::get($data, 'procedimientos', []),
             'documentos' => Arr::get($data, 'documentos', []),
             'tribunales' => Arr::get($data, 'tribunales', []),
+            'encargadosAudiencia' => Arr::get($data, 'encargados_audiencia', []),
             'updatedAt' => Arr::get($data, 'meta.updated_at'),
         ]);
     }

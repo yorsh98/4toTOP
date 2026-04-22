@@ -396,6 +396,35 @@
                                     <h2 class="text-xl font-semibold text-black dark:text-white">BITACORA PRUEBAS</h2>
                                 </div>
                             </a>
+
+                            <details class="group rounded-xl bg-white/92 p-6 shadow-[0_12px_30px_rgba(15,23,42,0.14)] ring-1 ring-slate-900/10 backdrop-blur-[2px] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(15,23,42,0.2)] hover:ring-slate-900/20 dark:bg-zinc-900/90 dark:ring-zinc-700 dark:hover:ring-zinc-500">
+                                <summary class="list-none flex cursor-pointer items-center gap-4 [&::-webkit-details-marker]:hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF2D20] rounded-lg">
+                                    <div class="flex size-12 shrink-0 items-center justify-center rounded-full bg-[#0A2E5D]/10 sm:size-16">
+                                        <span class="text-[34px] sm:text-[42px] font-bold leading-none text-[#0A2E5D]">#</span>
+                                    </div>
+
+                                    <div class="pt-3 sm:pt-5">
+                                        <h2 class="text-xl font-semibold text-black dark:text-white">Nº Encargado Audiencia</h2>                                        
+                                    </div>
+
+                                    <svg class="ml-auto size-5 shrink-0 text-slate-600 transition group-open:rotate-180 dark:text-slate-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                                    </svg>
+                                </summary>
+
+                                 <div class="mt-4 border-t border-slate-200/80 pt-4 dark:border-zinc-700/80">
+                                     <ul class="space-y-2 text-sm text-slate-800 dark:text-slate-200">
+                                        @forelse($encargadosAudiencia ?? [] as $encargado)
+                                            <li class="flex items-center justify-between gap-3">
+                                                <span>{{ $encargado['nombre'] }}</span>
+                                                <span class="font-semibold text-[#0A2E5D] dark:text-blue-300">{{ $encargado['numeros'] }}</span>
+                                            </li>
+                                        @empty
+                                            <li class="text-slate-500 dark:text-slate-400">Sin encargados configurados.</li>
+                                        @endforelse
+                                     </ul>
+                                 </div>
+                             </details>
                         </div> 
                     </main>
 

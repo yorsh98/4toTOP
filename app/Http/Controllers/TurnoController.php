@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Turno;
+use App\Services\BackofficeDocumentosCatalog;
 use App\Services\FuncionarioCatalog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -33,14 +34,15 @@ class TurnoController extends Controller
 
     }
 
-    public function enviarTurno()
+    public function enviarTurno(BackofficeDocumentosCatalog $catalog)
     {
         // Obtener los turnos desde la base de datos
         $turno1 = Turno::find(1);
         $turno2 = Turno::find(2);
+        $encargadosAudiencia = $catalog->encargadosAudiencia();
 
         // Verifica si los turnos existen antes de pasarlos a la vista
-        return view('welcome', compact('turno1', 'turno2'));
+        return view('welcome', compact('turno1', 'turno2', 'encargadosAudiencia'));
     }
 
     public function update(Request $request, $id)
