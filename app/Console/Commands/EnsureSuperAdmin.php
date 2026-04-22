@@ -34,8 +34,8 @@ class EnsureSuperAdmin extends Command
         $name = (string) ($this->option('name') ?: env('SUPERADMIN_NAME', 'Super Admin'));
         $passwordOption = $this->option('password');
         $password = is_string($passwordOption)
-            ? $passwordOption
-            : (string) env('SUPERADMIN_PASSWORD', str()->random(48));
+            ? trim($passwordOption)
+            : trim((string) env('SUPERADMIN_PASSWORD', ''));
         $forceResetPassword = (bool) $this->option('force-reset-password');
 
         $role = Role::firstOrCreate([
@@ -61,10 +61,20 @@ class EnsureSuperAdmin extends Command
         $user->email_verified_at = $user->email_verified_at ?? now();
 
         if ($forceResetPassword) {
-            $newPassword = $password;
-            $user->password = Hash::make($newPassword);
-            $this->warn('Password del SuperAdmin actualizada. Nueva password:');
-            $this->line($newPassword);
+            if ($password === '') {
+                $this->error('Debes entregar una password con --password o SUPERADMIN_PASSWORD para forzar el reseteo.');
+
+                return self::FAILURE;
+            }
+
+            if (mb_strlen($password) < 12) {
+                $this->error('La password debe tener al menos 12 caracteres para cumplir el minimo de seguridad.');
+
+                return self::FAILURE;
+            }
+
+            $user->password = Hash::make($password);
+            $this->info('Password del SuperAdmin actualizada correctamente.');
         }
 
         $user->save();

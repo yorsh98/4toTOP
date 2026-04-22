@@ -18,8 +18,8 @@ class LeerCorreosPOP3 extends Command
         $this->info("Conectando por POP3 sin cifrado...");
 
         // Credenciales hardcodeadas directamente
-        $usuario = 'removed-account@example.invalid';
-        $password = '***REMOVED***';
+        $usuario = '';
+        $password = '';
 
         $mailbox = new Mailbox(
             '{pop3.mail.pjud:110/pop3/notls}INBOX',
