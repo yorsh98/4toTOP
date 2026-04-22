@@ -199,6 +199,14 @@ return [
         ],
     ],
 
+    'encargados_audiencia' => [
+        ['nombre' => 'Leonardo Morales', 'numeros' => '1-6', 'activo' => true],
+        ['nombre' => 'Mauricio Fernandez', 'numeros' => '4-9', 'activo' => true],
+        ['nombre' => 'Carlos Donoso', 'numeros' => '0-5', 'activo' => true],
+        ['nombre' => 'Maricela Santos', 'numeros' => '3-8', 'activo' => true],
+        ['nombre' => 'Hortencia Garrido', 'numeros' => '2-7', 'activo' => true],
+    ],
+
     'tribunales' => [
         ['nombre' => '10° Juzgado de Garantia de Santiago', 'activo' => true],
         ['nombre' => '11° Juzgado de Garantia de Santiago', 'activo' => true],

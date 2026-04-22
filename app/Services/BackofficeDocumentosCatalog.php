@@ -26,11 +26,17 @@ class BackofficeDocumentosCatalog
         return $this->filterActivos($this->loadSection('tribunales'));
     }
 
+    public function encargadosAudiencia(): array
+    {
+        return $this->filterActivos($this->loadSection('encargados_audiencia'));
+    }
+
     public function save(array $catalog): void
     {
         $normalized = [
             'procedimientos' => $this->normalizeDocumentSection(Arr::get($catalog, 'procedimientos', [])),
             'documentos' => $this->normalizeDocumentSection(Arr::get($catalog, 'documentos', [])),
+            'encargados_audiencia' => $this->normalizeEncargadosAudiencia(Arr::get($catalog, 'encargados_audiencia', [])),
             'tribunales' => $this->normalizeTribunales(Arr::get($catalog, 'tribunales', [])),
             'meta' => [
                 'updated_at' => now()->toDateTimeString(),
@@ -69,6 +75,9 @@ class BackofficeDocumentosCatalog
         return [
             'procedimientos' => $this->normalizeDocumentSection(Arr::get($decoded, 'procedimientos', [])),
             'documentos' => $this->normalizeDocumentSection(Arr::get($decoded, 'documentos', [])),
+            'encargados_audiencia' => $this->normalizeEncargadosAudiencia(
+                Arr::get($decoded, 'encargados_audiencia', Arr::get(config('backoffice_documentos', []), 'encargados_audiencia', []))
+            ),
             'tribunales' => $this->normalizeTribunales(Arr::get($decoded, 'tribunales', [])),
             'meta' => Arr::get($decoded, 'meta', []),
         ];
@@ -81,6 +90,7 @@ class BackofficeDocumentosCatalog
         $this->save([
             'procedimientos' => Arr::get($defaults, 'procedimientos', []),
             'documentos' => Arr::get($defaults, 'documentos', []),
+            'encargados_audiencia' => Arr::get($defaults, 'encargados_audiencia', []),
             'tribunales' => Arr::get($defaults, 'tribunales', []),
         ]);
     }
@@ -120,6 +130,22 @@ class BackofficeDocumentosCatalog
             ->all();
 
         return $normalized;
+    }
+
+    protected function normalizeEncargadosAudiencia(array $rows): array
+    {
+        return collect($rows)
+            ->filter(fn ($row) => is_array($row) && trim((string) Arr::get($row, 'nombre', '')) !== '')
+            ->values()
+            ->map(function (array $row): array {
+                return [
+                    'nombre' => trim((string) Arr::get($row, 'nombre', '')),
+                    'numeros' => trim((string) Arr::get($row, 'numeros', '')),
+                    'activo' => (bool) Arr::get($row, 'activo', true),
+                ];
+            })
+            ->values()
+            ->all();
     }
 
     protected function filterActivos(array $rows): array
