@@ -17,14 +17,14 @@
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="font-sans antialiased bg-gray-100 text-gray-900">
-        <div class="min-h-screen bg-gray-100 lg:flex">
+    <body class="font-sans antialiased bg-slate-100 text-slate-900">
+        <div class="min-h-screen bg-slate-100 lg:flex">
             <livewire:layout.navigation />
 
             <div class="min-w-0 flex-1">
                 <!-- Page Heading -->
                 @if (isset($header))
-                    <header class="bg-white shadow">
+                    <header class="border-b border-slate-200/80 bg-white/90 shadow-sm backdrop-blur-sm">
                         <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
                             {{ $header }}
                         </div>
@@ -57,17 +57,17 @@
   x-show="$store.busy && $store.busy.visible"
   x-transition.opacity
   x-cloak
-  class="fixed inset-0 z-[9999] bg-white/70 backdrop-blur-sm flex items-center justify-center"
+  class="fixed inset-0 z-[9999] bg-slate-900/30 backdrop-blur-sm flex items-center justify-center"
   role="status" aria-live="polite" aria-busy="true"
 >
   <div class="flex flex-col items-center gap-3">
-    <div class="w-7 h-7 rounded-full border-2 border-gray-400 border-t-transparent animate-spin"></div>
-    <p class="text-sm text-gray-700">Cargando...</p>
+    <div class="w-7 h-7 rounded-full border-2 border-blue-500 border-t-transparent animate-spin"></div>
+    <p class="text-sm text-slate-100">Cargando...</p>
   </div>
 
   <!-- Barra superior de progreso (decorativa) -->
   <div class="fixed top-0 left-0 right-0 h-0.5 overflow-hidden">
-    <div class="h-full w-2/3 bg-gray-700" style="animation: progressbar 1.1s ease-in-out infinite;"></div>
+    <div class="h-full w-2/3 bg-blue-500" style="animation: progressbar 1.1s ease-in-out infinite;"></div>
   </div>
 </div>
 
