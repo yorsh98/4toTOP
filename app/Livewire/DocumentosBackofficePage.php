@@ -37,6 +37,13 @@ class DocumentosBackofficePage extends Component
 
     public $sentenciasExcel;
 
+    public array $sectionsOpen = [
+        'procedimientos' => true,
+        'documentos' => true,
+        'migracion' => true,
+        'encargados' => true,
+    ];
+
     public function mount(BackofficeDocumentosCatalog $catalog): void
     {
         Gate::authorize('documentos.ver');
@@ -45,6 +52,15 @@ class DocumentosBackofficePage extends Component
 
         $this->procedimientoOrden = count(Arr::get($data, 'procedimientos', [])) + 1;
         $this->documentoOrden = count(Arr::get($data, 'documentos', [])) + 1;
+    }
+
+    public function toggleSection(string $section): void
+    {
+        if (! array_key_exists($section, $this->sectionsOpen)) {
+            return;
+        }
+
+        $this->sectionsOpen[$section] = ! $this->sectionsOpen[$section];
     }
 
     public function addProcedimiento(BackofficeDocumentosCatalog $catalog): void
@@ -65,6 +81,7 @@ class DocumentosBackofficePage extends Component
             'url' => $this->storeUploadedFile($this->procedimientoArchivo, 'procedimientos'),
             'orden' => (int) $validated['procedimientoOrden'],
             'activo' => true,
+            'publico' => true,
         ];
 
         $data['procedimientos'] = $procedimientos;
@@ -110,6 +127,7 @@ class DocumentosBackofficePage extends Component
             'url' => $this->storeUploadedFile($this->documentoArchivo, 'doc'),
             'orden' => (int) $validated['documentoOrden'],
             'activo' => true,
+            'publico' => true,
         ];
 
         $data['documentos'] = $documentos;

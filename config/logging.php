@@ -73,6 +73,14 @@ return [
             'replace_placeholders' => true,
         ],
 
+        'mail_audit' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/mail-audit.log'),
+            'level' => env('MAIL_AUDIT_LOG_LEVEL', 'info'),
+            'days' => env('MAIL_AUDIT_LOG_DAYS', 30),
+            'replace_placeholders' => true,
+        ],
+
         'slack' => [
             'driver' => 'slack',
             'url' => env('LOG_SLACK_WEBHOOK_URL'),

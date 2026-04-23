@@ -9,7 +9,7 @@ class procController extends Controller
     public function index(BackofficeDocumentosCatalog $catalog)
     {
         return view('proc', [
-            'procedimientos' => $catalog->procedimientos(),
+            'procedimientos' => $catalog->procedimientosPublicos(),
         ]);
     }
 }
