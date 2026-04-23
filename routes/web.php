@@ -176,7 +176,7 @@ Route::get('/ausencias', [ausenciasController::class, 'index'])->name('ausencias
 | Correo Sistema de Audiencia.
 |--------------------------------------------------------------------------
 */
-Route::get('/programacion/mail/{fecha}', [PrograMailController::class, 'enviarProgramacionPorCorreo'])
+Route::post('/programacion/mail/{fecha}', [PrograMailController::class, 'enviarProgramacionPorCorreo'])
     ->where('fecha', '\d{4}-\d{2}-\d{2}')
     ->middleware(['auth', 'can:navbar.audiencias.editable'])
     ->name('programacion.mail');

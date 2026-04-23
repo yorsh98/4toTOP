@@ -8,11 +8,6 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote')->hourly();
 
-// Programar el comando diariamente a las 16:00 (4 PM)
-Artisan::command('correo:leer-ultimos-schedule', function () {
-    Artisan::call('correo:leer-ultimos');
-})->purpose('Leer correo de audiencias diariamente')->everyMinute();
-
 ScheduleFacade::command('notificaciones:ausentismo-diario')
     ->dailyAt((string) config('notifications_v2.schedule.daily_ausentismo_time', '08:05'))
     ->timezone((string) config('notifications_v2.schedule.timezone', 'America/Santiago'))

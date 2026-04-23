@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
+use Spatie\Permission\Models\Role;
 
 new #[Layout('layouts.guest')] class extends Component
 {
@@ -27,17 +28,32 @@ new #[Layout('layouts.guest')] class extends Component
             'password' => ['required', 'string', 'confirmed', Rules\Password::defaults()],
         ]);
 
+        $isFirstUser = ! User::query()->exists();
+
         $validated['password'] = Hash::make($validated['password']);
-        $validated['approved_at'] = null;
+        $validated['approved_at'] = $isFirstUser ? now() : null;
         $validated['approved_by'] = null;
-        $validated['approval_note'] = null;
+        $validated['approval_note'] = $isFirstUser ? 'Aprobacion automatica del primer usuario registrado' : null;
         $validated['rejected_at'] = null;
         $validated['rejected_by'] = null;
         $validated['rejection_note'] = null;
 
-        event(new Registered(User::create($validated)));
+        $user = User::create($validated);
 
-        session()->flash('status', 'Cuenta registrada. Debe ser aprobada por un administrador antes de iniciar sesión.');
+        if ($isFirstUser) {
+            $role = Role::firstOrCreate([
+                'name' => 'SuperAdmin',
+                'guard_name' => 'web',
+            ]);
+
+            $user->syncRoles([$role->name]);
+        }
+
+        event(new Registered($user));
+
+        session()->flash('status', $isFirstUser
+            ? 'Cuenta registrada y aprobada automaticamente por ser el primer usuario del sistema. Ya puedes iniciar sesion.'
+            : 'Cuenta registrada. Debe ser aprobada por un administrador antes de iniciar sesion.');
         $this->redirect(route('login', absolute: false), navigate: true);
     }
 };

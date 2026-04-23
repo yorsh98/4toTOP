@@ -16,9 +16,19 @@ class BackofficeDocumentosCatalog
         return $this->filterActivos($this->loadSection('procedimientos'));
     }
 
+    public function procedimientosPublicos(): array
+    {
+        return $this->filterPublicos($this->procedimientos());
+    }
+
     public function documentos(): array
     {
         return $this->filterActivos($this->loadSection('documentos'));
+    }
+
+    public function documentosPublicos(): array
+    {
+        return $this->filterPublicos($this->documentos());
     }
 
     public function tribunales(): array
@@ -106,6 +116,7 @@ class BackofficeDocumentosCatalog
                     'url' => $this->normalizeUrl((string) Arr::get($row, 'url', '')),
                     'orden' => max(1, (int) Arr::get($row, 'orden', $index + 1)),
                     'activo' => (bool) Arr::get($row, 'activo', true),
+                    'publico' => (bool) Arr::get($row, 'publico', true),
                 ];
             })
             ->sortBy('orden')
@@ -152,6 +163,14 @@ class BackofficeDocumentosCatalog
     {
         return collect($rows)
             ->filter(fn (array $row) => (bool) Arr::get($row, 'activo', true))
+            ->values()
+            ->all();
+    }
+
+    protected function filterPublicos(array $rows): array
+    {
+        return collect($rows)
+            ->filter(fn (array $row) => (bool) Arr::get($row, 'publico', true))
             ->values()
             ->all();
     }

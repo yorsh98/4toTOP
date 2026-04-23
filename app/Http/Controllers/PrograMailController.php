@@ -189,7 +189,6 @@ class PrograMailController extends Controller
     {
         $firmaHtml = '';
         $mailerKey = config('mail.default');                          // mailer por defecto
-        $fromAddr = config('mail.from.address');                     // from por defecto
         $fromName = 'Programación Diaria 4°TOP ('.Carbon::parse($fechaYmd, 'America/Santiago')->format('Y-m-d').')';
 
         if ($firmaId) {
@@ -201,15 +200,19 @@ class PrograMailController extends Controller
                 if (! empty($firma->mailer)) {
                     $mailerKey = trim((string) $firma->mailer);
                 }
-
-                // from específico desde env
-                if (! empty($firma->from_env)) {
-                    $envVal = env($firma->from_env);
-                    if (! empty($envVal)) {
-                        $fromAddr = $envVal;
-                    }
-                }
             }
+        }
+
+        $fromAddr = config("mail.mailers.{$mailerKey}.username") ?: config('mail.from.address');
+
+        if (! filter_var($fromAddr, FILTER_VALIDATE_EMAIL)) {
+            Log::warning('Firma con remitente inválido, se usa fallback global', [
+                'firma_id' => $firmaId,
+                'mailer' => $mailerKey,
+                'from_resuelto' => $fromAddr,
+            ]);
+
+            $fromAddr = config('mail.from.address');
         }
 
         return [$firmaHtml, $mailerKey, $fromAddr, $fromName];
@@ -260,7 +263,7 @@ class PrograMailController extends Controller
             Mail::mailer($mailerKey)->to($destinatarios)->send($mail);
 
             // logs para ver envio de correo
-            Log::info('Programación diaria enviada (rápida)', [
+            Log::channel('mail_audit')->info('Programación diaria enviada (rápida)', [
                 'fecha' => $fecha,
                 'mailer' => $mailerKey,
                 'from' => $fromAddr,
@@ -278,7 +281,7 @@ class PrograMailController extends Controller
                 'contexto' => 'enviarProgramacionPorCorreo',
             ]);
 
-            return back()->with('error', 'Fallo envío: '.$ex->getMessage());
+            return back()->with('error', 'Fallo de envio. Contacta al administrador del sistema.');
         }
     }
 
@@ -320,7 +323,7 @@ class PrograMailController extends Controller
             ]);
 
             // destinatatios(solo sera visible el propio y todos los demas ocultos)
-            $to = 'notifica_4top_santiago@pjud.cl';        // correo ancla (visible solo para el receptor)
+            $to = 'jtroncosor@pjud.cl';        // correo ancla (visible solo para el receptor)
             $bcc = $destinatarios;  // TODOS ocultos
 
             Mail::mailer($mailerKey)
@@ -329,11 +332,11 @@ class PrograMailController extends Controller
                 ->send($mail);
 
             // log para verificar envio de correo
-            Log::info('Programación diaria enviada (lista)', [
+            Log::channel('mail_audit')->info('Programación diaria enviada (lista)', [
                 'fecha' => $fecha,
                 'mailer' => $mailerKey,
                 'from' => $fromAddr,
-                'to' => $fromAddr,
+                'to' => $to,
                 'bcc' => $bcc,
                 'total_dest' => count($bcc),
                 'contexto' => 'enviarProgramacionPorCorreoLista',
@@ -351,7 +354,7 @@ class PrograMailController extends Controller
                 'contexto' => 'enviarProgramacionPorCorreoLista',
             ]);
 
-            return back()->with('error', 'Fallo envío (lista): '.$ex->getMessage());
+            return back()->with('error', 'Fallo de envio en difusion. Contacta al administrador del sistema.');
         }
     }
 

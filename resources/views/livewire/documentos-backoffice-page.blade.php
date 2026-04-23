@@ -14,14 +14,15 @@
             </div>
         @endif
 
-        <details class="group bg-white overflow-hidden shadow-sm sm:rounded-lg">
-            <summary class="list-none cursor-pointer p-6 text-gray-900 flex items-center justify-between [&::-webkit-details-marker]:hidden">
+        <div class="group bg-white overflow-hidden shadow-sm sm:rounded-lg">
+            <button type="button" wire:click="toggleSection('procedimientos')" class="w-full cursor-pointer p-6 text-gray-900 flex items-center justify-between">
                 <h3 class="text-lg font-semibold">Procedimientos tribunal</h3>
-                <svg class="size-5 text-slate-600 transition-transform group-open:rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <svg class="size-5 text-slate-600 transition-transform {{ ($sectionsOpen['procedimientos'] ?? true) ? 'rotate-180' : '' }}" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
                 </svg>
-            </summary>
+            </button>
 
+            @if ($sectionsOpen['procedimientos'] ?? true)
             <div class="px-6 pb-6 pt-0 text-gray-900 space-y-4 border-t border-slate-200">
 
                 <form wire:submit="addProcedimiento" class="grid grid-cols-1 md:grid-cols-4 gap-3">
@@ -57,6 +58,7 @@
                                 <th class="px-4 py-2 text-left font-semibold text-gray-700">Orden</th>
                                 <th class="px-4 py-2 text-left font-semibold text-gray-700">Nombre</th>
                                 <th class="px-4 py-2 text-left font-semibold text-gray-700">URL</th>
+                                <th class="px-4 py-2 text-left font-semibold text-gray-700">Publico</th>
                                 <th class="px-4 py-2 text-right font-semibold text-gray-700">Accion</th>
                             </tr>
                         </thead>
@@ -68,31 +70,40 @@
                                     <td class="px-4 py-2">
                                         <a href="{{ $item['url'] }}" target="_blank" class="text-sky-700 hover:underline">{{ $item['url'] }}</a>
                                     </td>
+                                    <td class="px-4 py-2">
+                                        @if (($item['publico'] ?? true) === true)
+                                            <span class="inline-flex rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800">Si</span>
+                                        @else
+                                            <span class="inline-flex rounded-full bg-gray-200 px-2 py-1 text-xs font-medium text-gray-700">No</span>
+                                        @endif
+                                    </td>
                                     <td class="px-4 py-2 text-right">
-                                        <button type="button" wire:click="removeProcedimiento({{ $i }})" wire:confirm="Se quitara este procedimiento del listado. Continuar?" class="rounded-md bg-red-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-700">
-                                            Quitar
+                                        <button type="button" wire:click="removeProcedimiento({{ $i }})" wire:confirm="Se quitara este procedimiento del listado. Continuar?" class="rounded-md bg-red-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-700" title="Quitar" aria-label="Quitar">
+                                            <i class="fas fa-trash"></i>
                                         </button>
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="4" class="px-4 py-6 text-center text-gray-500">Sin procedimientos cargados.</td>
+                                    <td colspan="5" class="px-4 py-6 text-center text-gray-500">Sin procedimientos cargados.</td>
                                 </tr>
                             @endforelse
                         </tbody>
                     </table>
                 </div>
             </div>
-        </details>
+            @endif
+        </div>
 
-        <details class="group bg-white overflow-hidden shadow-sm sm:rounded-lg">
-            <summary class="list-none cursor-pointer p-6 text-gray-900 flex items-center justify-between [&::-webkit-details-marker]:hidden">
+        <div class="group bg-white overflow-hidden shadow-sm sm:rounded-lg">
+            <button type="button" wire:click="toggleSection('documentos')" class="w-full cursor-pointer p-6 text-gray-900 flex items-center justify-between">
                 <h3 class="text-lg font-semibold">Documentos</h3>
-                <svg class="size-5 text-slate-600 transition-transform group-open:rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <svg class="size-5 text-slate-600 transition-transform {{ ($sectionsOpen['documentos'] ?? true) ? 'rotate-180' : '' }}" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
                 </svg>
-            </summary>
+            </button>
 
+            @if ($sectionsOpen['documentos'] ?? true)
             <div class="px-6 pb-6 pt-0 text-gray-900 space-y-4 border-t border-slate-200">
 
                 <form wire:submit="addDocumento" class="grid grid-cols-1 md:grid-cols-4 gap-3">
@@ -128,6 +139,7 @@
                                 <th class="px-4 py-2 text-left font-semibold text-gray-700">Orden</th>
                                 <th class="px-4 py-2 text-left font-semibold text-gray-700">Nombre</th>
                                 <th class="px-4 py-2 text-left font-semibold text-gray-700">URL</th>
+                                <th class="px-4 py-2 text-left font-semibold text-gray-700">Publico</th>
                                 <th class="px-4 py-2 text-right font-semibold text-gray-700">Accion</th>
                             </tr>
                         </thead>
@@ -139,31 +151,40 @@
                                     <td class="px-4 py-2">
                                         <a href="{{ $item['url'] }}" target="_blank" class="text-sky-700 hover:underline">{{ $item['url'] }}</a>
                                     </td>
+                                    <td class="px-4 py-2">
+                                        @if (($item['publico'] ?? true) === true)
+                                            <span class="inline-flex rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800">Si</span>
+                                        @else
+                                            <span class="inline-flex rounded-full bg-gray-200 px-2 py-1 text-xs font-medium text-gray-700">No</span>
+                                        @endif
+                                    </td>
                                     <td class="px-4 py-2 text-right">
-                                        <button type="button" wire:click="removeDocumento({{ $i }})" wire:confirm="Se quitara este documento del listado. Continuar?" class="rounded-md bg-red-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-700">
-                                            Quitar
+                                        <button type="button" wire:click="removeDocumento({{ $i }})" wire:confirm="Se quitara este documento del listado. Continuar?" class="rounded-md bg-red-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-700" title="Quitar" aria-label="Quitar">
+                                            <i class="fas fa-trash"></i>
                                         </button>
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="4" class="px-4 py-6 text-center text-gray-500">Sin documentos cargados.</td>
+                                    <td colspan="5" class="px-4 py-6 text-center text-gray-500">Sin documentos cargados.</td>
                                 </tr>
                             @endforelse
                         </tbody>
                     </table>
                 </div>
             </div>
-        </details>
+            @endif
+        </div>
 
-        <details class="group bg-white overflow-hidden shadow-sm sm:rounded-lg">
-            <summary class="list-none cursor-pointer p-6 text-gray-900 flex items-center justify-between [&::-webkit-details-marker]:hidden">
+        <div class="group bg-white overflow-hidden shadow-sm sm:rounded-lg">
+            <button type="button" wire:click="toggleSection('migracion')" class="w-full cursor-pointer p-6 text-gray-900 flex items-center justify-between">
                 <h3 class="text-lg font-semibold">Migracion Unijud</h3>
-                <svg class="size-5 text-slate-600 transition-transform group-open:rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <svg class="size-5 text-slate-600 transition-transform {{ ($sectionsOpen['migracion'] ?? true) ? 'rotate-180' : '' }}" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
                 </svg>
-            </summary>
+            </button>
 
+            @if ($sectionsOpen['migracion'] ?? true)
             <div class="px-6 pb-6 pt-0 text-gray-900 space-y-4 border-t border-slate-200">
 
                 <form wire:submit="addTribunal" class="grid grid-cols-1 md:grid-cols-4 gap-3">
@@ -192,8 +213,8 @@
                                 <tr wire:key="trib-{{ $i }}">
                                     <td class="px-4 py-2">{{ $item['nombre'] }}</td>
                                     <td class="px-4 py-2 text-right">
-                                        <button type="button" wire:click="removeTribunal({{ $i }})" wire:confirm="Se quitara este tribunal del listado. Continuar?" class="rounded-md bg-red-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-700">
-                                            Quitar
+                                        <button type="button" wire:click="removeTribunal({{ $i }})" wire:confirm="Se quitara este tribunal del listado. Continuar?" class="rounded-md bg-red-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-700" title="Quitar" aria-label="Quitar">
+                                            <i class="fas fa-trash"></i>
                                         </button>
                                     </td>
                                 </tr>
@@ -206,16 +227,18 @@
                     </table>
                 </div>
             </div>
-        </details>
+            @endif
+        </div>
 
-        <details class="group bg-white overflow-hidden shadow-sm sm:rounded-lg">
-            <summary class="list-none cursor-pointer p-6 text-gray-900 flex items-center justify-between [&::-webkit-details-marker]:hidden">
+        <div class="group bg-white overflow-hidden shadow-sm sm:rounded-lg">
+            <button type="button" wire:click="toggleSection('encargados')" class="w-full cursor-pointer p-6 text-gray-900 flex items-center justify-between">
                 <h3 class="text-lg font-semibold">N° Encargado Audiencia</h3>
-                <svg class="size-5 text-slate-600 transition-transform group-open:rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <svg class="size-5 text-slate-600 transition-transform {{ ($sectionsOpen['encargados'] ?? true) ? 'rotate-180' : '' }}" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
                 </svg>
-            </summary>
+            </button>
 
+            @if ($sectionsOpen['encargados'] ?? true)
             <div class="px-6 pb-6 pt-0 text-gray-900 space-y-4 border-t border-slate-200">
 
                 <form wire:submit="addEncargadoAudiencia" class="grid grid-cols-1 md:grid-cols-4 gap-3">
@@ -253,8 +276,8 @@
                                     <td class="px-4 py-2">{{ $item['nombre'] }}</td>
                                     <td class="px-4 py-2">{{ $item['numeros'] }}</td>
                                     <td class="px-4 py-2 text-right">
-                                        <button type="button" wire:click="removeEncargadoAudiencia({{ $i }})" wire:confirm="Se quitara este encargado del listado. Continuar?" class="rounded-md bg-red-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-700">
-                                            Quitar
+                                        <button type="button" wire:click="removeEncargadoAudiencia({{ $i }})" wire:confirm="Se quitara este encargado del listado. Continuar?" class="rounded-md bg-red-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-700" title="Quitar" aria-label="Quitar">
+                                            <i class="fas fa-trash"></i>
                                         </button>
                                     </td>
                                 </tr>
@@ -267,7 +290,8 @@
                     </table>
                 </div>
             </div>
-        </details>
+            @endif
+        </div>
 
         <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
             <div class="p-6 text-gray-900 space-y-4">
