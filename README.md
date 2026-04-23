@@ -81,4 +81,4 @@ php artisan key:generate
 php artisan migrate
 composer run dev
 ```
-php artisan db:seed --class=NombreDelSeeder
+seeders php artisan db:seed --class=NombreDelSeeder
