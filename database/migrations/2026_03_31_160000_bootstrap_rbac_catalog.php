@@ -23,6 +23,8 @@ return new class extends Migration
         'navbar.bitacora_pruebas.editable',
         'navbar.ausencias.visible',
         'navbar.ausencias.editable',
+        'navbar.documentos.visible',
+        'navbar.documentos.editable',
         'navbar.seguridad.visible',
         'navbar.seguridad.editable',
         'seguridad.roles.ver',
@@ -55,7 +57,10 @@ return new class extends Migration
         'ausentismo.editar',
         'progra.ver',
         'progra.mail.enviar',
+        'documentos.ver',
+        'documentos.gestionar',
         'sentencias.ver',
+        'sentencias.importar',
     ];
 
     private const ROLES = [
