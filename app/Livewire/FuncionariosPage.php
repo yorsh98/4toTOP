@@ -195,16 +195,31 @@ class FuncionariosPage extends Component
         $catalog = app(FuncionarioCatalog::class);
 
         $term = trim($this->search);
+        $matchingRoleKeys = [];
+
+        if ($term !== '') {
+            $normalizedTerm = mb_strtolower($term);
+
+            foreach ($catalog->roleOptions() as $key => $label) {
+                if (str_contains(mb_strtolower((string) $label), $normalizedTerm)) {
+                    $matchingRoleKeys[] = (string) $key;
+                }
+            }
+        }
 
         $solicitantes = Funcionario::query()
-            ->when($term !== '', function ($query) use ($term) {
-                $query->where(function ($subQuery) use ($term) {
+            ->when($term !== '', function ($query) use ($term, $matchingRoleKeys) {
+                $query->where(function ($subQuery) use ($term, $matchingRoleKeys) {
                     $subQuery
                         ->where('nombre', 'like', "%{$term}%")
                         ->orWhere('run', 'like', "%{$term}%")
                         ->orWhere('rol', 'like', "%{$term}%")
                         ->orWhere('email', 'like', "%{$term}%")
                         ->orWhere('telefono', 'like', "%{$term}%");
+
+                    if ($matchingRoleKeys !== []) {
+                        $subQuery->orWhereIn('rol', $matchingRoleKeys);
+                    }
                 });
             })
             ->orderBy('nombre')
