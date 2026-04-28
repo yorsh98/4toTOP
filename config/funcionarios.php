@@ -7,7 +7,7 @@ return [
         'ttypp' => 'TTyPP',
         'encargado_causa' => 'Encargado causa',
         'jefatura' => 'Jefatura',
-        'informatico' => 'Informatico',
+        'informatico' => 'Administrativo',
     ],
 
     'contexts' => [
