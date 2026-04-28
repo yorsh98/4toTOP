@@ -53,6 +53,16 @@
                                 @endif
                             </div>
                         @endguest
+
+                        @auth
+                            <a
+                                href="{{ route('dashboard') }}"
+                                class="inline-flex items-center justify-center gap-1.5 rounded-lg bg-[#0A2E5D] px-2.5 py-1.5 text-xs font-semibold text-white shadow-[0_6px_14px_rgba(10,46,93,0.28)] transition-all duration-300 hover:brightness-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0A2E5D] focus-visible:ring-offset-2"
+                            >
+                                <i class="fa-solid fa-arrow-left text-[11px]" aria-hidden="true"></i>
+                                Volver al backoffice
+                            </a>
+                        @endauth
                     </div>
                 </header>
                 <x-navbar />
