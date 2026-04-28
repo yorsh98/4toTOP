@@ -336,7 +336,7 @@
     </details>
 
     <details class="rounded-xl border border-gray-200 bg-white shadow-sm">
-        <summary class="cursor-pointer select-none px-5 py-4 text-base font-semibold text-gray-800">Turno 3</summary>
+        <summary class="cursor-pointer select-none px-5 py-4 text-base font-semibold text-gray-800">Turno 3 (PROGRAMACION DE AUDIENCIAS)</summary>
         <div class="space-y-4 border-t border-gray-200 p-5">
             <form wire:submit="saveTurno3" class="space-y-4">
                 <div class="grid gap-3 md:grid-cols-3">
@@ -346,7 +346,7 @@
                             $id = 'T3_'.$field;
                         @endphp
                         <div>
-                            <label for="{{ $id }}" class="block text-sm font-medium text-gray-600">Magistrado {{ $i }}</label>
+                            <label for="{{ $id }}" class="block text-sm font-medium text-gray-600">Turno {{ $i }}</label>
                             <input
                                 type="text"
                                 id="{{ $id }}"
