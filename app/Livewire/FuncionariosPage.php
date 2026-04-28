@@ -9,11 +9,18 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
+use Livewire\WithPagination;
 
 #[Layout('layouts.app')]
 class FuncionariosPage extends Component
 {
+    use WithPagination;
+
+    protected $paginationTheme = 'bootstrap';
+
     public ?int $editingId = null;
+
+    public string $search = '';
 
     public string $nombre = '';
 
@@ -176,14 +183,35 @@ class FuncionariosPage extends Component
         return $safeLocal.$token.'@'.$domain;
     }
 
+    public function updatingSearch(): void
+    {
+        $this->resetPage();
+    }
+
     public function render()
     {
         Gate::authorize('navbar.funcionarios.visible');
 
         $catalog = app(FuncionarioCatalog::class);
 
+        $term = trim($this->search);
+
+        $solicitantes = Funcionario::query()
+            ->when($term !== '', function ($query) use ($term) {
+                $query->where(function ($subQuery) use ($term) {
+                    $subQuery
+                        ->where('nombre', 'like', "%{$term}%")
+                        ->orWhere('run', 'like', "%{$term}%")
+                        ->orWhere('rol', 'like', "%{$term}%")
+                        ->orWhere('email', 'like', "%{$term}%")
+                        ->orWhere('telefono', 'like', "%{$term}%");
+                });
+            })
+            ->orderBy('nombre')
+            ->paginate(20);
+
         return view('livewire.funcionarios-page', [
-            'solicitantes' => Funcionario::query()->orderBy('nombre')->get(),
+            'solicitantes' => $solicitantes,
             'roles' => $catalog->roleOptions(),
         ]);
     }
