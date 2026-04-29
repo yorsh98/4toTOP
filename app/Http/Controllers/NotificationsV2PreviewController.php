@@ -150,4 +150,15 @@ class NotificationsV2PreviewController extends Controller
             'adminName' => 'Admin Demo',
         ]);
     }
+
+    public function bitacoraPruebas(Request $request): View
+    {
+        return view('emails.v2.bitacora-pruebas-outlook', [
+            'subject' => 'Notificacion de Bitacora de Pruebas',
+            'senderName' => (string) $request->query('sender', 'Admin Demo'),
+            'documentosUrl' => (string) $request->query('documentos', 'https://example.com/documentos'),
+            'bitacoraPublicUrl' => (string) $request->query('bitacora', route('bitacora-pruebas.public')),
+            'recipientName' => (string) $request->query('user', 'Usuario Demo'),
+        ]);
+    }
 }
