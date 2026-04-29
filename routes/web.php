@@ -200,6 +200,9 @@ Route::prefix('preview/notificaciones-v2')
 
         Route::get('/user-status', [NotificationsV2PreviewController::class, 'userStatus'])
             ->name('user-status');
+
+        Route::get('/bitacora-pruebas', [NotificationsV2PreviewController::class, 'bitacoraPruebas'])
+            ->name('bitacora-pruebas');
     });
 
 /*

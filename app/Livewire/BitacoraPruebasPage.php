@@ -5,16 +5,21 @@ namespace App\Livewire;
 use App\Models\Audiencia;
 use App\Models\BitacoraPruebaDia;
 use App\Models\BitacoraPruebaItem;
+use App\NotificationsV2\Application\Services\BitacoraPruebasNotifier;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
+use Throwable;
 
 #[Layout('layouts.app')]
 class BitacoraPruebasPage extends Component
 {
     public bool $showViewer = false;
+
+    public bool $showNotificationForm = false;
 
     public string $rit = '';
 
@@ -23,6 +28,12 @@ class BitacoraPruebasPage extends Component
     public string $fechaDia = '';
 
     public int $numeroDia = 1;
+
+    public string $destinatarioUno = '';
+
+    public string $destinatarioDos = '';
+
+    public string $destinatarioTres = '';
 
     /** @var array<int, array{nombre_prueba: string, institucion_exhibe: string}> */
     public array $newItems = [];
@@ -149,6 +160,99 @@ class BitacoraPruebasPage extends Component
         Gate::authorize('bitacora_pruebas.ver');
 
         $this->showViewer = ! $this->showViewer;
+    }
+
+    public function toggleNotificationForm(): void
+    {
+        Gate::authorize('bitacora_pruebas.editar');
+
+        $this->showNotificationForm = ! $this->showNotificationForm;
+    }
+
+    public function sendBitacoraNotification(): void
+    {
+        Gate::authorize('bitacora_pruebas.editar');
+
+        Log::info('bitacora_pruebas.notification.requested', [
+            'user_id' => Auth::id(),
+            'rit' => $this->rit,
+        ]);
+
+        $data = $this->validate([
+            'destinatarioUno' => ['nullable', 'email', 'max:255'],
+            'destinatarioDos' => ['nullable', 'email', 'max:255'],
+            'destinatarioTres' => ['nullable', 'email', 'max:255'],
+            'enlaceActa' => ['nullable', 'url', 'max:2048'],
+        ]);
+
+        $destinatarios = collect([
+            $data['destinatarioUno'] ?? null,
+            $data['destinatarioDos'] ?? null,
+            $data['destinatarioTres'] ?? null,
+        ])
+            ->map(fn ($email) => is_string($email) ? strtolower(trim($email)) : '')
+            ->filter(fn (string $email) => $email !== '')
+            ->unique()
+            ->values()
+            ->all();
+
+        if ($destinatarios === []) {
+            throw ValidationException::withMessages([
+                'destinatarioUno' => 'Debes ingresar al menos un correo destinatario.',
+            ]);
+        }
+
+        $documentosUrl = trim((string) ($data['enlaceActa'] ?? $this->enlaceActa));
+
+        if ($documentosUrl === '' && trim($this->rit) !== '') {
+            $documentosUrl = (string) (BitacoraPruebaDia::query()
+                ->where('rit', trim($this->rit))
+                ->whereNotNull('enlace_acta')
+                ->where('enlace_acta', '!=', '')
+                ->latest('id')
+                ->value('enlace_acta') ?? '');
+        }
+
+        if ($documentosUrl === '') {
+            $documentosUrl = (string) (BitacoraPruebaDia::query()
+                ->whereNotNull('enlace_acta')
+                ->where('enlace_acta', '!=', '')
+                ->latest('id')
+                ->value('enlace_acta') ?? '');
+        }
+
+        if ($documentosUrl === '') {
+            $documentosUrl = route('bitacora-pruebas.public');
+        }
+
+        try {
+            app(BitacoraPruebasNotifier::class)->notify(
+                destinatarios: $destinatarios,
+                senderName: Auth::user()?->name ?? 'Usuario del sistema',
+                documentosUrl: $documentosUrl,
+                bitacoraPublicUrl: 'http://10.13.214.129:8081/bitacora-pruebas',
+                rit: trim($this->rit),
+            );
+        } catch (Throwable $exception) {
+            Log::error('bitacora_pruebas.notification.failed_to_dispatch', [
+                'user_id' => Auth::id(),
+                'rit' => $this->rit,
+                'error' => $exception->getMessage(),
+            ]);
+
+            session()->flash('error', 'No se pudo encolar la notificacion. Revisa configuracion y vuelve a intentar.');
+
+            return;
+        }
+
+        Log::info('bitacora_pruebas.notification.dispatched', [
+            'user_id' => Auth::id(),
+            'rit' => $this->rit,
+            'destinatarios_count' => count($destinatarios),
+            'documentos_url' => $documentosUrl,
+        ]);
+
+        session()->flash('ok', 'Notificacion enviada correctamente.');
     }
 
     public function render()

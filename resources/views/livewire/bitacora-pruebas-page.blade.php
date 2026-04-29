@@ -10,15 +10,27 @@
                     <div class="mb-4 rounded-md bg-green-100 px-4 py-2 text-sm text-green-800">{{ session('ok') }}</div>
                 @endif
 
+                @if (session('error'))
+                    <div class="mb-4 rounded-md bg-red-100 px-4 py-2 text-sm text-red-800">{{ session('error') }}</div>
+                @endif
+
                 <h3 class="text-lg font-semibold mb-4">Nuevo dia de bitacora</h3>
 
-                <div class="mb-4 flex justify-end">
+                <div class="mb-4 flex justify-end gap-2">
                     <button
                         type="button"
                         wire:click="toggleViewer"
                         class="inline-flex items-center px-4 py-2 rounded-md border border-sky-200 text-sky-700 bg-sky-50 hover:bg-sky-100"
                     >
                         {{ $showViewer ? 'Ocultar modo visualizacion' : 'Ver modo visualizacion' }}
+                    </button>
+
+                    <button
+                        type="button"
+                        wire:click="toggleNotificationForm"
+                        class="inline-flex items-center px-4 py-2 rounded-md border border-emerald-200 text-emerald-700 bg-emerald-50 hover:bg-emerald-100"
+                    >
+                        Enviar notificacion de bitacora
                     </button>
                 </div>
 
@@ -82,6 +94,63 @@
                         </button>
                     </div>
                 </div>
+
+                @if ($showNotificationForm)
+                <div class="mt-8 border-t border-gray-200 pt-6">
+                    <h3 class="text-lg font-semibold mb-4">Enviar notificacion de bitacora</h3>
+
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
+                        <div class="md:col-span-3">
+                            <label class="block text-sm text-gray-700 mb-1">Correo destinatario 1</label>
+                            <input
+                                type="email"
+                                wire:model.live="destinatarioUno"
+                                class="w-full px-3 py-2 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                                placeholder="correo1@dominio.cl"
+                            >
+                            @error('destinatarioUno') <p class="text-xs text-red-600 mt-1">{{ $message }}</p> @enderror
+                        </div>
+
+                        <div class="md:col-span-3">
+                            <label class="block text-sm text-gray-700 mb-1">Correo destinatario 2</label>
+                            <input
+                                type="email"
+                                wire:model.live="destinatarioDos"
+                                class="w-full px-3 py-2 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                                placeholder="correo2@dominio.cl"
+                            >
+                            @error('destinatarioDos') <p class="text-xs text-red-600 mt-1">{{ $message }}</p> @enderror
+                        </div>
+
+                        <div class="md:col-span-3">
+                            <label class="block text-sm text-gray-700 mb-1">Correo destinatario 3</label>
+                            <input
+                                type="email"
+                                wire:model.live="destinatarioTres"
+                                class="w-full px-3 py-2 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                                placeholder="correo3@dominio.cl"
+                            >
+                            @error('destinatarioTres') <p class="text-xs text-red-600 mt-1">{{ $message }}</p> @enderror
+                        </div>
+
+                        <div class="md:col-span-3">
+                            <button
+                                type="button"
+                                wire:click="sendBitacoraNotification"
+                                class="w-full px-4 py-2 rounded-md bg-emerald-600 text-white hover:bg-emerald-700"
+                            >
+                                Enviar notificacion
+                            </button>
+                        </div>
+
+                        <div class="md:col-span-12">
+                            @error('enlaceActa') <p class="text-xs text-red-600 mt-1">{{ $message }}</p> @enderror
+                        </div>
+
+                        
+                    </div>
+                </div>
+                @endif
             </div>
         </div>
 
