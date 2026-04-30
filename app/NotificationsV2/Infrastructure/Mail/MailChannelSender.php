@@ -51,6 +51,15 @@ class MailChannelSender implements ChannelSender
                     'recipient_type' => $recipient->type,
                     'status' => 'sent',
                 ]);
+
+                Log::channel('mail_audit')->info('notifications_v2.mail.recipient_sent', [
+                    'dispatch_id' => $dispatch->id,
+                    'event_key' => $dispatch->event_key,
+                    'mailer' => $mailer,
+                    'recipient_email' => $recipient->email,
+                    'recipient_type' => $recipient->type,
+                    'status' => 'sent',
+                ]);
             } catch (Throwable $exception) {
                 $recipient->update([
                     'status' => 'failed',
@@ -60,6 +69,16 @@ class MailChannelSender implements ChannelSender
                 Log::warning('notifications_v2.mail.recipient_failed', [
                     'dispatch_id' => $dispatch->id,
                     'event_key' => $dispatch->event_key,
+                    'recipient_email' => $recipient->email,
+                    'recipient_type' => $recipient->type,
+                    'status' => 'failed',
+                    'error' => $exception->getMessage(),
+                ]);
+
+                Log::channel('mail_audit')->warning('notifications_v2.mail.recipient_failed', [
+                    'dispatch_id' => $dispatch->id,
+                    'event_key' => $dispatch->event_key,
+                    'mailer' => $mailer,
                     'recipient_email' => $recipient->email,
                     'recipient_type' => $recipient->type,
                     'status' => 'failed',
