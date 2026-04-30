@@ -94,15 +94,21 @@
                                     </div>
                                     <span class="font-medium text-gray-700 dark:text-gray-300">PORTAL ORDENES Y CONTRAORDENES</span>
                                 </a>
-                               <a href="https://consultaintegrada.pjud.cl/loginMinistry" target="_blank" class="flex items-center p-3 space-x-3 rounded-xl transition-all shadow-sm hover:bg-gray-100 hover:-translate-y-0.5 border border-gray-100 dark:border-gray-700">
-                                    <div class="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-                                        <img src="/favicon.webp" alt="Gestión Penal" class="w-6 h-6">
-                                    </div>
-                                    <span class="font-medium text-gray-700 dark:text-gray-300">CONSULTA INTEGRADA DE CAUSAS UNIJUD</span>
-                                </a>                                
+                                 <a href="https://consultaintegrada.pjud.cl/loginMinistry" target="_blank" class="flex items-center p-3 space-x-3 rounded-xl transition-all shadow-sm hover:bg-gray-100 hover:-translate-y-0.5 border border-gray-100 dark:border-gray-700">
+                                     <div class="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                                         <img src="/favicon.webp" alt="Gestión Penal" class="w-6 h-6">
+                                     </div>
+                                     <span class="font-medium text-gray-700 dark:text-gray-300">CONSULTA INTEGRADA DE CAUSAS UNIJUD</span>
+                                 </a>
+                                 <a href="https://juris.pjud.cl/" target="_blank" class="flex items-center p-3 space-x-3 rounded-xl transition-all shadow-sm hover:bg-gray-100 hover:-translate-y-0.5 border border-gray-100 dark:border-gray-700">
+                                     <div class="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                                         <img src="/favicon.webp" alt="Gestión Penal" class="w-6 h-6">
+                                     </div>
+                                     <span class="font-medium text-gray-700 dark:text-gray-300">BUSCADOR UNIFICADO SENTENCIAS PJUD</span>
+                                 </a>
  
-                            </div>
-                        </div> 
+                             </div>
+                         </div> 
                         <div class="bg-white dark:bg-gray-800 shadow-lg rounded-2xl hover:shadow-xl transition-all mb-6">
                             <button onclick="toggleAcceso('mod2')" 
                                     class="w-full px-6 py-4 flex items-center justify-between text-lg font-semibold text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-t-2xl transition-all duration-300 group">

@@ -281,6 +281,14 @@ class PrograMailController extends Controller
                 'contexto' => 'enviarProgramacionPorCorreo',
             ]);
 
+            Log::channel('mail_audit')->warning('Programación diaria fallida (rápida)', [
+                'fecha' => $fecha,
+                'mailer' => $mailerKey ?? null,
+                'from' => $fromAddr ?? null,
+                'error' => $ex->getMessage(),
+                'contexto' => 'enviarProgramacionPorCorreo',
+            ]);
+
             return back()->with('error', 'Fallo de envio. Contacta al administrador del sistema.');
         }
     }
@@ -345,6 +353,16 @@ class PrograMailController extends Controller
             return back()->with('ok', "Programación {$fecha} enviada (difusión).");
         } catch (\Throwable $ex) {
             Log::error('Fallo envío programación diaria (lista)', [
+                'fecha' => $fecha,
+                'mailer' => $mailerKey ?? null,
+                'from' => $fromAddr ?? null,
+                'to' => $to ?? null,
+                'bcc' => $bcc ?? [],
+                'error' => $ex->getMessage(),
+                'contexto' => 'enviarProgramacionPorCorreoLista',
+            ]);
+
+            Log::channel('mail_audit')->warning('Programación diaria fallida (lista)', [
                 'fecha' => $fecha,
                 'mailer' => $mailerKey ?? null,
                 'from' => $fromAddr ?? null,
