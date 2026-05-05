@@ -177,7 +177,7 @@
                                 </div>                                
                             </a>
                             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                                <a  id="5"
+                                <a  id="11"
                                     href="{{ url('/buscadorsentencias') }}" 
                                     class="flex items-center gap-3 rounded-xl bg-white/92 p-6 shadow-[0_12px_30px_rgba(15,23,42,0.14)] ring-1 ring-slate-900/10 backdrop-blur-[2px] transition-all duration-300 hover:-translate-y-0.5 hover:text-black/80 hover:shadow-[0_18px_38px_rgba(15,23,42,0.2)] hover:ring-slate-900/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF2D20] lg:pb-10 dark:bg-zinc-900/90 dark:ring-zinc-700 dark:hover:text-white/80 dark:hover:ring-zinc-500">
                                     <div class="size-12 shrink-0 flex items-center justify-center rounded-full">
@@ -360,7 +360,7 @@
                                     <h2 class="text-xl font-semibold text-black dark:text-white">DOCUMENTOS</h2>                                    
                                 </div>                                
                             </a>
-                            <a
+                            <a  id="10"
                                 href="{{ url('/migraunijud') }}" 
                                 class="flex items-start gap-4 rounded-xl bg-white/92 p-6 shadow-[0_12px_30px_rgba(15,23,42,0.14)] ring-1 ring-slate-900/10 backdrop-blur-[2px] transition-all duration-300 hover:-translate-y-0.5 hover:text-black/80 hover:shadow-[0_18px_38px_rgba(15,23,42,0.2)] hover:ring-slate-900/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF2D20] lg:pb-10 dark:bg-zinc-900/90 dark:ring-zinc-700 dark:hover:text-white/80 dark:hover:ring-zinc-500">
                                 <div class="flex size-12 shrink-0 items-center justify-center rounded-full  sm:size-16">
@@ -381,7 +381,7 @@
                         </div>  
                         <div class="grid gap-6 pt-6 lg:grid-cols-3 lg:gap-8">
                              
-                            <a  id="6"
+                            <a  id="5"
                                 href="{{ url('/proc') }}" 
                                 class="flex items-center gap-4 rounded-xl bg-white/92 p-6 shadow-[0_12px_30px_rgba(15,23,42,0.14)] ring-1 ring-slate-900/10 backdrop-blur-[2px] transition-all duration-300 hover:-translate-y-0.5 hover:text-black/80 hover:shadow-[0_18px_38px_rgba(15,23,42,0.2)] hover:ring-slate-900/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF2D20] lg:pb-10 dark:bg-zinc-900/90 dark:ring-zinc-700 dark:hover:text-white/80 dark:hover:ring-zinc-500"
                             >
