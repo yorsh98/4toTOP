@@ -27,7 +27,7 @@ class BitacoraPruebasViewer extends Component
             ->orderBy('rit')
             ->value('rit');
 
-        $this->selectedRit = $firstRit ?? '';
+        $this->selectedRit = trim((string) ($firstRit ?? ''));
 
         if ($this->selectedRit !== '') {
             $this->selectedDiaId = BitacoraPruebaDia::query()
@@ -39,7 +39,7 @@ class BitacoraPruebasViewer extends Component
 
     public function selectRit(string $rit): void
     {
-        $this->selectedRit = $rit;
+        $this->selectedRit = trim($rit);
 
         $this->selectedDiaId = BitacoraPruebaDia::query()
             ->where('rit', $rit)
@@ -55,6 +55,7 @@ class BitacoraPruebasViewer extends Component
     public function render()
     {
         $dias = collect();
+        $matchesPorDia = [];
 
         $ritData = BitacoraPruebaDia::query()
             ->select('rit', 'enlace_acta')
@@ -75,6 +76,9 @@ class BitacoraPruebasViewer extends Component
 
         $rits = $ritData
             ->keys()
+            ->map(fn ($rit) => trim((string) $rit))
+            ->filter(fn (string $rit) => $rit !== '')
+            ->unique()
             ->values();
 
         if (trim($this->searchRit) !== '') {
@@ -103,30 +107,47 @@ class BitacoraPruebasViewer extends Component
                     })
                     ->values();
             }
+
+            if (trim($this->searchDetalle) !== '') {
+                $needle = mb_strtolower(trim($this->searchDetalle));
+
+                $dias = $dias
+                    ->map(function (BitacoraPruebaDia $dia) use ($needle, &$matchesPorDia) {
+                        $filteredItems = $dia->items
+                            ->filter(function ($item) use ($needle) {
+                                $nombre = mb_strtolower((string) $item->nombre_prueba);
+                                $institucion = mb_strtolower((string) $item->institucion_exhibe);
+                                $usuario = mb_strtolower((string) ($item->usuario?->name ?? ''));
+
+                                return str_contains($nombre, $needle)
+                                    || str_contains($institucion, $needle)
+                                    || str_contains($usuario, $needle);
+                            })
+                            ->values();
+
+                        $matchesPorDia[$dia->id] = $filteredItems->count();
+
+                        $dia->setRelation('items', $filteredItems);
+
+                        return $dia;
+                    })
+                    ->filter(fn (BitacoraPruebaDia $dia) => ($matchesPorDia[$dia->id] ?? 0) > 0)
+                    ->values();
+            }
+        }
+
+        if ($dias->isNotEmpty() && ! $dias->contains(fn (BitacoraPruebaDia $dia) => $dia->id === $this->selectedDiaId)) {
+            $this->selectedDiaId = (int) $dias->first()->id;
         }
 
         $selectedDia = $dias->firstWhere('id', $this->selectedDiaId);
-
-        if ($selectedDia && trim($this->searchDetalle) !== '') {
-            $needle = mb_strtolower(trim($this->searchDetalle));
-            $selectedDia->setRelation('items', $selectedDia->items
-                ->filter(function ($item) use ($needle) {
-                    $nombre = mb_strtolower((string) $item->nombre_prueba);
-                    $institucion = mb_strtolower((string) $item->institucion_exhibe);
-                    $usuario = mb_strtolower((string) ($item->usuario?->name ?? ''));
-
-                    return str_contains($nombre, $needle)
-                        || str_contains($institucion, $needle)
-                        || str_contains($usuario, $needle);
-                })
-                ->values());
-        }
 
         return view('livewire.bitacora-pruebas-viewer', [
             'rits' => $rits,
             'dias' => $dias,
             'selectedDia' => $selectedDia,
             'enlacesPorRit' => $enlacesPorRit,
+            'matchesPorDia' => $matchesPorDia,
         ]);
     }
 }

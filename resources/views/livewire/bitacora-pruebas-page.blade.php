@@ -194,6 +194,7 @@
                                             placeholder="Nombre de la prueba"
                                             class="md:col-span-2 px-3 py-2 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500"
                                         >
+                                        @error("newItems.{$dia->id}.nombre_prueba") <p class="text-xs text-red-600 mt-1 md:col-span-2">{{ $message }}</p> @enderror
 
                                         <div>
                                             <input
@@ -203,12 +204,14 @@
                                                 placeholder="Institucion que exhibe"
                                                 class="w-full px-3 py-2 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500"
                                             >
+                                            @error("newItems.{$dia->id}.institucion_exhibe") <p class="text-xs text-red-600 mt-1">{{ $message }}</p> @enderror
                                         </div>
 
                                         <button
                                             type="button"
                                             wire:click="addItem({{ $dia->id }})"
-                                            class="px-3 py-2 rounded-md bg-sky-600 text-white hover:bg-sky-700"
+                                            @disabled(! $this->canAddItem($dia->id))
+                                            class="px-3 py-2 rounded-md bg-sky-600 text-white hover:bg-sky-700 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-sky-600"
                                         >
                                             Agregar prueba
                                         </button>

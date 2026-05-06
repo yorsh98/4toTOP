@@ -113,20 +113,20 @@ class BitacoraPruebasPage extends Component
 
         $dia = BitacoraPruebaDia::query()->findOrFail($diaId);
 
-        $payload = $this->newItems[$diaId] ?? ['nombre_prueba' => '', 'institucion_exhibe' => ''];
-
-        $validated = validator($payload, [
-            'nombre_prueba' => ['required', 'string', 'max:255'],
-            'institucion_exhibe' => ['required', 'string', 'max:255'],
+        $validated = $this->validate([
+            "newItems.{$diaId}.nombre_prueba" => ['required', 'string', 'max:255'],
+            "newItems.{$diaId}.institucion_exhibe" => ['required', 'string', 'max:255'],
         ], [], [
-            'nombre_prueba' => 'nombre de la prueba',
-            'institucion_exhibe' => 'institucion que exhibe',
-        ])->validate();
+            "newItems.{$diaId}.nombre_prueba" => 'nombre de la prueba',
+            "newItems.{$diaId}.institucion_exhibe" => 'institucion que exhibe',
+        ]);
+
+        $item = $validated['newItems'][$diaId] ?? ['nombre_prueba' => '', 'institucion_exhibe' => ''];
 
         BitacoraPruebaItem::query()->create([
             'bitacora_pruebas_dia_id' => $dia->id,
-            'nombre_prueba' => trim($validated['nombre_prueba']),
-            'institucion_exhibe' => trim($validated['institucion_exhibe']),
+            'nombre_prueba' => trim((string) ($item['nombre_prueba'] ?? '')),
+            'institucion_exhibe' => trim((string) ($item['institucion_exhibe'] ?? '')),
             'ingresado_por_user_id' => Auth::id(),
         ]);
 
@@ -253,6 +253,20 @@ class BitacoraPruebasPage extends Component
         ]);
 
         session()->flash('ok', 'Notificacion enviada correctamente.');
+    }
+
+    public function canAddItem(int $diaId): bool
+    {
+        $item = $this->newItems[$diaId] ?? null;
+
+        if (! is_array($item)) {
+            return false;
+        }
+
+        $nombrePrueba = trim((string) ($item['nombre_prueba'] ?? ''));
+        $institucionExhibe = trim((string) ($item['institucion_exhibe'] ?? ''));
+
+        return $nombrePrueba !== '' && $institucionExhibe !== '';
     }
 
     public function render()
