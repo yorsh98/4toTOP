@@ -48,6 +48,12 @@ La aplicación implementa una arquitectura monolítica basada en Laravel, separa
 php artisan queue:work database --queue=default -v
 ```
 
+- Scheduler en produccion (obligatorio para tareas programadas como ausentismo 08:03):
+
+```bash
+* * * * * php /ruta/proyecto/artisan schedule:run >> /dev/null 2>&1
+```
+
 ## Vista rápida de arquitectura
 
 ```text

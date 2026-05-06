@@ -47,11 +47,8 @@ class DailyAusentismoSummaryNotifier
         $options = [
             'event_key' => 'ausentismo.resumen_diario.'.$fechaReporte,
             'recipients' => $this->catalogRecipientsWithoutJueces(),
+            'idempotency_key' => ($force ? 'force.' : 'run.').'ausentismo.resumen_diario.'.$fechaReporte.'.'.Str::uuid()->toString(),
         ];
-
-        if ($force) {
-            $options['idempotency_key'] = 'force.ausentismo.resumen_diario.'.$fechaReporte.'.'.Str::uuid()->toString();
-        }
 
         $this->orchestrator->dispatch('ausentismo.resumen_diario', $payload, $options);
     }
