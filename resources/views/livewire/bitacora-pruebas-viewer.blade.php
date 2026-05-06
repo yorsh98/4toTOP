@@ -48,7 +48,7 @@
                             <button
                                 type="button"
                                 wire:click="selectRit('{{ $rit }}')"
-                                class="flex-1 text-left px-3 py-2 rounded-md border transition {{ $selectedRit === $rit ? 'bg-sky-600 text-white border-sky-600' : 'bg-white hover:bg-sky-50 border-gray-300 text-gray-800' }}"
+                                class="flex-1 text-left px-3 py-2 rounded-md border transition {{ trim($selectedRit) === trim($rit) ? 'bg-sky-600 text-white border-sky-600' : 'bg-white hover:bg-sky-50 border-gray-300 text-gray-800' }}"
                                 title="Ver desglose por dia"
                             >
                                 {{ $rit }}
@@ -109,7 +109,14 @@
                             wire:click="selectDia({{ $dia->id }})"
                             class="w-full text-left px-3 py-2 rounded-md border transition {{ $selectedDiaId === $dia->id ? 'bg-sky-600 text-white border-sky-600' : 'bg-white hover:bg-sky-50 border-gray-300 text-gray-800' }}"
                         >
-                            Dia {{ $dia->numero_dia }}
+                            <span class="inline-flex w-full items-center justify-between gap-2">
+                                <span>Dia {{ $dia->numero_dia }}</span>
+                                @if (trim($searchDetalle) !== '')
+                                    <span class="text-xs px-2 py-0.5 rounded-full {{ $selectedDiaId === $dia->id ? 'bg-white/25 text-white' : 'bg-sky-100 text-sky-700' }}">
+                                        {{ $matchesPorDia[$dia->id] ?? 0 }}
+                                    </span>
+                                @endif
+                            </span>
                         </button>
                     @endforeach
                 </div>
