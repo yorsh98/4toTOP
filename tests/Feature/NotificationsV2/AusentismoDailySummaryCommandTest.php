@@ -112,3 +112,41 @@ test('daily ausentismo command sends control message when there are no absences'
         'status' => 'pending',
     ]);
 });
+
+test('daily ausentismo command uses observacion when tipo permiso is otro', function () {
+    Funcionario::query()->create([
+        'nombre' => 'Jefatura Mail',
+        'rol' => 'jefatura',
+        'email' => 'jefatura@example.cl',
+        'fecha_cumpleanos' => '1982-01-01',
+    ]);
+
+    Ausentismo::query()->create([
+        'funcionario_nombre' => 'Funcionario Con Observacion',
+        'cargo' => 'Administrativo/a',
+        'tipo_permiso' => 'Otro',
+        'fecha_inicio' => '2026-04-20',
+        'fecha_termino' => '2026-04-22',
+        'observacion' => 'Permiso especial por diligencia externa',
+    ]);
+
+    Ausentismo::query()->create([
+        'funcionario_nombre' => 'Funcionario Sin Observacion',
+        'cargo' => 'Administrativo/a',
+        'tipo_permiso' => 'Otro',
+        'fecha_inicio' => '2026-04-20',
+        'fecha_termino' => '2026-04-22',
+        'observacion' => '   ',
+    ]);
+
+    $this->artisan('notificaciones:ausentismo-diario', ['--date' => '2026-04-21'])
+        ->assertSuccessful();
+
+    $dispatch = NotificationDispatch::query()->latest('id')->first();
+
+    expect($dispatch)->not->toBeNull();
+    expect($dispatch->payload['ausentes_html'])->toContain('Permiso especial por diligencia externa');
+    expect($dispatch->payload['ausentes_html'])->toContain('>Otro<');
+    expect($dispatch->payload['ausentes_text'])->toContain('Permiso especial por diligencia externa');
+    expect($dispatch->payload['ausentes_text'])->toContain(' | Otro');
+});

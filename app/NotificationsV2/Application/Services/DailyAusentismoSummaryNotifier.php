@@ -123,7 +123,7 @@ class DailyAusentismoSummaryNotifier
         foreach ($ausentes as $ausente) {
             $nombre = (string) ($ausente['funcionario_nombre'] ?? '');
             $cargo = (string) ($ausente['cargo'] ?? '');
-            $tipoPermiso = (string) ($ausente['tipo_permiso'] ?? '');
+            $tipoPermiso = $this->resolveTipoPermisoDisplay($ausente);
 
             $rows .= '<tr>'
                 .'<td style="border:1px solid #e5e7eb;padding:8px;">'.e($nombre).'</td>'
@@ -151,11 +151,24 @@ class DailyAusentismoSummaryNotifier
         $lines = array_map(function (array $ausente): string {
             $nombre = (string) ($ausente['funcionario_nombre'] ?? '');
             $cargo = (string) ($ausente['cargo'] ?? '');
-            $tipoPermiso = (string) ($ausente['tipo_permiso'] ?? '');
+            $tipoPermiso = $this->resolveTipoPermisoDisplay($ausente);
 
             return "- {$nombre} | {$cargo} | {$tipoPermiso}";
         }, $ausentes);
 
         return implode(' ', $lines);
+    }
+
+    private function resolveTipoPermisoDisplay(array $ausente): string
+    {
+        $tipoPermiso = trim((string) ($ausente['tipo_permiso'] ?? ''));
+
+        if (! strcasecmp($tipoPermiso, 'Otro')) {
+            $observacion = trim((string) ($ausente['observacion'] ?? ''));
+
+            return $observacion !== '' ? $observacion : 'Otro';
+        }
+
+        return $tipoPermiso;
     }
 }
