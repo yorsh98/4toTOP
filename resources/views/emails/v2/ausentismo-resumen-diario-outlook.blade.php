@@ -30,10 +30,17 @@
                                     <th style="background:#f8fafc;border:1px solid #e5e7eb;padding:8px;text-align:left;">Tipo permiso</th>
                                 </tr>
                                 @foreach($ausentes as $ausente)
+                                    @php
+                                        $tipoPermiso = trim((string) ($ausente['tipo_permiso'] ?? ''));
+                                        $observacion = trim((string) ($ausente['observacion'] ?? ''));
+                                        $tipoMostrado = strcasecmp($tipoPermiso, 'Otro') === 0
+                                            ? ($observacion !== '' ? $observacion : 'Otro')
+                                            : $tipoPermiso;
+                                    @endphp
                                     <tr>
                                         <td style="border:1px solid #e5e7eb;padding:8px;">{{ $ausente['funcionario_nombre'] }}</td>
                                         <td style="border:1px solid #e5e7eb;padding:8px;">{{ $ausente['cargo'] }}</td>
-                                        <td style="border:1px solid #e5e7eb;padding:8px;">{{ $ausente['tipo_permiso'] }}</td>
+                                        <td style="border:1px solid #e5e7eb;padding:8px;">{{ $tipoMostrado }}</td>
                                     </tr>
                                 @endforeach
                             </table>
