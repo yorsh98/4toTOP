@@ -68,6 +68,11 @@ class RolesAndPermissionsSeeder extends Seeder
             'documentos.ver',
             'documentos.gestionar',
             'sentencias.importar',
+            'ttypp.ver',
+            'ttypp.crear',
+            'ttypp.editar',
+            'ttypp.importar',
+            'ttypp.exportar',
         ];
 
         foreach ($permissions as $permissionName) {
@@ -145,6 +150,11 @@ class RolesAndPermissionsSeeder extends Seeder
             'documentos.ver',
             'documentos.gestionar',
             'sentencias.importar',
+            'ttypp.ver',
+            'ttypp.crear',
+            'ttypp.editar',
+            'ttypp.importar',
+            'ttypp.exportar',
         ]);
 
         $operador->syncPermissions([
@@ -176,6 +186,11 @@ class RolesAndPermissionsSeeder extends Seeder
             'ausentismo.ver',
             'progra.ver',
             'sentencias.ver',
+            'ttypp.ver',
+            'ttypp.crear',
+            'ttypp.editar',
+            'ttypp.importar',
+            'ttypp.exportar',
         ]);
 
         $consulta->syncPermissions([
@@ -193,6 +208,8 @@ class RolesAndPermissionsSeeder extends Seeder
             'ausentismo.ver',
             'progra.ver',
             'sentencias.ver',
+            'ttypp.ver',
+            'ttypp.exportar',
         ]);
 
         app(PermissionRegistrar::class)->forgetCachedPermissions();

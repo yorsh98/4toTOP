@@ -57,6 +57,13 @@ new class extends Component
             'permissions' => ['navbar.audiencias.visible', 'navbar.audiencias.editable'],
         ],
         [
+            'label' => 'TTYPP',
+            'route' => 'ttypp.index',
+            'active' => 'ttypp.*',
+            'icon' => 'fa-solid fa-user-shield',
+            'permissions' => ['navbar.ttypp.visible', 'navbar.ttypp.editable'],
+        ],
+        [
             'label' => __('Bitacora Pruebas'),
             'route' => 'bitacora-pruebas.index',
             'active' => 'bitacora-pruebas.*',

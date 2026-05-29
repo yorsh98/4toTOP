@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\TtyppRegistro;
 use App\Models\Turno;
 use App\Services\BackofficeDocumentosCatalog;
 use App\Services\FuncionarioCatalog;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
@@ -76,5 +78,39 @@ class TurnoController extends Controller
         $turno->update($validatedData);
 
         return redirect()->route('turno')->with('success', 'Turno actualizado correctamente');
+    }
+
+    public function ttyppWelcome(Request $request)
+    {
+        $tz = 'America/Santiago';
+        $fecha = $request->query('fecha');
+
+        try {
+            $selectedDate = $fecha
+                ? Carbon::createFromFormat('Y-m-d', $fecha, $tz)->startOfDay()
+                : Carbon::now($tz)->startOfDay();
+        } catch (\Throwable $exception) {
+            $selectedDate = Carbon::now($tz)->startOfDay();
+        }
+
+        $start = $selectedDate->copy()->startOfDay()->setTimezone('UTC');
+        $end = $selectedDate->copy()->endOfDay()->setTimezone('UTC');
+
+        $registros = TtyppRegistro::query()
+            ->where(function ($query) use ($selectedDate, $start, $end) {
+                $query->whereDate('fecha_asignacion', $selectedDate->toDateString())
+                    ->orWhere(function ($legacy) use ($start, $end) {
+                        $legacy->whereNull('fecha_asignacion')
+                            ->whereBetween('created_at', [$start, $end]);
+                    });
+            })
+            ->latest('id')
+            ->get();
+
+        return view('ttypp-welcome', [
+            'fecha' => $selectedDate->toDateString(),
+            'fechaHuman' => $selectedDate->locale('es')->isoFormat('dddd D [de] MMMM [de] YYYY'),
+            'registros' => $registros,
+        ]);
     }
 }
