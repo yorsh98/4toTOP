@@ -35,6 +35,7 @@ use App\Livewire\Security\AuditPage;
 use App\Livewire\Security\RolePermissionsPage;
 use App\Livewire\Security\RolesPage;
 use App\Livewire\Security\UsersRolesPage;
+use App\Livewire\TtyppPage;
 use App\Livewire\TurnoPage;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
@@ -144,6 +145,9 @@ Route::get('/backoffice/bitacora-pruebas', BitacoraPruebasPage::class)
 Route::get('/backoffice/documentos', DocumentosBackofficePage::class)
     ->name('backoffice.documentos.index')
     ->middleware(['auth', 'can:navbar.documentos.visible']);
+Route::get('/backoffice/ttypp', TtyppPage::class)
+    ->name('ttypp.index')
+    ->middleware(['auth', 'can:navbar.ttypp.visible']);
 
 /*
 |--------------------------------------------------------------------------
@@ -184,6 +188,8 @@ Route::post('/programacion/mail/{fecha}', [PrograMailController::class, 'enviarP
 // TEST
 Route::get('/preview/progra/{fecha?}', [PrograMailController::class, 'preview'])
     ->name('preview.progra');
+
+Route::get('/ttypp', [TurnoController::class, 'ttyppWelcome'])->name('ttypp.welcome');
 
 Route::prefix('preview/notificaciones-v2')
     ->name('preview.notifications-v2.')
