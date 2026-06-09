@@ -73,6 +73,8 @@ class RolesAndPermissionsSeeder extends Seeder
             'ttypp.editar',
             'ttypp.importar',
             'ttypp.exportar',
+            'ttypp.mail.preview',
+            'ttypp.mail.enviar',
         ];
 
         foreach ($permissions as $permissionName) {
@@ -155,6 +157,8 @@ class RolesAndPermissionsSeeder extends Seeder
             'ttypp.editar',
             'ttypp.importar',
             'ttypp.exportar',
+            'ttypp.mail.preview',
+            'ttypp.mail.enviar',
         ]);
 
         $operador->syncPermissions([
@@ -191,6 +195,8 @@ class RolesAndPermissionsSeeder extends Seeder
             'ttypp.editar',
             'ttypp.importar',
             'ttypp.exportar',
+            'ttypp.mail.preview',
+            'ttypp.mail.enviar',
         ]);
 
         $consulta->syncPermissions([
@@ -210,6 +216,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'sentencias.ver',
             'ttypp.ver',
             'ttypp.exportar',
+            'ttypp.mail.preview',
         ]);
 
         app(PermissionRegistrar::class)->forgetCachedPermissions();

@@ -11,28 +11,7 @@
         </div>
     @endif
 
-    <div class="grid gap-4 md:grid-cols-3">
-        <div class="rounded-xl border border-blue-200 bg-blue-50 p-5">
-            <p class="text-sm font-medium text-blue-700">Registros almacenados</p>
-            <p class="mt-2 text-3xl font-bold text-blue-900">{{ number_format($totalRegistros) }}</p>
-        </div>
-
-        <div class="rounded-xl border border-amber-200 bg-amber-50 p-5">
-            <p class="text-sm font-medium text-amber-700">Estado de implementacion</p>
-            <p class="mt-2 text-lg font-semibold text-amber-900">Formulario en desarrollo</p>
-        </div>
-
-        <div class="rounded-xl border border-slate-200 bg-slate-50 p-5">
-            <label for="ttypp-search" class="text-sm font-medium text-slate-700">Buscar</label>
-                <input
-                    id="ttypp-search"
-                    type="text"
-                    wire:model.live.debounce.300ms="search"
-                    placeholder="Buscar por RIT, RUC, Acta o Sala"
-                    class="mt-2 w-full rounded-md border-slate-300 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                >
-            </div>
-        </div>
+    {{-- Bloque superior de resumen/busqueda retirado visualmente; se mantiene la logica de filtro en Livewire para uso interno/exportaciones. --}}
 
     <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
         <h2 class="text-lg font-semibold text-slate-900">Automatizacion inicial</h2>
@@ -168,6 +147,14 @@
                     <button type="button" wire:click="applySelectedDate" class="rounded-md border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100">Ver</button>
                     <button type="button" wire:click="today" class="rounded-md border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100">Hoy</button>
                     <button type="button" wire:click="nextDay" class="rounded-md border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100">Siguiente</button>
+                </div>
+                <div class="mt-3 flex flex-wrap items-center gap-2">
+                    @can('ttypp.mail.preview')
+                        <button type="button" wire:click="previewTtyppMail" class="rounded-md border border-blue-300 px-3 py-2 text-sm font-medium text-blue-700 hover:bg-blue-50">Previsualizar correo</button>
+                    @endcan
+                    @can('ttypp.mail.enviar')
+                        <button type="button" wire:click="sendTtyppMail" wire:confirm="¿Remitir correo TTyPP para la fecha seleccionada?" class="rounded-md bg-blue-700 px-3 py-2 text-sm font-medium text-white hover:bg-blue-800">Remitir correo</button>
+                    @endcan
                 </div>
             </div>
         </div>

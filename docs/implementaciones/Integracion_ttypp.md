@@ -28,6 +28,12 @@ Reemplazar el Excel operativo de Testigos y Peritos por un formulario web en bac
   - Permisos granulares para TTYPP: `ttypp.importar` y `ttypp.exportar`.
   - Aplicacion de permisos en UI y acciones Livewire de importacion/exportacion.
   - Pruebas Pest para flujo principal: alta nullable, filtro, permisos de importacion y ruta de modulo `TTyPP` en `welcome`.
+- Integracion de correo TTyPP completada:
+  - Botones `Previsualizar correo` y `Remitir correo` en `Listado TTYPP`.
+  - Preview bajo el flujo `NotificationsV2` (`preview.notifications-v2.ttypp-listado`).
+  - Servicio `TtyppListadoNotifier` con plantilla `ttypp.listado.diario`.
+  - Destinatarios resueltos desde catalogo de funcionarios con rol `TTyPP`.
+  - Pruebas Pest para preview y dispatch de correo TTyPP.
 - Ajustes funcionales ya aplicados:
   - Se elimino el campo `Anio` del formulario y del esquema TTYPP.
   - `RIT` autocompleta `RUC` consultando tabla `audiencias`.

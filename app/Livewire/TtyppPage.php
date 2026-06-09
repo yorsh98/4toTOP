@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\TtyppRegistro;
 use App\Models\Audiencia;
+use App\NotificationsV2\Application\Services\TtyppListadoNotifier;
 use App\Services\FuncionarioCatalog;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -349,6 +350,39 @@ class TtyppPage extends Component
         }, $filename, [
             'Content-Type' => 'text/csv; charset=UTF-8',
         ]);
+    }
+
+    public function previewTtyppMail()
+    {
+        Gate::authorize('ttypp.mail.preview');
+
+        return redirect()->route('preview.notifications-v2.ttypp-listado', [
+            'fecha' => $this->selectedDate,
+        ]);
+    }
+
+    public function sendTtyppMail(): void
+    {
+        Gate::authorize('ttypp.mail.enviar');
+
+        $notifier = app(TtyppListadoNotifier::class);
+        $registros = $notifier->recordsForDate($this->selectedDate);
+
+        if ($registros->isEmpty()) {
+            session()->flash('ok', 'No hay registros TTyPP para la fecha seleccionada. No se envio correo.');
+
+            return;
+        }
+
+        if ($notifier->recipients() === []) {
+            session()->flash('ok', 'No hay destinatarios TTyPP con correo valido en el catalogo de funcionarios.');
+
+            return;
+        }
+
+        $notifier->notifyForDate($this->selectedDate, Auth::user()?->name ?? 'Usuario del sistema');
+
+        session()->flash('ok', 'Correo TTyPP encolado/enviado correctamente.');
     }
 
     private function sanitizePayload(array $payload): array

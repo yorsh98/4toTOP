@@ -191,6 +191,10 @@ Route::get('/preview/progra/{fecha?}', [PrograMailController::class, 'preview'])
 
 Route::get('/ttypp', [TurnoController::class, 'ttyppWelcome'])->name('ttypp.welcome');
 
+Route::get('/preview/notificaciones-v2/ttypp-listado', [NotificationsV2PreviewController::class, 'ttyppListado'])
+    ->name('preview.notifications-v2.ttypp-listado')
+    ->middleware(['auth', 'can:ttypp.mail.preview']);
+
 Route::prefix('preview/notificaciones-v2')
     ->name('preview.notifications-v2.')
     ->middleware(['auth', 'can:navbar.seguridad.visible'])
