@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\NotificationsV2\Application\Services\TurnoOneWeeklySummaryNotifier;
 use App\NotificationsV2\Application\Services\TurnoTwoAcdWeeklySummaryNotifier;
+use App\NotificationsV2\Application\Services\TtyppListadoNotifier;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -159,6 +160,20 @@ class NotificationsV2PreviewController extends Controller
             'documentosUrl' => (string) $request->query('documentos', 'https://example.com/documentos'),
             'bitacoraPublicUrl' => (string) $request->query('bitacora', route('bitacora-pruebas.public')),
             'recipientName' => (string) $request->query('user', 'Usuario Demo'),
+        ]);
+    }
+
+    public function ttyppListado(Request $request, TtyppListadoNotifier $notifier): View
+    {
+        $date = $request->query('fecha');
+        if (! is_string($date) || ! preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+            $date = now('America/Santiago')->toDateString();
+        }
+
+        return view('emails.v2.ttypp-listado-outlook', [
+            'fecha' => $date,
+            'senderName' => $request->user()?->name ?? 'Usuario Demo',
+            'registros' => $notifier->recordsForDate($date),
         ]);
     }
 }

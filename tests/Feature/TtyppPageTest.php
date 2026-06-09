@@ -1,8 +1,10 @@
 <?php
 
 use App\Livewire\TtyppPage;
+use App\Models\Funcionario;
 use App\Models\TtyppRegistro;
 use App\Models\User;
+use App\NotificationsV2\Domain\Models\NotificationDispatch;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Http\UploadedFile;
 use Livewire\Livewire;
@@ -75,4 +77,56 @@ test('ttypp welcome module route is accessible', function () {
     $this->get(route('ttypp.welcome'))
         ->assertSuccessful()
         ->assertSee('TTyPP');
+});
+
+test('ttypp mail preview route renders listado for selected date', function () {
+    $user = User::factory()->create();
+    $user->assignRole('SuperAdmin');
+
+    TtyppRegistro::query()->create([
+        'rit' => '777-2026',
+        'fecha_asignacion' => '2026-05-30',
+    ]);
+
+    $this->actingAs($user)
+        ->get(route('preview.notifications-v2.ttypp-listado', ['fecha' => '2026-05-30']))
+        ->assertSuccessful()
+        ->assertSee('777-2026')
+        ->assertSee('Listado TTyPP');
+});
+
+test('ttypp mail is sent to funcionarios with ttypp role', function () {
+    config(['notifications_v2.enabled' => true]);
+
+    $user = User::factory()->create();
+    $user->assignRole('SuperAdmin');
+
+    Funcionario::query()->create([
+        'nombre' => 'Funcionario TTyPP',
+        'run' => null,
+        'rol' => 'ttypp',
+        'email' => 'ttypp@example.cl',
+        'telefono' => null,
+        'fecha_cumpleanos' => '1990-01-01',
+    ]);
+
+    TtyppRegistro::query()->create([
+        'rit' => '888-2026',
+        'fecha_asignacion' => now('America/Santiago')->toDateString(),
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(TtyppPage::class)
+        ->call('sendTtyppMail')
+        ->assertHasNoErrors();
+
+    $dispatch = NotificationDispatch::query()
+        ->where('event_key', 'like', 'ttypp.listado.diario.%')
+        ->with('recipients')
+        ->latest('id')
+        ->first();
+
+    expect($dispatch)->not->toBeNull()
+        ->and($dispatch->recipients)->toHaveCount(1)
+        ->and($dispatch->recipients->first()->email)->toBe('ttypp@example.cl');
 });
