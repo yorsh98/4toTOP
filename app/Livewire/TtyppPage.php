@@ -2,8 +2,8 @@
 
 namespace App\Livewire;
 
-use App\Models\TtyppRegistro;
 use App\Models\Audiencia;
+use App\Models\TtyppRegistro;
 use App\NotificationsV2\Application\Services\TtyppListadoNotifier;
 use App\Services\FuncionarioCatalog;
 use Carbon\Carbon;
@@ -14,6 +14,10 @@ use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\WithPagination;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Shared\Date as ExcelDate;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 #[Layout('layouts.app')]
 class TtyppPage extends Component
@@ -24,6 +28,8 @@ class TtyppPage extends Component
     public ?int $editingId = null;
 
     public string $search = '';
+
+    public array $selectedRegistroHistorial = [];
 
     public ?string $rit = null;
 
@@ -51,14 +57,14 @@ class TtyppPage extends Component
 
     public ?string $fecha_asignacion = null;
 
-    public $importCsv;
+    public $importExcel;
 
     public string $selectedDate = '';
 
     public function mount(): void
     {
         Gate::authorize('ttypp.ver');
-        $this->selectedDate = now('America/Santiago')->toDateString();
+        $this->selectedDate = $this->defaultFechaAsignacion();
         $this->fecha_asignacion = $this->defaultFechaAsignacion();
     }
 
@@ -118,21 +124,10 @@ class TtyppPage extends Component
 
     public function updatedRit(?string $value): void
     {
-        $rit = trim((string) $value);
-
-        if ($rit === '') {
-            return;
-        }
-
-        $ruc = Audiencia::query()
-            ->where('rit', $rit)
-            ->whereNotNull('ruc')
-            ->where('ruc', '!=', '')
-            ->latest('id')
-            ->value('ruc');
+        $ruc = $this->rucForRit($value);
 
         if ($ruc) {
-            $this->ruc = (string) $ruc;
+            $this->ruc = $ruc;
         }
     }
 
@@ -179,6 +174,8 @@ class TtyppPage extends Component
         $this->sala = $registro->sala;
         $this->jueces = $registro->jueces;
         $this->fecha_asignacion = optional($registro->fecha_asignacion)->format('Y-m-d');
+
+        $this->selectedRegistroHistorial = $registro->historial()->with('user')->get()->toArray();
     }
 
     public function cancelEdit(): void
@@ -217,6 +214,7 @@ class TtyppPage extends Component
             'sala',
             'jueces',
             'fecha_asignacion',
+            'selectedRegistroHistorial',
         ]);
 
         $this->fecha_asignacion = $this->defaultFechaAsignacion();
@@ -233,47 +231,60 @@ class TtyppPage extends Component
         return $today->addDay()->toDateString();
     }
 
-    public function importFromCsv(): void
+    public function importFromExcel(): void
     {
         Gate::authorize('ttypp.importar');
 
         $this->validate([
-            'importCsv' => ['required', File::types(['csv', 'txt'])->max(10 * 1024)],
+            'importExcel' => ['required', File::types(['xlsx', 'xls'])->max(20 * 1024)],
         ]);
 
-        $path = $this->importCsv->getRealPath();
-        $handle = fopen($path, 'r');
+        $spreadsheet = IOFactory::load($this->importExcel->getRealPath());
+        $rows = $spreadsheet->getActiveSheet()->toArray(null, true, false, true);
 
-        if (! $handle) {
-            session()->flash('ok', 'No se pudo abrir el archivo CSV.');
+        if ($rows === []) {
+            session()->flash('ok', 'El archivo Excel no contiene filas validas.');
 
             return;
         }
 
-        $headers = fgetcsv($handle);
+        $headers = array_shift($rows);
 
         if (! is_array($headers)) {
-            fclose($handle);
-            session()->flash('ok', 'El archivo CSV no contiene encabezados validos.');
+            session()->flash('ok', 'El archivo Excel no contiene encabezados validos.');
 
             return;
         }
 
-        $normalizedHeaders = array_map(fn ($h) => $this->normalizeHeader((string) $h), $headers);
+        $normalizedHeaders = [];
+        foreach ($headers as $column => $header) {
+            $normalizedHeaders[$column] = $this->normalizeHeader((string) $header);
+        }
 
+        $read = 0;
         $inserted = 0;
-        $omitted = 0;
+        $filtered = 0;
+        $invalid = 0;
 
-        while (($row = fgetcsv($handle)) !== false) {
+        foreach ($rows as $row) {
             if (! is_array($row)) {
-                $omitted++;
+                $invalid++;
+
                 continue;
             }
 
-            $payload = $this->mapCsvRowToPayload($normalizedHeaders, $row);
+            $read++;
+            $payload = $this->mapSiagjRowToPayload($normalizedHeaders, $row);
 
-            if ($this->isPayloadEmpty($payload)) {
-                $omitted++;
+            if ($payload === null) {
+                $filtered++;
+
+                continue;
+            }
+
+            if ($this->isPayloadEmpty($payload) || blank($payload['rit'] ?? null) || blank($payload['fecha_asignacion'] ?? null)) {
+                $invalid++;
+
                 continue;
             }
 
@@ -284,19 +295,17 @@ class TtyppPage extends Component
             $inserted++;
         }
 
-        fclose($handle);
-
-        $this->reset('importCsv');
+        $this->reset('importExcel');
         $this->resetPage();
 
-        session()->flash('ok', "Importacion completada. Filas insertadas: {$inserted}. Filas omitidas: {$omitted}.");
+        session()->flash('ok', "Importacion Excel completada. Filas leidas: {$read}. Filas insertadas: {$inserted}. Filas omitidas por filtro: {$filtered}. Filas invalidas: {$invalid}.");
     }
 
-    public function exportCsv()
+    public function exportExcel()
     {
         Gate::authorize('ttypp.exportar');
 
-        $filename = 'ttypp_'.now()->format('Ymd_His').'.csv';
+        $filename = 'ttypp_'.now()->format('Ymd_His').'.xlsx';
         $search = trim($this->search);
         $selectedDate = Carbon::parse($this->selectedDate, 'America/Santiago');
         $start = $selectedDate->copy()->startOfDay()->setTimezone('UTC');
@@ -322,12 +331,15 @@ class TtyppPage extends Component
             ->get();
 
         return response()->streamDownload(function () use ($rows): void {
-            $output = fopen('php://output', 'w');
+            $spreadsheet = new Spreadsheet;
+            $sheet = $spreadsheet->getActiveSheet();
+            $sheet->fromArray([
+                ['RIT', 'RUC', 'Tipo AUD', 'N Dias', 'Cant.', 'Modalidad', 'Encargada TI MP', 'Encargada TI D', 'Encargada Zoom', 'Acta', 'Sala', 'Jueces', 'Fecha Asignacion', 'Creado', 'Actualizado'],
+            ]);
 
-            fputcsv($output, ['RIT', 'RUC', 'Tipo AUD', 'N Dias', 'Cant.', 'Modalidad', 'Encargada TI MP', 'Encargada TI D', 'Encargada Zoom', 'Acta', 'Sala', 'Jueces', 'Fecha Asignacion', 'Creado', 'Actualizado']);
-
+            $rowNumber = 2;
             foreach ($rows as $row) {
-                fputcsv($output, [
+                $sheet->fromArray([
                     $row->rit,
                     $row->ruc,
                     $row->tipo_audiencia,
@@ -343,12 +355,13 @@ class TtyppPage extends Component
                     optional($row->fecha_asignacion)->format('Y-m-d'),
                     optional($row->created_at)->format('Y-m-d H:i:s'),
                     optional($row->updated_at)->format('Y-m-d H:i:s'),
-                ]);
+                ], null, 'A'.$rowNumber);
+                $rowNumber++;
             }
 
-            fclose($output);
+            (new Xlsx($spreadsheet))->save('php://output');
         }, $filename, [
-            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         ]);
     }
 
@@ -406,36 +419,139 @@ class TtyppPage extends Component
     private function normalizeHeader(string $value): string
     {
         $value = mb_strtolower(trim($value));
+        $value = strtr($value, [
+            'á' => 'a',
+            'é' => 'e',
+            'í' => 'i',
+            'ó' => 'o',
+            'ú' => 'u',
+            'ñ' => 'n',
+        ]);
         $value = str_replace(['.', '-', '_'], ' ', $value);
 
         return preg_replace('/\s+/', ' ', $value) ?? $value;
     }
 
-    private function mapCsvRowToPayload(array $headers, array $row): array
+    private function normalizeValue(?string $value): string
     {
-        $data = array_combine($headers, $row);
+        $value = mb_strtolower(trim((string) $value));
+        $value = strtr($value, [
+            'á' => 'a',
+            'é' => 'e',
+            'í' => 'i',
+            'ó' => 'o',
+            'ú' => 'u',
+            'ñ' => 'n',
+        ]);
+        $value = rtrim($value, '.');
 
-        if (! is_array($data)) {
+        return preg_replace('/\s+/', ' ', $value) ?? $value;
+    }
+
+    private function mapSiagjRowToPayload(array $headers, array $row): ?array
+    {
+        $data = [];
+
+        foreach ($headers as $column => $header) {
+            if ($header !== '') {
+                $data[$header] = $row[$column] ?? null;
+            }
+        }
+
+        $estadoEvento = $this->normalizeValue($this->valueFor($data, ['estadoevento', 'estado evento']));
+        $evento = $this->normalizeValue($this->valueFor($data, ['evento']));
+        $tipoTramite = $this->normalizeValue($this->valueFor($data, ['tipo tramite', 'tipotramite']));
+
+        if ($estadoEvento !== 'por realizarse' || $evento !== 'audiencia de juicio oral top' || $tipoTramite !== 'audiencia') {
+            return null;
+        }
+
+        $rit = trim((string) $this->valueFor($data, ['rit']));
+        $anioCausa = trim((string) $this->valueFor($data, ['anocausa', 'ano causa']));
+        $fechaEvento = $this->parseExcelDate($this->valueFor($data, ['fechaevento', 'fecha evento']));
+        $ritCompleto = $rit !== '' && $anioCausa !== '' ? $rit.'-'.$anioCausa : null;
+
+        return $this->sanitizePayload([
+            'rit' => $ritCompleto,
+            'ruc' => $this->rucForRit($ritCompleto),
+            'fecha_asignacion' => $fechaEvento,
+        ]);
+    }
+
+    private function rucForRit(?string $rit): ?string
+    {
+        $rit = trim((string) $rit);
+
+        if ($rit === '') {
+            return null;
+        }
+
+        $ruc = Audiencia::query()
+            ->where('rit', $rit)
+            ->whereNotNull('ruc')
+            ->where('ruc', '!=', '')
+            ->latest('id')
+            ->value('ruc');
+
+        return $ruc ? (string) $ruc : null;
+    }
+
+    private function getAudienciaDataForRit(?string $rit): array
+    {
+        $rit = trim((string) $rit);
+        if ($rit === '') {
             return [];
         }
 
-        $payload = [
-            'rit' => $this->valueFor($data, ['rit']),
-            'ruc' => $this->valueFor($data, ['ruc']),
-            'tipo_audiencia' => $this->valueFor($data, ['tipo aud', 'tipo audiencia']),
-            'numero_dias' => $this->valueFor($data, ['n dias', 'numero dias', 'dias']),
-            'cantidad' => $this->valueFor($data, ['cant', 'cant ttypp', 'cantidad']),
-            'modalidad' => $this->valueFor($data, ['modalidad']),
-            'encargada_ti_mp' => $this->valueFor($data, ['encargada ti mp', 'ti mp']),
-            'encargada_ti_d' => $this->valueFor($data, ['encargada ti d', 'encargada ti defensa', 'ti d']),
-            'encargada_zoom' => $this->valueFor($data, ['encargada zoom', 'zoom']),
-            'acta' => $this->valueFor($data, ['acta']),
-            'sala' => $this->valueFor($data, ['sala']),
-            'jueces' => $this->valueFor($data, ['jueces', 'juez', 'jueza']),
-            'fecha_asignacion' => $this->valueFor($data, ['fecha asignacion', 'fecha']),
-        ];
+        $audiencia = Audiencia::query()
+            ->where('rit', $rit)
+            ->latest('id')
+            ->first();
 
-        return $this->sanitizePayload($payload);
+        if (! $audiencia) {
+            return [];
+        }
+
+        $jueces = collect([$audiencia->JuezP, $audiencia->JuezR, $audiencia->JuezI])
+            ->filter(fn ($j) => ! empty(trim((string) $j)))
+            ->implode(', ');
+
+        return [
+            'ruc' => $audiencia->ruc ? (string) $audiencia->ruc : null,
+            'tipo_audiencia' => $audiencia->tipo_audiencia ? (string) $audiencia->tipo_audiencia : null,
+            'acta' => $audiencia->acta ? (string) $audiencia->acta : null,
+            'sala' => $audiencia->sala ? (string) $audiencia->sala : null,
+            'jueces' => $jueces !== '' ? $jueces : null,
+        ];
+    }
+
+    private function parseExcelDate(mixed $value): ?string
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        if (is_numeric($value)) {
+            return ExcelDate::excelToDateTimeObject((float) $value)->format('Y-m-d');
+        }
+
+        $value = trim((string) $value);
+
+        foreach (['d/m/Y H:i', 'd/m/Y H:i:s', 'd/m/Y', 'Y-m-d H:i:s', 'Y-m-d'] as $format) {
+            try {
+                $date = Carbon::createFromFormat($format, $value, 'America/Santiago');
+
+                return $date->toDateString();
+            } catch (\Throwable) {
+                continue;
+            }
+        }
+
+        try {
+            return Carbon::parse($value, 'America/Santiago')->toDateString();
+        } catch (\Throwable) {
+            return null;
+        }
     }
 
     private function valueFor(array $data, array $keys): ?string
@@ -467,14 +583,32 @@ class TtyppPage extends Component
         $start = $selectedDate->copy()->startOfDay()->setTimezone('UTC');
         $end = $selectedDate->copy()->endOfDay()->setTimezone('UTC');
 
-        $registros = TtyppRegistro::query()
+        $registrosQuery = TtyppRegistro::query()
             ->where(function ($query) use ($selectedDate, $start, $end) {
                 $query->whereDate('fecha_asignacion', $selectedDate->toDateString())
                     ->orWhere(function ($legacy) use ($start, $end) {
                         $legacy->whereNull('fecha_asignacion')
                             ->whereBetween('created_at', [$start, $end]);
                     });
-            })
+            });
+
+        // Obtener todos los registros del día para calcular métricas
+        $registrosDia = (clone $registrosQuery)->get();
+        $totalDia = $registrosDia->count();
+
+        // Agrupación por modalidad para el dashboard
+        $modalidadConteo = $registrosDia->groupBy('modalidad')
+            ->map(fn ($group) => $group->count());
+
+        // Conteo de causas con TTYPP completo (todas las encargadas asignadas) vs incompletos
+        $ttyppAsignadas = $registrosDia->filter(function ($r) {
+            return ! empty(trim((string) $r->encargada_ti_mp))
+                && ! empty(trim((string) $r->encargada_ti_d))
+                && ! empty(trim((string) $r->encargada_zoom));
+        })->count();
+        $ttyppPendientes = $totalDia - $ttyppAsignadas;
+
+        $registros = $registrosQuery
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($nested) use ($search) {
                     $nested->where('rit', 'like', "%{$search}%")
@@ -488,18 +622,18 @@ class TtyppPage extends Component
 
         return view('livewire.ttypp-page', [
             'totalRegistros' => TtyppRegistro::query()->count(),
-            'totalRegistrosDia' => TtyppRegistro::query()
-                ->where(function ($query) use ($selectedDate, $start, $end) {
-                    $query->whereDate('fecha_asignacion', $selectedDate->toDateString())
-                        ->orWhere(function ($legacy) use ($start, $end) {
-                            $legacy->whereNull('fecha_asignacion')
-                                ->whereBetween('created_at', [$start, $end]);
-                        });
-                })
-                ->count(),
+            'totalRegistrosDia' => $totalDia,
             'registros' => $registros,
             'encargadasTtypp' => app(FuncionarioCatalog::class)->nombresByRoles(['ttypp']),
             'actasSalaCausa' => app(FuncionarioCatalog::class)->nombresByRoles(['sala_causa']),
+
+            // Dashboard Metrics
+            'modalidadConteo' => $modalidadConteo,
+            'ttyppAsignadas' => $ttyppAsignadas,
+            'ttyppPendientes' => $ttyppPendientes,
+
+            // Normalización Catálogos
+            'modalidades' => ['Presencial+Zoom', 'Zoom', 'Presencial'],
         ]);
     }
 }

@@ -13,6 +13,12 @@ ScheduleFacade::command('notificaciones:ausentismo-diario')
     ->timezone((string) config('notifications_v2.schedule.timezone', 'America/Santiago'))
     ->withoutOverlapping();
 
+ScheduleFacade::command('notificaciones:ttypp-diario')
+    ->dailyAt('08:10')
+    ->timezone((string) config('notifications_v2.schedule.timezone', 'America/Santiago'))
+    ->weekdays()
+    ->withoutOverlapping();
+
 // Turno 1 weekly summary cron disabled by request.
 // If needed again, schedule the command below as a CRON task:
 // ScheduleFacade::command('notificaciones:turno1-semanal')

@@ -20,20 +20,24 @@ Reemplazar el Excel operativo de Testigos y Peritos por un formulario web en bac
 - Sprint 2 en progreso avanzado: CRUD funcional con campos `nullable`, busqueda, paginacion y acciones de editar/eliminar.
 - Sprint 3 completado: modulo `TTyPP` publicado en `welcome`, con visualizacion diaria de `Listado TTYPP` y barra superior para navegar por fechas.
 - Sprint 4 completado (fase inicial):
-  - Importacion CSV masiva tolerante a campos vacios.
-  - Exportacion CSV del listado filtrado.
+  - Importacion Excel SIAGJ (`.xlsx` y `.xls`) con filtros operativos y tolerancia a campos vacios.
+  - Exportacion Excel `.xlsx` del listado filtrado.
   - Auditoria minima por registro (`created_by`, `updated_by`).
   - Alertas no bloqueantes de calidad de datos (RUC, Acta, Modalidad).
 - Sprint 5 completado (endurecimiento inicial):
   - Permisos granulares para TTYPP: `ttypp.importar` y `ttypp.exportar`.
   - Aplicacion de permisos en UI y acciones Livewire de importacion/exportacion.
-  - Pruebas Pest para flujo principal: alta nullable, filtro, permisos de importacion y ruta de modulo `TTyPP` en `welcome`.
+  - Pruebas Pest para flujo principal: alta nullable, filtro, permisos de importacion Excel SIAGJ, importacion filtrada, exportacion `.xlsx` y ruta de modulo `TTyPP` en `welcome`.
 - Integracion de correo TTyPP completada:
   - Botones `Previsualizar correo` y `Remitir correo` en `Listado TTYPP`.
   - Preview bajo el flujo `NotificationsV2` (`preview.notifications-v2.ttypp-listado`).
   - Servicio `TtyppListadoNotifier` con plantilla `ttypp.listado.diario`.
   - Destinatarios resueltos desde catalogo de funcionarios con rol `TTyPP`.
   - Pruebas Pest para preview y dispatch de correo TTyPP.
+- Importacion SIAGJ completada:
+  - Archivo esperado `.xlsx` o `.xls` con encabezados `RIT`, `AÑOCAUSA`, `TIPOCAUSA`, `TIPO_TRAMITE`, `EVENTO`, `FECHAEVENTO`, `ESTADOEVENTO`.
+  - Solo se importan filas con `ESTADOEVENTO = Por realizarse`, `EVENTO = Audiencia de juicio oral TOP` y `TIPO_TRAMITE = Audiencia`.
+  - Se guarda `rit` como `RIT-AÑOCAUSA` y `fecha_asignacion` desde `FECHAEVENTO`; el resto queda editable desde backoffice.
 - Ajustes funcionales ya aplicados:
   - Se elimino el campo `Anio` del formulario y del esquema TTYPP.
   - `RIT` autocompleta `RUC` consultando tabla `audiencias`.
@@ -135,8 +139,8 @@ Reemplazar el Excel operativo de Testigos y Peritos por un formulario web en bac
 
 ### Entregables
 - Catalogos base opcionales (tipo audiencia, modalidad, encargadas) sin volver obligatorios.
-- Importador inicial CSV/XLSX (modo asistido).
-- Exportacion a Excel/CSV para continuidad operativa.
+- Importador inicial Excel SIAGJ (`.xlsx` y `.xls`, modo asistido).
+- Exportacion Excel `.xlsx` para continuidad operativa.
 - Auditoria minima de cambios (quien crea/edita).
 
 ### Tareas
