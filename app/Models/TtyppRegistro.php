@@ -34,4 +34,38 @@ class TtyppRegistro extends Model
     protected $casts = [
         'fecha_asignacion' => 'date',
     ];
+
+    public function historial()
+    {
+        return $this->hasMany(TtyppRegistroHistorial::class, 'ttypp_registro_id')->orderBy('created_at', 'desc');
+    }
+
+    protected static function booted()
+    {
+        static::updating(function ($registro) {
+            $dirty = $registro->getDirty();
+            $changes = [];
+            foreach ($dirty as $key => $newValue) {
+                if (in_array($key, ['updated_at', 'updated_by'])) {
+                    continue;
+                }
+                $oldValue = $registro->getOriginal($key);
+                if ($oldValue != $newValue) {
+                    $changes[$key] = [
+                        'old' => $oldValue instanceof \DateTimeInterface ? $oldValue->format('Y-m-d') : $oldValue,
+                        'new' => $newValue instanceof \DateTimeInterface ? $newValue->format('Y-m-d') : $newValue,
+                    ];
+                }
+            }
+
+            if (! empty($changes)) {
+                TtyppRegistroHistorial::create([
+                    'ttypp_registro_id' => $registro->id,
+                    'user_id' => auth()->id(),
+                    'cambios' => $changes,
+                    'created_at' => now(),
+                ]);
+            }
+        });
+    }
 }
