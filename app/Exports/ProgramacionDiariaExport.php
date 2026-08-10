@@ -6,20 +6,18 @@ use App\Models\Audiencia;
 use App\Models\Turno;
 use App\Models\Ausentismo;
 use Carbon\Carbon;
-use Maatwebsite\Excel\Concerns\Exportable;
-use Maatwebsite\Excel\Concerns\WithEvents;
-use Maatwebsite\Excel\Concerns\WithTitle;
-use Maatwebsite\Excel\Events\AfterSheet;
+use PhpOffice\PhpSpreadsheet\Cell\Cell;
+use PhpOffice\PhpSpreadsheet\Cell\StringValueBinder;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 
-class ProgramacionDiariaExport implements WithEvents, WithTitle
+class ProgramacionDiariaExport
 {
-    use Exportable;
-
     protected string $fecha;                 // YYYY-MM-DD
     protected ?array $juecesAusentes = null; // si vienes con arreglo manual, se usa; si no, se consulta DB
 
@@ -206,15 +204,58 @@ class ProgramacionDiariaExport implements WithEvents, WithTitle
     }
 
 
-    public function registerEvents(): array
+    public function raw(): string
     {
-        return [
-            AfterSheet::class => function (AfterSheet $event) {
-                /** @var Worksheet $sheet */
-                $sheet = $event->sheet->getDelegate();
+        $spreadsheet = $this->spreadsheet();
 
-                // ===== Estilos base =====
-                $borderThin = ['borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => 'D1D5DB']]]];
+        try {
+            ob_start();
+            (new Xlsx($spreadsheet))->save('php://output');
+
+            return (string) ob_get_clean();
+        } finally {
+            $spreadsheet->disconnectWorksheets();
+        }
+    }
+
+    public function download(string $filename)
+    {
+        return response()->streamDownload(function (): void {
+            $spreadsheet = $this->spreadsheet();
+
+            try {
+                (new Xlsx($spreadsheet))->save('php://output');
+            } finally {
+                $spreadsheet->disconnectWorksheets();
+            }
+        }, $filename, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ]);
+    }
+
+    private function spreadsheet(): Spreadsheet
+    {
+        $spreadsheet = new Spreadsheet;
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle($this->title());
+
+        $valueBinder = Cell::getValueBinder();
+        Cell::setValueBinder(new StringValueBinder);
+
+        try {
+            $this->populate($sheet);
+        } finally {
+            Cell::setValueBinder($valueBinder);
+        }
+
+        return $spreadsheet;
+    }
+
+    private function populate(Worksheet $sheet): void
+    {
+
+        // ===== Estilos base =====
+        $borderThin = ['borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => 'D1D5DB']]]];
                 $titleStyle = [
                     'font' => ['bold' => true, 'size' => 18, 'name' => 'Aptos Display'],
                     'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
@@ -721,8 +762,6 @@ class ProgramacionDiariaExport implements WithEvents, WithTitle
 
                 // ===== Marco negro alrededor de TODO =====
                 $this->applyOuterMargin($sheet, 1, max(1, $row - 1));
-            },
-        ];
     }
 
     /**

@@ -4,6 +4,7 @@
         
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="csrf-token" content="{{ csrf_token() }}">
 
         <title>4toTOP</title>
 
@@ -12,6 +13,7 @@
         
 
         <!-- Styles -->
+        @livewireStyles
         @stack('styles')
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         <link rel="icon" href="{{ asset('favicon.webp') }}" type="image/webp">
@@ -48,6 +50,7 @@
         </div>
         
     
+        @stack('scripts')
+        @livewireScripts
     </body>
-    @stack('scripts')    
 </html>
