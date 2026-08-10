@@ -6,6 +6,7 @@ use App\Models\Audiencia;
 use App\Models\TtyppRegistro;
 use App\NotificationsV2\Application\Services\TtyppListadoNotifier;
 use App\Services\FuncionarioCatalog;
+use App\Services\SafeSpreadsheetReader;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
@@ -14,10 +15,7 @@ use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\WithPagination;
-use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Shared\Date as ExcelDate;
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 #[Layout('layouts.app')]
 class TtyppPage extends Component
@@ -231,7 +229,7 @@ class TtyppPage extends Component
         return $today->addDay()->toDateString();
     }
 
-    public function importFromExcel(): void
+    public function importFromExcel(SafeSpreadsheetReader $reader): void
     {
         Gate::authorize('ttypp.importar');
 
@@ -239,130 +237,86 @@ class TtyppPage extends Component
             'importExcel' => ['required', File::types(['xlsx', 'xls'])->max(20 * 1024)],
         ]);
 
-        $spreadsheet = IOFactory::load($this->importExcel->getRealPath());
-        $rows = $spreadsheet->getActiveSheet()->toArray(null, true, false, true);
+        $spreadsheet = $reader->load(
+            $this->importExcel->getRealPath(),
+            allowXls: true,
+            maxRows: 5000,
+            maxColumns: 7,
+        );
 
-        if ($rows === []) {
-            session()->flash('ok', 'El archivo Excel no contiene filas validas.');
+        try {
+            $rows = $spreadsheet->getActiveSheet()->toArray(null, true, false, true);
 
-            return;
-        }
+            if ($rows === []) {
+                session()->flash('ok', 'El archivo Excel no contiene filas validas.');
 
-        $headers = array_shift($rows);
-
-        if (! is_array($headers)) {
-            session()->flash('ok', 'El archivo Excel no contiene encabezados validos.');
-
-            return;
-        }
-
-        $normalizedHeaders = [];
-        foreach ($headers as $column => $header) {
-            $normalizedHeaders[$column] = $this->normalizeHeader((string) $header);
-        }
-
-        $read = 0;
-        $inserted = 0;
-        $filtered = 0;
-        $invalid = 0;
-
-        foreach ($rows as $row) {
-            if (! is_array($row)) {
-                $invalid++;
-
-                continue;
+                return;
             }
 
-            $read++;
-            $payload = $this->mapSiagjRowToPayload($normalizedHeaders, $row);
+            $headers = array_shift($rows);
 
-            if ($payload === null) {
-                $filtered++;
+            if (! is_array($headers)) {
+                session()->flash('ok', 'El archivo Excel no contiene encabezados validos.');
 
-                continue;
+                return;
             }
 
-            if ($this->isPayloadEmpty($payload) || blank($payload['rit'] ?? null) || blank($payload['fecha_asignacion'] ?? null)) {
-                $invalid++;
-
-                continue;
+            $normalizedHeaders = [];
+            foreach ($headers as $column => $header) {
+                $normalizedHeaders[$column] = $this->normalizeHeader((string) $header);
             }
 
-            $payload['created_by'] = Auth::id();
-            $payload['updated_by'] = Auth::id();
+            $read = 0;
+            $inserted = 0;
+            $filtered = 0;
+            $invalid = 0;
 
-            TtyppRegistro::query()->create($payload);
-            $inserted++;
+            foreach ($rows as $row) {
+                if (! is_array($row)) {
+                    $invalid++;
+
+                    continue;
+                }
+
+                $read++;
+                $payload = $this->mapSiagjRowToPayload($normalizedHeaders, $row);
+
+                if ($payload === null) {
+                    $filtered++;
+
+                    continue;
+                }
+
+                if ($this->isPayloadEmpty($payload) || blank($payload['rit'] ?? null) || blank($payload['fecha_asignacion'] ?? null)) {
+                    $invalid++;
+
+                    continue;
+                }
+
+                $payload['created_by'] = Auth::id();
+                $payload['updated_by'] = Auth::id();
+
+                TtyppRegistro::query()->create($payload);
+                $inserted++;
+            }
+
+            $this->reset('importExcel');
+            $this->resetPage();
+
+            session()->flash('ok', "Importacion Excel completada. Filas leidas: {$read}. Filas insertadas: {$inserted}. Filas omitidas por filtro: {$filtered}. Filas invalidas: {$invalid}.");
+        } finally {
+            $spreadsheet->disconnectWorksheets();
         }
-
-        $this->reset('importExcel');
-        $this->resetPage();
-
-        session()->flash('ok', "Importacion Excel completada. Filas leidas: {$read}. Filas insertadas: {$inserted}. Filas omitidas por filtro: {$filtered}. Filas invalidas: {$invalid}.");
     }
 
-    public function exportExcel()
+    public function exportExcel(): void
     {
         Gate::authorize('ttypp.exportar');
 
-        $filename = 'ttypp_'.now()->format('Ymd_His').'.xlsx';
-        $search = trim($this->search);
-        $selectedDate = Carbon::parse($this->selectedDate, 'America/Santiago');
-        $start = $selectedDate->copy()->startOfDay()->setTimezone('UTC');
-        $end = $selectedDate->copy()->endOfDay()->setTimezone('UTC');
-
-        $rows = TtyppRegistro::query()
-            ->where(function ($query) use ($selectedDate, $start, $end) {
-                $query->whereDate('fecha_asignacion', $selectedDate->toDateString())
-                    ->orWhere(function ($legacy) use ($start, $end) {
-                        $legacy->whereNull('fecha_asignacion')
-                            ->whereBetween('created_at', [$start, $end]);
-                    });
-            })
-            ->when($search !== '', function ($query) use ($search) {
-                $query->where(function ($nested) use ($search) {
-                    $nested->where('rit', 'like', "%{$search}%")
-                        ->orWhere('ruc', 'like', "%{$search}%")
-                        ->orWhere('acta', 'like', "%{$search}%")
-                        ->orWhere('sala', 'like', "%{$search}%");
-                });
-            })
-            ->latest('id')
-            ->get();
-
-        return response()->streamDownload(function () use ($rows): void {
-            $spreadsheet = new Spreadsheet;
-            $sheet = $spreadsheet->getActiveSheet();
-            $sheet->fromArray([
-                ['RIT', 'RUC', 'Tipo AUD', 'N Dias', 'Cant.', 'Modalidad', 'Encargada TI MP', 'Encargada TI D', 'Encargada Zoom', 'Acta', 'Sala', 'Jueces', 'Fecha Asignacion', 'Creado', 'Actualizado'],
-            ]);
-
-            $rowNumber = 2;
-            foreach ($rows as $row) {
-                $sheet->fromArray([
-                    $row->rit,
-                    $row->ruc,
-                    $row->tipo_audiencia,
-                    $row->numero_dias,
-                    $row->cantidad,
-                    $row->modalidad,
-                    $row->encargada_ti_mp,
-                    $row->encargada_ti_d,
-                    $row->encargada_zoom,
-                    $row->acta,
-                    $row->sala,
-                    $row->jueces,
-                    optional($row->fecha_asignacion)->format('Y-m-d'),
-                    optional($row->created_at)->format('Y-m-d H:i:s'),
-                    optional($row->updated_at)->format('Y-m-d H:i:s'),
-                ], null, 'A'.$rowNumber);
-                $rowNumber++;
-            }
-
-            (new Xlsx($spreadsheet))->save('php://output');
-        }, $filename, [
-            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        ]);
+        $this->redirectRoute('ttypp.export', [
+            'fecha' => $this->selectedDate,
+            'search' => $this->search,
+        ], navigate: false);
     }
 
     public function previewTtyppMail()

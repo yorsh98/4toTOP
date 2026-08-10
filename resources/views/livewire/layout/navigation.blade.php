@@ -85,6 +85,20 @@ new class extends Component
             'permissions' => ['navbar.documentos.visible', 'navbar.documentos.editable'],
         ],
         [
+            'label' => __('Servicios'),
+            'route' => 'backoffice.servicios.inventario',
+            'active' => 'backoffice.servicios.inventario',
+            'icon' => 'fa-solid fa-boxes-stacked',
+            'permissions' => ['servicios.ver'],
+        ],
+        [
+            'label' => __('Mapa Servicios'),
+            'route' => 'backoffice.servicios.mapa',
+            'active' => 'backoffice.servicios.mapa',
+            'icon' => 'fa-solid fa-map-location-dot',
+            'permissions' => ['servicios.ver'],
+        ],
+        [
             'label' => __('Seguridad'),
             'route' => 'seguridad.roles.index',
             'active' => 'seguridad.*',

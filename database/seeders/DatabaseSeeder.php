@@ -17,11 +17,19 @@ class DatabaseSeeder extends Seeder
         $this->call([
             MailSignaturesSeeder::class,
             MailRecipientSeeder::class,
+            ServiciosRoleSeeder::class,
+            SectorSeeder::class,
+            ActivoSeeder::class,
         ]);
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        User::query()->firstOrCreate(
+            ['email' => 'local-fixture@example.invalid'],
+            [
+                'name' => 'Test User',
+                'password' => str()->random(48),
+                'email_verified_at' => now(),
+                'approved_at' => now(),
+            ]
+        );
     }
 }

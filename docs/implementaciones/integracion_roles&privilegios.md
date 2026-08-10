@@ -38,7 +38,7 @@ Decisiones base:
 - `/tabla2`
 - `/tablas`
 - `/guiastelefonicas`
-- `/acc`, `/doc`, `/form`, `/proc`
+- `/acc`, `/doc`, `/proc`
 - `/migraunijud`
 - `/buscadorsentencias`
 - `/Monitor`
@@ -137,7 +137,7 @@ Esta matriz se implementa en Sprint 2 y se ajusta en Sprint 3.
 - `GET /programacion/mail/{fecha}` -> `progra.mail.enviar`
 - `GET /buscadorsentencias` -> `sentencias.ver`
 
-Nota: rutas de solo UI como `/doc`, `/acc`, `/form`, `/proc`, `/tabla2`, `/tablas` se pueden agrupar bajo un permiso de lectura general si aplica.
+Nota: rutas de solo UI como `/doc`, `/acc`, `/proc`, `/tabla2`, `/tablas` se pueden agrupar bajo un permiso de lectura general si aplica.
 
 ---
 

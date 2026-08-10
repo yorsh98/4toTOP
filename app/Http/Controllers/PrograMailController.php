@@ -12,8 +12,6 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
-use Maatwebsite\Excel\Excel as ExcelFormat;
-use Maatwebsite\Excel\Facades\Excel;
 
 class PrograMailController extends Controller
 {
@@ -245,7 +243,7 @@ class PrograMailController extends Controller
             ))->from($fromAddr, $fromName);
 
             // Adjunta Excel
-            $excelBin = Excel::raw(new ProgramacionDiariaExport($fecha), ExcelFormat::XLSX);
+            $excelBin = (new ProgramacionDiariaExport($fecha))->raw();
             $mail->attachData($excelBin, "Programacion_{$fecha}.xlsx", [
                 'mime' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             ]);
@@ -325,13 +323,13 @@ class PrograMailController extends Controller
             ))->from($fromAddr, $fromName);
 
             // Adjunta Excel
-            $excelBin = Excel::raw(new ProgramacionDiariaExport($fecha), ExcelFormat::XLSX);
+            $excelBin = (new ProgramacionDiariaExport($fecha))->raw();
             $mail->attachData($excelBin, "Programacion_{$fecha}.xlsx", [
                 'mime' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             ]);
 
             // destinatatios(solo sera visible el propio y todos los demas ocultos)
-            $to = 'notifica_4top_santiago@pjud.cl';        // correo ancla (visible solo para el receptor)
+            $to = 'jtroncosor@pjud.cl';        // correo ancla (visible solo para el receptor)
             $bcc = $destinatarios;  // TODOS ocultos
 
             Mail::mailer($mailerKey)

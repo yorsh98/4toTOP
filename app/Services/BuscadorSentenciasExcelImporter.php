@@ -5,12 +5,13 @@ namespace App\Services;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
-use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Shared\Date as ExcelDate;
 use RuntimeException;
 
 class BuscadorSentenciasExcelImporter
 {
+    public function __construct(private readonly SafeSpreadsheetReader $spreadsheetReader) {}
+
     /** @var array<string, array<int, string>> */
     protected array $headerAliases = [
         'ruc' => ['RUC'],
@@ -30,7 +31,12 @@ class BuscadorSentenciasExcelImporter
             throw new RuntimeException("No se encontro el archivo a importar: {$filePath}");
         }
 
-        $spreadsheet = IOFactory::load($filePath);
+        $spreadsheet = $this->spreadsheetReader->load(
+            $filePath,
+            allowXls: false,
+            maxRows: 25000,
+            maxColumns: 9,
+        );
         $sheet = $spreadsheet->getActiveSheet();
         $highestRow = $sheet->getHighestRow();
 
@@ -112,12 +118,16 @@ class BuscadorSentenciasExcelImporter
             $insertedRows += count($batch);
         }
 
-        return [
+        $result = [
             'total_filas_validas' => $totalRows,
             'filas_insertadas' => $insertedRows,
             'filas_omitidas' => $omittedRows,
             'filas_duplicadas' => $duplicateRows,
         ];
+
+        $spreadsheet->disconnectWorksheets();
+
+        return $result;
     }
 
     protected function loadExistingKeys(): array
@@ -180,7 +190,7 @@ class BuscadorSentenciasExcelImporter
         $normalizedHeaderToColumn = [];
 
         for ($col = 1; $col <= $highestColumnIndex; $col++) {
-            $rawHeader = (string) $sheet->getCellByColumnAndRow($col, $headerRow)->getValue();
+            $rawHeader = (string) $sheet->getCell([$col, $headerRow])->getValue();
             $normalized = $this->normalizeHeader($rawHeader);
 
             if ($normalized !== '') {
@@ -211,7 +221,7 @@ class BuscadorSentenciasExcelImporter
             return null;
         }
 
-        return $sheet->getCellByColumnAndRow($column, $row)->getValue();
+        return $sheet->getCell([$column, $row])->getValue();
     }
 
     protected function nullableString(mixed $value): ?string

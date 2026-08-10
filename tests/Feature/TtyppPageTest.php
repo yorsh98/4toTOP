@@ -218,11 +218,22 @@ test('superadmin exports filtered ttypp list as xlsx', function () {
         'fecha_asignacion' => '2026-06-10',
     ]);
 
-    Livewire::actingAs($user)
-        ->test(TtyppPage::class)
-        ->set('selectedDate', '2026-06-10')
+    $component = Livewire::actingAs($user)
+        ->test(TtyppPage::class);
+
+    $component
+        ->set('selectedDate', '2026-06-10');
+
+    $component
         ->call('exportExcel')
-        ->assertFileDownloaded('ttypp_20260609_100000.xlsx');
+        ->assertRedirect(route('ttypp.export', [
+            'fecha' => '2026-06-10',
+            'search' => '',
+        ], absolute: false));
+
+    $this->actingAs($user)
+        ->get(route('ttypp.export', ['fecha' => '2026-06-10']))
+        ->assertDownload('ttypp_20260609_100000.xlsx');
 
     Carbon::setTestNow();
 });

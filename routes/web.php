@@ -12,7 +12,6 @@ use App\Http\Controllers\ausenciasController;
 use App\Http\Controllers\ausentismoController;
 use App\Http\Controllers\buscadorsentenciasController;
 use App\Http\Controllers\docController;
-use App\Http\Controllers\formController;
 use App\Http\Controllers\guiasController;
 use App\Http\Controllers\guiastelefonicasController;
 use App\Http\Controllers\libertadController;
@@ -26,6 +25,7 @@ use App\Http\Controllers\PrograMailController;
 use App\Http\Controllers\SistOficioLibertadesController;
 use App\Http\Controllers\tabla2Controller;
 use App\Http\Controllers\tablasController;
+use App\Http\Controllers\TtyppExportController;
 use App\Http\Controllers\TurnoController;
 use App\Livewire\BitacoraPruebasPage;
 use App\Livewire\BitacoraPruebasPublicPage;
@@ -35,6 +35,9 @@ use App\Livewire\Security\AuditPage;
 use App\Livewire\Security\RolePermissionsPage;
 use App\Livewire\Security\RolesPage;
 use App\Livewire\Security\UsersRolesPage;
+use App\Livewire\ServiciosInventarioPage;
+use App\Livewire\ServiciosMapaPage;
+use App\Livewire\ServiciosMapaPublicPage;
 use App\Livewire\TtyppPage;
 use App\Livewire\TurnoPage;
 use Illuminate\Support\Facades\Mail;
@@ -107,7 +110,6 @@ Route::get('/guiastelefonicas', [guiastelefonicasController::class, 'index'])->n
 
 Route::get('/acc', [accController::class, 'index'])->name('acc');
 Route::get('/doc', [docController::class, 'index'])->name('doc');
-Route::get('/form', [formController::class, 'index'])->name('form');
 Route::get('/proc', [procController::class, 'index'])->name('proc');
 Route::get('/migraunijud', [migraunijudController::class, 'index'])->name('migraunijud');
 Route::get('/buscadorsentencias', [buscadorsentenciasController::class, 'index'])->name('buscadorsentencias');
@@ -119,7 +121,6 @@ Route::get('/buscadorsentencias', [buscadorsentenciasController::class, 'index']
 */
 Route::prefix('progra')->name('progra.')->group(function () {
     Route::get('/', [prograController::class, 'index'])->name('index');
-    Route::get('/mostrar', [prograController::class, 'mostrar'])->name('mostrar');
 });
 
 /*
@@ -139,6 +140,7 @@ Route::post('/enviar-solicitud', [SistOficioLibertadesController::class, 'enviar
 Route::get('/AdmAudv', [AdmAudvController::class, 'index'])->name('AdmAudv')->middleware(['auth', 'can:navbar.audiencias.visible']);
 Route::get('/Monitor', [MonitorController::class, 'index'])->name('Monitor');
 Route::get('/bitacora-pruebas', BitacoraPruebasPublicPage::class)->name('bitacora-pruebas.public');
+Route::get('/servicios/mapa-publico', ServiciosMapaPublicPage::class)->name('servicios.mapa-publico');
 Route::get('/backoffice/bitacora-pruebas', BitacoraPruebasPage::class)
     ->name('bitacora-pruebas.index')
     ->middleware(['auth', 'can:navbar.bitacora_pruebas.visible']);
@@ -148,6 +150,15 @@ Route::get('/backoffice/documentos', DocumentosBackofficePage::class)
 Route::get('/backoffice/ttypp', TtyppPage::class)
     ->name('ttypp.index')
     ->middleware(['auth', 'can:navbar.ttypp.visible']);
+Route::get('/backoffice/ttypp/export', TtyppExportController::class)
+    ->name('ttypp.export')
+    ->middleware(['auth', 'can:ttypp.exportar']);
+Route::get('/backoffice/servicios/inventario', ServiciosInventarioPage::class)
+    ->name('backoffice.servicios.inventario')
+    ->middleware(['auth', 'can:servicios.ver']);
+Route::get('/backoffice/servicios/mapa', ServiciosMapaPage::class)
+    ->name('backoffice.servicios.mapa')
+    ->middleware(['auth', 'can:servicios.ver']);
 
 /*
 |--------------------------------------------------------------------------
@@ -164,7 +175,6 @@ Route::get('/csrf-refresh', function () {
 |--------------------------------------------------------------------------
 */
 Route::get('/audiencias/export/diaria', [AudienciasExportController::class, 'diaria'])
-    ->middleware(['auth', 'can:navbar.audiencias.editable'])
     ->name('audiencias.export.diaria');
 
 /*

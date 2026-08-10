@@ -406,6 +406,21 @@
                                 </div>
                             </a>
 
+                            <a  id="13"
+                                href="{{ route('servicios.mapa-publico') }}"
+                                class="flex items-center gap-4 rounded-xl bg-white/92 p-6 shadow-[0_12px_30px_rgba(15,23,42,0.14)] ring-1 ring-slate-900/10 backdrop-blur-[2px] transition-all duration-300 hover:-translate-y-0.5 hover:text-black/80 hover:shadow-[0_18px_38px_rgba(15,23,42,0.2)] hover:ring-slate-900/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF2D20] lg:pb-10 dark:bg-zinc-900/90 dark:ring-zinc-700 dark:hover:text-white/80 dark:hover:ring-zinc-500"
+                            >
+                                <div class="flex size-12 shrink-0 items-center justify-center rounded-full bg-[#2D8CFF]/10 sm:size-16">
+                                    <i class="fa-solid fa-map-location-dot text-[#0A2E5D] text-xl"></i>
+                                </div>
+                                <div class="pt-3 sm:pt-5">
+                                    <h2 class="text-xl font-semibold text-black dark:text-white">MAPA SERVICIOS</h2>
+                                    <p class="mt-2 text-sm/relaxed">
+                                        Plano publico interactivo del tribunal
+                                    </p>
+                                </div>
+                            </a>
+
                             <a  id="9"
                                 href="{{ url('/bitacora-pruebas') }}"
                                 class="flex items-center gap-4 rounded-xl bg-white/92 p-6 shadow-[0_12px_30px_rgba(15,23,42,0.14)] ring-1 ring-slate-900/10 backdrop-blur-[2px] transition-all duration-300 hover:-translate-y-0.5 hover:text-black/80 hover:shadow-[0_18px_38px_rgba(15,23,42,0.2)] hover:ring-slate-900/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF2D20] lg:pb-10 dark:bg-zinc-900/90 dark:ring-zinc-700 dark:hover:text-white/80 dark:hover:ring-zinc-500"
