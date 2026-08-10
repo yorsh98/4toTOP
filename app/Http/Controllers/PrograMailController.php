@@ -177,6 +177,48 @@ class PrograMailController extends Controller
         return compact('juicios', 'lecturas', 'cortas', 'juecesAusentes', 'turno1', 'turno2', 'turno3');
     }
 
+    public function snapshotForNotification(string $fechaYmd, ?int $firmaId): array
+    {
+        [$firmaHtml, $mailerKey, $fromAddr, $fromName] = $this->resolveSignatureConfig($firmaId, $fechaYmd);
+
+        $juecesAusentes = Ausentismo::query()
+            ->select(['funcionario_nombre', 'cargo', 'observacion', 'tipo_permiso', 'fecha_inicio', 'fecha_termino'])
+            ->where(function ($query) {
+                $query->where('cargo', 'LIKE', '%JUEZ%')
+                    ->orWhere('cargo', 'LIKE', '%JUEZA%');
+            })
+            ->whereDate('fecha_inicio', '<=', $fechaYmd)
+            ->where(function ($query) use ($fechaYmd) {
+                $query->whereNull('fecha_termino')
+                    ->orWhereDate('fecha_termino', '>=', $fechaYmd);
+            })
+            ->orderBy('funcionario_nombre')
+            ->get()
+            ->map(fn (Ausentismo $ausentismo) => [
+                'nombre' => mb_strtoupper(trim((string) $ausentismo->funcionario_nombre), 'UTF-8') ?: '—',
+                'funcion' => mb_strtoupper((string) ($ausentismo->observacion ?: $ausentismo->tipo_permiso ?: '—'), 'UTF-8'),
+            ])
+            ->all();
+
+        return [
+            'fecha' => $fechaYmd,
+            'mailer' => $mailerKey,
+            'from_address' => $fromAddr,
+            'from_name' => $fromName,
+            'firma_html' => $firmaHtml,
+            'mail_data' => $this->buildDataForMail($fechaYmd),
+            'export_snapshot' => [
+                'audiencias' => Audiencia::query()
+                    ->whereDate('fecha', $fechaYmd)
+                    ->get()
+                    ->map(fn (Audiencia $audiencia) => $audiencia->toArray())
+                    ->all(),
+                'turno' => Turno::find(2)?->only(['TM1', 'TM2', 'TM3']) ?? [],
+                'jueces_ausentes' => $juecesAusentes,
+            ],
+        ];
+    }
+
     /** ================== Helper de firma/mailer/from ================== */
 
     /**
