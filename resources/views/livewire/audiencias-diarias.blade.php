@@ -1,5 +1,6 @@
 {{-- resources/views/livewire/audiencias-diarias.blade.php --}}
-<div x-data="{ open: @entangle('showSend').live, listModal:false }">
+<div x-data="{ open: @entangle('showSend').live, listModal:false }"
+    @if($envioDispatchId && !in_array($envioStatus, ['sent', 'failed'], true)) wire:poll.1s="actualizarEstadoEnvio" @endif>
     @php
         // Helper para mostrar "vacío" en letra muy chica cuando el valor venga null o vacío
         $fmt = function ($v) {
@@ -317,11 +318,25 @@
 
         {{-- Footer --}}
         <div class="px-4 py-3 border-t flex items-center justify-end gap-2">
+          @if($envioDispatchId)
+            @php($envioProgreso = $envioTotal ? (($envioEnviados + $envioFallidos) / $envioTotal) * 100 : 0)
+            <div class="mr-auto min-w-56 text-sm text-gray-600">
+              <div class="flex justify-between mb-1">
+                <span>Envío #{{ $envioDispatchId }}</span>
+                <span>{{ $envioTotal ? (int) round((($envioEnviados + $envioFallidos) / $envioTotal) * 100) : 0 }}%</span>
+              </div>
+              <div class="h-2 overflow-hidden rounded bg-gray-200">
+                <div class="h-full bg-blue-600 transition-all" x-bind:style="{ width: '{{ $envioProgreso }}%' }"></div>
+              </div>
+              <div class="mt-1">{{ $envioEnviados }} enviados, {{ $envioFallidos }} no enviados, {{ max(0, $envioTotal - $envioEnviados - $envioFallidos) }} pendientes</div>
+            </div>
+          @endif
           <button type="button" class="px-3 py-2 rounded-md border hover:bg-gray-50" x-on:click="open = false">
             Cancelar
           </button>
           <button type="button"
                   wire:click="enviarCorreoDifusion"
+                  @disabled($envioDispatchId && !in_array($envioStatus, ['sent', 'failed'], true))
                   wire:loading.attr="disabled"
                   wire:target="enviarCorreoDifusion"
                   class="px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed">
@@ -408,8 +423,36 @@
         document.addEventListener('audiencia-eliminada', () => {
             Swal?.fire?.({ icon:'success', title:'Eliminada', timer:1200, showConfirmButton:false });
         });
-        document.addEventListener('correo-enviado', () => {
-            Swal?.fire?.({ icon:'success', title:'Correo enviado', timer:1500, showConfirmButton:false });
+        document.addEventListener('correo-difusion-finalizada', (event) => {
+            const { status, dispatchId, sent, failed, failures = [] } = event.detail;
+
+            if (status === 'sent' && failed === 0) {
+                Swal?.fire?.({ icon: 'success', title: 'Programación enviada', text: `Enviada a ${sent} destinatarios.`, timer: 1800, showConfirmButton: false });
+                return;
+            }
+
+            const error = status === 'failed';
+            Swal?.fire?.({
+                icon: error ? 'error' : 'warning',
+                title: error ? 'No se pudo completar el envío' : 'Envío completado con advertencias',
+                text: `${sent} enviados, ${failed} no enviados. Despacho #${dispatchId}.`,
+                showDenyButton: failed > 0,
+                denyButtonText: 'Ver destinatarios no enviados',
+                confirmButtonText: 'Cerrar',
+            }).then((result) => {
+                if (!result.isDenied) return;
+
+                const escape = (value) => String(value).replace(/[&<>'"]/g, (character) => ({
+                    '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#039;', '"': '&quot;'
+                })[character]);
+                const details = failures.map(({ email, reason }) => `<li><strong>${escape(email)}</strong>: ${escape(reason || 'Rechazado por el servidor SMTP.')}</li>`).join('');
+
+                Swal?.fire?.({
+                    icon: 'info',
+                    title: 'Destinatarios no enviados',
+                    html: `<ul class="text-left">${details}</ul><p class="mt-3 text-sm text-gray-500">Despacho #${dispatchId}</p>`,
+                });
+            });
         });
     </script>
     @endscript

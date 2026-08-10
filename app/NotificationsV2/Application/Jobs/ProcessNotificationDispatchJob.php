@@ -81,6 +81,7 @@ class ProcessNotificationDispatchJob implements ShouldQueue
                 'failed_at' => now(),
                 'failure_reason' => 'No active template found for this notification type.',
             ]);
+            $this->clearProgramacionSnapshot($dispatch);
 
             return;
         }
@@ -117,6 +118,8 @@ class ProcessNotificationDispatchJob implements ShouldQueue
                     'failed_recipients' => $failedRecipients,
                 ]);
 
+                $this->clearProgramacionSnapshot($dispatch);
+
                 return;
             }
 
@@ -143,6 +146,8 @@ class ProcessNotificationDispatchJob implements ShouldQueue
                 'sent_recipients' => $sentRecipients,
                 'failed_recipients' => $failedRecipients,
             ]);
+
+            $this->clearProgramacionSnapshot($dispatch);
         } catch (Throwable $exception) {
             $attempt->update([
                 'status' => 'failed',
@@ -187,6 +192,8 @@ class ProcessNotificationDispatchJob implements ShouldQueue
             'status' => 'failed',
             'error' => $exception->getMessage(),
         ]);
+
+        $this->clearProgramacionSnapshot($dispatch);
     }
 
     private function resolveTemplate(NotificationDispatch $dispatch): ?NotificationTemplate
@@ -200,5 +207,16 @@ class ProcessNotificationDispatchJob implements ShouldQueue
             ->where('is_active', true)
             ->orderByDesc('version')
             ->first();
+    }
+
+    private function clearProgramacionSnapshot(NotificationDispatch $dispatch): void
+    {
+        $payload = $dispatch->payload ?? [];
+        if (! array_key_exists('programacion_diaria', $payload)) {
+            return;
+        }
+
+        unset($payload['programacion_diaria']);
+        $dispatch->update(['payload' => $payload]);
     }
 }

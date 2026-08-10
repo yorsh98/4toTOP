@@ -4,10 +4,11 @@
 
 namespace App\Livewire;
 
-use App\Http\Controllers\PrograMailController;
 use App\Models\Audiencia;
 use App\Models\MailRecipient;
 use App\Models\MailSignature;
+use App\NotificationsV2\Application\Services\ProgramacionDiariaNotifier;
+use App\NotificationsV2\Domain\Models\NotificationDispatch;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -42,6 +43,20 @@ class AudienciasDiarias extends Component
     public ?int $firmaId = null;
 
     public string $firmaPreview = '';
+
+    public ?int $envioDispatchId = null;
+
+    public ?string $envioStatus = null;
+
+    public int $envioTotal = 0;
+
+    public int $envioEnviados = 0;
+
+    public int $envioFallidos = 0;
+
+    public array $envioFallidosDetalle = [];
+
+    public bool $envioNotificado = false;
 
     public function mount(): void
     {
@@ -284,10 +299,50 @@ class AudienciasDiarias extends Component
             return;
         }
 
-        app(PrograMailController::class)
-            ->enviarProgramacionPorCorreoLista($this->fecha, $limpios, $this->firmaId);
+        $dispatch = app(ProgramacionDiariaNotifier::class)
+            ->notify($this->fecha, $limpios, $this->firmaId);
 
-        $this->dispatch('correo-enviado');
+        $this->envioDispatchId = $dispatch->id;
+        $this->envioNotificado = false;
+        $this->actualizarEstadoEnvio();
+    }
+
+    public function actualizarEstadoEnvio(): void
+    {
+        if (! $this->envioDispatchId) {
+            return;
+        }
+
+        $dispatch = NotificationDispatch::query()->find($this->envioDispatchId);
+        if (! $dispatch) {
+            return;
+        }
+
+        $this->envioStatus = $dispatch->status;
+        $this->envioTotal = $dispatch->recipients()->count();
+        $this->envioEnviados = $dispatch->recipients()->where('status', 'sent')->count();
+        $this->envioFallidos = $dispatch->recipients()->where('status', 'failed')->count();
+        $this->envioFallidosDetalle = $dispatch->recipients()
+            ->where('status', 'failed')
+            ->get(['email', 'failure_reason'])
+            ->map(fn ($recipient) => [
+                'email' => $recipient->email,
+                'reason' => $recipient->failure_reason,
+            ])
+            ->all();
+
+        if (! in_array($this->envioStatus, ['sent', 'failed'], true) || $this->envioNotificado) {
+            return;
+        }
+
+        $this->envioNotificado = true;
+        $this->dispatch('correo-difusion-finalizada',
+            status: $this->envioStatus,
+            dispatchId: $dispatch->id,
+            sent: $this->envioEnviados,
+            failed: $this->envioFallidos,
+            failures: $this->envioFallidosDetalle,
+        );
     }
 
     /* ===================== Slide-over ===================== */

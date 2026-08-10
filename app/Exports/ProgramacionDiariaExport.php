@@ -20,6 +20,7 @@ class ProgramacionDiariaExport
 {
     protected string $fecha;                 // YYYY-MM-DD
     protected ?array $juecesAusentes = null; // si vienes con arreglo manual, se usa; si no, se consulta DB
+    protected ?array $snapshot;
 
     // === Colores solicitados para "Acusados" ===
     private const ACUSADOS_HEAD_BG = '9CA3AF'; // gris más oscuro (Tailwind gray-400)
@@ -31,10 +32,11 @@ class ProgramacionDiariaExport
     private const RED_LABEL    = 'FF0000';     // "TURNO X:"
     private const MUTED_GRAY   = '9CA3AF';     // "NO HAY"
 
-    public function __construct(string $fecha, ?array $juecesAusentes = null)
+    public function __construct(string $fecha, ?array $juecesAusentes = null, ?array $snapshot = null)
     {
         $this->fecha = $fecha;
         $this->juecesAusentes = $juecesAusentes; // si es null, se cargará desde DB
+        $this->snapshot = $snapshot;
     }
 
     public function title(): string
@@ -56,6 +58,10 @@ class ProgramacionDiariaExport
 
     private function getJuecesAusentesFromDB(string $fecha): array
     {
+        if (isset($this->snapshot['jueces_ausentes'])) {
+            return $this->snapshot['jueces_ausentes'];
+        }
+
         // Se asume MySQL/MariaDB; LIKE cubrirá JUEZ/JUEZA
         $q = Ausentismo::query()
             ->select(['funcionario_nombre','cargo','observacion','tipo_permiso', 'fecha_inicio','fecha_termino'])
@@ -308,7 +314,9 @@ class ProgramacionDiariaExport
 
                 // ===== BLOQUE: Turnos (bajo título y fecha) =====
                 $row++; // espacio
-                $turno2 = Turno::find(2);
+                $turno2 = isset($this->snapshot['turno'])
+                    ? (object) $this->snapshot['turno']
+                    : Turno::find(2);
 
                 // tamaños más grandes para TURNOS
                 $turnoFontSize = 15;     // tamaño letra
@@ -399,9 +407,14 @@ class ProgramacionDiariaExport
                 };
 
                 // 3) Recolección + orden por: sección → sala asc (num) → hora asc; sin sala al final
-                $audiencias = Audiencia::query()
-                    ->whereDate('fecha', $this->fecha)
-                    ->get()
+                $audiencias = (isset($this->snapshot['audiencias'])
+                    ? collect($this->snapshot['audiencias'])->map(function (array $attributes): Audiencia {
+                        $audiencia = new Audiencia;
+                        $audiencia->forceFill($attributes);
+
+                        return $audiencia;
+                    })
+                    : Audiencia::query()->whereDate('fecha', $this->fecha)->get())
                     ->sort(function ($a, $b) use ($priority, $parseSala) {
                         $ta = strtoupper(trim((string)($a->tipo_audiencia ?? '')));
                         $tb = strtoupper(trim((string)($b->tipo_audiencia ?? '')));
