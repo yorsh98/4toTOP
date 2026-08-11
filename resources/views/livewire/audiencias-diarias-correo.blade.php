@@ -4,9 +4,14 @@
         if (!this.open) return;
 
         this.open = false;
+
+        if (this.$wire.envioDispatchId && !['sent', 'failed'].includes(this.$wire.envioStatus)) {
+            return;
+        }
+
         window.setTimeout(() => $wire.close(), window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 160);
     }
-}" x-init="$nextTick(() => open = true)" @if($envioDispatchId && !in_array($envioStatus, ['sent', 'failed'], true)) wire:poll.3s="actualizarEstadoEnvio" @endif>
+}" x-init="$nextTick(() => open = true)" x-on:audiencias-correo-abrir.window="open = true" @if($envioDispatchId && !in_array($envioStatus, ['sent', 'failed'], true)) wire:poll.3s="actualizarEstadoEnvio" @endif>
     <div x-cloak x-show="open" x-transition:enter="transition-opacity duration-150 ease-out motion-reduce:transition-none"
         x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
         x-transition:leave="transition-opacity duration-150 ease-in motion-reduce:transition-none"
@@ -131,7 +136,7 @@
             const { status, dispatchId, sent, failed, failures = [] } = event.detail;
             const completedWithoutFailures = status === 'sent' && failed === 0;
 
-            Swal?.fire?.({
+            const alert = Swal?.fire?.({
                 icon: completedWithoutFailures ? 'success' : 'warning',
                 title: completedWithoutFailures ? 'Programación enviada' : 'Envío completado con advertencias',
                 text: completedWithoutFailures
@@ -140,7 +145,15 @@
                 showDenyButton: failed > 0,
                 denyButtonText: 'Ver destinatarios no enviados',
                 confirmButtonText: 'Cerrar',
-            }).then((result) => {
+            });
+
+            if (!alert) {
+                $wire.close();
+
+                return;
+            }
+
+            alert.then((result) => {
                 if (!result.isDenied) return;
 
                 const escape = (value) => String(value).replace(/[&<>'"]/g, (character) => ({
@@ -153,7 +166,7 @@
                     title: 'Destinatarios no enviados',
                     html: `<ul class="text-left">${details}</ul><p class="mt-3 text-sm text-gray-500">Despacho #${dispatchId}</p>`,
                 });
-            });
+            }).finally(() => $wire.close());
         });
     </script>
     @endscript
