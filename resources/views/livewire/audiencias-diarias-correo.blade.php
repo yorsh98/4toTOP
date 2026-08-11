@@ -42,8 +42,11 @@
                     </div>
                     @error('newEmail') <p class="text-sm text-red-600">{{ $message }}</p> @enderror
 
-                    <div class="text-sm border rounded-md">
-                        <div class="px-3 py-2 border-b bg-gray-50">{{ count($recipients) }} destinatarios</div>
+                    <details class="text-sm border rounded-md">
+                        <summary class="flex items-center justify-between px-3 py-2 cursor-pointer bg-gray-50 text-gray-700">
+                            <span>{{ count($recipients) }} destinatarios</span>
+                            <span class="text-xs font-medium text-blue-700">Ver lista</span>
+                        </summary>
                         <ul class="max-h-48 overflow-y-auto divide-y">
                             @forelse($recipients as $index => $recipient)
                                 <li class="flex items-center justify-between px-3 py-2">
@@ -54,7 +57,7 @@
                                 <li class="px-3 py-2 text-gray-500">Sin destinatarios.</li>
                             @endforelse
                         </ul>
-                    </div>
+                    </details>
                     @error('recipients') <p class="text-sm text-red-600">{{ $message }}</p> @enderror
                 </section>
 
