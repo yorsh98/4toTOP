@@ -106,7 +106,7 @@
                                 <div id="screenshot-container" class="relative flex w-full flex-1 items-stretch">
                                     <section>
                                         <img src="{{ asset('img/S1.webp') }}" onclick="window.location.href='{{ url('/SistOficioLibertades') }}'">
-                                        <img src="{{ asset('img/S2.webp') }}" onclick="window.location.href='http://10.13.214.129:8080/webaudios/'">
+                                        <img src="{{ asset('img/S2.webp') }}" onclick="window.location.href='{{ route('audios-salas.index') }}'">
                                         <img src="{{ asset('img/S3.webp') }}" onclick="window.location.href='http://10.13.214.129:8080/cumpleanos/'">
                                     </section>
                                     <div class="absolute -bottom-16 -left-16 h-40 w-[calc(100%+8rem)] bg-gradient-to-b from-transparent via-white to-white dark:via-zinc-900 dark:to-zinc-900"></div>

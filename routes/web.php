@@ -27,6 +27,7 @@ use App\Http\Controllers\tabla2Controller;
 use App\Http\Controllers\tablasController;
 use App\Http\Controllers\TtyppExportController;
 use App\Http\Controllers\TurnoController;
+use App\Livewire\AudiosSalasPage;
 use App\Livewire\BitacoraPruebasPage;
 use App\Livewire\BitacoraPruebasPublicPage;
 use App\Livewire\DocumentosBackofficePage;
@@ -159,6 +160,9 @@ Route::get('/backoffice/servicios/inventario', ServiciosInventarioPage::class)
 Route::get('/backoffice/servicios/mapa', ServiciosMapaPage::class)
     ->name('backoffice.servicios.mapa')
     ->middleware(['auth', 'can:servicios.ver']);
+Route::get('/audios-salas', AudiosSalasPage::class)
+    ->name('audios-salas.index')
+    ->middleware(['auth', 'can:audios_salas.ver']);
 
 /*
 |--------------------------------------------------------------------------

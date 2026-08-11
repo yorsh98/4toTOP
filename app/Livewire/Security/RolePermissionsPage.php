@@ -25,6 +25,7 @@ class RolePermissionsPage extends Component
         'bitacora_pruebas' => 'Bitacora Pruebas',
         'ausencias' => 'Ausencias',
         'documentos' => 'Documentos',
+        'audios_salas' => 'Audios de Salas',
         'seguridad' => 'Seguridad',
     ];
 
@@ -47,6 +48,8 @@ class RolePermissionsPage extends Component
         'navbar.ausencias.editable' => ['ausentismo.editar'],
         'navbar.documentos.visible' => ['documentos.ver'],
         'navbar.documentos.editable' => ['documentos.gestionar'],
+        'navbar.audios_salas.visible' => ['audios_salas.ver'],
+        'navbar.audios_salas.editable' => ['audios_salas.gestionar'],
         'navbar.seguridad.visible' => ['seguridad.roles.ver', 'seguridad.permisos.ver', 'seguridad.auditoria.ver'],
         'navbar.seguridad.editable' => ['seguridad.roles.gestionar', 'seguridad.permisos.gestionar', 'seguridad.usuarios_roles.gestionar'],
     ];

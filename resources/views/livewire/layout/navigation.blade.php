@@ -85,6 +85,13 @@ new class extends Component
             'permissions' => ['navbar.documentos.visible', 'navbar.documentos.editable'],
         ],
         [
+            'label' => __('Audios de Salas'),
+            'route' => 'audios-salas.index',
+            'active' => 'audios-salas.*',
+            'icon' => 'fa-solid fa-headphones',
+            'permissions' => ['navbar.audios_salas.visible', 'navbar.audios_salas.editable'],
+        ],
+        [
             'label' => __('Servicios'),
             'route' => 'backoffice.servicios.inventario',
             'active' => 'backoffice.servicios.inventario',
