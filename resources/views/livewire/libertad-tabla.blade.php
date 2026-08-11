@@ -125,7 +125,9 @@
                                     <button wire:click="edit({{ $l->id }})" class="btn btn-sm btn-primary">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <button wire:click="confirmDelete({{ $l->id }})" class="btn btn-sm btn-danger">
+                                    <button wire:click="confirmDelete({{ $l->id }})"
+                                        wire:confirm="¿Está seguro de eliminar esta libertad?"
+                                        class="btn btn-sm btn-danger">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 @else
