@@ -42,6 +42,13 @@ class AudienciasDiarias extends Component
     public function openSend(): void
     {
         Gate::authorize('progra.mail.enviar');
+
+        if ($this->showSend) {
+            $this->dispatch('audiencias-correo-abrir');
+
+            return;
+        }
+
         $this->showSend = true;
     }
 
