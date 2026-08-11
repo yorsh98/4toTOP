@@ -64,6 +64,7 @@ class LibertadTabla extends Component
     public function mount(string $modo = 'full'): void
     {
         $this->modo = in_array($modo, ['full', 'vista'], true) ? $modo : 'full';
+        $this->filtroAnio = (string) now()->year;
 
         if ($this->isFull()) {
             Gate::authorize('libertades.ver');
