@@ -10,7 +10,9 @@
     {{-- Evita FOUC de Alpine --}}
     <style>[x-cloak]{display:none!important}</style>
 
-    <div class="py-2" x-data="audienciasUI()" x-init="init()" x-cloak>
+    <div class="py-2" x-data="audienciasUI()" x-init="init()" x-cloak
+         x-on:audiencia-edicion-abierta.window="editandoDiaria = true"
+         x-on:audiencia-edicion-cerrada.window="editandoDiaria = false">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
@@ -42,7 +44,7 @@
                     </div>
 
                     {{-- ====== MENÚ DE BOTONES (tus módulos) ====== --}}
-                    <template x-if="modo === 'menu'">
+                    <template x-if="modo === 'menu' && !editandoDiaria">
                         <div>
                             <p class="text-sm text-gray-600 mb-3">Selecciona el módulo:</p>
 
@@ -69,19 +71,16 @@
                     </template>
 
                     {{-- ====== CONTENIDO DEL MÓDULO ====== --}}
-                    <template x-if="modo !== 'menu'">
-                        <div>
-                            <!-- barra superior con botón Volver -->
-                            <div class="flex items-center justify-between mb-4">
-                                <button type="button" @click="back()"
-                                        class="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border hover:bg-gray-50">
-                                    <span>←</span> <span>Volver</span>
-                                </button>
-                                <div class="text-sm text-gray-500" x-text="tituloActual()"></div>
-                            </div>
-
-                            <!-- monta solo el componente activo -->
+                    <template x-if="modo !== 'menu' && !editandoDiaria">
                             <div>
+                                <div class="flex items-center justify-between mb-4">
+                                    <button type="button" @click="back()"
+                                            class="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border hover:bg-gray-50">
+                                        <span>←</span> <span>Volver</span>
+                                    </button>
+                                    <div class="text-sm text-gray-500" x-text="tituloActual()"></div>
+                                </div>
+
                                 <template x-if="modo === 'lecturas'">
                                     <livewire:lecturas-sentencia-batch :wire:key="'ls'"/>
                                 </template>
@@ -94,7 +93,6 @@
                                     <livewire:audiencia-form :wire:key="'form'"/>
                                 </template>
                             </div>
-                        </div>
                     </template>
 
                 </div>
@@ -109,6 +107,7 @@
                 // estado
                 modo: 'menu',          // lecturas | cortas | form | menu
                 diariasAbierta: false, // acordeón superior
+                editandoDiaria: false,
 
                 // init desde la URL
                 init(){

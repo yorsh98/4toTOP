@@ -11,6 +11,8 @@ use Livewire\Component;
 
 class AudienciasCortasBatch extends Component
 {
+    public ?int $editId = null;
+
     /** Datos compartidos por todas las filas */
     public $shared = [
         'fecha' => '',
@@ -39,12 +41,54 @@ class AudienciasCortasBatch extends Component
     /** Constante interna: no se expone en la vista */
     private const TIPO = 'Audiencia Corta';
 
-    public function mount(): void
+    public function mount(?int $edit = null): void
     {
-        Gate::authorize('audiencias.crear');
+        Gate::authorize($edit ? 'audiencias.editar' : 'audiencias.crear');
         $this->hydrateRoleOptions();
+
+        if ($edit) {
+            $this->loadForEdit($edit);
+
+            return;
+        }
+
         $this->shared['fecha'] = now()->addDay()->toDateString();
         $this->addRow();
+    }
+
+    private function loadForEdit(int $id): void
+    {
+        $audiencia = Audiencia::query()
+            ->whereKey($id)
+            ->where('tipo_audiencia', self::TIPO)
+            ->firstOrFail();
+
+        $this->editId = $audiencia->id;
+        $this->shared = [
+            'fecha' => $audiencia->fecha->toDateString(),
+            'sala' => $audiencia->sala,
+            'JuezP' => $audiencia->JuezP,
+            'JuezR' => $audiencia->JuezR,
+            'JuezI' => $audiencia->JuezI,
+            'anfitrion' => $audiencia->anfitrion,
+            'cta_zoom' => $audiencia->cta_zoom,
+            'ubicacion' => $audiencia->ubicacion,
+            'hora_inicio' => $audiencia->hora_inicio?->format('H:i'),
+        ];
+        $this->items = [[
+            'rit' => $audiencia->rit,
+            'ruc' => $audiencia->ruc,
+            'encargado_causa' => $audiencia->encargado_causa,
+            'acta' => $audiencia->acta,
+            'obs' => $audiencia->obs,
+            'acusados' => $audiencia->acusados ?? [],
+            'nuevoAcusado' => [
+                'nombre_completo' => '',
+                'situacion' => 'Libre',
+                'medida_cautelar' => '',
+                'forma_notificacion' => '',
+            ],
+        ]];
     }
 
     public function hydrateRoleOptions(): void
@@ -166,7 +210,9 @@ class AudienciasCortasBatch extends Component
 
     public function guardar(): void
     {
-        Gate::authorize('audiencias.crear');
+        if ($this->editId === null) {
+            Gate::authorize('audiencias.crear');
+        }
 
         try {
             $this->validate();
@@ -191,6 +237,16 @@ class AudienciasCortasBatch extends Component
             return;
         }
 
+        if ($this->editId !== null) {
+            $this->saveEditedRow($this->items[0]);
+            $this->items = [];
+            $this->addRow();
+            $this->dispatch('alerta-success');
+            $this->dispatch('audiencia-guardada');
+
+            return;
+        }
+
         // Unicidad contra BD: rit + fecha(compartida) + tipo_audiencia = 'Audiencia Corta'
         foreach ($this->items as $i => $row) {
             $exists = Audiencia::where('rit', $row['rit'])
@@ -210,32 +266,7 @@ class AudienciasCortasBatch extends Component
 
         DB::transaction(function () {
             foreach ($this->items as $row) {
-                Audiencia::create([
-                    'fecha' => $this->shared['fecha'],
-                    'rit' => $row['rit'],
-                    'sala' => $this->shared['sala'],
-                    'ubicacion' => $this->shared['ubicacion'],
-                    'hora_inicio' => $this->shared['hora_inicio'],
-                    'ruc' => $row['ruc'],
-                    'cta_zoom' => $this->shared['cta_zoom'] ?: null,
-                    'tipo_audiencia' => self::TIPO, // <-- FORZADO AQUÍ
-                    'num_testigos' => null,
-                    'num_peritos' => null,
-                    'duracion' => null,
-                    'delito' => null,
-                    'jueces_inhabilitados' => [],
-                    'encargado_causa' => $row['encargado_causa'],
-                    'encargado_ttp' => null,
-                    'encargado_ttp_zoom' => null,
-                    'estado' => 'POR_REALIZARSE',
-                    'acusados' => $row['acusados'], // $casts → JSON
-                    'JuezP' => $this->shared['JuezP'],
-                    'JuezR' => $this->shared['JuezR'],
-                    'JuezI' => $this->shared['JuezI'],
-                    'acta' => $row['acta'],
-                    'anfitrion' => $this->shared['anfitrion'] ?: null,
-                    'obs' => $row['obs'] ?: null,
-                ]);
+                Audiencia::create($this->audienciaData($row));
             }
         });
 
@@ -244,6 +275,56 @@ class AudienciasCortasBatch extends Component
         $this->addRow();
 
         $this->dispatch('alerta-success');
+        $this->dispatch('audiencia-guardada');
+    }
+
+    private function saveEditedRow(array $row): void
+    {
+        $audiencia = Audiencia::query()
+            ->whereDate('fecha', $this->shared['fecha'])
+            ->where('rit', $row['rit'])
+            ->where('tipo_audiencia', self::TIPO)
+            ->first();
+
+        if ($audiencia) {
+            Gate::authorize('audiencias.editar');
+            $audiencia->update($this->audienciaData($row));
+
+            return;
+        }
+
+        Gate::authorize('audiencias.crear');
+        Audiencia::create($this->audienciaData($row));
+    }
+
+    private function audienciaData(array $row): array
+    {
+        return [
+            'fecha' => $this->shared['fecha'],
+            'rit' => $row['rit'],
+            'sala' => $this->shared['sala'],
+            'ubicacion' => $this->shared['ubicacion'],
+            'hora_inicio' => $this->shared['hora_inicio'],
+            'ruc' => $row['ruc'],
+            'cta_zoom' => $this->shared['cta_zoom'] ?: null,
+            'tipo_audiencia' => self::TIPO,
+            'num_testigos' => null,
+            'num_peritos' => null,
+            'duracion' => null,
+            'delito' => null,
+            'jueces_inhabilitados' => [],
+            'encargado_causa' => $row['encargado_causa'],
+            'encargado_ttp' => null,
+            'encargado_ttp_zoom' => null,
+            'estado' => 'POR_REALIZARSE',
+            'acusados' => $row['acusados'],
+            'JuezP' => $this->shared['JuezP'],
+            'JuezR' => $this->shared['JuezR'],
+            'JuezI' => $this->shared['JuezI'],
+            'acta' => $row['acta'],
+            'anfitrion' => $this->shared['anfitrion'] ?: null,
+            'obs' => $row['obs'] ?: null,
+        ];
     }
 
     public function render()

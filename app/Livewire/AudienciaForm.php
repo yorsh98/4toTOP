@@ -5,7 +5,6 @@ namespace App\Livewire;
 use App\Models\Audiencia;
 use App\Services\FuncionarioCatalog;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Validation\Rule;
 use Livewire\Component;
 
 class AudienciaForm extends Component
@@ -120,11 +119,15 @@ class AudienciaForm extends Component
         'Nuevosjueces_inhabilitados' => 'Debe agregar al menos un magistrado si no puede agregar a NO',
     ];
 
-    public function mount()
+    public function mount(?int $edit = null): void
     {
         Gate::authorize('audiencias.ver');
         $this->fecha = now()->addDay()->format('Y-m-d');
         $this->hydrateRoleOptions();
+
+        if ($edit) {
+            $this->editAudiencia($edit);
+        }
     }
 
     public function hydrateRoleOptions(): void
@@ -137,16 +140,16 @@ class AudienciaForm extends Component
         $this->encargadoCausaOptions = $catalog->nombresByContext('audiencias.encargado_causa');
     }
 
-    public function editAudiencia($id)
+    public function editAudiencia(int $id): void
     {
         Gate::authorize('audiencias.editar');
-        $audiencia = Audiencia::find($id);
+        $audiencia = Audiencia::findOrFail($id);
         $this->audienciaId = $audiencia->id;
         $this->fecha = $audiencia->fecha->format('Y-m-d');
         $this->rit = $audiencia->rit;
         $this->sala = $audiencia->sala;
         $this->ubicacion = $audiencia->ubicacion;
-        $this->hora_inicio = $audiencia->hora_inicio;
+        $this->hora_inicio = $audiencia->hora_inicio?->format('H:i');
         $this->ruc = $audiencia->ruc;
         $this->cta_zoom = $audiencia->cta_zoom;
         $this->tipo_audiencia = $audiencia->tipo_audiencia;
@@ -210,16 +213,9 @@ class AudienciaForm extends Component
 
     public function guardarAudiencia()
     {
-        Gate::authorize($this->audienciaId ? 'audiencias.editar' : 'audiencias.crear');
-
-        $validated = $this->validate([
+        $this->validate([
             'fecha' => 'required|date',
-            'rit' => ['required', Rule::unique('audiencias')->where(function ($query) {
-                return $query->where('rit', $this->rit)
-                    ->whereDate('fecha', $this->fecha)
-                    ->where('tipo_audiencia', $this->tipo_audiencia);
-            })->ignore($this->audienciaId),
-            ],
+            'rit' => 'required',
             'hora_inicio' => 'required',
             'sala' => 'required',
             'ruc' => 'required',
@@ -236,6 +232,10 @@ class AudienciaForm extends Component
             'encargado_ttp_zoom' => ['nullable', 'string', 'max:255'],
             'anfitrion' => ['nullable', 'string', 'max:255'],
         ]);
+
+        if (! empty($this->nuevoAcusado['nombre_completo'])) {
+            $this->agregarAcusado();
+        }
 
         $data = [
             'fecha' => $this->fecha,
@@ -264,15 +264,24 @@ class AudienciaForm extends Component
             'obs' => $this->obs,
         ];
 
-        if (! empty($this->nuevoAcusado['nombre_completo'])) {
-            $this->agregarAcusado();
-        }
+        $audiencia = Audiencia::query()
+            ->whereDate('fecha', $this->fecha)
+            ->where('rit', $this->rit)
+            ->where('tipo_audiencia', $this->tipo_audiencia)
+            ->first();
 
-        Audiencia::create($data);
+        if ($audiencia) {
+            Gate::authorize('audiencias.editar');
+            $audiencia->update($data);
+        } else {
+            Gate::authorize('audiencias.crear');
+            Audiencia::create($data);
+        }
 
         $this->reset();
         $this->fecha = now()->addDay()->format('Y-m-d');
         $this->dispatch('alerta-success');
+        $this->dispatch('audiencia-guardada');
     }
 
     public function buscarPorRit()
