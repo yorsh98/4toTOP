@@ -1,6 +1,6 @@
 <?php
 
-use App\Livewire\AudienciasDiarias;
+use App\Livewire\AudienciasDiariasCorreo;
 use App\Mail\ProgramacionDiariaHtmlMail;
 use App\Models\User;
 use App\NotificationsV2\Application\Contracts\ChannelSender;
@@ -46,7 +46,7 @@ test('daily hearings page queues the program dispatch without waiting for SMTP',
     config()->set('notifications_v2.enabled', true);
     Queue::fake();
 
-    Livewire::test(AudienciasDiarias::class)
+    Livewire::test(AudienciasDiariasCorreo::class, ['fecha' => '2026-08-10'])
         ->set('recipients', ['receiver@example.cl'])
         ->call('enviarCorreoDifusion')
         ->assertHasNoErrors()

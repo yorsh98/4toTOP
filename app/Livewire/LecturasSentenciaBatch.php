@@ -11,6 +11,8 @@ use Livewire\Component;
 
 class LecturasSentenciaBatch extends Component
 {
+    public ?int $editId = null;
+
     /** Filas independientes */
     public array $items = [];
 
@@ -23,11 +25,48 @@ class LecturasSentenciaBatch extends Component
 
     public array $encargadoCausaOptions = [];
 
-    public function mount(): void
+    public function mount(?int $edit = null): void
     {
-        Gate::authorize('audiencias.crear');
+        Gate::authorize($edit ? 'audiencias.editar' : 'audiencias.crear');
         $this->hydrateRoleOptions();
+
+        if ($edit) {
+            $this->loadForEdit($edit);
+
+            return;
+        }
+
         $this->addRow();
+    }
+
+    private function loadForEdit(int $id): void
+    {
+        $audiencia = Audiencia::query()
+            ->whereKey($id)
+            ->where('tipo_audiencia', 'Lectura de Sentencia')
+            ->firstOrFail();
+
+        $this->editId = $audiencia->id;
+        $this->items = [[
+            'fecha' => $audiencia->fecha->toDateString(),
+            'hora_inicio' => $audiencia->hora_inicio?->format('H:i'),
+            'JuezR' => $audiencia->JuezR,
+            'tipo_audiencia' => $audiencia->tipo_audiencia,
+            'sala' => $audiencia->sala,
+            'cta_zoom' => $audiencia->cta_zoom,
+            'rit' => $audiencia->rit,
+            'ruc' => $audiencia->ruc,
+            'encargado_sala' => $audiencia->encargado_causa,
+            'acta' => $audiencia->acta,
+            'obs' => $audiencia->obs,
+            'acusados' => $audiencia->acusados ?? [],
+            'nuevoAcusado' => [
+                'nombre_completo' => '',
+                'situacion' => 'Libre',
+                'medida_cautelar' => '',
+                'forma_notificacion' => '',
+            ],
+        ]];
     }
 
     public function hydrateRoleOptions(): void
@@ -154,7 +193,9 @@ class LecturasSentenciaBatch extends Component
 
     public function guardar(): void
     {
-        Gate::authorize('audiencias.crear');
+        if ($this->editId === null) {
+            Gate::authorize('audiencias.crear');
+        }
 
         try {
             $this->validate();
@@ -179,6 +220,16 @@ class LecturasSentenciaBatch extends Component
             return;
         }
 
+        if ($this->editId !== null) {
+            $this->saveEditedRow($this->items[0]);
+            $this->items = [];
+            $this->addRow();
+            $this->dispatch('alerta-success');
+            $this->dispatch('audiencia-guardada');
+
+            return;
+        }
+
         // Unicidad contra BD
         foreach ($this->items as $i => $row) {
             $exists = Audiencia::where('rit', $row['rit'])
@@ -198,33 +249,7 @@ class LecturasSentenciaBatch extends Component
 
         DB::transaction(function () {
             foreach ($this->items as $row) {
-                Audiencia::create([
-                    'fecha' => $row['fecha'],
-                    'rit' => $row['rit'],
-                    'sala' => $row['sala'],
-                    // Si tu columna 'ubicacion' es NOT NULL, agrega el input o define un default aquí.
-                    'ubicacion' => null, // ⚠️ ajusta si tu esquema lo requiere
-                    'hora_inicio' => $row['hora_inicio'],
-                    'ruc' => $row['ruc'],
-                    'cta_zoom' => $row['cta_zoom'] ?: null,
-                    'tipo_audiencia' => $row['tipo_audiencia'], // p.ej. "Lectura de Sentencia"
-                    'num_testigos' => null,
-                    'num_peritos' => null,
-                    'duracion' => null,
-                    'delito' => null,
-                    'jueces_inhabilitados' => [],
-                    'encargado_causa' => $row['encargado_sala'],
-                    'encargado_ttp' => null,
-                    'encargado_ttp_zoom' => null,
-                    'estado' => 'POR_REALIZARSE',
-                    'acusados' => $row['acusados'],
-                    'JuezP' => null,
-                    'JuezR' => $row['JuezR'],
-                    'JuezI' => null,
-                    'acta' => $row['acta'],
-                    'obs' => $row['obs'],
-                    'anfitrion' => null,
-                ]);
+                Audiencia::create($this->audienciaData($row));
             }
         });
 
@@ -233,6 +258,56 @@ class LecturasSentenciaBatch extends Component
         $this->addRow();
 
         $this->dispatch('alerta-success');
+        $this->dispatch('audiencia-guardada');
+    }
+
+    private function saveEditedRow(array $row): void
+    {
+        $audiencia = Audiencia::query()
+            ->whereDate('fecha', $row['fecha'])
+            ->where('rit', $row['rit'])
+            ->where('tipo_audiencia', $row['tipo_audiencia'])
+            ->first();
+
+        if ($audiencia) {
+            Gate::authorize('audiencias.editar');
+            $audiencia->update($this->audienciaData($row));
+
+            return;
+        }
+
+        Gate::authorize('audiencias.crear');
+        Audiencia::create($this->audienciaData($row));
+    }
+
+    private function audienciaData(array $row): array
+    {
+        return [
+            'fecha' => $row['fecha'],
+            'rit' => $row['rit'],
+            'sala' => $row['sala'],
+            'ubicacion' => null,
+            'hora_inicio' => $row['hora_inicio'],
+            'ruc' => $row['ruc'],
+            'cta_zoom' => $row['cta_zoom'] ?: null,
+            'tipo_audiencia' => $row['tipo_audiencia'],
+            'num_testigos' => null,
+            'num_peritos' => null,
+            'duracion' => null,
+            'delito' => null,
+            'jueces_inhabilitados' => [],
+            'encargado_causa' => $row['encargado_sala'],
+            'encargado_ttp' => null,
+            'encargado_ttp_zoom' => null,
+            'estado' => 'POR_REALIZARSE',
+            'acusados' => $row['acusados'],
+            'JuezP' => null,
+            'JuezR' => $row['JuezR'],
+            'JuezI' => null,
+            'acta' => $row['acta'],
+            'obs' => $row['obs'],
+            'anfitrion' => null,
+        ];
     }
 
     public function render()
