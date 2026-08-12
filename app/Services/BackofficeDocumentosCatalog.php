@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Models\Documento;
+use App\Models\DocumentoMovimiento;
 use Illuminate\Support\Arr;
 
 class BackofficeDocumentosCatalog
@@ -13,7 +15,7 @@ class BackofficeDocumentosCatalog
 
     public function procedimientos(): array
     {
-        return $this->filterActivos($this->loadSection('procedimientos'));
+        return $this->documentosByCategory('procedimiento');
     }
 
     public function procedimientosPublicos(): array
@@ -23,7 +25,7 @@ class BackofficeDocumentosCatalog
 
     public function documentos(): array
     {
-        return $this->filterActivos($this->loadSection('documentos'));
+        return $this->documentosByCategory('documento');
     }
 
     public function documentosPublicos(): array
@@ -44,6 +46,7 @@ class BackofficeDocumentosCatalog
     public function save(array $catalog): void
     {
         $normalized = [
+            // Documents belong in the database; these values only preserve the legacy file format.
             'procedimientos' => $this->normalizeDocumentSection(Arr::get($catalog, 'procedimientos', [])),
             'documentos' => $this->normalizeDocumentSection(Arr::get($catalog, 'documentos', [])),
             'encargados_audiencia' => $this->normalizeEncargadosAudiencia(Arr::get($catalog, 'encargados_audiencia', [])),
@@ -83,8 +86,8 @@ class BackofficeDocumentosCatalog
         }
 
         return [
-            'procedimientos' => $this->normalizeDocumentSection(Arr::get($decoded, 'procedimientos', [])),
-            'documentos' => $this->normalizeDocumentSection(Arr::get($decoded, 'documentos', [])),
+            'procedimientos' => $this->documentosByCategory('procedimiento'),
+            'documentos' => $this->documentosByCategory('documento'),
             'encargados_audiencia' => $this->normalizeEncargadosAudiencia(
                 Arr::get($decoded, 'encargados_audiencia', Arr::get(config('backoffice_documentos', []), 'encargados_audiencia', []))
             ),
@@ -102,6 +105,62 @@ class BackofficeDocumentosCatalog
             'documentos' => Arr::get($defaults, 'documentos', []),
             'encargados_audiencia' => Arr::get($defaults, 'encargados_audiencia', []),
             'tribunales' => Arr::get($defaults, 'tribunales', []),
+        ]);
+    }
+
+    public function addDocumento(string $categoria, string $nombre, string $archivo, int $orden): Documento
+    {
+        $documento = Documento::create([
+            'categoria' => $categoria,
+            'nombre' => trim($nombre),
+            'archivo' => $archivo,
+            'orden' => $orden,
+            'created_by' => auth()->id(),
+            'updated_by' => auth()->id(),
+        ]);
+
+        $this->recordMovement($documento, 'creado', ['archivo' => $archivo]);
+
+        return $documento;
+    }
+
+    public function archiveDocumento(int $id): void
+    {
+        $documento = Documento::findOrFail($id);
+        $documento->update(['activo' => false, 'updated_by' => auth()->id()]);
+        $documento->delete();
+
+        $this->recordMovement($documento, 'archivado');
+    }
+
+    protected function documentosByCategory(string $categoria): array
+    {
+        return Documento::query()
+            ->where('categoria', $categoria)
+            ->where('activo', true)
+            ->orderBy('orden')
+            ->orderBy('id')
+            ->get()
+            ->map(fn (Documento $documento) => [
+                'id' => $documento->id,
+                'nombre' => $documento->nombre,
+                'url' => $documento->url(),
+                'orden' => $documento->orden,
+                'activo' => $documento->activo,
+                'publico' => $documento->publico,
+                'created_at' => $documento->created_at?->format('d-m-Y H:i'),
+            ])
+            ->all();
+    }
+
+    protected function recordMovement(Documento $documento, string $accion, ?array $detalle = null): void
+    {
+        DocumentoMovimiento::create([
+            'documento_id' => $documento->id,
+            'user_id' => auth()->id(),
+            'accion' => $accion,
+            'detalle' => $detalle,
+            'created_at' => now(),
         ]);
     }
 

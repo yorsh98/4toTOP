@@ -1,9 +1,9 @@
 <x-slot:header>
-    <h2 class="font-semibold text-xl text-gray-800 leading-tight">TTyPP - Unidad de Testigos y Peritos</h2>
+    <x-page-heading eyebrow="TTYPP · Gestion operativa" title="Unidad de Testigos y Peritos" />
 </x-slot:header>
 
 <div class="py-6">
-    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+    <div class="max-w-7xl mx-auto space-y-6 px-4 sm:px-6 lg:px-8">
 
     @if (session('ok'))
         <div class="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">

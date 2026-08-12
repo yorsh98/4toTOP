@@ -24,8 +24,8 @@
             <div class="min-w-0 flex-1">
                 <!-- Page Heading -->
                 @if (isset($header))
-                    <header class="border-b border-slate-200/80 bg-white/90 shadow-sm backdrop-blur-sm">
-                        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                    <header class="h-16 border-b border-slate-200/80 bg-white/90 shadow-sm backdrop-blur-sm">
+                        <div class="flex h-full items-center">
                             {{ $header }}
                         </div>
                     </header>

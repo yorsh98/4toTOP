@@ -1,9 +1,9 @@
 <x-slot:header>
-    <h2 class="font-semibold text-xl text-gray-800 leading-tight">Audios de Salas</h2>
+    <x-page-heading eyebrow="Audios · Salas" title="Audios de salas" />
 </x-slot:header>
 
 <div class="py-2">
-    <div class="max-w-7xl mx-auto space-y-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto space-y-4 px-4 sm:px-6 lg:px-8">
         @if (session('ok'))
             <div class="rounded-md bg-green-100 px-4 py-2 text-sm text-green-800">{{ session('ok') }}</div>
         @endif

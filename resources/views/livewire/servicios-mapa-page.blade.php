@@ -1,6 +1,6 @@
 @unless ($isPublic)
     <x-slot:header>
-        <h2 class="text-xl font-semibold leading-tight text-gray-800">Servicios - Mapa interactivo</h2>
+        <x-page-heading eyebrow="Servicios · Mapa" title="Mapa interactivo" />
     </x-slot:header>
 @endunless
 

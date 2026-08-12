@@ -1,8 +1,8 @@
 <x-slot:header>
-    <h2 class="font-semibold text-xl text-gray-800 leading-tight">Panel Administrativo de los Turnos</h2>
+    <x-page-heading eyebrow="Turnos · Administracion" title="Panel administrativo de los turnos" />
 </x-slot:header>
 
-<div class="mx-auto max-w-6xl space-y-6 px-3 py-4 sm:px-6 lg:px-8" data-turno-page="1">
+<div class="mx-auto max-w-7xl space-y-6 px-4 py-4 sm:px-6 lg:px-8" data-turno-page="1">
     <div class="rounded-xl border border-blue-100 bg-gradient-to-r from-blue-50 to-indigo-50 p-5">
         <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <div>
