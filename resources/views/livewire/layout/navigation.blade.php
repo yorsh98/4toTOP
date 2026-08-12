@@ -20,6 +20,7 @@ new class extends Component
             'active' => 'dashboard',
             'icon' => 'fa-solid fa-house',
             'permissions' => ['navbar.inicio.visible', 'navbar.inicio.editable'],
+            'accent' => '#38bdf8',
         ],
         [
             'label' => __('Funcionarios'),
@@ -27,6 +28,7 @@ new class extends Component
             'active' => 'addfuncionario*',
             'icon' => 'fa-solid fa-users',
             'permissions' => ['navbar.funcionarios.visible', 'navbar.funcionarios.editable'],
+            'accent' => '#0284c7',
         ],
         [
             'label' => __('Oficios / Libertades'),
@@ -34,6 +36,7 @@ new class extends Component
             'active' => 'oficiolibertad',
             'icon' => 'fa-solid fa-file-signature',
             'permissions' => ['navbar.oficios_libertades.visible', 'navbar.oficios_libertades.editable'],
+            'accent' => '#2563eb',
         ],
         [
             'label' => __('Turnos'),
@@ -41,6 +44,7 @@ new class extends Component
             'active' => 'turno',
             'icon' => 'fa-solid fa-calendar-days',
             'permissions' => ['navbar.turnos.visible', 'navbar.turnos.editable'],
+            'accent' => '#4f46e5',
         ],
         [
             'label' => __('Guias'),
@@ -48,6 +52,7 @@ new class extends Component
             'active' => 'guias',
             'icon' => 'fa-solid fa-book',
             'permissions' => ['navbar.guias.visible', 'navbar.guias.editable'],
+            'accent' => '#0891b2',
         ],
         [
             'label' => __('Audiencias'),
@@ -55,6 +60,7 @@ new class extends Component
             'active' => 'AdmAudv',
             'icon' => 'fa-solid fa-gavel',
             'permissions' => ['navbar.audiencias.visible', 'navbar.audiencias.editable'],
+            'accent' => '#7c3aed',
         ],
         [
             'label' => 'TTYPP',
@@ -62,6 +68,7 @@ new class extends Component
             'active' => 'ttypp.*',
             'icon' => 'fa-solid fa-user-shield',
             'permissions' => ['navbar.ttypp.visible', 'navbar.ttypp.editable'],
+            'accent' => '#c026d3',
         ],
         [
             'label' => __('Bitacora Pruebas'),
@@ -69,6 +76,7 @@ new class extends Component
             'active' => 'bitacora-pruebas.*',
             'icon' => 'fa-solid fa-clipboard-list',
             'permissions' => ['navbar.bitacora_pruebas.visible', 'navbar.bitacora_pruebas.editable'],
+            'accent' => '#059669',
         ],
         [
             'label' => __('Ausencias'),
@@ -76,6 +84,7 @@ new class extends Component
             'active' => 'ausentismo',
             'icon' => 'fa-solid fa-user-clock',
             'permissions' => ['navbar.ausencias.visible', 'navbar.ausencias.editable'],
+            'accent' => '#d97706',
         ],
         [
             'label' => __('Documentos'),
@@ -83,6 +92,7 @@ new class extends Component
             'active' => 'backoffice.documentos.*',
             'icon' => 'fa-solid fa-folder-open',
             'permissions' => ['navbar.documentos.visible', 'navbar.documentos.editable'],
+            'accent' => '#ea580c',
         ],
         [
             'label' => __('Audios de Salas'),
@@ -90,6 +100,7 @@ new class extends Component
             'active' => 'audios-salas.*',
             'icon' => 'fa-solid fa-headphones',
             'permissions' => ['audios_salas.ver'],
+            'accent' => '#e11d48',
         ],
         [
             'label' => __('Servicios'),
@@ -97,6 +108,7 @@ new class extends Component
             'active' => 'backoffice.servicios.inventario',
             'icon' => 'fa-solid fa-boxes-stacked',
             'permissions' => ['servicios.ver'],
+            'accent' => '#0d9488',
         ],
         [
             'label' => __('Mapa Servicios'),
@@ -104,6 +116,7 @@ new class extends Component
             'active' => 'backoffice.servicios.mapa',
             'icon' => 'fa-solid fa-map-location-dot',
             'permissions' => ['servicios.ver'],
+            'accent' => '#65a30d',
         ],
         [
             'label' => __('Seguridad'),
@@ -111,6 +124,7 @@ new class extends Component
             'active' => 'seguridad.*',
             'icon' => 'fa-solid fa-shield-halved',
             'permissions' => ['navbar.seguridad.visible', 'navbar.seguridad.editable'],
+            'accent' => '#94a3b8',
         ],
     ];
 @endphp
@@ -179,10 +193,13 @@ new class extends Component
                             href="{{ route($item['route']) }}"
                             wire:navigate
                             title="{{ $item['label'] }}"
+                            style="--module-accent: {{ $item['accent'] }}; --module-tint: color-mix(in srgb, {{ $item['accent'] }} 16%, transparent);"
                             :class="collapsed ? 'justify-center' : ''"
-                            class="flex items-center rounded-md px-3 py-2 text-sm font-medium transition {{ $isActive ? 'bg-blue-300/15 text-blue-100 ring-1 ring-blue-300/25' : 'text-slate-200 hover:bg-slate-800/60 hover:text-white' }}"
+                            class="group flex items-center rounded-md px-3 py-2 text-sm font-medium transition {{ $isActive ? 'bg-[var(--module-tint)] text-white ring-1 ring-[var(--module-accent)]' : 'text-slate-200 hover:bg-slate-800/60 hover:text-white' }}"
                         >
-                            <i class="{{ $item['icon'] }} text-base" :class="collapsed ? '' : 'mr-3'"></i>
+                            <span class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-[var(--module-tint)] text-[var(--module-accent)] transition group-hover:bg-[var(--module-accent)] group-hover:text-white" :class="collapsed ? '' : 'mr-3'">
+                                <i class="{{ $item['icon'] }} text-sm"></i>
+                            </span>
                             <span x-show="!collapsed" x-transition.opacity.duration.200ms x-cloak>{{ $item['label'] }}</span>
                         </a>
                     @endcanany
@@ -236,8 +253,10 @@ new class extends Component
             @foreach ($menuItems as $item)
                 @canany($item['permissions'])
                     <x-responsive-nav-link :href="route($item['route'])" :active="request()->routeIs($item['active'])" wire:navigate>
-                        <span class="inline-flex items-center gap-2">
-                            <i class="{{ $item['icon'] }}"></i>
+                        <span style="--module-accent: {{ $item['accent'] }}; --module-tint: color-mix(in srgb, {{ $item['accent'] }} 16%, transparent);" class="inline-flex items-center gap-2">
+                            <span class="inline-flex h-8 w-8 items-center justify-center rounded-md bg-[var(--module-tint)] text-[var(--module-accent)]">
+                                <i class="{{ $item['icon'] }} text-sm"></i>
+                            </span>
                             <span>{{ $item['label'] }}</span>
                         </span>
                     </x-responsive-nav-link>
