@@ -1,9 +1,9 @@
 <x-slot:header>
-    <h2 class="text-xl font-semibold leading-tight text-gray-800">Servicios - Inventario</h2>
+    <x-page-heading eyebrow="Servicios · Inventario" title="Inventario de servicios" />
 </x-slot:header>
 
 <div class="py-6">
-    <div class="mx-auto max-w-7xl space-y-6 sm:px-6 lg:px-8">
+    <div class="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
         @if (session('ok'))
             <div class="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
                 {{ session('ok') }}

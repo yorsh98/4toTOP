@@ -2,9 +2,7 @@
     <link rel="stylesheet" href="{{ asset('css/audiencias.css') }}">
 
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Administracion BD Audiencias') }}
-        </h2>
+        <x-page-heading eyebrow="Audiencias · Administracion" title="Administracion BD Audiencias" />
     </x-slot>
 
     {{-- Evita FOUC de Alpine --}}
@@ -13,7 +11,7 @@
     <div class="py-2" x-data="audienciasUI()" x-init="init()" x-cloak
          x-on:audiencia-edicion-abierta.window="editandoDiaria = true"
          x-on:audiencia-edicion-cerrada.window="editandoDiaria = false">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
 

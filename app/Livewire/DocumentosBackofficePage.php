@@ -38,20 +38,18 @@ class DocumentosBackofficePage extends Component
     public $sentenciasExcel;
 
     public array $sectionsOpen = [
-        'procedimientos' => true,
-        'documentos' => true,
-        'migracion' => true,
-        'encargados' => true,
+        'procedimientos' => false,
+        'documentos' => false,
+        'migracion' => false,
+        'encargados' => false,
     ];
 
     public function mount(BackofficeDocumentosCatalog $catalog): void
     {
         Gate::authorize('documentos.ver');
 
-        $data = $catalog->all();
-
-        $this->procedimientoOrden = count(Arr::get($data, 'procedimientos', [])) + 1;
-        $this->documentoOrden = count(Arr::get($data, 'documentos', [])) + 1;
+        $this->procedimientoOrden = count($catalog->procedimientos()) + 1;
+        $this->documentoOrden = count($catalog->documentos()) + 1;
     }
 
     public function toggleSection(string $section): void
@@ -73,40 +71,24 @@ class DocumentosBackofficePage extends Component
             'procedimientoArchivo' => ['required', File::types(['pdf', 'doc', 'docx'])->max(20 * 1024)],
         ]);
 
-        $data = $catalog->all();
-        $procedimientos = Arr::get($data, 'procedimientos', []);
-
-        $procedimientos[] = [
-            'nombre' => trim($validated['procedimientoNombre']),
-            'url' => $this->storeUploadedFile($this->procedimientoArchivo, 'procedimientos'),
-            'orden' => (int) $validated['procedimientoOrden'],
-            'activo' => true,
-            'publico' => true,
-        ];
-
-        $data['procedimientos'] = $procedimientos;
-        $catalog->save($data);
+        $catalog->addDocumento(
+            'procedimiento',
+            $validated['procedimientoNombre'],
+            $this->storeUploadedFile($this->procedimientoArchivo, 'procedimientos'),
+            (int) $validated['procedimientoOrden'],
+        );
 
         $this->reset(['procedimientoNombre', 'procedimientoArchivo']);
-        $this->procedimientoOrden = count($catalog->all()['procedimientos']) + 1;
+        $this->procedimientoOrden = count($catalog->procedimientos()) + 1;
         session()->flash('ok', 'Procedimiento agregado correctamente.');
     }
 
-    public function removeProcedimiento(int $index, BackofficeDocumentosCatalog $catalog): void
+    public function removeProcedimiento(int $id, BackofficeDocumentosCatalog $catalog): void
     {
         Gate::authorize('documentos.gestionar');
 
-        $data = $catalog->all();
-        $procedimientos = Arr::get($data, 'procedimientos', []);
-
-        if (! array_key_exists($index, $procedimientos)) {
-            return;
-        }
-
-        unset($procedimientos[$index]);
-        $data['procedimientos'] = array_values($procedimientos);
-        $catalog->save($data);
-        session()->flash('ok', 'Procedimiento quitado del listado.');
+        $catalog->archiveDocumento($id);
+        session()->flash('ok', 'Procedimiento archivado correctamente.');
     }
 
     public function addDocumento(BackofficeDocumentosCatalog $catalog): void
@@ -119,40 +101,24 @@ class DocumentosBackofficePage extends Component
             'documentoArchivo' => ['required', File::types(['pdf', 'doc', 'docx'])->max(20 * 1024)],
         ]);
 
-        $data = $catalog->all();
-        $documentos = Arr::get($data, 'documentos', []);
-
-        $documentos[] = [
-            'nombre' => trim($validated['documentoNombre']),
-            'url' => $this->storeUploadedFile($this->documentoArchivo, 'doc'),
-            'orden' => (int) $validated['documentoOrden'],
-            'activo' => true,
-            'publico' => true,
-        ];
-
-        $data['documentos'] = $documentos;
-        $catalog->save($data);
+        $catalog->addDocumento(
+            'documento',
+            $validated['documentoNombre'],
+            $this->storeUploadedFile($this->documentoArchivo, 'doc'),
+            (int) $validated['documentoOrden'],
+        );
 
         $this->reset(['documentoNombre', 'documentoArchivo']);
-        $this->documentoOrden = count($catalog->all()['documentos']) + 1;
+        $this->documentoOrden = count($catalog->documentos()) + 1;
         session()->flash('ok', 'Documento agregado correctamente.');
     }
 
-    public function removeDocumento(int $index, BackofficeDocumentosCatalog $catalog): void
+    public function removeDocumento(int $id, BackofficeDocumentosCatalog $catalog): void
     {
         Gate::authorize('documentos.gestionar');
 
-        $data = $catalog->all();
-        $documentos = Arr::get($data, 'documentos', []);
-
-        if (! array_key_exists($index, $documentos)) {
-            return;
-        }
-
-        unset($documentos[$index]);
-        $data['documentos'] = array_values($documentos);
-        $catalog->save($data);
-        session()->flash('ok', 'Documento quitado del listado.');
+        $catalog->archiveDocumento($id);
+        session()->flash('ok', 'Documento archivado correctamente.');
     }
 
     public function addTribunal(BackofficeDocumentosCatalog $catalog): void
@@ -280,6 +246,6 @@ class DocumentosBackofficePage extends Component
         $filename = $slug.'-'.now()->format('YmdHis').'-'.Str::random(6).'.'.$extension;
         $storedPath = $file->storeAs('documentos/'.$section, $filename, 'public');
 
-        return '/storage/'.$storedPath;
+        return $storedPath;
     }
 }

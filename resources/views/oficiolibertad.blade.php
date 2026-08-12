@@ -2,16 +2,14 @@
     <link rel="stylesheet" href="{{ asset('css/audiencias.css') }}"><!-- si ya la usas para estilos base -->
 
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Panel administrativo Sistema Oficio / Libertades') }}
-        </h2>
+        <x-page-heading eyebrow="Oficios y libertades · Administracion" title="Panel administrativo" />
     </x-slot>
 
     {{-- Evita FOUC de Alpine --}}
     <style>[x-cloak]{display:none!important}</style>
 
     <div class="py-2" x-data="ofilibUI()" x-init="init()" x-cloak>
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
 

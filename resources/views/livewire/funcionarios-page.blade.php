@@ -1,9 +1,9 @@
 <x-slot:header>
-    <h2 class="font-semibold text-xl text-gray-800 leading-tight">Catalogo Global de Funcionarios</h2>
+    <x-page-heading eyebrow="Funcionarios · Catalogo global" title="Catalogo global de funcionarios" />
 </x-slot:header>
 
 <div class="py-6">
-    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="mb-4 rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-800">
             Este catalogo se utiliza como fuente global para Programacion Diaria, Turnos y Oficio/Libertad.
         </div>

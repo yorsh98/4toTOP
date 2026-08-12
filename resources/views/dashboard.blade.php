@@ -1,13 +1,11 @@
 <x-app-layout>
    
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Inicio') }}
-        </h2>
+        <x-page-heading eyebrow="Backoffice · Inicio" title="Inicio" />
     </x-slot>
 
     <div class="py-2">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
                     <h1 class="mb-3 text-2xl font-semibold text-gray-900">Bienvenido(a) al Backoffice del 4to TOP</h1>
