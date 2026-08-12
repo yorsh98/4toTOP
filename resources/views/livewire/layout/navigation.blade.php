@@ -89,7 +89,7 @@ new class extends Component
             'route' => 'audios-salas.index',
             'active' => 'audios-salas.*',
             'icon' => 'fa-solid fa-headphones',
-            'permissions' => ['navbar.audios_salas.visible', 'navbar.audios_salas.editable'],
+            'permissions' => ['audios_salas.ver'],
         ],
         [
             'label' => __('Servicios'),
