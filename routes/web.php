@@ -252,7 +252,7 @@ Route::prefix('seguridad')->name('seguridad.')->middleware(['auth'])->group(func
         ->name('roles.permissions.edit');
 
     Route::get('/usuarios-roles', UsersRolesPage::class)
-        ->middleware('can:navbar.seguridad.visible')
+        ->middleware('can:navbar.seguridad.editable')
         ->name('users.index');
 
     Route::get('/auditoria', AuditPage::class)
