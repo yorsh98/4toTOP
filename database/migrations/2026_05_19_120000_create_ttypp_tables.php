@@ -10,8 +10,8 @@ return new class extends Migration
     {
         Schema::create('ttypp_registros', function (Blueprint $table) {
             $table->id();
-            $table->string('rit')->nullable();
-            $table->string('ruc')->nullable();
+            $table->string('rit')->nullable()->index();
+            $table->string('ruc')->nullable()->index();
             $table->string('tipo_audiencia')->nullable();
             $table->string('numero_dias')->nullable();
             $table->string('cantidad')->nullable();
@@ -22,20 +22,25 @@ return new class extends Migration
             $table->string('acta')->nullable();
             $table->string('sala')->nullable();
             $table->string('jueces')->nullable();
-            $table->date('fecha_asignacion')->nullable();
+            $table->date('fecha_asignacion')->nullable()->index();
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
             $table->softDeletes();
+        });
 
-            $table->index('rit');
-            $table->index('ruc');
-            $table->index('fecha_asignacion');
+        Schema::create('ttypp_registro_historials', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('ttypp_registro_id')->constrained('ttypp_registros')->cascadeOnDelete();
+            $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->json('cambios');
+            $table->timestamp('created_at')->useCurrent();
         });
     }
 
     public function down(): void
     {
+        Schema::dropIfExists('ttypp_registro_historials');
         Schema::dropIfExists('ttypp_registros');
     }
 };
