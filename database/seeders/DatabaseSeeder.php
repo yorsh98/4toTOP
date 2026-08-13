@@ -20,6 +20,8 @@ class DatabaseSeeder extends Seeder
             ServiciosRoleSeeder::class,
             SectorSeeder::class,
             ActivoSeeder::class,
+            DocumentosCatalogSeeder::class,
+            VisitaCarcelCatalogSeeder::class,
         ]);
 
         User::query()->firstOrCreate(
