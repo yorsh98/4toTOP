@@ -29,6 +29,26 @@ test('superadmin can access security roles route', function () {
         ->assertOk();
 });
 
+test('security viewer does not see role management controls', function () {
+    $viewer = User::factory()->create();
+    $viewer->givePermissionTo('navbar.seguridad.visible');
+
+    $this->actingAs($viewer)
+        ->get(route('seguridad.roles.index'))
+        ->assertOk()
+        ->assertDontSee('Crear rol')
+        ->assertDontSee('Eliminar');
+});
+
+test('security viewer cannot access user role management', function () {
+    $viewer = User::factory()->create();
+    $viewer->givePermissionTo('navbar.seguridad.visible');
+
+    $this->actingAs($viewer)
+        ->get(route('seguridad.users.index'))
+        ->assertForbidden();
+});
+
 test('public front routes remain accessible without authentication', function () {
     $this->get('/tablas')->assertOk();
     $this->get('/tabla2')->assertOk();

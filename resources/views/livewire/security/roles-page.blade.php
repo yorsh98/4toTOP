@@ -2,78 +2,86 @@
     <x-page-heading eyebrow="Seguridad · Administracion" title="Roles" />
 </x-slot:header>
 
-<div class="py-2">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
-                    <h2 class="mb-4 text-xl font-semibold text-gray-800">Roles</h2>
-                    @include('seguridad._tabs')
+<div class="py-6 sm:py-8">
+    <div class="mx-auto max-w-7xl space-y-4 px-4 sm:px-6 lg:px-8">
+        @include('seguridad._tabs')
 
                     @if (session('ok'))
-                        <div class="mb-4 rounded-md bg-green-100 px-4 py-2 text-sm text-green-800">{{ session('ok') }}</div>
+            <div class="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800" role="status">{{ session('ok') }}</div>
                     @endif
 
                     @if (session('error'))
-                        <div class="mb-4 rounded-md bg-red-100 px-4 py-2 text-sm text-red-800">{{ session('error') }}</div>
+            <div class="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800" role="alert">{{ session('error') }}</div>
                     @endif
 
-                    <div class="mb-6 rounded-lg border p-4">
-                        <h3 class="mb-3 text-base font-semibold">Crear nuevo rol</h3>
-                        <form wire:submit="createRole" class="flex flex-col gap-3 sm:flex-row sm:items-end">
-                            <div class="w-full sm:w-80">
-                                <label for="name" class="mb-1 block text-sm font-medium text-gray-700">Nombre del rol</label>
-                                <input id="name" name="name" type="text" wire:model="name" class="w-full rounded-md border-gray-300 text-sm" placeholder="Ej: Coordinador">
+        <div wire:offline class="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">Sin conexion. Los cambios no se han guardado.</div>
+
+        @can('navbar.seguridad.editable')
+            <form wire:submit="createRole" class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                    <div class="w-full sm:max-w-md">
+                        <h3 class="text-lg font-semibold text-slate-900">Crear rol</h3>
+                        <p class="mt-1 text-sm text-slate-600">Usa un nombre breve y reconocible para el equipo.</p>
+                        <label for="name" class="mt-4 block text-sm font-medium text-slate-700">Nombre del rol</label>
+                        <input id="name" name="name" type="text" wire:model="name" class="mt-1 w-full rounded-md border-slate-300 text-sm shadow-sm focus:border-sky-600 focus:ring-sky-600" placeholder="Ej: Coordinador">
                                 @error('name')
                                     <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
                                 @enderror
-                            </div>
-                            <button type="submit" class="rounded-md bg-sky-600 px-4 py-2 text-sm font-medium text-white hover:bg-sky-700" wire:loading.attr="disabled" wire:target="createRole">
-                                Crear rol
-                            </button>
-                        </form>
                     </div>
+                    <button type="submit" class="rounded-md bg-sky-700 px-4 py-2 text-sm font-medium text-white hover:bg-sky-800 disabled:opacity-50" wire:loading.attr="disabled" wire:target="createRole">
+                        <span wire:loading.remove wire:target="createRole">Crear rol</span><span wire:loading wire:target="createRole">Creando...</span>
+                    </button>
+                </div>
+            </form>
+        @endcan
 
-                    <div class="overflow-x-auto rounded-lg border">
-                        <table class="min-w-full divide-y divide-gray-200 text-sm">
-                            <thead class="bg-gray-50">
+        <section class="rounded-xl border border-slate-200 bg-white shadow-sm">
+            <div class="flex items-center justify-between gap-4 border-b border-slate-200 px-5 py-4">
+                <div><h3 class="text-lg font-semibold text-slate-900">Roles de acceso</h3><p class="mt-1 text-sm text-slate-600">{{ $roles->count() }} {{ $roles->count() === 1 ? 'rol registrado' : 'roles registrados' }}</p></div>
+                <span wire:loading wire:target="deleteRole" class="text-sm text-slate-500">Actualizando...</span>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-slate-200 text-sm">
+                    <thead class="bg-slate-50">
                                 <tr>
-                                    <th class="px-4 py-2 text-left font-semibold text-gray-700">Rol</th>
-                                    <th class="px-4 py-2 text-left font-semibold text-gray-700">Usuarios</th>
-                                    <th class="px-4 py-2 text-left font-semibold text-gray-700">Acciones</th>
+                                    <th class="px-5 py-3 text-left font-semibold text-slate-700">Rol</th>
+                                    <th class="px-5 py-3 text-left font-semibold text-slate-700">Usuarios asignados</th>
+                                    <th class="px-5 py-3 text-right font-semibold text-slate-700">Acciones</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-gray-100 bg-white">
+                            <tbody class="divide-y divide-slate-100 bg-white">
                                 @forelse ($roles as $role)
                                     <tr wire:key="role-{{ $role->id }}">
-                                        <td class="px-4 py-2">{{ $role->name }}</td>
-                                        <td class="px-4 py-2">{{ $role->users_count }}</td>
-                                        <td class="px-4 py-2">
-                                            <div class="flex flex-wrap gap-2">
-                                                <a href="{{ route('seguridad.roles.permissions.edit', $role) }}" wire:navigate class="rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-indigo-700">
-                                                    Permisos
-                                                </a>
-                                                @if ($role->name !== 'SuperAdmin')
+                                        <td class="px-5 py-4 font-medium text-slate-900">{{ $role->name }}</td>
+                                        <td class="px-5 py-4 text-slate-700">{{ $role->users_count }}</td>
+                                        <td class="px-5 py-4"><div class="flex flex-wrap justify-end gap-2">
+                                            <a href="{{ route('seguridad.roles.permissions.edit', $role) }}" wire:navigate class="rounded-md border border-sky-200 bg-sky-50 px-3 py-1.5 text-xs font-medium text-sky-800 hover:bg-sky-100">Configurar permisos</a>
+                                            @can('navbar.seguridad.editable')
+                                                @if ($role->name === 'SuperAdmin')
+                                                    <span class="inline-flex items-center rounded-md bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-600">Protegido</span>
+                                                @else
                                                     <button
                                                         type="button"
                                                         wire:click="deleteRole({{ $role->id }})"
                                                         wire:confirm="¿Eliminar rol {{ $role->name }}?"
-                                                        class="rounded-md bg-red-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-700"
+                                                        class="rounded-md border border-rose-200 bg-white px-3 py-1.5 text-xs font-medium text-rose-700 hover:bg-rose-50 disabled:opacity-50"
+                                                        wire:loading.attr="disabled"
+                                                        wire:target="deleteRole({{ $role->id }})"
                                                     >
                                                         Eliminar
                                                     </button>
                                                 @endif
-                                            </div>
-                                        </td>
+                                            @endcan
+                                        </div></td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="3" class="px-4 py-6 text-center text-gray-500">No hay roles disponibles.</td>
+                                        <td colspan="3" class="px-5 py-12 text-center text-sm text-slate-500">No hay roles creados.</td>
                                     </tr>
                                 @endforelse
                             </tbody>
                         </table>
-                    </div>
-                </div>
             </div>
-        </div>
+        </section>
     </div>
+</div>
