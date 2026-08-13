@@ -242,7 +242,7 @@ class UsersRolesPage extends Component
 
     public function render()
     {
-        Gate::authorize('navbar.seguridad.visible');
+        Gate::authorize('navbar.seguridad.editable');
 
         $users = User::query()
             ->with('roles')
