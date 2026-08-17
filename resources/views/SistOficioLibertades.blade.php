@@ -166,49 +166,7 @@
       </div>
     </div>
 
-    <!-- Modales Bootstrap (como los tenías) -->
-    <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered modal-confirm">
-        <div class="modal-content">
-          <div class="modal-header justify-content-center">
-            <div class="icon-box"><i class="material-icons">&#xE876;</i></div>
-            <h5 class="modal-title" id="successModalLabel">
-              {{ session('tipo') === 'oficio' ? 'Oficio creado' : (session('tipo') === 'libertad' ? 'Libertad creada' : '') }}
-            </h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-          </div>
-          <div class="modal-body text-center">
-            {{ session('success') }}
-            <h4 class="mt-2">¡Solicitud exitosa!</h4>
-            <p class="mb-1">Tu número de {{ session('tipo') === 'oficio' ? 'OFICIO' : 'LIBERTAD' }} es:</p>
-            <h4 class="mb-3"><strong>{{ session('NumEntregado') }}-{{ session('año') }}</strong></h4>
-            <a class="btn btn-success" href="{{ url('/SistOficioLibertades') }}">Volver al Inicio</a>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header bg-danger text-white">
-            <h5 class="modal-title" id="errorModalLabel">Error</h5>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-          </div>
-          <div class="modal-body">{{ session('error') }}</div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
   </main>
-
-  {{-- Bootstrap bundle (si no está en tu layout) --}}
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-          integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-          crossorigin="anonymous"></script>
 
   <script>
     let currentForm = null; // 'oficio' | 'libertad'
@@ -254,12 +212,22 @@
       if (alertBox) alertBox.classList.add('d-none');
     }
 
-    // Mostrar modales según flash (si sigues usando Bootstrap)
     document.addEventListener('DOMContentLoaded', () => {
       const success = @json(session('success'));
       const error   = @json(session('error'));
-      if (success) bootstrap.Modal.getOrCreateInstance('#successModal').show();
-      if (error)   bootstrap.Modal.getOrCreateInstance('#errorModal').show();
+      const tipo = @json(session('tipo'));
+      const numero = @json(session('NumEntregado'));
+      const ano = @json(session('año'));
+
+      if (success) {
+        Swal.fire({
+          icon: 'success',
+          title: tipo === 'oficio' ? 'Oficio creado' : 'Libertad creada',
+          text: numero && ano ? `${success} Número asignado: ${numero}-${ano}` : success,
+        });
+      }
+
+      if (error) Swal.fire({ icon: 'error', title: 'Error', text: error });
     });
   </script>
 </x-sist-layout>

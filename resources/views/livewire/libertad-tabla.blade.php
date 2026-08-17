@@ -1,4 +1,5 @@
 <div>
+    <x-flash-notifications />
     @php($isFull = $modo === 'full')
 
     {{-- Barra de búsqueda y controles --}}
