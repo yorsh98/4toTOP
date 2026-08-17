@@ -7,6 +7,13 @@ use Livewire\Attributes\Layout;
 #[Layout('layouts.in')]
 class ServiciosMapaPublicPage extends ServiciosMapaPage
 {
+    protected function queryString(): array
+    {
+        return [
+            'piso' => ['history' => true],
+        ];
+    }
+
     public function boot(): void
     {
         $this->publicMode = true;

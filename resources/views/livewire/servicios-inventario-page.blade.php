@@ -2,13 +2,9 @@
     <x-page-heading eyebrow="Servicios · Inventario" title="Inventario de servicios" />
 </x-slot:header>
 
-<div class="py-6">
-    <div class="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
-        @if (session('ok'))
-            <div class="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-                {{ session('ok') }}
-            </div>
-        @endif
+<div class="py-2">
+    <div class="mx-auto max-w-7xl space-y-4 px-4 sm:px-6 lg:px-8">
+        <x-flash-notifications />
 
         <div class="grid gap-4 sm:grid-cols-3">
             <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
@@ -54,9 +50,16 @@
 
                     <div>
                         <label class="text-sm font-medium text-slate-700">Sector</label>
+                        <div class="mt-1 flex rounded-lg bg-slate-100 p-1">
+                            @foreach ([7, 8, 9] as $floor)
+                                <button type="button" wire:click="selectPiso({{ $floor }})" class="flex-1 rounded-md px-3 py-1.5 text-sm font-semibold transition {{ $piso === $floor ? 'bg-blue-700 text-white shadow' : 'text-slate-600 hover:bg-white' }}">
+                                    Piso {{ $floor }}
+                                </button>
+                            @endforeach
+                        </div>
                         <select wire:model="sector_id" class="mt-1 w-full rounded-md border-slate-300 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500">
                             <option value="">Seleccione sector</option>
-                            @foreach ($sectores as $sector)
+                            @foreach ($sectoresPiso as $sector)
                                 <option value="{{ $sector->id }}">{{ $sector->nombre }}</option>
                             @endforeach
                         </select>
@@ -125,7 +128,7 @@
                         <select wire:model.live="sectorFiltro" class="mt-1 w-full rounded-md border-slate-300 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500">
                             <option value="">Todos</option>
                             @foreach ($sectores as $sector)
-                                <option value="{{ $sector->id }}">{{ $sector->nombre }}</option>
+                                <option value="{{ $sector->id }}">Piso {{ (int) $sector->piso }} · {{ $sector->nombre }}</option>
                             @endforeach
                         </select>
                     </div>
