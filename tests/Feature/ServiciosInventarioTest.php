@@ -26,7 +26,7 @@ test('user with servicios ver permission can see inventory backoffice', function
     $this->actingAs($user)
         ->get(route('backoffice.servicios.inventario'))
         ->assertSuccessful()
-        ->assertSee('Servicios - Inventario');
+        ->assertSee('Inventario de servicios');
 });
 
 test('user with servicios crear permission can create activo', function () {
@@ -77,6 +77,67 @@ test('user with servicios editar permission can update activo', function () {
         'sector_id' => $nuevoSector->id,
         'estado' => 'Baja',
     ]);
+});
+
+test('user can move an asset between floor sectors', function () {
+    $origen = Sector::factory()->create(['piso' => '7MO', 'nombre' => 'Sector origen']);
+    $destino = Sector::factory()->create(['piso' => '9NO', 'nombre' => 'Sector destino']);
+    $activo = Activo::factory()->for($origen)->create();
+    $user = User::factory()->create();
+    $user->givePermissionTo(['servicios.ver', 'servicios.editar']);
+
+    Livewire::actingAs($user)
+        ->test(ServiciosInventarioPage::class)
+        ->assertSee('Piso 7 · Sector origen')
+        ->assertSee('Piso 9 · Sector destino')
+        ->call('edit', $activo->id)
+        ->set('sector_id', $destino->id)
+        ->call('save')
+        ->assertHasNoErrors();
+
+    $this->assertDatabaseHas('activos', ['id' => $activo->id, 'sector_id' => $destino->id]);
+});
+
+test('inventory form filters sectors by the selected floor', function () {
+    $sectorPisoSiete = Sector::factory()->create(['piso' => '7MO', 'nombre' => 'Sector siete']);
+    $sectorPisoOcho = Sector::factory()->create(['piso' => '8VO', 'nombre' => 'Sector ocho']);
+    $user = User::factory()->create();
+    $user->givePermissionTo('servicios.ver');
+
+    Livewire::actingAs($user)
+        ->test(ServiciosInventarioPage::class)
+        ->set('sector_id', $sectorPisoOcho->id)
+        ->call('selectPiso', 7)
+        ->assertSet('piso', 7)
+        ->assertSet('sector_id', null)
+        ->assertViewHas('sectoresPiso', fn ($sectores) => $sectores->pluck('id')->all() === [$sectorPisoSiete->id]);
+});
+
+test('editing an asset selects its sector floor', function () {
+    $sector = Sector::factory()->create(['piso' => '9NO']);
+    $activo = Activo::factory()->for($sector)->create();
+    $user = User::factory()->create();
+    $user->givePermissionTo(['servicios.ver', 'servicios.editar']);
+
+    Livewire::actingAs($user)
+        ->test(ServiciosInventarioPage::class)
+        ->call('edit', $activo->id)
+        ->assertSet('piso', 9)
+        ->assertSet('sector_id', $sector->id);
+});
+
+test('inventory flash messages render as SweetAlert notifications', function () {
+    $sector = Sector::factory()->create();
+    $user = User::factory()->create();
+    $user->givePermissionTo(['servicios.ver', 'servicios.crear']);
+
+    Livewire::actingAs($user)
+        ->test(ServiciosInventarioPage::class)
+        ->set('nombre', 'Teclado de prueba')
+        ->set('sector_id', $sector->id)
+        ->call('save')
+        ->assertSeeHtml('data-flash-notification')
+        ->assertSeeHtml('data-icon="success"');
 });
 
 test('user with servicios eliminar permission can delete activo', function () {

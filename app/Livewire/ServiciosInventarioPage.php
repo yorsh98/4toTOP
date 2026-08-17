@@ -27,6 +27,8 @@ class ServiciosInventarioPage extends Component
 
     public ?int $sector_id = null;
 
+    public int $piso = 8;
+
     public string $codigo_inventario = '';
 
     public string $numero_serie = '';
@@ -78,6 +80,17 @@ class ServiciosInventarioPage extends Component
         $this->resetPage();
     }
 
+    public function selectPiso(int $piso): void
+    {
+        if (! in_array($piso, [7, 8, 9], true)) {
+            return;
+        }
+
+        $this->piso = $piso;
+        $this->sector_id = null;
+        $this->resetValidation('sector_id');
+    }
+
     public function save(): void
     {
         Gate::authorize($this->editingId ? 'servicios.editar' : 'servicios.crear');
@@ -107,6 +120,7 @@ class ServiciosInventarioPage extends Component
         $this->editingId = $activo->id;
         $this->nombre = $activo->nombre;
         $this->sector_id = $activo->sector_id;
+        $this->piso = (int) $activo->sector->piso;
         $this->codigo_inventario = (string) $activo->codigo_inventario;
         $this->numero_serie = (string) $activo->numero_serie;
         $this->estado = $activo->estado;
@@ -170,8 +184,18 @@ class ServiciosInventarioPage extends Component
         return view('livewire.servicios-inventario-page', [
             'activos' => $activos,
             'sectores' => Sector::query()->orderBy('nombre')->get(),
+            'sectoresPiso' => Sector::query()->where('piso', $this->floorLabel())->orderBy('nombre')->get(),
             'estados' => $this->estados(),
             'totalActivos' => Activo::query()->count(),
         ]);
+    }
+
+    private function floorLabel(): string
+    {
+        return match ($this->piso) {
+            7 => '7MO',
+            9 => '9NO',
+            default => '8VO',
+        };
     }
 }

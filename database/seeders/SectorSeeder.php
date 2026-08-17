@@ -44,6 +44,7 @@ class SectorSeeder extends Seeder
             ['id_mapa' => '801', 'nombre' => '801 Baño'],
             ['id_mapa' => '803_BANO', 'nombre' => '803 Baño'],
             ['id_mapa' => 'HALL CENTRAL', 'nombre' => 'HALL CENTRAL'],
+            ['id_mapa' => 'TTyPP', 'nombre' => 'TTyPP'],
             ['id_mapa' => '833', 'nombre' => '833 Rene Bonnemaison'],
             ['id_mapa' => '832', 'nombre' => '832 Pedro Suarez'],
             ['id_mapa' => '831', 'nombre' => '831 Cristian Soto'],
@@ -59,9 +60,60 @@ class SectorSeeder extends Seeder
         ];
 
         foreach ($sectors as $s) {
-            Sector::updateOrCreate(
+            Sector::firstOrCreate(
                 ['identificador_mapa' => $s['id_mapa']],
                 ['nombre' => $s['nombre'], 'piso' => '8VO']
+            );
+        }
+
+        foreach ([
+            '7MO' => ['737', '736', '735', '929', '738', '739', '712', '706', '703', '713', '714', '711', '710', '709', '708', '707', '715', '716', '717', '718', '719', '720', '705', '704', '702', '701', '721', '722', '723', '733', '732', '731', '730', '729', '728', '727', '726', '725', '724'],
+            '9NO' => ['934', '935', '936', '912', '906', '903', '913', '914', '911', '910', '909', '908', '907', '915', '916', '917', '918', '919', '920', '905', '904', '902', '901', '921', '922', '923', '925', '932', '931', '930', '801', '928', '836', '926', '933', 'COMEDOR'],
+        ] as $piso => $identificadores) {
+            foreach ($identificadores as $identificador) {
+                Sector::firstOrCreate(
+                    ['identificador_mapa' => $piso[0]."_{$identificador}"],
+                    ['nombre' => $identificador, 'piso' => $piso]
+                );
+            }
+
+            Sector::firstOrCreate(
+                ['identificador_mapa' => $piso[0].'_HALL_CENTRAL'],
+                ['nombre' => 'HALL CENTRAL', 'piso' => $piso]
+            );
+        }
+
+        foreach ([
+            'PECERA_9' => 'Pecera 9',
+            'TERESA' => 'Teresa',
+            '904_OF' => '904',
+            'DASH_1' => '-',
+            'DASH_2' => '-',
+        ] as $identificador => $nombre) {
+            Sector::firstOrCreate(
+                ['identificador_mapa' => "9_{$identificador}"],
+                ['nombre' => $nombre, 'piso' => '9NO']
+            );
+        }
+
+        foreach ([
+            ['8VO', 'ADMINISTRACION_HALL', 'Adm.'],
+            ['8VO', 'SERVICIOS_HALL', 'Servicios'],
+            ['8VO', 'ESPACIO_INFERIOR', 'Encargados'],
+            ['7MO', '7_ESPACIO_INFERIOR', 'por designar'],
+            ['7MO', '7_por designar', 'por designar'],
+            ['7MO', '7_Publico', 'Publico'],
+            ['8VO', 'Zona Publica', 'Zona Publica'],
+            ['7MO', '7_Zona Publica', 'Zona Publica'],
+            ['9NO', '9_ESPACIO_INFERIOR_1', 'Causas_2'],
+            ['9NO', '9_ESPACIO_INFERIOR_2', 'Informaticos'],
+            ['9NO', '9_Causas_1', 'Causas_1'],
+            ['9NO', '9_Causas_3', 'Causas_3'],
+            ['9NO', '9_Zona Publica', 'Zona Publica'],
+        ] as [$piso, $identificador, $nombre]) {
+            Sector::firstOrCreate(
+                ['identificador_mapa' => $identificador],
+                ['nombre' => $nombre, 'piso' => $piso]
             );
         }
     }
