@@ -27,6 +27,8 @@ use App\Http\Controllers\tabla2Controller;
 use App\Http\Controllers\tablasController;
 use App\Http\Controllers\TtyppExportController;
 use App\Http\Controllers\TurnoController;
+use App\Http\Controllers\VisitaCarcelExportController;
+use App\Http\Controllers\VisitaCarcelPenalesExportController;
 use App\Livewire\AudiosSalasPage;
 use App\Livewire\BitacoraPruebasPage;
 use App\Livewire\BitacoraPruebasPublicPage;
@@ -41,6 +43,7 @@ use App\Livewire\ServiciosMapaPage;
 use App\Livewire\ServiciosMapaPublicPage;
 use App\Livewire\TtyppPage;
 use App\Livewire\TurnoPage;
+use App\Livewire\VisitaCarcelPage;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 
@@ -163,6 +166,15 @@ Route::get('/backoffice/servicios/mapa', ServiciosMapaPage::class)
 Route::get('/audios-salas', AudiosSalasPage::class)
     ->name('audios-salas.index')
     ->middleware(['auth', 'can:audios_salas.ver']);
+Route::get('/visita-carcel', VisitaCarcelPage::class)
+    ->name('visita-carcel.index')
+    ->middleware(['auth', 'can:visita_carcel.ver']);
+Route::get('/visita-carcel/exportar-por-penal', VisitaCarcelExportController::class)
+    ->name('visita-carcel.exportar-por-penal')
+    ->middleware(['auth', 'can:visita_carcel.gestionar']);
+Route::get('/visita-carcel/exportar-penales', VisitaCarcelPenalesExportController::class)
+    ->name('visita-carcel.exportar-penales')
+    ->middleware(['auth', 'can:visita_carcel.gestionar']);
 
 /*
 |--------------------------------------------------------------------------
