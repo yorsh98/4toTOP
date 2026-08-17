@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -30,6 +31,12 @@ return new class extends Migration
             $table->string('penal');
             $table->text('delito');
             $table->date('fecha_ingreso_pp')->index();
+            $table->date('plazo_cierre')->nullable();
+            $table->date('ultima_rev_pp')->nullable();
+            $table->string('juez')->nullable();
+            $table->string('defensor')->nullable();
+            $table->date('fecha_ult_res')->nullable();
+            $table->text('ult_resolucion')->nullable();
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('deleted_by')->nullable()->constrained('users')->nullOnDelete();
@@ -37,42 +44,30 @@ return new class extends Migration
             $table->softDeletes();
         });
 
-        Schema::create('visita_carcel_importaciones', function (Blueprint $table) {
+        Schema::create('visita_carcel_imputado_historials', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('visita_carcel_imputado_id');
+            $table->foreign('visita_carcel_imputado_id', 'vcih_imputado_fk')->references('id')->on('visita_carcel_imputados');
+            $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->string('archivo');
-            $table->foreignId('importado_por')->nullable()->constrained('users')->nullOnDelete();
-            $table->unsignedInteger('filas_procesadas')->default(0);
-            $table->unsignedInteger('movimientos_creados')->default(0);
-            $table->unsignedInteger('duplicados')->default(0);
-            $table->unsignedInteger('causas_no_encontradas')->default(0);
-            $table->unsignedInteger('imputados_no_encontrados')->default(0);
-            $table->unsignedInteger('coincidencias_ambiguas')->default(0);
-            $table->unsignedInteger('inconsistencias')->default(0);
+            $table->json('cambios');
+            $table->timestamp('created_at')->useCurrent();
+        });
+
+        Schema::create('penales', function (Blueprint $table) {
+            $table->id();
+            $table->string('nombre')->unique();
+            $table->boolean('activo')->default(true);
             $table->timestamps();
         });
 
-        Schema::create('visita_carcel_movimientos', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('visita_carcel_causa_id')->constrained('visita_carcel_causas');
-            $table->foreignId('visita_carcel_imputado_id')->nullable()->constrained('visita_carcel_imputados')->nullOnDelete();
-            $table->foreignId('visita_carcel_importacion_id')->constrained('visita_carcel_importaciones');
-            $table->string('ruc');
-            $table->string('rit');
-            $table->string('tipo_tramite');
-            $table->string('evento');
-            $table->date('fecha_evento');
-            $table->string('estado_evento');
-            $table->string('fingerprint', 64)->unique();
-            $table->timestamps();
-            $table->index(['visita_carcel_causa_id', 'fecha_evento'], 'vcm_causa_fecha_index');
-            $table->index('visita_carcel_imputado_id', 'vcm_imputado_index');
-        });
+        DB::table('penales')->insert(array_map(fn (string $nombre) => ['nombre' => $nombre, 'activo' => true, 'created_at' => now(), 'updated_at' => now()], ['CCP Nueva Imperial', 'CCP Valdivia', 'CCP Valparaiso', 'CCP Colina II', 'CP Biobio', 'CCP La Serena', 'CDP Puente Alto', 'CP Puerto Montt', 'CP Rancagua', 'CDP Stgo Uno', 'CDT Pudahuel Norte', 'REPAS', 'CDP Stgo Sur', 'CPF San Miguel', 'Cuartel Gral. PDI Borgoño', 'CP la Laguna Talca', 'CCP Talca']));
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('visita_carcel_movimientos');
-        Schema::dropIfExists('visita_carcel_importaciones');
+        Schema::dropIfExists('penales');
+        Schema::dropIfExists('visita_carcel_imputado_historials');
         Schema::dropIfExists('visita_carcel_imputados');
         Schema::dropIfExists('visita_carcel_causas');
     }
