@@ -6,6 +6,7 @@
 @endphp
 
 <div class="max-w-4xl mx-auto p-6 bg-blue-50 rounded border">
+    <x-flash-notifications />
     <h2 class="text-2xl font-bold text-gray-800 mb-6">
         {{ $audienciaId ? 'Editar' : 'Registro de Nueva' }} Audiencia
     </h2>
@@ -339,12 +340,7 @@
 @script
 <script>
     document.addEventListener('alerta-success', () => {
-        Swal.fire({
-            icon: 'success',
-            title: 'Éxito',
-            text: '¡Audiencia agregada o actualizada correctamente!',
-            confirmButtonColor: '#3085d6'
-        });
+        SwalToast.fire({ icon: 'success', title: 'Audiencia guardada correctamente.' });
     });
 </script>        
 @endscript

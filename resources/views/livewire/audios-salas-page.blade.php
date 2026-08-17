@@ -4,9 +4,7 @@
 
 <div class="py-2">
     <div class="max-w-7xl mx-auto space-y-4 px-4 sm:px-6 lg:px-8">
-        @if (session('ok'))
-            <div class="rounded-md bg-green-100 px-4 py-2 text-sm text-green-800">{{ session('ok') }}</div>
-        @endif
+        <x-flash-notifications />
 
         <div class="bg-white p-6 shadow-sm sm:rounded-lg">
             <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">

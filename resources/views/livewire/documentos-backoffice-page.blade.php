@@ -8,11 +8,9 @@
     </x-page-heading>
 </x-slot:header>
 
-<div class="py-4 sm:py-7">
-    <div class="max-w-7xl mx-auto space-y-5 px-4 sm:px-6 lg:px-8">
-        @if (session('ok'))
-            <div class="rounded-md bg-green-100 px-4 py-2 text-sm text-green-800">{{ session('ok') }}</div>
-        @endif
+<div class="py-2">
+    <div class="max-w-7xl mx-auto space-y-4 px-4 sm:px-6 lg:px-8">
+        <x-flash-notifications />
 
         @if ($errors->any())
             <div class="rounded-md bg-red-100 px-4 py-2 text-sm text-red-800">

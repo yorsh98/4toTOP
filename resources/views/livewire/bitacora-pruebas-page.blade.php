@@ -6,13 +6,7 @@
     <div class="max-w-7xl mx-auto space-y-4 px-4 sm:px-6 lg:px-8">
         <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
             <div class="p-6 text-gray-900">
-                @if (session('ok'))
-                    <div class="mb-4 rounded-md bg-green-100 px-4 py-2 text-sm text-green-800">{{ session('ok') }}</div>
-                @endif
-
-                @if (session('error'))
-                    <div class="mb-4 rounded-md bg-red-100 px-4 py-2 text-sm text-red-800">{{ session('error') }}</div>
-                @endif
+                <x-flash-notifications />
 
                 <h3 class="text-lg font-semibold mb-4">Nuevo dia de bitacora</h3>
 

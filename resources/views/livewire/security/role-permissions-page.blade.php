@@ -6,8 +6,7 @@
     <div class="mx-auto max-w-7xl space-y-4 px-4 sm:px-6 lg:px-8">
         @include('seguridad._tabs')
 
-        @if (session('ok'))<div class="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800" role="status">{{ session('ok') }}</div>@endif
-        @if (session('error'))<div class="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800" role="alert">{{ session('error') }}</div>@endif
+        <x-flash-notifications />
         <div wire:offline class="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">Sin conexion. Los cambios no se han guardado.</div>
 
         <div class="flex items-center justify-between gap-4">
