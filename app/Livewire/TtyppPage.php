@@ -140,13 +140,13 @@ class TtyppPage extends Component
             $payload = $this->sanitizePayload($validated);
             $payload['updated_by'] = Auth::id();
             $registro->update($payload);
-            session()->flash('ok', 'Registro actualizado correctamente.');
+            $this->dispatch('app-toast', message: 'Registro actualizado correctamente.');
         } else {
             $payload = $this->sanitizePayload($validated);
             $payload['created_by'] = Auth::id();
             $payload['updated_by'] = Auth::id();
             TtyppRegistro::query()->create($payload);
-            session()->flash('ok', 'Registro creado correctamente.');
+            $this->dispatch('app-toast', message: 'Registro creado correctamente.');
         }
 
         $this->resetForm();
@@ -192,7 +192,7 @@ class TtyppPage extends Component
             $this->resetForm();
         }
 
-        session()->flash('ok', 'Registro eliminado correctamente.');
+        $this->dispatch('app-toast', message: 'Registro eliminado correctamente.');
     }
 
     public function resetForm(): void
@@ -248,7 +248,7 @@ class TtyppPage extends Component
             $rows = $spreadsheet->getActiveSheet()->toArray(null, true, false, true);
 
             if ($rows === []) {
-                session()->flash('ok', 'El archivo Excel no contiene filas validas.');
+                $this->dispatch('app-toast', icon: 'info', message: 'El archivo Excel no contiene filas válidas.');
 
                 return;
             }
@@ -256,7 +256,7 @@ class TtyppPage extends Component
             $headers = array_shift($rows);
 
             if (! is_array($headers)) {
-                session()->flash('ok', 'El archivo Excel no contiene encabezados validos.');
+                $this->dispatch('app-toast', icon: 'info', message: 'El archivo Excel no contiene encabezados válidos.');
 
                 return;
             }
@@ -303,7 +303,7 @@ class TtyppPage extends Component
             $this->reset('importExcel');
             $this->resetPage();
 
-            session()->flash('ok', "Importacion Excel completada. Filas leidas: {$read}. Filas insertadas: {$inserted}. Filas omitidas por filtro: {$filtered}. Filas invalidas: {$invalid}.");
+            $this->dispatch('app-toast', message: "Importación Excel completada. Filas leídas: {$read}. Filas insertadas: {$inserted}. Filas omitidas por filtro: {$filtered}. Filas inválidas: {$invalid}.");
         } finally {
             $spreadsheet->disconnectWorksheets();
         }
@@ -336,20 +336,20 @@ class TtyppPage extends Component
         $registros = $notifier->recordsForDate($this->selectedDate);
 
         if ($registros->isEmpty()) {
-            session()->flash('ok', 'No hay registros TTyPP para la fecha seleccionada. No se envio correo.');
+            $this->dispatch('app-toast', icon: 'info', message: 'No hay registros TTyPP para la fecha seleccionada. No se envió correo.');
 
             return;
         }
 
         if ($notifier->recipients() === []) {
-            session()->flash('ok', 'No hay destinatarios TTyPP con correo valido en el catalogo de funcionarios.');
+            $this->dispatch('app-toast', icon: 'info', message: 'No hay destinatarios TTyPP con correo válido en el catálogo de funcionarios.');
 
             return;
         }
 
         $notifier->notifyForDate($this->selectedDate, Auth::user()?->name ?? 'Usuario del sistema');
 
-        session()->flash('ok', 'Correo TTyPP encolado/enviado correctamente.');
+        $this->dispatch('app-toast', message: 'Correo TTyPP encolado/enviado correctamente.');
     }
 
     private function sanitizePayload(array $payload): array

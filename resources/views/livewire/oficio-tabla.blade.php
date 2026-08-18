@@ -67,7 +67,12 @@
                     </div>
                     <div class="col-md-3">
                         <label class="form-label">Solicitante</label>
-                        <input type="text" class="form-control rounded" wire:model="newUserSolicitante" required @if(!$isFull) disabled @endif>
+                        <select class="form-select rounded" wire:model="newUserSolicitante" required @if(!$isFull) disabled @endif>
+                            <option value="">Seleccione un solicitante</option>
+                            @foreach($solicitantes as $solicitante)
+                                <option value="{{ $solicitante }}">{{ $solicitante }}</option>
+                            @endforeach
+                        </select>
                         @error('newUserSolicitante') <div class="text-danger small">{{ $message }}</div> @enderror
                     </div>
                     <div class="col-md-4">
@@ -120,8 +125,8 @@
                                     <button wire:click="edit({{ $l->id }})" class="btn btn-sm btn-primary">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <button wire:click="confirmDelete({{ $l->id }})"
-                                        wire:confirm="¿Está seguro de eliminar este oficio?"
+                                    <button type="button"
+                                        x-on:click="confirmDestructiveAction('¿Eliminar oficio?', 'Esta acción no se puede deshacer.').then(result => { if (result.isConfirmed) $wire.confirmDelete({{ $l->id }}) })"
                                         class="btn btn-sm btn-danger">
                                         <i class="fas fa-trash"></i>
                                     </button>

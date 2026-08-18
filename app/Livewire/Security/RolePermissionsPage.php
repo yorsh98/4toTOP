@@ -26,6 +26,7 @@ class RolePermissionsPage extends Component
         'ausencias' => 'Ausencias',
         'documentos' => 'Documentos',
         'audios_salas' => 'Audios de Salas',
+        'visita_carcel' => 'Visita Carcel',
         'seguridad' => 'Seguridad',
     ];
 
@@ -50,6 +51,8 @@ class RolePermissionsPage extends Component
         'navbar.documentos.editable' => ['documentos.gestionar'],
         'navbar.audios_salas.visible' => ['audios_salas.ver'],
         'navbar.audios_salas.editable' => ['audios_salas.gestionar'],
+        'navbar.visita_carcel.visible' => ['visita_carcel.ver'],
+        'navbar.visita_carcel.editable' => ['visita_carcel.gestionar'],
         'navbar.seguridad.visible' => ['seguridad.roles.ver', 'seguridad.permisos.ver', 'seguridad.auditoria.ver'],
         'navbar.seguridad.editable' => ['seguridad.roles.gestionar', 'seguridad.permisos.gestionar', 'seguridad.usuarios_roles.gestionar'],
     ];
@@ -98,7 +101,7 @@ class RolePermissionsPage extends Component
             after: ['permissions' => $afterPermissions],
         );
 
-        session()->flash('ok', 'Permisos del rol actualizados correctamente.');
+        $this->dispatch('app-toast', message: 'Permisos del rol actualizados correctamente.');
     }
 
     public function render()

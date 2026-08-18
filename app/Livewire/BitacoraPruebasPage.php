@@ -104,7 +104,7 @@ class BitacoraPruebasPage extends Component
         $this->reset(['fechaDia']);
         $this->numeroDia = 1;
         $this->enlaceActa = $enlaceActa;
-        session()->flash('ok', 'Dia agregado correctamente.');
+        $this->dispatch('app-toast', message: 'Día agregado correctamente.');
     }
 
     public function addItem(int $diaId): void
@@ -131,7 +131,7 @@ class BitacoraPruebasPage extends Component
         ]);
 
         $this->newItems[$diaId] = ['nombre_prueba' => '', 'institucion_exhibe' => ''];
-        session()->flash('ok', 'Prueba agregada correctamente.');
+        $this->dispatch('app-toast', message: 'Prueba agregada correctamente.');
     }
 
     public function deleteDia(int $diaId): void
@@ -142,7 +142,7 @@ class BitacoraPruebasPage extends Component
         $dia->items()->delete();
         $dia->delete();
 
-        session()->flash('ok', 'Dia eliminado correctamente.');
+        $this->dispatch('app-toast', message: 'Día eliminado correctamente.');
     }
 
     public function deleteItem(int $itemId): void
@@ -152,7 +152,7 @@ class BitacoraPruebasPage extends Component
         $item = BitacoraPruebaItem::query()->findOrFail($itemId);
         $item->delete();
 
-        session()->flash('ok', 'Prueba eliminada correctamente.');
+        $this->dispatch('app-toast', message: 'Prueba eliminada correctamente.');
     }
 
     public function toggleViewer(): void
@@ -252,7 +252,7 @@ class BitacoraPruebasPage extends Component
             'documentos_url' => $documentosUrl,
         ]);
 
-        session()->flash('ok', 'Notificacion enviada correctamente.');
+        $this->dispatch('app-toast', message: 'Notificación enviada correctamente.');
     }
 
     public function canAddItem(int $diaId): bool

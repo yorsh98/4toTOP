@@ -77,7 +77,7 @@ class UsersRolesPage extends Component
             after: ['roles' => $afterRoles, 'email' => $user->email],
         );
 
-        session()->flash('ok', 'Roles de usuario actualizados correctamente.');
+        $this->dispatch('app-toast', message: 'Roles de usuario actualizados correctamente.');
     }
 
     public function approveUser(int $userId): void
@@ -122,7 +122,7 @@ class UsersRolesPage extends Component
             ],
         );
 
-        session()->flash('ok', 'Usuario aprobado correctamente.');
+        $this->dispatch('app-toast', message: 'Usuario aprobado correctamente.');
     }
 
     public function rejectUser(int $userId): void
@@ -168,7 +168,7 @@ class UsersRolesPage extends Component
             ],
         );
 
-        session()->flash('ok', 'Usuario rechazado correctamente.');
+        $this->dispatch('app-toast', message: 'Usuario rechazado correctamente.');
     }
 
     public function sendResetPasswordLink(int $userId): void
@@ -199,7 +199,7 @@ class UsersRolesPage extends Component
             after: ['email' => $user->email],
         );
 
-        session()->flash('ok', 'Correo de recuperacion enviado correctamente.');
+        $this->dispatch('app-toast', message: 'Correo de recuperación enviado correctamente.');
     }
 
     public function setUserSuspension(int $userId, bool $suspend): void
@@ -237,7 +237,7 @@ class UsersRolesPage extends Component
             ],
         );
 
-        session()->flash('ok', $suspend ? 'Usuario suspendido correctamente.' : 'Usuario reactivado correctamente.');
+        $this->dispatch('app-toast', message: $suspend ? 'Usuario suspendido correctamente.' : 'Usuario reactivado correctamente.');
     }
 
     public function render()

@@ -222,8 +222,10 @@
       if (success) {
         Swal.fire({
           icon: 'success',
-          title: tipo === 'oficio' ? 'Oficio creado' : 'Libertad creada',
-          text: numero && ano ? `${success} Número asignado: ${numero}-${ano}` : success,
+          title: tipo === 'oficio' ? 'Número de Oficio creado' : 'Número de Libertad creado',
+          html: numero && ano
+            ? `${success}<div style="margin-top: 1rem; font-size: 1.35rem; font-weight: 700;">${numero}-${ano}</div>`
+            : success,
         });
       }
 

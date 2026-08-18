@@ -49,7 +49,7 @@
                                 <button type="button" class="group relative inline-flex h-8 w-8 items-center justify-center rounded-md text-red-600 transition-all duration-150 ease-out motion-safe:hover:-translate-y-0.5 hover:bg-red-50 hover:shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
                                     aria-label="Eliminar audiencia {{ $aud->rit }}"
                                     title="Eliminar audiencia"
-                                    x-on:click="if (confirm('¿Eliminar esta audiencia (RIT {{ $aud->rit }})?')) $wire.eliminar({{ $aud->id }})">
+                                    x-on:click="confirmDestructiveAction('¿Eliminar audiencia?', 'RIT {{ $aud->rit }}. Esta acción no se puede deshacer.').then(result => { if (result.isConfirmed) $wire.eliminar({{ $aud->id }}) })">
                                     <i class="fas fa-trash" aria-hidden="true"></i>
                                     <span class="sr-only">Eliminar audiencia</span>
                                     <span role="tooltip" class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 -translate-x-1/2 whitespace-nowrap rounded bg-slate-800 px-2 py-1 text-xs font-medium text-white opacity-0 shadow-sm transition-opacity duration-150 group-hover:opacity-100 group-focus-visible:opacity-100">Eliminar audiencia</span>
@@ -157,7 +157,7 @@
     @script
     <script>
         document.addEventListener('audiencia-eliminada', () => {
-            Swal?.fire?.({ icon: 'success', title: 'Eliminada', timer: 1200, showConfirmButton: false });
+            SwalToast.fire({ icon: 'success', title: 'Audiencia eliminada.' });
         });
     </script>
     @endscript

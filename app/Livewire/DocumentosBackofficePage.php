@@ -80,7 +80,7 @@ class DocumentosBackofficePage extends Component
 
         $this->reset(['procedimientoNombre', 'procedimientoArchivo']);
         $this->procedimientoOrden = count($catalog->procedimientos()) + 1;
-        session()->flash('ok', 'Procedimiento agregado correctamente.');
+        $this->dispatch('app-toast', message: 'Procedimiento agregado correctamente.');
     }
 
     public function removeProcedimiento(int $id, BackofficeDocumentosCatalog $catalog): void
@@ -88,7 +88,7 @@ class DocumentosBackofficePage extends Component
         Gate::authorize('documentos.gestionar');
 
         $catalog->archiveDocumento($id);
-        session()->flash('ok', 'Procedimiento archivado correctamente.');
+        $this->dispatch('app-toast', message: 'Procedimiento archivado correctamente.');
     }
 
     public function addDocumento(BackofficeDocumentosCatalog $catalog): void
@@ -110,7 +110,7 @@ class DocumentosBackofficePage extends Component
 
         $this->reset(['documentoNombre', 'documentoArchivo']);
         $this->documentoOrden = count($catalog->documentos()) + 1;
-        session()->flash('ok', 'Documento agregado correctamente.');
+        $this->dispatch('app-toast', message: 'Documento agregado correctamente.');
     }
 
     public function removeDocumento(int $id, BackofficeDocumentosCatalog $catalog): void
@@ -118,7 +118,7 @@ class DocumentosBackofficePage extends Component
         Gate::authorize('documentos.gestionar');
 
         $catalog->archiveDocumento($id);
-        session()->flash('ok', 'Documento archivado correctamente.');
+        $this->dispatch('app-toast', message: 'Documento archivado correctamente.');
     }
 
     public function addTribunal(BackofficeDocumentosCatalog $catalog): void
@@ -141,7 +141,7 @@ class DocumentosBackofficePage extends Component
         $catalog->save($data);
 
         $this->reset('tribunalNombre');
-        session()->flash('ok', 'Tribunal agregado correctamente.');
+        $this->dispatch('app-toast', message: 'Tribunal agregado correctamente.');
     }
 
     public function addEncargadoAudiencia(BackofficeDocumentosCatalog $catalog): void
@@ -166,7 +166,7 @@ class DocumentosBackofficePage extends Component
         $catalog->save($data);
 
         $this->reset(['encargadoAudienciaNombre', 'encargadoAudienciaNumeros']);
-        session()->flash('ok', 'Encargado de audiencia agregado correctamente.');
+        $this->dispatch('app-toast', message: 'Encargado de audiencia agregado correctamente.');
     }
 
     public function removeTribunal(int $index, BackofficeDocumentosCatalog $catalog): void
@@ -183,7 +183,7 @@ class DocumentosBackofficePage extends Component
         unset($tribunales[$index]);
         $data['tribunales'] = array_values($tribunales);
         $catalog->save($data);
-        session()->flash('ok', 'Tribunal quitado del listado.');
+        $this->dispatch('app-toast', message: 'Tribunal quitado del listado.');
     }
 
     public function removeEncargadoAudiencia(int $index, BackofficeDocumentosCatalog $catalog): void
@@ -200,7 +200,7 @@ class DocumentosBackofficePage extends Component
         unset($encargados[$index]);
         $data['encargados_audiencia'] = array_values($encargados);
         $catalog->save($data);
-        session()->flash('ok', 'Encargado de audiencia quitado del listado.');
+        $this->dispatch('app-toast', message: 'Encargado de audiencia quitado del listado.');
     }
 
     public function importSentencias(BuscadorSentenciasExcelImporter $importer): void
@@ -215,10 +215,7 @@ class DocumentosBackofficePage extends Component
 
         $this->reset('sentenciasExcel');
 
-        session()->flash(
-            'ok',
-            'Importacion de sentencias completada. Filas validas: '.$result['total_filas_validas'].'. Filas insertadas: '.$result['filas_insertadas'].'. Filas duplicadas: '.($result['filas_duplicadas'] ?? 0).'. Filas omitidas: '.($result['filas_omitidas'] ?? 0).'.'
-        );
+        $this->dispatch('app-toast', message: 'Importación de sentencias completada. Filas válidas: '.$result['total_filas_validas'].'. Filas insertadas: '.$result['filas_insertadas'].'. Filas duplicadas: '.($result['filas_duplicadas'] ?? 0).'. Filas omitidas: '.($result['filas_omitidas'] ?? 0).'.');
     }
 
     public function render(BackofficeDocumentosCatalog $catalog)

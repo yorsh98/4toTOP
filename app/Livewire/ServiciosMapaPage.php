@@ -102,7 +102,7 @@ class ServiciosMapaPage extends Component
         ]);
 
         $this->cancelSectorEdit();
-        session()->flash('ok', 'Sector actualizado correctamente.');
+        $this->dispatch('app-toast', message: 'Sector actualizado correctamente.');
     }
 
     public function cancelSectorEdit(): void

@@ -28,6 +28,26 @@ window.confirmDestructiveAction = (title, text, confirmButtonText = 'Sí, elimin
     confirmButtonColor: '#dc2626',
 });
 
+const bindLivewireToastListeners = () => {
+    if (window.__livewireToastListenersBound || !window.Livewire) {
+        return;
+    }
+
+    window.__livewireToastListenersBound = true;
+
+    window.Livewire.on('app-toast', (event) => {
+        const toast = event?.detail ?? event ?? {};
+
+        window.SwalToast.fire({
+            icon: toast.icon ?? 'success',
+            title: toast.message ?? 'Operación realizada correctamente.',
+        });
+    });
+};
+
+document.addEventListener('livewire:init', bindLivewireToastListeners);
+bindLivewireToastListeners();
+
 const showFlashNotifications = (root = document) => {
     const notifications = [
         ...(root.matches?.('[data-flash-notification]') ? [root] : []),

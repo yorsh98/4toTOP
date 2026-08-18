@@ -46,7 +46,7 @@ class TurnoPage extends Component
             'FECHA' => $semanaTurno,
         ]));
 
-        session()->flash('success', 'Turno 1 actualizado correctamente.');
+        $this->dispatch('app-toast', message: 'Turno 1 actualizado correctamente.');
         $this->hydrateState();
     }
 
@@ -74,7 +74,7 @@ class TurnoPage extends Component
             session()->flash('warning', 'Se omitieron destinatarios sin correo valido: '.$nombres.'.');
         }
 
-        session()->flash('success', 'Resumen semanal de Turno 1 encolado correctamente.');
+        $this->dispatch('app-toast', message: 'Resumen semanal de Turno 1 encolado correctamente.');
     }
 
     public function sendTurno2AcdSummary(): void
@@ -102,7 +102,7 @@ class TurnoPage extends Component
             session()->flash('warning', 'Turno 2 ACD: se omitieron destinatarios sin correo valido: '.$nombres.'.');
         }
 
-        session()->flash('success', 'Resumen de Turno 2 ACD encolado correctamente.');
+        $this->dispatch('app-toast', message: 'Resumen de Turno 2 ACD encolado correctamente.');
     }
 
     public function saveTurno2Acd(): void
@@ -118,7 +118,7 @@ class TurnoPage extends Component
             'FECHA' => $periodoTurno,
         ]));
 
-        session()->flash('success', 'Turno 2 ACD actualizado correctamente.');
+        $this->dispatch('app-toast', message: 'Turno 2 ACD actualizado correctamente.');
         $this->hydrateState();
     }
 
@@ -130,7 +130,7 @@ class TurnoPage extends Component
 
         Turno::query()->findOrFail(2)->update($data);
 
-        session()->flash('success', 'Turno 3 actualizado correctamente.');
+        $this->dispatch('app-toast', message: 'Turno 3 actualizado correctamente.');
         $this->hydrateState();
     }
 
