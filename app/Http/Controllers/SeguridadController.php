@@ -27,6 +27,7 @@ class SeguridadController extends Controller
         'audiencias' => 'Audiencias',
         'bitacora_pruebas' => 'Bitacora Pruebas',
         'ausencias' => 'Ausencias',
+        'visita_carcel' => 'Visita Carcel',
         'seguridad' => 'Seguridad',
     ];
 
@@ -47,6 +48,8 @@ class SeguridadController extends Controller
         'navbar.bitacora_pruebas.editable' => ['bitacora_pruebas.crear', 'bitacora_pruebas.editar'],
         'navbar.ausencias.visible' => ['ausentismo.ver'],
         'navbar.ausencias.editable' => ['ausentismo.editar'],
+        'navbar.visita_carcel.visible' => ['visita_carcel.ver'],
+        'navbar.visita_carcel.editable' => ['visita_carcel.gestionar'],
         'navbar.seguridad.visible' => ['seguridad.roles.ver', 'seguridad.permisos.ver', 'seguridad.auditoria.ver'],
         'navbar.seguridad.editable' => ['seguridad.roles.gestionar', 'seguridad.permisos.gestionar', 'seguridad.usuarios_roles.gestionar'],
     ];

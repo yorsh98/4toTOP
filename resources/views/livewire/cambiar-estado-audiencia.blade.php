@@ -1,24 +1,24 @@
 <div class="space-y-2">
     <!-- Botones de filtro -->
-    <div class="flex flex-wrap gap-2">        
+    <div class="flex flex-wrap gap-2">
         @foreach($tiposAudiencia as $tipo)
-            <button 
+            <button
                 wire:click="setFiltro('{{ $tipo }}')"
                 class="px-3 py-1 rounded-lg text-sm hover:shadow
-                       {{ $filtro === $tipo ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-zinc-700 dark:text-gray-200' }}">
+                       {{ $filtro === $tipo ? 'bg-blue-600 text-white' : 'bg-gray-200 ' }}">
                 {{ $tipo }}
             </button>
         @endforeach
     </div>
     <!-- Lista de audiencias -->
     @forelse($audiencias as $audiencia)
-        <div class="grid grid-cols-3 gap-4 items-center p-3 bg-white shadow rounded-lg dark:bg-zinc-900">
+        <div class="grid grid-cols-3 gap-4 items-center p-3 bg-white shadow rounded-lg ">
             <!-- RIT -->
-            <div class="text-sm font-semibold text-gray-800 dark:text-gray-200">
+            <div class="text-sm font-semibold text-gray-800 ">
                 RIT: {{ $audiencia->rit }}
             </div>
             <!-- Sala -->
-            <div class="text-sm text-gray-600 dark:text-gray-400">
+            <div class="text-sm text-gray-600 ">
                 Sala: {{ $audiencia->sala }}
             </div>
             <!-- Estado -->
@@ -26,21 +26,21 @@
                 @auth
                     <select
                         wire:change="cambiarEstado({{ $audiencia->id }}, $event.target.value)"
-                        class="w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-zinc-800 dark:text-gray-200">
+                        class="w-full rounded-lg border-gray-300 ">
                         <option value="POR_REALIZARSE" @selected($audiencia->estado === 'POR_REALIZARSE')>POR REALIZARSE</option>
                         <option value="EN_CURSO" @selected($audiencia->estado === 'EN_CURSO')>EN CURSO</option>
                         <option value="RECESO" @selected($audiencia->estado === 'RECESO')>RECESO</option>
                         <option value="FINALIZADA" @selected($audiencia->estado === 'FINALIZADA')>FINALIZADA</option>
                     </select>
                 @else
-                    <div class="text-xs rounded-md bg-gray-100 px-2 py-1 text-gray-700 dark:bg-zinc-800 dark:text-gray-200">
+                    <div class="text-xs rounded-md bg-gray-100 px-2 py-1 text-gray-700 ">
                         {{ str_replace('_', ' ', $audiencia->estado) }}
                     </div>
                 @endauth
             </div>
         </div>
     @empty
-        <div class="text-center text-gray-500 dark:text-gray-400">
+        <div class="text-center text-gray-500 ">
             @if(!$filtro)
                 Selecciona un tipo de audiencia para comenzar.
             @else

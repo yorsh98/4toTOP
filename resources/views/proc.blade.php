@@ -9,28 +9,28 @@
                                     INICIO
                                 </a>
                             </div>
-                            <div class="flex justify-center items-start gap-4 rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] transition duration-300 hover:text-black/70 hover:ring-black/20 focus:outline-none focus-visible:ring-[#FF2D20] lg:pb-10 dark:bg-zinc-900 dark:ring-zinc-800 dark:hover:text-white/70 dark:hover:ring-zinc-700 dark:focus-visible:ring-[#FF2D20]">
-                                <div class="flex size-12 shrink-0 items-center justify-center rounded-full sm:size-16">    
+                            <div class="flex justify-center items-start gap-4 rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] transition duration-300 hover:text-black/70 hover:ring-black/20 focus:outline-none focus-visible:ring-[#FF2D20] lg:pb-10     ">
+                                <div class="flex size-12 shrink-0 items-center justify-center rounded-full sm:size-16">
                                     <svg viewBox="0 0 1024 1024" class="icon" version="1.1" xmlns="http://www.w3.org/2000/svg" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M832 960H192s-64-2.133333-64-170.666667h768c0 168.533333-64 170.666667-64 170.666667z" fill="#42A5F5"></path><path d="M170.666667 64h682.666666v725.333333H170.666667z" fill="#90CAF9"></path><path d="M384 320h341.333333v42.666667H384zM384 405.333333h341.333333v42.666667H384zM384 490.666667h341.333333v42.666666H384zM384 576h341.333333v42.666667H384zM384 661.333333h341.333333v42.666667H384z" fill="#1976D2"></path><path d="M298.666667 320h42.666666v42.666667h-42.666666zM298.666667 405.333333h42.666666v42.666667h-42.666666zM298.666667 490.666667h42.666666v42.666666h-42.666666zM298.666667 576h42.666666v42.666667h-42.666666zM298.666667 661.333333h42.666666v42.666667h-42.666666z" fill="#1976D2"></path></g></svg>
                                 </div>
                                 <div class="pt-3 sm:pt-5">
-                                    <h2 class="text-xl font-semibold text-black dark:text-white">SELECCIONE EL PROCEDIMIENTO A VISUALIZAR</h2>
+                                    <h2 class="text-xl font-semibold text-black ">SELECCIONE EL PROCEDIMIENTO A VISUALIZAR</h2>
                                 </div>
                             </div>
                         </div>
                         <div class="grid gap-6 lg:grid-cols-1 lg:gap-8 animate__animated animate__zoomInDown animate__delay-0.8s">
                             <div class="grid gap-6 lg:grid-cols-1 lg:gap-8 animate__animated animate__zoomInDown animate__delay-0.8s">
-                                <div class="flex flex-col gap-6 overflow-hidden rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] lg:p-10 lg:pb-10 dark:bg-zinc-900 dark:ring-zinc-800">
-                                    
+                                <div class="flex flex-col gap-6 overflow-hidden rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] lg:p-10 lg:pb-10  ">
+
                                     @foreach($procedimientos as $proc)
-                                    <a 
-                                        href="{{ $proc['url'] }}" 
+                                    <a
+                                        href="{{ $proc['url'] }}"
                                         target="_blank"
-                                        class="group relative p-6 rounded-lg border border-gray-200 hover:border-blue-500 transition-all duration-300 shadow-sm hover:shadow-lg dark:border-zinc-700 dark:hover:border-blue-500"
+                                        class="group relative p-6 rounded-lg border border-gray-200 hover:border-blue-500 transition-all duration-300 shadow-sm hover:shadow-lg  "
                                     >
                                         <div class="flex justify-between items-center">
                                             <div class="flex-1 min-w-0">
-                                                <h3 class="text-lg font-semibold text-gray-900 truncate dark:text-white">
+                                                <h3 class="text-lg font-semibold text-gray-900 truncate ">
                                                     {{ $proc['nombre'] }}
                                                 </h3>
                                             </div>
