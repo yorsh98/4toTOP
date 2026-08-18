@@ -71,7 +71,7 @@ class FuncionariosPage extends Component
             ]);
 
             $this->resetForm();
-            session()->flash('success', 'Funcionario restaurado correctamente.');
+            $this->dispatch('app-toast', message: 'Funcionario restaurado correctamente.');
 
             return;
         }
@@ -86,7 +86,7 @@ class FuncionariosPage extends Component
         ]);
 
         $this->resetForm();
-        session()->flash('success', 'Funcionario agregado correctamente.');
+        $this->dispatch('app-toast', message: 'Funcionario agregado correctamente.');
     }
 
     public function editFuncionario(int $id): void
@@ -142,7 +142,7 @@ class FuncionariosPage extends Component
         ]);
 
         $this->resetForm();
-        session()->flash('success', 'Funcionario actualizado correctamente.');
+        $this->dispatch('app-toast', message: 'Funcionario actualizado correctamente.');
     }
 
     public function resetForm(): void
@@ -165,7 +165,7 @@ class FuncionariosPage extends Component
             $this->resetForm();
         }
 
-        session()->flash('success', 'Funcionario eliminado correctamente.');
+        $this->dispatch('app-toast', message: 'Funcionario eliminado correctamente.');
     }
 
     private function buildDeletedEmail(string $email, int $id): string

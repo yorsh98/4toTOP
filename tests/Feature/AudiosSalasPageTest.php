@@ -48,7 +48,8 @@ test('only users with management permission can update links', function () {
         ->set('anio', '2026')
         ->set('enlaces.701', 'https://audios.test/2026/sala-701')
         ->call('guardar')
-        ->assertHasNoErrors();
+        ->assertHasNoErrors()
+        ->assertDispatched('app-toast');
 
     $this->assertDatabaseHas('audio_sala_enlaces', [
         'anio' => 2026,

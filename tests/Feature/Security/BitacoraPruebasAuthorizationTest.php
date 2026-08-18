@@ -43,7 +43,8 @@ test('operador can access bitacora pruebas backoffice and create dia and prueba'
         ->set('numeroDia', 1)
         ->set('fechaDia', '2026-04-20')
         ->call('createDia')
-        ->assertHasNoErrors();
+        ->assertHasNoErrors()
+        ->assertDispatched('app-toast');
 
     $diaId = BitacoraPruebaDia::query()->where('rit', '100-2026')->where('numero_dia', 1)->value('id');
 
@@ -52,7 +53,8 @@ test('operador can access bitacora pruebas backoffice and create dia and prueba'
         ->set("newItems.{$diaId}.nombre_prueba", 'Declaracion de testigo')
         ->set("newItems.{$diaId}.institucion_exhibe", 'Min. Publico')
         ->call('addItem', $diaId)
-        ->assertHasNoErrors();
+        ->assertHasNoErrors()
+        ->assertDispatched('app-toast');
 
     $this->assertDatabaseHas('bitacora_pruebas_items', [
         'bitacora_pruebas_dia_id' => $diaId,

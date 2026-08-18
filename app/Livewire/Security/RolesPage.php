@@ -52,7 +52,7 @@ class RolesPage extends Component
         );
 
         $this->reset('name');
-        session()->flash('ok', 'Rol creado correctamente.');
+        $this->dispatch('app-toast', message: 'Rol creado correctamente.');
     }
 
     public function deleteRole(int $roleId): void
@@ -90,7 +90,7 @@ class RolesPage extends Component
             after: null,
         );
 
-        session()->flash('ok', 'Rol eliminado correctamente.');
+        $this->dispatch('app-toast', message: 'Rol eliminado correctamente.');
     }
 
     public function render()

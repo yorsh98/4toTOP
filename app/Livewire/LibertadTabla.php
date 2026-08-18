@@ -3,9 +3,11 @@
 namespace App\Livewire;
 
 use App\Models\Libertad;
+use App\Services\FuncionarioCatalog;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\Rule;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -42,6 +44,8 @@ class LibertadTabla extends Component
 
     public ?string $newAnio = null; // opcional
 
+    public array $solicitantes = [];
+
     // ===== Editar =====
     public ?int $editingId = null;
 
@@ -65,6 +69,7 @@ class LibertadTabla extends Component
     {
         $this->modo = in_array($modo, ['full', 'vista'], true) ? $modo : 'full';
         $this->filtroAnio = (string) now()->year;
+        $this->solicitantes = app(FuncionarioCatalog::class)->nombresByContext('oficios.solicitantes');
 
         if ($this->isFull()) {
             Gate::authorize('libertades.ver');
@@ -142,7 +147,7 @@ class LibertadTabla extends Component
 
         $this->validate([
             'newCausaAsig' => ['required', 'regex:/^[a-zA-Z0-9\s\-]{1,10}$/'],
-            'newUserSolicitante' => ['required', 'string', 'max:255'],
+            'newUserSolicitante' => ['required', 'string', Rule::in(app(FuncionarioCatalog::class)->nombresByContext('oficios.solicitantes'))],
             'newUserDirigido' => ['required', 'regex:/^[a-zA-Z0-9\s\-]+$/'],
             'newAnio' => ['nullable', 'digits:4'],
         ], [
@@ -186,8 +191,7 @@ class LibertadTabla extends Component
 
         $this->resetCreateForm();
         $this->showCreateForm = false;
-        $this->dispatch('alerta-exito'); // SweetAlert
-        session()->flash('success', 'Libertad creada. N° '.$lib->Numentregado.' / '.$lib->año);
+        $this->dispatch('app-toast', message: 'Libertad creada: N° '.$lib->Numentregado.' / '.$lib->año.'.');
     }
 
     // ------ Editar / Actualizar ------
@@ -253,8 +257,7 @@ class LibertadTabla extends Component
         ])->save();
 
         $this->dispatch('close-edit-modal');
-        $this->dispatch('alerta-exito');
-        session()->flash('success', 'Libertad actualizada');
+        $this->dispatch('app-toast', message: 'Libertad actualizada correctamente.');
     }
 
     // ------ Eliminar / Restaurar ------
@@ -280,8 +283,7 @@ class LibertadTabla extends Component
         }
 
         $lib->delete(); // Soft delete
-        $this->dispatch('alerta-deleted');
-        session()->flash('success', 'Eliminada (soft). El número quedó disponible.');
+        $this->dispatch('app-toast', message: 'Libertad eliminada correctamente.');
     }
 
     public function restore(int $id): void
@@ -309,7 +311,7 @@ class LibertadTabla extends Component
         }
 
         $lib->restore();
-        session()->flash('success', 'Restaurada correctamente.');
+        $this->dispatch('app-toast', message: 'Libertad restaurada correctamente.');
     }
 
     public function toggleEliminados(): void

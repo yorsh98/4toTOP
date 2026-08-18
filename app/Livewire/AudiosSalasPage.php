@@ -64,7 +64,7 @@ class AudiosSalasPage extends Component
         }
 
         $this->cargarEnlaces();
-        session()->flash('ok', 'Enlaces de audio actualizados correctamente.');
+        $this->dispatch('app-toast', message: 'Enlaces de audio actualizados correctamente.');
     }
 
     public function render()

@@ -203,21 +203,11 @@
 @script
 <script>
     document.addEventListener('alerta-exito', () => {
-        Swal.fire({
-            icon: 'success',
-            title: 'Éxito',
-            text: '¡Guia guardada correctamente!',
-            confirmButtonColor: '#3085d6'
-        });
+        SwalToast.fire({ icon: 'success', title: 'Guía guardada correctamente.' });
     });
 
     window.addEventListener('alerta-deleted', () => {
-        Swal.fire({
-            icon: 'success',
-            title: 'Éxito',
-            text: '¡Guia Eliminada correctamente!',
-            confirmButtonColor: '#3085d6'
-        });
+        SwalToast.fire({ icon: 'success', title: 'Guía eliminada correctamente.' });
     });
 </script>
 @endscript

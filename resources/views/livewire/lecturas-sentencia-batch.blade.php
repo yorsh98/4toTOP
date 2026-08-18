@@ -212,12 +212,7 @@
         });
 
         document.addEventListener('alerta-success', () => {
-            Swal?.fire?.({
-                icon: 'success',
-                title: '¡Listo!',
-                text: 'Lecturas de Sentencia registradas correctamente.',
-                confirmButtonColor: '#3085d6'
-            });
+        SwalToast.fire({ icon: 'success', title: 'Lecturas de sentencia registradas correctamente.' });
         });
 
         document.addEventListener('max-filas', () => {

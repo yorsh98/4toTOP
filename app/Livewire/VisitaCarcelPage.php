@@ -400,7 +400,7 @@ class VisitaCarcelPage extends Component
         ]);
 
         $this->cerrarFormularioCausa();
-        session()->flash('ok', 'Causa registrada correctamente.');
+        $this->dispatch('app-toast', message: 'Causa registrada correctamente.');
     }
 
     public function verFicha(int $causaId): void
@@ -454,7 +454,7 @@ class VisitaCarcelPage extends Component
         ]);
 
         $this->cerrarFormularioImputado();
-        session()->flash('ok', 'Imputado registrado correctamente.');
+        $this->dispatch('app-toast', message: 'Imputado registrado correctamente.');
     }
 
     public function eliminarImputado(int $imputadoId): void
@@ -465,7 +465,7 @@ class VisitaCarcelPage extends Component
         $imputado->update(['deleted_by' => Auth::id()]);
         $imputado->delete();
 
-        session()->flash('ok', 'Imputado eliminado del catalogo.');
+        $this->dispatch('app-toast', message: 'Imputado eliminado del catálogo.');
     }
 
     public function eliminarCausa(int $causaId): void
@@ -488,7 +488,7 @@ class VisitaCarcelPage extends Component
             $this->cerrarFicha();
         }
 
-        session()->flash('ok', 'Causa eliminada del catalogo.');
+        $this->dispatch('app-toast', message: 'Causa eliminada del catálogo.');
     }
 
     private function procesarZipActualizacion(SafeSpreadsheetReader $reader, string $path, string $archivo): array

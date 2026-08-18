@@ -10,17 +10,17 @@
             });
 
             window.addEventListener('toast', e => {
-                const msg = e.detail?.message ?? 'OK';
-                const t = document.createElement('div');
-                t.textContent = msg;
-                t.className = 'fixed top-4 right-4 bg-black/80 text-white text-sm px-4 py-2 rounded-xl shadow';
-                document.body.appendChild(t);
-                setTimeout(()=> t.remove(), 2200);
+                SwalToast.fire({ icon: 'success', title: e.detail?.message ?? 'OK' });
             });
 
             window.addEventListener('scrollToForm', () => {
                 document.getElementById('ausentismo-form')?.scrollIntoView({ behavior:'smooth', block:'start' });
             });
+        },
+
+        async confirmDelete(id) {
+            const result = await confirmDestructiveAction('¿Eliminar registro?', 'Esta acción no se puede deshacer.');
+            if (result.isConfirmed) this.$wire.delete(id);
         }
     }"
     class="space-y-6"
@@ -160,9 +160,9 @@
                                             class="px-3 py-1 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <button wire:click="delete({{ $row->id }})"
+                                    <button type="button" x-on:click="confirmDelete({{ $row->id }})"
                                             class="px-3 py-1 rounded-lg bg-red-50 text-red-700 hover:bg-red-100"
-                                            onclick="return confirm('¿Eliminar este registro?')">
+                                            aria-label="Eliminar registro">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </div>

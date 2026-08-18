@@ -87,7 +87,8 @@ test('manager adds an imputado from the cause record', function () {
         ->set('delito', 'Homicidio')
         ->set('fechaIngresoPp', '2026-08-02')
         ->call('guardarImputado')
-        ->assertHasNoErrors();
+        ->assertHasNoErrors()
+        ->assertDispatched('app-toast');
 
     expect(VisitaCarcelCausa::query()->count())->toBe(1)
         ->and($causa->imputados()->count())->toBe(1);
@@ -114,7 +115,10 @@ test('manager soft deletes an imputado with traceability', function () {
     $causa = VisitaCarcelCausa::query()->create(['ruc' => '2301234567-8', 'rit' => '142-2026']);
     $imputado = $causa->imputados()->create(['nombre' => 'Juan Perez Soto', 'rut' => '12.345.678-9', 'penal' => 'Santiago 1', 'delito' => 'Robo', 'fecha_ingreso_pp' => '2026-08-01']);
 
-    Livewire::actingAs($user)->test(VisitaCarcelPage::class)->call('eliminarImputado', $imputado->id);
+    Livewire::actingAs($user)
+        ->test(VisitaCarcelPage::class)
+        ->call('eliminarImputado', $imputado->id)
+        ->assertDispatched('app-toast');
 
     $trashed = VisitaCarcelImputado::withTrashed()->findOrFail($imputado->id);
     expect($trashed->trashed())->toBeTrue()->and($trashed->deleted_by)->toBe($user->id);
@@ -126,7 +130,10 @@ test('manager soft deletes a cause and its imputados', function () {
     $causa = VisitaCarcelCausa::query()->create(['ruc' => '2301234567-8', 'rit' => '142-2026']);
     $imputado = $causa->imputados()->create(['nombre' => 'Juan Perez Soto', 'rut' => '12.345.678-9', 'penal' => 'Santiago 1', 'delito' => 'Robo', 'fecha_ingreso_pp' => '2026-08-01']);
 
-    Livewire::actingAs($user)->test(VisitaCarcelPage::class)->call('eliminarCausa', $causa->id);
+    Livewire::actingAs($user)
+        ->test(VisitaCarcelPage::class)
+        ->call('eliminarCausa', $causa->id)
+        ->assertDispatched('app-toast');
 
     expect(VisitaCarcelCausa::withTrashed()->findOrFail($causa->id)->trashed())->toBeTrue()
         ->and(VisitaCarcelCausa::withTrashed()->findOrFail($causa->id)->deleted_by)->toBe($user->id)

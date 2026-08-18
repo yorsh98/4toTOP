@@ -37,7 +37,8 @@ test('superadmin can approve pending user from seguridad module', function () {
 
     Livewire::test(UsersRolesPage::class)
         ->call('approveUser', $pending->id)
-        ->assertHasNoErrors();
+        ->assertHasNoErrors()
+        ->assertDispatched('app-toast');
 
     $pending->refresh();
 
@@ -50,4 +51,20 @@ test('superadmin can approve pending user from seguridad module', function () {
         'entity_type' => 'user',
         'entity_id' => (string) $pending->id,
     ]);
+});
+
+test('superadmin can suspend and reactivate a user from seguridad module', function () {
+    $superAdmin = User::factory()->create(['email' => 'admin-suspension@test.local']);
+    $superAdmin->assignRole('SuperAdmin');
+    $target = User::factory()->create();
+
+    $this->actingAs($superAdmin);
+
+    Livewire::test(UsersRolesPage::class)
+        ->call('setUserSuspension', $target->id, true)
+        ->assertDispatched('app-toast')
+        ->call('setUserSuspension', $target->id, false)
+        ->assertDispatched('app-toast');
+
+    expect($target->fresh()->suspended_at)->toBeNull();
 });

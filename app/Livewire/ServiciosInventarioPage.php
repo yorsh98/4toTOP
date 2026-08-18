@@ -102,10 +102,10 @@ class ServiciosInventarioPage extends Component
 
         if ($this->editingId) {
             Activo::query()->findOrFail($this->editingId)->update($validated);
-            session()->flash('ok', 'Activo actualizado correctamente.');
+            $this->dispatch('app-toast', message: 'Activo actualizado correctamente.');
         } else {
             Activo::query()->create($validated);
-            session()->flash('ok', 'Activo creado correctamente.');
+            $this->dispatch('app-toast', message: 'Activo creado correctamente.');
         }
 
         $this->resetForm();
@@ -137,7 +137,7 @@ class ServiciosInventarioPage extends Component
             $this->resetForm();
         }
 
-        session()->flash('ok', 'Activo eliminado correctamente.');
+        $this->dispatch('app-toast', message: 'Activo eliminado correctamente.');
     }
 
     public function resetForm(): void

@@ -174,10 +174,7 @@ class TablaGuias extends Component
     {
         $this->authorizeWrite();
 
-        $this->js("
-            if (confirm('¿Estás seguro de eliminar esta guía?')) {
-                \$wire.call('performDelete', $id);}
-        ");
+        $this->js("confirmDestructiveAction('¿Eliminar guía?', 'Esta acción no se puede deshacer.').then(result => { if (result.isConfirmed) \$wire.call('performDelete', $id) })");
     }
 
     public function performDelete($id)

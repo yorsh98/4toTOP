@@ -37,7 +37,7 @@
                                     <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#updateLibertadModal{{ $data['id'] }}">Modificar</button>
 
                                     <!-- Formulario de eliminación -->
-                                    <form action="{{ route('Libertad.delete', ['id' => $data['id']]) }}" method="POST" style="display: inline;" onsubmit="return confirm('¿Estás seguro de eliminar esta Libertad?');">
+                                    <form action="{{ route('Libertad.delete', ['id' => $data['id']]) }}" method="POST" style="display: inline;" data-confirm-delete>
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn btn-danger">Eliminar</button>
@@ -54,7 +54,7 @@
                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </div>
                                         <div class="modal-body">
-                                            <form action="{{ route('Libertad.update', ['id' => $data['id']]) }}" method="POST">
+                                            <form action="{{ route('Libertad.update', ['id' => $data['id']]) }}" method="POST" data-confirm-update>
                                                 @csrf
                                                 @method('PATCH')
                                                 <div class="mb-3">
@@ -69,7 +69,7 @@
                                                     <label for="UserDirigido{{ $data['id'] }}" class="form-label">Dirigido a</label>
                                                     <input type="text" class="form-control" id="UserDirigido{{ $data['id'] }}" name="UserDirigido" value="{{ $data['UserDirigido'] }}" pattern="^[a-zA-Z0-9\s\-]{1,10}$">
                                                 </div>
-                                                <button type="submit" class="btn btn-success" onclick="return confirm('¿Estás seguro de ACTUALIZAR esta libertad?')" >Guardar Cambios</button>
+                                                <button type="submit" class="btn btn-success">Guardar Cambios</button>
                                             </form>
                                         </div>
                                     </div>
@@ -123,6 +123,24 @@
                         }
                     }    
                 });
+            });
+
+            document.addEventListener('submit', async (event) => {
+                const form = event.target;
+                if (!form.matches('[data-confirm-delete], [data-confirm-update]')) return;
+
+                event.preventDefault();
+                const result = form.matches('[data-confirm-delete]')
+                    ? await confirmDestructiveAction('¿Eliminar libertad?', 'Esta acción no se puede deshacer.')
+                    : await Swal.fire({
+                        icon: 'question',
+                        title: '¿Guardar cambios?',
+                        showCancelButton: true,
+                        confirmButtonText: 'Sí, guardar',
+                        cancelButtonText: 'Cancelar',
+                    });
+
+                if (result.isConfirmed) form.submit();
             });
         </script>
     @endpush

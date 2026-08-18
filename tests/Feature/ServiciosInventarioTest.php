@@ -43,7 +43,8 @@ test('user with servicios crear permission can create activo', function () {
         ->set('estado', 'Operativo')
         ->set('observaciones', 'Disponible para contingencia')
         ->call('save')
-        ->assertHasNoErrors();
+        ->assertHasNoErrors()
+        ->assertDispatched('app-toast');
 
     $this->assertDatabaseHas('activos', [
         'nombre' => 'Impresora de respaldo',
@@ -69,7 +70,8 @@ test('user with servicios editar permission can update activo', function () {
         ->set('sector_id', $nuevoSector->id)
         ->set('estado', 'Baja')
         ->call('save')
-        ->assertHasNoErrors();
+        ->assertHasNoErrors()
+        ->assertDispatched('app-toast');
 
     $this->assertDatabaseHas('activos', [
         'id' => $activo->id,
@@ -126,20 +128,6 @@ test('editing an asset selects its sector floor', function () {
         ->assertSet('sector_id', $sector->id);
 });
 
-test('inventory flash messages render as SweetAlert notifications', function () {
-    $sector = Sector::factory()->create();
-    $user = User::factory()->create();
-    $user->givePermissionTo(['servicios.ver', 'servicios.crear']);
-
-    Livewire::actingAs($user)
-        ->test(ServiciosInventarioPage::class)
-        ->set('nombre', 'Teclado de prueba')
-        ->set('sector_id', $sector->id)
-        ->call('save')
-        ->assertSeeHtml('data-flash-notification')
-        ->assertSeeHtml('data-icon="success"');
-});
-
 test('user with servicios eliminar permission can delete activo', function () {
     $activo = Activo::factory()->create();
     $user = User::factory()->create();
@@ -148,7 +136,8 @@ test('user with servicios eliminar permission can delete activo', function () {
     Livewire::actingAs($user)
         ->test(ServiciosInventarioPage::class)
         ->call('delete', $activo->id)
-        ->assertHasNoErrors();
+        ->assertHasNoErrors()
+        ->assertDispatched('app-toast');
 
     $this->assertDatabaseMissing('activos', [
         'id' => $activo->id,

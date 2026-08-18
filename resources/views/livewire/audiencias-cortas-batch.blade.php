@@ -230,12 +230,7 @@
     });
 
     document.addEventListener('alerta-success', () => {
-        Swal?.fire?.({
-            icon: 'success',
-            title: '¡Listo!',
-            text: 'Audiencias Corta registradas correctamente.',
-            confirmButtonColor: '#3085d6'
-        });
+        SwalToast.fire({ icon: 'success', title: 'Audiencias cortas registradas correctamente.' });
     });
     </script>
     @endscript

@@ -123,24 +123,6 @@
       } catch (_) {}
     };
 
-    var bindLivewireBusyHooks = function () {
-      if (window.__busyHooksBound || typeof window.Livewire === 'undefined') {
-        return;
-      }
-
-      window.__busyHooksBound = true;
-
-      Livewire.hook('message.sent', () => {
-        try {
-          initBusyStore();
-          window.Alpine.store('busy').on();
-        } catch (_) {}
-      });
-
-      Livewire.hook('message.failed', turnBusyOff);
-      Livewire.hook('message.processed', turnBusyOff);
-    };
-
     initBusyStore();
     document.addEventListener('alpine:init', initBusyStore);
     if (document.readyState === 'complete' || document.readyState === 'interactive') {
@@ -149,9 +131,13 @@
       window.addEventListener('load', turnBusyOff, { once: true });
     }
 
+    document.addEventListener('livewire:navigating', () => {
+      try {
+        initBusyStore();
+        window.Alpine.store('busy').on();
+      } catch (_) {}
+    });
     document.addEventListener('livewire:navigated', turnBusyOff);
-    bindLivewireBusyHooks();
-    document.addEventListener('livewire:load', bindLivewireBusyHooks);
   })();
 
   // (Opcional) Si también haces cargas manuales con Alpine (como tu switch de módulos),
