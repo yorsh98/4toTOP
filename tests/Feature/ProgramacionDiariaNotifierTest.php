@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Queue;
 use Livewire\Livewire;
 
-test('daily program dispatch sends one frozen message per recipient', function () {
+test('daily program dispatch sends one frozen message with recipients in BCC', function () {
     config()->set('notifications_v2.enabled', false);
     config()->set('mail.default', 'array');
     Mail::fake();
@@ -33,7 +33,12 @@ test('daily program dispatch sends one frozen message per recipient', function (
     expect($dispatch->recipients()->where('status', 'sent')->count())->toBe(2);
     expect($dispatch->payload)->not->toHaveKey('programacion_diaria');
 
-    Mail::assertSent(ProgramacionDiariaHtmlMail::class, 2);
+    Mail::assertSent(ProgramacionDiariaHtmlMail::class, function (ProgramacionDiariaHtmlMail $mail) {
+        return $mail->hasTo('notifica_4top_santiago@pjud.cl')
+            && $mail->hasBcc('first@example.cl')
+            && $mail->hasBcc('second@example.cl');
+    });
+    Mail::assertSent(ProgramacionDiariaHtmlMail::class, 1);
 });
 
 test('daily hearings page queues the program dispatch without waiting for SMTP', function () {

@@ -32,26 +32,70 @@ class MailChannelSender implements ChannelSender
             ))->raw()
             : null;
 
+        if (is_array($programacion)) {
+            try {
+                $this->sendProgramacion(
+                    'notifica_4top_santiago@pjud.cl',
+                    $dispatch->recipients->pluck('email')->all(),
+                    $programacion,
+                    $excel,
+                );
+
+                foreach ($dispatch->recipients as $recipient) {
+                    $recipient->update([
+                        'status' => 'sent',
+                        'failure_reason' => null,
+                        'sent_at' => now(),
+                    ]);
+
+                    Log::info('notifications_v2.mail.recipient_sent', [
+                        'dispatch_id' => $dispatch->id,
+                        'event_key' => $dispatch->event_key,
+                        'recipient_email' => $recipient->email,
+                        'recipient_type' => $recipient->type,
+                        'status' => 'sent',
+                    ]);
+                }
+
+                return;
+            } catch (Throwable $exception) {
+                foreach ($dispatch->recipients as $recipient) {
+                    $recipient->update([
+                        'status' => 'failed',
+                        'failure_reason' => $this->failureReason($exception),
+                    ]);
+
+                    Log::warning('notifications_v2.mail.recipient_failed', [
+                        'dispatch_id' => $dispatch->id,
+                        'event_key' => $dispatch->event_key,
+                        'recipient_email' => $recipient->email,
+                        'recipient_type' => $recipient->type,
+                        'status' => 'failed',
+                        'error_code' => $exception->getCode(),
+                        'error' => $exception->getMessage(),
+                    ]);
+                }
+
+                return;
+            }
+        }
+
         foreach ($dispatch->recipients as $recipient) {
             if ($recipient->status === 'sent') {
                 continue;
             }
 
             try {
-                if (is_array($programacion)) {
-                    $this->sendProgramacion($recipient->email, $programacion, $excel);
-                } else {
-                    Mail::mailer($mailer)->send([], [], function (Message $message) use ($recipient, $from, $subject, $html): void {
-                        $message->to($recipient->email, $recipient->name ?: null);
-                        $message->subject($subject);
+                Mail::mailer($mailer)->send([], [], function (Message $message) use ($recipient, $from, $subject, $html): void {
+                    $message->to($recipient->email, $recipient->name ?: null);
+                    $message->subject($subject);
 
-                        if (! empty($from['address'])) {
-                            $message->from((string) $from['address'], (string) ($from['name'] ?? 'Notificaciones'));
-                        }
+                    if (! empty($from['address'])) {
+                        $message->from((string) $from['address'], (string) ($from['name'] ?? 'Notificaciones'));
+                    }
 
-                        $message->html($html);
-                    });
-                }
+                    $message->html($html);
+                });
 
                 $recipient->update([
                     'status' => 'sent',
@@ -105,7 +149,7 @@ class MailChannelSender implements ChannelSender
         }
     }
 
-    private function sendProgramacion(string $email, array $snapshot, string $excel): void
+    private function sendProgramacion(string $to, array $bcc, array $snapshot, string $excel): void
     {
         $data = $snapshot['mail_data'];
         $mail = (new ProgramacionDiariaHtmlMail(
@@ -123,7 +167,7 @@ class MailChannelSender implements ChannelSender
                 'mime' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             ]);
 
-        Mail::mailer($snapshot['mailer'])->to($email)->send($mail);
+        Mail::mailer($snapshot['mailer'])->to($to)->bcc($bcc)->send($mail);
     }
 
     private function failureReason(Throwable $exception): string
