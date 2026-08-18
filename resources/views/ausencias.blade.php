@@ -18,7 +18,7 @@
                     shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05]
                     transition duration-300 hover:text-black/70 hover:ring-black/20
                     focus:outline-none focus-visible:ring-[#FF2D20]
-                    lg:pb-10 dark:bg-zinc-900 dark:ring-zinc-800 dark:hover:text-white/70 dark:hover:ring-zinc-700 dark:focus-visible:ring-[#FF2D20]
+                    lg:pb-10
                     animate__animated animate__zoomIn"
              style="--animate-duration: 520ms; --animate-delay: .12s;">
             <div class="flex size-12 shrink-0 items-center justify-center rounded-full sm:size-16
@@ -42,7 +42,7 @@
             </div>
 
             <div class="pt-3 sm:pt-5">
-                <h2 class="text-xl font-semibold text-black dark:text-white">Ausentismo</h2>
+                <h2 class="text-xl font-semibold text-black ">Ausentismo</h2>
             </div>
         </div>
     </div>
@@ -53,7 +53,7 @@
          style="--animate-duration: 580ms; --animate-delay: .22s;">
         <div class="flex flex-col gap-6 overflow-hidden rounded-lg bg-white p-6
                     shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05]
-                    lg:p-10 lg:pb-10 dark:bg-zinc-900 dark:ring-zinc-800">
+                    lg:p-10 lg:pb-10  ">
             <livewire:ausentismo-calendario/>
         </div>
     </div>

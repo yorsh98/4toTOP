@@ -103,6 +103,14 @@ new class extends Component
             'accent' => '#e11d48',
         ],
         [
+            'label' => __('Visita Carcel'),
+            'route' => 'visita-carcel.index',
+            'active' => 'visita-carcel.*',
+            'icon' => 'fa-solid fa-building-shield',
+            'permissions' => ['navbar.visita_carcel.visible', 'visita_carcel.ver'],
+            'accent' => '#be123c',
+        ],
+        [
             'label' => __('Servicios'),
             'route' => 'backoffice.servicios.inventario',
             'active' => 'backoffice.servicios.inventario',

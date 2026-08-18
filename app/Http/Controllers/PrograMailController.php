@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
+// DEPRECATED
 class PrograMailController extends Controller
 {
     /** ================== Helpers de normalización ================== */
@@ -369,9 +370,9 @@ class PrograMailController extends Controller
             $mail->attachData($excelBin, "Programacion_{$fecha}.xlsx", [
                 'mime' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             ]);
-
+            // DEPRECATED
             // destinatatios(solo sera visible el propio y todos los demas ocultos)
-            $to = 'notifica_4top_santiago@pjud.cl';        // correo ancla (visible solo para el receptor)
+            $to = 'jtroncoso@pjud.cl';        // correo ancla (visible solo para el receptor)
             $bcc = $destinatarios;  // TODOS ocultos
 
             Mail::mailer($mailerKey)
