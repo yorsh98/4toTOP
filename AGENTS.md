@@ -1,35 +1,23 @@
 # AGENTS.md
 
-High-signal guidance for OpenCode sessions in `4toTOP` (Laravel monolith).
-
-## Stack and Tooling (verified from manifests)
-- Laravel `^13.0`, PHP `^8.3` (`composer.json`).
-- Livewire `^3.6` + Volt `^1.10`; authorization uses `spatie/laravel-permission`.
-- Frontend build is Vite 6 + Tailwind 3 + Bootstrap 5 (`package.json`, `vite.config.js`, `resources/css/app.css`).
-- Test stack is Pest 4 on PHPUnit 12.
-- Repo-local OpenCode config enables Laravel Boost MCP (`opencode.json` + `boost.json`).
-
-## Commands Agents Should Actually Use
+## Workflow
 - Setup: `composer install && npm install && cp .env.example .env && php artisan key:generate && php artisan migrate`.
-- Full local dev loop: `composer run dev` (starts server + queue listener + log tail + Vite concurrently).
-- Frontend only: `npm run dev` or `npm run build`.
-- Lint gate: `./vendor/bin/pint --test` (there is no ESLint/typecheck script).
-- Run tests: `./vendor/bin/pest` (or `php artisan test`).
-- Focused test: `./vendor/bin/pest tests/Feature/Auth/AuthenticationTest.php` or `./vendor/bin/pest --filter="users can logout"`.
+- `composer run dev` runs the HTTP server, database queue listener, Pail, Vite, and scheduler together. Use `npm run dev` or `npm run build` only for frontend work.
+- Formatting is `./vendor/bin/pint --test`; no JavaScript lint or typecheck script is configured. Run targeted tests with `./vendor/bin/pest path/to/Test.php` or `./vendor/bin/pest --filter="test name"`.
+- Feature tests use `RefreshDatabase` globally and `phpunit.xml` overrides the connection to MySQL database `sistoficiolibertades_test`, not SQLite. Migrations and that test database must exist before running them.
+- Local defaults use MariaDB and database-backed cache, sessions, and queues; migrate before exercising normal application flows.
 
-## Environment and Test Gotchas
-- App defaults to MariaDB in `.env.example` (`DB_CONNECTION=mariadb`).
-- Cache, queue, and session default to `database`; migrations must be up or app behavior breaks in non-obvious ways.
-- `phpunit.xml` forces test DB to MySQL database `sistoficiolibertades_test` (not sqlite). Ensure this DB exists before running test suites.
-- Pest global config applies `RefreshDatabase` to all `tests/Feature/*` via `tests/Pest.php`, so feature tests are migration-sensitive.
+## Application Map
+- HTTP routes are centralized in `routes/web.php`; feature modules use route prefixes and names such as `SistOficioLibertades.*` and `seguridad.*`. `/` is `TurnoController::enviarTurno`, not Laravel's default welcome route.
+- UI is mixed Blade, Livewire classes in `app/Livewire`, and Volt. Volt mounts both `resources/views/livewire` and `resources/views/pages`; auth routes point to `pages.auth.*`.
+- Vite builds only `resources/css/app.css` and `resources/js/app.js`. The JS entrypoint intentionally exposes global `jQuery`, `Swal`, and `SwalToast`; CSS imports Bootstrap before Tailwind layers.
+- Legacy controller file/class names are lowercase (for example `addfuncionarioController`). Do not rename them incidentally.
 
-## Architecture Notes That Prevent Wrong Assumptions
-- Primary HTTP wiring is in `routes/web.php`; many modules are route-prefixed groups (`SistOficioLibertades.*`, `seguridad.*`, etc.).
-- Codebase includes legacy lowercase controller class/file names (example: `app/Http/Controllers/addfuncionarioController.php`); do not rename unless task explicitly requests refactor.
-- Root route `/` is `TurnoController@enviarTurno` named `welcome` (not the default Laravel welcome view).
-- Frontend entrypoints are fixed to `resources/css/app.css` and `resources/js/app.js`; JS currently exposes global `jQuery` and `Swal`.
-- `AppServiceProvider` contains critical auth behavior: fixed-email superadmin bypass and auto-sync of `SuperAdmin` role/permissions.
+## Security And Operations
+- Authorization is Spatie permissions. `AppServiceProvider` grants every ability to a fixed email and to users with the `SuperAdmin` role; changes here affect all authorization.
+- The web middleware stack appends `App\Http\Middleware\SecurityHeaders` globally.
+- Scheduled notification commands live in `routes/console.php`; development's `composer run dev` includes `schedule:work`. Production needs an external `schedule:run` cron and a database queue worker.
+- Repo-local OpenCode config starts Laravel Boost MCP with `php artisan boost:mcp`.
 
-## Agent Workflow Expectations
-- Minimum verification before handoff: `./vendor/bin/pint --test` + targeted Pest tests for changed behavior.
-- Prefer small, low-risk edits over broad rewrites in this legacy-heavy codebase.
+## Verification
+- Before handoff, run `./vendor/bin/pint --test` and the smallest relevant Pest test file or filter.
