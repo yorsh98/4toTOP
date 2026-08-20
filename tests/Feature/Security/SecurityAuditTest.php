@@ -71,3 +71,17 @@ test('updating role permissions dispatches a security toast', function () {
         ->assertHasNoErrors()
         ->assertDispatched('app-toast');
 });
+
+test('role permissions show services and its map as modules', function () {
+    $superAdmin = User::factory()->create();
+    $superAdmin->assignRole('SuperAdmin');
+    $role = Role::query()->where('name', 'Operador')->firstOrFail();
+
+    $this->actingAs($superAdmin);
+
+    Livewire::test(RolePermissionsPage::class, ['role' => $role])
+        ->assertSee('Servicios')
+        ->assertSee('Mapa Servicios')
+        ->assertSeeHtml('value="navbar.servicios.visible"')
+        ->assertSeeHtml('value="navbar.mapa_servicios.visible"');
+});

@@ -14,6 +14,10 @@ class ServiciosRoleSeeder extends Seeder
     public function run(): void
     {
         $permissions = [
+            'navbar.servicios.visible',
+            'navbar.servicios.editable',
+            'navbar.mapa_servicios.visible',
+            'navbar.mapa_servicios.editable',
             'servicios.ver',
             'servicios.crear',
             'servicios.editar',
