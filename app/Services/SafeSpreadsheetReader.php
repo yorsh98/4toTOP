@@ -41,4 +41,34 @@ class SafeSpreadsheetReader
 
         return $reader->load($path);
     }
+
+    public function loadAll(string $path, bool $allowXls, int $maxRows, int $maxColumns): Spreadsheet
+    {
+        if (! is_file($path) || ! is_readable($path)) {
+            throw new RuntimeException('El archivo no está disponible para su lectura.');
+        }
+
+        $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+        $reader = match ($extension) {
+            'xlsx' => new Xlsx,
+            'xls' => $allowXls ? new Xls : throw new RuntimeException('Solo se permiten archivos XLSX.'),
+            default => throw new RuntimeException('El archivo debe ser XLSX'.($allowXls ? ' o XLS.' : '.')),
+        };
+
+        if (! $reader->canRead($path)) {
+            throw new RuntimeException('El contenido del archivo no coincide con el formato permitido.');
+        }
+
+        $worksheets = $reader->listWorksheetInfo($path);
+
+        if ($worksheets === [] || collect($worksheets)->contains(fn (array $worksheet) => $worksheet['totalRows'] > $maxRows || $worksheet['totalColumns'] > $maxColumns)) {
+            throw new RuntimeException('La planilla excede los límites permitidos.');
+        }
+
+        $reader->setReadDataOnly(true);
+        $reader->setReadEmptyCells(false);
+        $reader->setLoadSheetsOnly(array_column($worksheets, 'worksheetName'));
+
+        return $reader->load($path);
+    }
 }
