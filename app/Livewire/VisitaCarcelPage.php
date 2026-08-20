@@ -256,13 +256,39 @@ class VisitaCarcelPage extends Component
         $result = ['archivo' => $archivo, 'procesadas' => 0, 'causas_creadas' => 0, 'imputados_creados' => 0, 'actualizadas' => 0, 'sin_coincidencia' => 0, 'sin_cambios' => 0, 'error' => null];
 
         try {
-            $rows = $reader->load($path, true, 5000, 70)->getActiveSheet()->toArray(null, true, false, true);
+            $spreadsheet = $reader->loadAll($path, true, 5000, 70);
         } catch (\Throwable $exception) {
             $result['error'] = $exception->getMessage();
 
             return $result;
         }
 
+        $errores = [];
+
+        foreach ($spreadsheet->getWorksheetIterator() as $hoja) {
+            $detalle = $this->procesarHojaActualizacion($hoja->toArray(null, true, false, true), $hoja->getTitle(), $archivo);
+
+            if ($detalle['error'] !== null) {
+                $errores[] = $hoja->getTitle().': '.$detalle['error'];
+
+                continue;
+            }
+
+            foreach (['procesadas', 'causas_creadas', 'imputados_creados', 'actualizadas', 'sin_coincidencia', 'sin_cambios'] as $campo) {
+                $result[$campo] += $detalle[$campo];
+            }
+        }
+
+        if ($result['procesadas'] === 0 && $errores !== []) {
+            $result['error'] = implode(' ', $errores);
+        }
+
+        return $result;
+    }
+
+    private function procesarHojaActualizacion(array $rows, string $nombreHoja, string $archivo): array
+    {
+        $result = ['procesadas' => 0, 'causas_creadas' => 0, 'imputados_creados' => 0, 'actualizadas' => 0, 'sin_coincidencia' => 0, 'sin_cambios' => 0, 'error' => null];
         $encabezados = $this->encabezadosActualizacion($rows);
 
         if ($encabezados === null) {
@@ -272,7 +298,7 @@ class VisitaCarcelPage extends Component
         }
 
         [$headers, $filaEncabezados] = $encabezados;
-        $penal = $this->penalPlanilla($rows, $filaEncabezados);
+        $penal = $this->penalPlanilla($rows, $filaEncabezados, $nombreHoja);
 
         foreach (array_slice($rows, $filaEncabezados + 1) as $row) {
             $data = $this->rowData($headers, $row);
@@ -589,13 +615,23 @@ class VisitaCarcelPage extends Component
         return null;
     }
 
-    private function penalPlanilla(array $rows, int $filaEncabezados): ?string
+    private function penalPlanilla(array $rows, int $filaEncabezados, string $nombreHoja = ''): ?string
     {
-        $referencia = $this->normalizarPenal(collect(array_slice($rows, 0, $filaEncabezados))->flatten()->implode(' '));
+        $referencia = $this->normalizarPenal($nombreHoja.' '.collect(array_slice($rows, 0, $filaEncabezados))->flatten()->implode(' '));
+        $penales = Penal::query()->where('activo', true)->get();
 
-        return Penal::query()
-            ->where('activo', true)
-            ->get()
+        foreach ([
+            'CDPSANTIAGOUNO' => 'CDPSTGOUNO',
+            'CCPDECOLINAII' => 'CCPCOLINAII',
+            'CDPDESANTIAGOSUR' => 'CDPSTGOSUR',
+            'CUARTELGENERALPDIBORGONO' => 'CUARTELGRALPDIBORGONO',
+        ] as $origen => $destino) {
+            if (str_contains($referencia, $origen)) {
+                return $penales->first(fn (Penal $penal) => $this->normalizarPenal($penal->nombre) === $destino)?->nombre;
+            }
+        }
+
+        return $penales
             ->first(fn (Penal $penal) => str_contains($referencia, $this->normalizarPenal($penal->nombre)))
             ?->nombre;
     }
@@ -651,9 +687,11 @@ class VisitaCarcelPage extends Component
             return Date::excelToDateTimeObject((float) $value)->format('Y-m-d');
         }
 
+        $date = preg_replace("/[\\s'’‘]+/u", '', trim((string) $value)) ?? '';
+
         foreach (['d/m/Y H:i', 'd/m/Y H:i:s', 'd/m/Y', 'Y-m-d H:i:s', 'Y-m-d'] as $format) {
             try {
-                return Carbon::createFromFormat($format, trim((string) $value), 'America/Santiago')->toDateString();
+                return Carbon::createFromFormat($format, $date, 'America/Santiago')->toDateString();
             } catch (\Throwable) {
                 continue;
             }

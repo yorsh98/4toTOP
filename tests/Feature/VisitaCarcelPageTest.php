@@ -238,6 +238,74 @@ test('manager creates missing causes and imputados from a legacy spreadsheet', f
         ->and($imputado->juez)->toBe('Juez Nuevo');
 });
 
+test('manager recognizes legacy names for Santiago Uno and Colina II', function () {
+    $user = visitaCarcelManager();
+    Penal::query()->firstOrCreate(['nombre' => 'CDP Stgo Uno'], ['activo' => true]);
+    Penal::query()->firstOrCreate(['nombre' => 'CCP Colina II'], ['activo' => true]);
+
+    Livewire::actingAs($user)
+        ->test(VisitaCarcelPage::class)
+        ->set('archivosActualizacion', [
+            UploadedFile::fake()->createWithContent('santiago.xls', visitaCarcelPlanilla([
+                [100, 2026, '2600000001-1', '12.345.678-9', 46250, 46251, 'Juez Santiago', 'Defensor Santiago', 46252, 'Resolucion Santiago'],
+            ], 'xls', 'C.D.P. SANTIAGO UNO')),
+            UploadedFile::fake()->createWithContent('colina.xls', visitaCarcelPlanilla([
+                [101, 2026, '2600000002-2', '11.111.111-1', 46250, 46251, 'Juez Colina', 'Defensor Colina', 46252, 'Resolucion Colina'],
+            ], 'xls', 'C.C.P. DE COLINA II')),
+        ])
+        ->call('actualizarDesdeArchivos')
+        ->assertHasNoErrors()
+        ->assertSet('resultadoActualizacion.imputados_creados', 2);
+
+    expect(VisitaCarcelCausa::query()->where('ruc', '2600000001-1')->firstOrFail()->imputados()->firstOrFail()->penal)->toBe('CDP Stgo Uno')
+        ->and(VisitaCarcelCausa::query()->where('ruc', '2600000002-2')->firstOrFail()->imputados()->firstOrFail()->penal)->toBe('CCP Colina II');
+});
+
+test('manager imports every worksheet from the Santiago spreadsheet', function () {
+    $user = visitaCarcelManager();
+
+    foreach (['CDP Stgo Uno', 'CDT Pudahuel Norte', 'REPAS', 'CDP Stgo Sur', 'CPF San Miguel', 'Cuartel Gral. PDI Borgoño'] as $penal) {
+        Penal::query()->firstOrCreate(['nombre' => $penal], ['activo' => true]);
+    }
+
+    $hojas = [
+        ['C.D.P. SANTIAGO I', 'C.D.P. SANTIAGO UNO', '2600000010-1'],
+        ['CDT PUDAHUEL NORTE', 'CDT PUDAHUEL NORTE', '2600000011-1'],
+        ['REPAS', 'REPAS', '2600000012-1'],
+        ['C.D.P. DE SANTIAGO SUR', 'C.D.P. DE SANTIAGO SUR', '2600000013-1'],
+        ['CPF SAN MIGUEL', 'CPF SAN MIGUEL', '2600000014-1'],
+        ['CUARTEL GENERAL PDI BORGOÑO', 'CUARTEL GENERAL PDI BORGOÑO', '2600000015-1'],
+    ];
+
+    Livewire::actingAs($user)
+        ->test(VisitaCarcelPage::class)
+        ->set('archivosActualizacion', [UploadedFile::fake()->createWithContent('santiago.xls', visitaCarcelPlanillaMultiple($hojas))])
+        ->call('actualizarDesdeArchivos')
+        ->assertHasNoErrors()
+        ->assertSet('resultadoActualizacion.imputados_creados', 6)
+        ->assertSet('resultadoActualizacion.causas_creadas', 6);
+
+    foreach (array_column($hojas, 2) as $ruc) {
+        expect(VisitaCarcelCausa::query()->where('ruc', $ruc)->exists())->toBeTrue();
+    }
+});
+
+test('manager corrects harmless typos in an ingreso date', function () {
+    $user = visitaCarcelManager();
+    Penal::query()->firstOrCreate(['nombre' => 'CCP Valdivia'], ['activo' => true]);
+
+    Livewire::actingAs($user)
+        ->test(VisitaCarcelPage::class)
+        ->set('archivosActualizacion', [UploadedFile::fake()->createWithContent('fecha-corregida.xls', visitaCarcelPlanilla([
+            [300, 2026, '2600000016-1', '12.345.678-9', 46250, 46251, 'Juez', 'Defensor', 46252, 'Resolucion'],
+        ], 'xls', 'C.C.P. VALDIVIA', false, "20/0'7/2022"))])
+        ->call('actualizarDesdeArchivos')
+        ->assertHasNoErrors()
+        ->assertSet('resultadoActualizacion.imputados_creados', 1);
+
+    expect(VisitaCarcelCausa::query()->where('ruc', '2600000016-1')->firstOrFail()->imputados()->firstOrFail()->fecha_ingreso_pp->toDateString())->toBe('2022-07-20');
+});
+
 function visitaCarcelManager(): User
 {
     $user = User::factory()->create();
@@ -246,20 +314,44 @@ function visitaCarcelManager(): User
     return $user;
 }
 
-function visitaCarcelPlanilla(array $filas, string $extension, string $penal = 'Penal', bool $columnasResiduales = false): string
+function visitaCarcelPlanilla(array $filas, string $extension, string $penal = 'Penal', bool $columnasResiduales = false, mixed $fechaIngreso = 46200): string
 {
     $planilla = new Spreadsheet;
     $formatoValido = count($filas[0] ?? []) === 10;
     $planilla->getActiveSheet()->fromArray([
         ['Lugar de Reclusion', $penal],
         $formatoValido ? ['Tribunal', 'Rit', 'Año', 'Ruc', 'Imputado', 'RUT', 'Delito', 'Fec. Ingreso P.P.', 'Plazo Cierre', 'Ultima Rev. P.P.', 'Juez', 'Defensor', 'Fec. Ult. Res.', 'Ult. Resolución'] : $filas[0],
-        ...($formatoValido ? array_map(fn (array $fila) => ['4 TOP Santiago', $fila[0], $fila[1], $fila[2], 'Imputado de prueba', $fila[3], 'Delito de prueba', 46200, $fila[4], $fila[5], $fila[6], $fila[7], $fila[8], $fila[9]], $filas) : []),
+        ...($formatoValido ? array_map(fn (array $fila) => ['4 TOP Santiago', $fila[0], $fila[1], $fila[2], 'Imputado de prueba', $fila[3], 'Delito de prueba', $fechaIngreso, $fila[4], $fila[5], $fila[6], $fila[7], $fila[8], $fila[9]], $filas) : []),
     ]);
     if ($columnasResiduales) {
         $planilla->getActiveSheet()->setCellValue('BK1', 'Formato residual');
     }
     $path = tempnam(sys_get_temp_dir(), 'visita-carcel-planilla-');
     ($extension === 'xls' ? new Xls($planilla) : new Xlsx($planilla))->save($path);
+
+    try {
+        return file_get_contents($path);
+    } finally {
+        @unlink($path);
+    }
+}
+
+function visitaCarcelPlanillaMultiple(array $hojas): string
+{
+    $planilla = new Spreadsheet;
+    $planilla->removeSheetByIndex(0);
+
+    foreach ($hojas as [$titulo, $penal, $ruc]) {
+        $hoja = $planilla->createSheet()->setTitle($titulo);
+        $hoja->fromArray([
+            ['Lugar de Reclusion', $penal],
+            ['Tribunal', 'Rit', 'Año', 'Ruc', 'Imputado', 'RUT', 'Delito', 'Fec. Ingreso P.P.', 'Plazo Cierre', 'Ultima Rev. P.P.', 'Juez', 'Defensor', 'Fec. Ult. Res.', 'Ult. Resolución'],
+            ['4 TOP Santiago', 200, 2026, $ruc, 'Imputado de prueba', '12.345.678-9', 'Delito de prueba', 46200, 46250, 46251, 'Juez', 'Defensor', 46252, 'Resolucion'],
+        ]);
+    }
+
+    $path = tempnam(sys_get_temp_dir(), 'visita-carcel-multiple-');
+    (new Xls($planilla))->save($path);
 
     try {
         return file_get_contents($path);
