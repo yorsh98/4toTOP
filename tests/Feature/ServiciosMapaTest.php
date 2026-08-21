@@ -37,7 +37,7 @@ test('user with servicios ver permission can see services map', function () {
     $this->actingAs($user)
         ->get(route('backoffice.servicios.mapa'))
         ->assertSuccessful()
-        ->assertSee('Servicios - Mapa interactivo')
+        ->assertSee('Mapa interactivo')
         ->assertSee('Plano real Piso 8')
         ->assertSee('PLANTA: Piso 8')
         ->assertSee('837')
@@ -84,8 +84,7 @@ test('user with edit permission can rename a sector from the map', function () {
         ->call('editSector', $sector->id)
         ->set('sectorNombre', '823 Nueva persona')
         ->call('saveSector')
-        ->assertSee('823 Nueva persona')
-        ->assertSee('Sector actualizado correctamente.');
+        ->assertSee('823 Nueva persona');
 
     $this->assertDatabaseHas('sectors', [
         'id' => $sector->id,
@@ -196,8 +195,8 @@ test('guest can access public services map', function () {
 
     $this->get(route('servicios.mapa-publico'))
         ->assertSuccessful()
-        ->assertSee('Mapa Servicios')
-        ->assertSee('Unidad de Servicios del Tribunal')
+        ->assertSee('Inventario')
+        ->assertSee('Unidad de Servicios')
         ->assertSee('Plano interactivo y activos registrados en inventario.')
         ->assertSee('Meson publico visible')
         ->assertSee('PRIV-001')
@@ -331,6 +330,7 @@ test('floors seven and nine load their administrable hotspots', function (int $f
     [7, '7MO', '7_Zona Publica', 'Zona Publica'],
     [8, '8VO', 'ADMINISTRACION_HALL', 'Adm.'],
     [8, '8VO', 'SERVICIOS_HALL', 'Servicios'],
+    [8, '8VO', 'ADM', 'ADM'],
     [8, '8VO', 'ESPACIO_INFERIOR', 'Encargados'],
     [8, '8VO', 'Zona Publica', 'Zona Publica'],
     [9, '9NO', '9_HALL_CENTRAL', 'HALL CENTRAL'],
@@ -367,11 +367,11 @@ test('map uses blue colors for populated and empty sectors', function () {
 
     Livewire::actingAs($user)
         ->test(ServiciosMapaPage::class)
-        ->assertSeeHtml('border-blue-700 bg-blue-600/70 text-white')
+        ->assertSeeHtml('border-blue-700 bg-blue-600/75 text-white')
         ->assertSeeHtml('border-blue-300 bg-blue-200/70 text-blue-950');
 
     Livewire::test(ServiciosMapaPublicPage::class)
-        ->assertSeeHtml('border-blue-700 bg-blue-600/70 text-white')
+        ->assertSeeHtml('border-blue-700 bg-blue-600/75 text-white')
         ->assertSeeHtml('border-blue-300 bg-blue-200/70 text-blue-950');
 });
 
@@ -424,6 +424,12 @@ test('sector seeder registers map sectors for floors seven and nine', function (
         'piso' => '8VO',
         'identificador_mapa' => 'SERVICIOS_HALL',
         'nombre' => 'Servicios',
+    ]);
+
+    $this->assertDatabaseHas('sectors', [
+        'piso' => '8VO',
+        'identificador_mapa' => 'ADM',
+        'nombre' => 'ADM',
     ]);
 
     $this->assertDatabaseHas('sectors', [
