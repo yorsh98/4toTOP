@@ -275,19 +275,19 @@ test('guest can switch floors on public services map through query string', func
     $this->get(route('servicios.mapa-publico', ['piso' => 7]))
         ->assertSuccessful()
         ->assertSee('Piso 7')
-        ->assertSee('images/planos/Plano_Piso_7.png', false);
+        ->assertSee('images/planos/Plano_Piso_7.webp', false);
 
     $this->get(route('servicios.mapa-publico', ['piso' => 9]))
         ->assertSuccessful()
         ->assertSee('Piso 9')
-        ->assertSee('images/planos/Plano_Piso_9.png', false);
+        ->assertSee('images/planos/Plano_Piso_9.webp', false);
 });
 
 test('guest can switch floors on public services map without navigation', function () {
     Livewire::test(ServiciosMapaPublicPage::class)
         ->call('selectPiso', 7)
         ->assertSet('piso', 7)
-        ->assertSee('images/planos/Plano_Piso_7.png', false);
+        ->assertSee('images/planos/Plano_Piso_7.webp', false);
 });
 
 test('public inventory table only shows assets from the selected floor', function () {

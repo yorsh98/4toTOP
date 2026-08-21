@@ -206,7 +206,7 @@ class ServiciosMapaPage extends Component
             'totalActivos' => $sectores->sum('activos_count'),
             'activos' => $activos,
             'publicActivos' => $publicActivos,
-            'imagePath' => asset("images/planos/Plano_Piso_{$this->piso}.png"),
+            'imagePath' => asset("images/planos/Plano_Piso_{$this->piso}.webp"),
             'availableFloors' => [7, 8, 9],
             'isPublic' => $this->publicMode,
             'mapSearchResultCount' => count($mapMatchingSectorIds),
