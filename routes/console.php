@@ -19,6 +19,12 @@ ScheduleFacade::command('notificaciones:ttypp-diario')
     ->weekdays()
     ->withoutOverlapping();
 
+ScheduleFacade::command('notificaciones:visita-carcel-revision-pp')
+    ->dailyAt('08:05')
+    ->days([1, 3, 5])
+    ->timezone((string) config('notifications_v2.schedule.timezone', 'America/Santiago'))
+    ->withoutOverlapping();
+
 // Turno 1 weekly summary cron disabled by request.
 // If needed again, schedule the command below as a CRON task:
 // ScheduleFacade::command('notificaciones:turno1-semanal')

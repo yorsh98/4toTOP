@@ -6,6 +6,8 @@ use App\Models\User;
 use App\Models\VisitaCarcelCausa;
 use App\Models\VisitaCarcelImputado;
 use App\Models\VisitaCarcelImputadoHistorial;
+use App\Services\SafeSpreadsheetReader;
+use Carbon\Carbon;
 use Illuminate\Http\UploadedFile;
 use Livewire\Livewire;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -40,6 +42,7 @@ test('manager creates a cause without imputados', function () {
 
     Livewire::actingAs($user)
         ->test(VisitaCarcelPage::class)
+        ->assertSee('Nueva causa')
         ->set('ruc', '2301234567-8')
         ->set('rit', '142-2026')
         ->call('guardarCausa')
@@ -53,6 +56,51 @@ test('manager creates a cause without imputados', function () {
     expect($causa->imputados()->count())->toBe(0);
 });
 
+test('manager can view the required alimentación spreadsheet format', function () {
+    $user = visitaCarcelManager();
+
+    Livewire::actingAs($user)
+        ->test(VisitaCarcelPage::class)
+        ->call('seleccionarModo', 'alimentacion')
+        ->call('abrirInformacionAlimentacion')
+        ->assertSee('Formato requerido para alimentar el catálogo')
+        ->assertSee('ULTIMA REV. P.P.');
+});
+
+test('comparison import reports the reason for each skipped row', function () {
+    $user = visitaCarcelManager();
+    VisitaCarcelCausa::query()->create(['ruc' => '2301234567-8', 'rit' => '142-2026']);
+
+    Livewire::actingAs($user)
+        ->test(VisitaCarcelPage::class)
+        ->set('archivoMovimientos', UploadedFile::fake()->createWithContent('comparacion.xlsx', visitaCarcelComparacionPlanilla([
+            [142, 2026, '2301234567-8'],
+            [143, 2026, '2301234567-8'],
+            [142, 2026, '9999999999-9'],
+            [142, 2026, '2301234567-8'],
+        ])))
+        ->call('importarMovimientos')
+        ->assertHasNoErrors()
+        ->assertSet('resultadoImportacion.movimientos_creados', 1)
+        ->assertSet('resultadoImportacion.inconsistencias', 1)
+        ->assertSet('resultadoImportacion.causas_no_encontradas', 1)
+        ->assertSet('resultadoImportacion.duplicados', 1)
+        ->assertSet('resultadoImportacion.errores.0', 'Fila 3: el RIT 143-2026 no coincide con el catálogo.');
+});
+
+test('comparison import shows a file error instead of failing when the reader rejects it', function () {
+    $user = visitaCarcelManager();
+    $reader = Mockery::mock(SafeSpreadsheetReader::class);
+    $reader->shouldReceive('load')->once()->andThrow(new RuntimeException('El contenido del archivo no coincide con el formato permitido.'));
+    app()->instance(SafeSpreadsheetReader::class, $reader);
+
+    Livewire::actingAs($user)
+        ->test(VisitaCarcelPage::class)
+        ->set('archivoMovimientos', UploadedFile::fake()->createWithContent('comparacion.xlsx', visitaCarcelComparacionPlanilla([])))
+        ->call('importarMovimientos')
+        ->assertHasErrors(['archivoMovimientos' => 'El contenido del archivo no coincide con el formato permitido.']);
+});
+
 test('causes are paginated and searching returns to the first page', function () {
     $user = User::factory()->create();
     $user->givePermissionTo('visita_carcel.ver');
@@ -61,6 +109,12 @@ test('causes are paginated and searching returns to the first page', function ()
         VisitaCarcelCausa::query()->create([
             'ruc' => sprintf('230123%04d-8', $number),
             'rit' => $number.'-2026',
+        ])->imputados()->create([
+            'nombre' => "Imputado {$number}",
+            'rut' => "12.345.{$number}-9",
+            'penal' => 'Santiago 1',
+            'delito' => 'Robo',
+            'fecha_ingreso_pp' => '2026-01-01',
         ]);
     }
 
@@ -92,6 +146,87 @@ test('manager adds an imputado from the cause record', function () {
 
     expect(VisitaCarcelCausa::query()->count())->toBe(1)
         ->and($causa->imputados()->count())->toBe(1);
+});
+
+test('notifications show imputados from day 160 through day 180', function () {
+    Carbon::setTestNow(Carbon::parse('2026-08-24', 'America/Santiago'));
+    $user = visitaCarcelManager();
+    $causa = VisitaCarcelCausa::query()->create(['ruc' => '2301234567-8', 'rit' => '142-2026']);
+
+    foreach ([160, 180, 181] as $days) {
+        $causa->imputados()->create([
+            'nombre' => "Imputado {$days}", 'rut' => "12.345.67{$days}-9", 'penal' => 'Santiago 1', 'delito' => 'Robo', 'fecha_ingreso_pp' => '2026-01-01',
+            'ultima_rev_pp' => now('America/Santiago')->subDays($days)->toDateString(),
+        ]);
+    }
+
+    Livewire::actingAs($user)
+        ->test(VisitaCarcelPage::class)
+        ->call('seleccionarModo', 'notificaciones')
+        ->assertSee('Imputado 160')
+        ->assertSee('Imputado 180')
+        ->assertDontSee('Imputado 181')
+        ->set('searchNotificaciones', 'Imputado 160')
+        ->assertSee('Imputado 160')
+        ->assertDontSee('Imputado 180');
+
+    Carbon::setTestNow();
+});
+
+test('manager updates the last PP review with an audit record', function () {
+    $user = visitaCarcelManager();
+    $causa = VisitaCarcelCausa::query()->create(['ruc' => '2301234567-8', 'rit' => '142-2026']);
+    $imputado = $causa->imputados()->create(['nombre' => 'Juan Perez Soto', 'rut' => '12.345.678-9', 'penal' => 'Santiago 1', 'delito' => 'Robo', 'fecha_ingreso_pp' => '2026-01-01', 'ultima_rev_pp' => '2026-03-01']);
+
+    Livewire::actingAs($user)
+        ->test(VisitaCarcelPage::class)
+        ->call('abrirFormularioRevisionPp', $imputado->id)
+        ->set('ultimaRevisionPp', '2026-08-20')
+        ->call('actualizarRevisionPp')
+        ->assertHasNoErrors();
+
+    expect($imputado->refresh()->ultima_rev_pp->toDateString())->toBe('2026-08-20')
+        ->and(VisitaCarcelImputadoHistorial::query()->latest('id')->firstOrFail()->cambios)->toBe([
+            'ultima_rev_pp' => ['old' => '2026-03-01', 'new' => '2026-08-20'],
+        ]);
+});
+
+test('manager can set the PP review date to today', function () {
+    Carbon::setTestNow(Carbon::parse('2026-08-24 10:00', 'America/Santiago'));
+    $user = visitaCarcelManager();
+
+    Livewire::actingAs($user)
+        ->test(VisitaCarcelPage::class)
+        ->call('usarFechaActualRevisionPp')
+        ->assertSet('ultimaRevisionPp', '2026-08-24');
+
+    Carbon::setTestNow();
+});
+
+test('manager edits an imputado and records every changed field', function () {
+    $user = visitaCarcelManager();
+    $causa = VisitaCarcelCausa::query()->create(['ruc' => '2301234567-8', 'rit' => '142-2026']);
+    $imputado = $causa->imputados()->create([
+        'nombre' => 'Juan Perez Soto', 'rut' => '12.345.678-9', 'penal' => 'Santiago 1', 'delito' => 'Robo', 'fecha_ingreso_pp' => '2026-01-01',
+        'plazo_cierre' => '2026-03-01', 'ultima_rev_pp' => '2026-03-02', 'juez' => 'Juez anterior', 'defensor' => 'Defensor anterior', 'fecha_ult_res' => '2026-03-03', 'ult_resolucion' => 'Resolución anterior',
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(VisitaCarcelPage::class)
+        ->call('abrirEdicionImputado', $imputado->id)
+        ->assertSet('imputadoEdicion.nombre', 'Juan Perez Soto')
+        ->set('imputadoEdicion.nombre', 'Juan Perez Actualizado')
+        ->set('imputadoEdicion.ultima_rev_pp', '2026-08-20')
+        ->set('imputadoEdicion.ult_resolucion', 'Resolución actualizada')
+        ->call('guardarEdicionImputado')
+        ->assertHasNoErrors();
+
+    $historial = VisitaCarcelImputadoHistorial::query()->latest('id')->firstOrFail();
+
+    expect($imputado->refresh()->nombre)->toBe('Juan Perez Actualizado')
+        ->and($imputado->ultima_rev_pp->toDateString())->toBe('2026-08-20')
+        ->and($historial->archivo)->toBe('Edición manual desde ficha de causa')
+        ->and($historial->cambios)->toHaveKeys(['nombre', 'ultima_rev_pp', 'ult_resolucion']);
 });
 
 test('manager cannot create an active cause with a duplicate ruc', function () {
@@ -328,6 +463,23 @@ function visitaCarcelPlanilla(array $filas, string $extension, string $penal = '
     }
     $path = tempnam(sys_get_temp_dir(), 'visita-carcel-planilla-');
     ($extension === 'xls' ? new Xls($planilla) : new Xlsx($planilla))->save($path);
+
+    try {
+        return file_get_contents($path);
+    } finally {
+        @unlink($path);
+    }
+}
+
+function visitaCarcelComparacionPlanilla(array $filas): string
+{
+    $planilla = new Spreadsheet;
+    $planilla->getActiveSheet()->fromArray([
+        ['RIT', 'AÑOCAUSA', 'RUC'],
+        ...$filas,
+    ]);
+    $path = tempnam(sys_get_temp_dir(), 'visita-carcel-comparacion-');
+    (new Xlsx($planilla))->save($path);
 
     try {
         return file_get_contents($path);
