@@ -421,6 +421,24 @@ HTML;
 HTML;
     }
 
+    public static function visitaCarcelRevisionPpHtml(): string
+    {
+        return <<<'HTML'
+<!doctype html>
+<html lang="es"><body style="margin:0;padding:24px;background:#f4f5f7;font-family:Arial,Helvetica,sans-serif;color:#111827;">
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"><tr><td align="center"><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="960" style="width:960px;max-width:960px;background:#ffffff;border:1px solid #cbd5e1;">
+<tr><td style="background:#92400e;padding:16px 18px;color:#ffffff;font-size:22px;font-weight:bold;">4to Tribunal de Juicio Oral en lo Penal de Santiago<br><span style="font-size:14px;font-weight:normal;">Revisión de prisión preventiva</span></td></tr>
+<tr><td style="padding:18px;font-size:14px;line-height:20px;"><p style="margin:0 0 10px;"><strong>Fecha:</strong> {{ fecha }} &nbsp; <strong>Imputados vigentes:</strong> {{ total_imputados }}</p><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;font-size:12px;"><tr><th style="border:1px solid #cbd5e1;padding:6px;background:#fef3c7;text-align:left;">Nombre imputado</th><th style="border:1px solid #cbd5e1;padding:6px;background:#fef3c7;text-align:left;">RUT</th><th style="border:1px solid #cbd5e1;padding:6px;background:#fef3c7;text-align:left;">RIT</th><th style="border:1px solid #cbd5e1;padding:6px;background:#fef3c7;text-align:left;">RUC</th><th style="border:1px solid #cbd5e1;padding:6px;background:#fef3c7;text-align:left;">Última revisión PP</th><th style="border:1px solid #cbd5e1;padding:6px;background:#fef3c7;text-align:left;">Día plazo</th></tr>{{ tabla_rows_html }}</table><p style="margin:14px 0 0;">{{ mensaje_sin_imputados }}</p></td></tr>
+<tr><td style="background:#f8fafc;border-top:1px solid #e5e7eb;padding:14px 18px;color:#4b5563;font-size:12px;">Correo automático del Sistema de Notificaciones.</td></tr>
+</table></td></tr></table></body></html>
+HTML;
+    }
+
+    public static function visitaCarcelRevisionPpText(): string
+    {
+        return 'Revisión de prisión preventiva. Fecha: {{ fecha }}. Imputados vigentes: {{ total_imputados }}. {{ tabla_rows_text }} {{ mensaje_sin_imputados }}';
+    }
+
     public static function legacyUserStatusText(): string
     {
         return 'Hola {{ user_name }}. {{ line }} {{ admin_line_text }} Si tienes dudas, contacta al administrador del sistema.';

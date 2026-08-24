@@ -7,6 +7,7 @@ use App\Models\VisitaCarcelCausa;
 use App\Models\VisitaCarcelImputado;
 use App\Models\VisitaCarcelImputadoHistorial;
 use App\Services\SafeSpreadsheetReader;
+use App\Services\VisitaCarcelRevisionPpService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -39,6 +40,20 @@ class VisitaCarcelPage extends Component
 
     public bool $formularioImportacionAbierto = false;
 
+    public bool $informacionImportacionAbierta = false;
+
+    public bool $informacionAlimentacionAbierta = false;
+
+    public ?int $imputadoRevisionPpId = null;
+
+    public string $ultimaRevisionPp = '';
+
+    public ?int $imputadoEditandoId = null;
+
+    public array $imputadoEdicion = [];
+
+    public array $historialEdicion = [];
+
     public $archivoMovimientos;
 
     public array $resultadoImportacion = [];
@@ -63,6 +78,8 @@ class VisitaCarcelPage extends Component
 
     public string $search = '';
 
+    public string $searchNotificaciones = '';
+
     public ?int $causaSeleccionadaId = null;
 
     public function mount(): void
@@ -70,11 +87,11 @@ class VisitaCarcelPage extends Component
         Gate::authorize('visita_carcel.ver');
     }
 
-    public function render()
+    public function render(VisitaCarcelRevisionPpService $revisionPp)
     {
         Gate::authorize('visita_carcel.ver');
 
-        $causas = VisitaCarcelCausa::query()
+        $causasQuery = VisitaCarcelCausa::query()
             ->withCount('imputados')
             ->when($this->search !== '', function ($query) {
                 $term = '%'.trim($this->search).'%';
@@ -86,16 +103,30 @@ class VisitaCarcelPage extends Component
                 });
             })
             ->when($this->modo === 'comparacion' && $this->coincidenciasCruce !== [], fn ($query) => $query->whereIn('id', collect($this->coincidenciasCruce)->pluck('causa_id')->unique()))
-            ->orderBy('ruc')
-            ->paginate(10);
+            ->orderBy('ruc');
+
+        $totalImputados = $this->modo === 'comparacion'
+            ? (clone $causasQuery)->get()->sum('imputados_count')
+            : 0;
+        $causas = $causasQuery->paginate(10);
+
+        $notificaciones = $this->modo === 'notificaciones'
+            ? $revisionPp->recordsForDate(now('America/Santiago'))
+                ->filter(function (VisitaCarcelImputado $imputado): bool {
+                    $term = trim(mb_strtolower($this->searchNotificaciones));
+
+                    return $term === '' || str_contains(mb_strtolower(implode(' ', [$imputado->nombre, $imputado->rut, $imputado->causa->rit, $imputado->causa->ruc])), $term);
+                })
+                ->values()
+            : collect();
 
         $causaSeleccionada = $this->causaSeleccionadaId
-            ? VisitaCarcelCausa::query()->with('imputados')->find($this->causaSeleccionadaId)
+            ? VisitaCarcelCausa::query()->with('imputados.historial')->find($this->causaSeleccionadaId)
             : null;
 
         $causaSeleccionada?->setRelation('movimientos', collect());
 
-        return view('livewire.visita-carcel-page', compact('causas', 'causaSeleccionada') + ['penales' => $this->modo === 'alimentacion' ? Penal::query()->where('activo', true)->orderBy('nombre')->pluck('nombre') : collect()]);
+        return view('livewire.visita-carcel-page', compact('causas', 'causaSeleccionada', 'notificaciones', 'totalImputados') + ['penales' => $this->modo === 'alimentacion' ? Penal::query()->where('activo', true)->orderBy('nombre')->pluck('nombre') : collect()]);
     }
 
     public function updatingSearch(): void
@@ -107,7 +138,7 @@ class VisitaCarcelPage extends Component
     {
         Gate::authorize('visita_carcel.ver');
 
-        if (! in_array($modo, ['comparacion', 'alimentacion'], true)) {
+        if (! in_array($modo, ['comparacion', 'alimentacion', 'notificaciones'], true)) {
             return;
         }
 
@@ -130,6 +161,30 @@ class VisitaCarcelPage extends Component
         $this->resetValidation();
     }
 
+    public function abrirInformacionImportacion(): void
+    {
+        Gate::authorize('visita_carcel.gestionar');
+
+        $this->informacionImportacionAbierta = true;
+    }
+
+    public function cerrarInformacionImportacion(): void
+    {
+        $this->informacionImportacionAbierta = false;
+    }
+
+    public function abrirInformacionAlimentacion(): void
+    {
+        Gate::authorize('visita_carcel.gestionar');
+
+        $this->informacionAlimentacionAbierta = true;
+    }
+
+    public function cerrarInformacionAlimentacion(): void
+    {
+        $this->informacionAlimentacionAbierta = false;
+    }
+
     public function importarMovimientos(SafeSpreadsheetReader $reader): void
     {
         Gate::authorize('visita_carcel.gestionar');
@@ -138,82 +193,77 @@ class VisitaCarcelPage extends Component
             'archivoMovimientos' => ['required', File::types(['xlsx', 'xls'])->max(20 * 1024)],
         ]);
 
-        $spreadsheet = $reader->load($this->archivoMovimientos->getRealPath(), allowXls: true, maxRows: 5000, maxColumns: 20);
-        $rows = $spreadsheet->getActiveSheet()->toArray(null, true, false, true);
-        $headers = array_shift($rows);
-        $headers = $this->headers($headers ?: []);
-        $requiredHeaders = ['rit', 'anocausa', 'ruc'];
+        try {
+            $spreadsheet = $reader->load($this->archivoMovimientos->getRealPath(), allowXls: true, maxRows: 5000, maxColumns: 20);
+            $rows = $spreadsheet->getActiveSheet()->toArray(null, true, false, true);
+            $headers = $this->headers(array_shift($rows) ?: []);
 
-        if (array_diff($requiredHeaders, $headers) !== []) {
-            $this->addError('archivoMovimientos', 'El archivo debe incluir las columnas RIT, AÑOCAUSA y RUC.');
+            if (array_diff(['rit', 'anocausa', 'ruc'], $headers) !== []) {
+                $this->addError('archivoMovimientos', 'La primera fila debe incluir las columnas RIT, AÑOCAUSA y RUC.');
 
-            return;
+                return;
+            }
+
+            $result = ['filas_procesadas' => 0, 'movimientos_creados' => 0, 'duplicados' => 0, 'causas_no_encontradas' => 0, 'imputados_no_encontrados' => 0, 'coincidencias_ambiguas' => 0, 'inconsistencias' => 0, 'errores' => []];
+            $matches = [];
+
+            foreach ($rows as $index => $row) {
+                $data = $this->rowData($headers, $row);
+                if ($this->rowIsEmpty($data)) {
+                    continue;
+                }
+
+                $result['filas_procesadas']++;
+                $fila = $index + 2;
+                $ruc = trim((string) $data['ruc']);
+                $rit = trim((string) $data['rit']).'-'.trim((string) $data['anocausa']);
+
+                if ($ruc === '' || $rit === '-') {
+                    $result['inconsistencias']++;
+                    $this->agregarErrorImportacion($result, $fila, 'faltan RUC, RIT o AÑOCAUSA.');
+
+                    continue;
+                }
+
+                $causa = VisitaCarcelCausa::query()->where('ruc', $ruc)->first();
+                if (! $causa) {
+                    $result['causas_no_encontradas']++;
+                    $this->agregarErrorImportacion($result, $fila, "no existe una causa con RUC {$ruc}.");
+
+                    continue;
+                }
+
+                if ($causa->rit !== $rit) {
+                    $result['inconsistencias']++;
+                    $this->agregarErrorImportacion($result, $fila, "el RIT {$rit} no coincide con el catálogo.");
+
+                    continue;
+                }
+
+                $payload = ['ruc' => $ruc, 'rit' => $rit, 'anio' => trim((string) $data['anocausa']), 'causa_id' => $causa->id];
+                $fingerprint = hash('sha256', implode('|', $payload));
+                if (isset($matches[$fingerprint])) {
+                    $result['duplicados']++;
+                    $this->agregarErrorImportacion($result, $fila, 'registro duplicado en esta planilla.');
+
+                    continue;
+                }
+
+                $matches[$fingerprint] = $payload;
+                $result['movimientos_creados']++;
+            }
+
+            $this->resultadoImportacion = $result;
+            $this->coincidenciasCruce = array_values($matches);
+            session()->put('visita_carcel.comparacion', $this->coincidenciasCruce);
+            $this->reset('archivoMovimientos');
+            session()->flash('ok', 'Comparacion completada. Los resultados son temporales y no se guardaron en el catalogo.');
+        } catch (\RuntimeException $exception) {
+            $this->addError('archivoMovimientos', $exception->getMessage());
+        } catch (\Throwable $exception) {
+            report($exception);
+            $this->addError('archivoMovimientos', 'No fue posible procesar la planilla. Verifique que el archivo no esté dañado y vuelva a intentarlo.');
         }
-
-        $result = [
-            'filas_procesadas' => 0,
-            'movimientos_creados' => 0,
-            'duplicados' => 0,
-            'causas_no_encontradas' => 0,
-            'imputados_no_encontrados' => 0,
-            'coincidencias_ambiguas' => 0,
-            'inconsistencias' => 0,
-        ];
-
-        $matches = [];
-        foreach ($rows as $row) {
-            $data = $this->rowData($headers, $row);
-
-            if ($this->rowIsEmpty($data)) {
-                continue;
-            }
-
-            $result['filas_procesadas']++;
-            $ruc = trim((string) $data['ruc']);
-            $rit = trim((string) $data['rit']).'-'.trim((string) $data['anocausa']);
-            if ($ruc === '' || $rit === '-') {
-                $result['inconsistencias']++;
-
-                continue;
-            }
-
-            $causa = VisitaCarcelCausa::query()->where('ruc', $ruc)->first();
-
-            if (! $causa) {
-                $result['causas_no_encontradas']++;
-
-                continue;
-            }
-
-            if ($causa->rit !== $rit) {
-                $result['inconsistencias']++;
-
-                continue;
-            }
-
-            $payload = [
-                'ruc' => $ruc,
-                'rit' => $rit,
-                'anio' => trim((string) $data['anocausa']),
-                'causa_id' => $causa->id,
-            ];
-            $fingerprint = hash('sha256', implode('|', $payload));
-
-            if (isset($matches[$fingerprint])) {
-                $result['duplicados']++;
-
-                continue;
-            }
-
-            $matches[$fingerprint] = $payload;
-            $result['movimientos_creados']++;
-        }
-
-        $this->resultadoImportacion = $result;
-        $this->coincidenciasCruce = array_values($matches);
-        session()->put('visita_carcel.comparacion', $this->coincidenciasCruce);
-        $this->reset('archivoMovimientos');
-        session()->flash('ok', 'Comparacion completada. Los resultados son temporales y no se guardaron en el catalogo.');
     }
 
     public function salirModoCruce(): void
@@ -230,25 +280,30 @@ class VisitaCarcelPage extends Component
             'archivosActualizacion.*' => ['required', File::types(['xlsx', 'xls', 'zip'])->max(20 * 1024)],
         ]);
 
-        $result = ['archivos_procesados' => 0, 'archivos_omitidos' => 0, 'procesadas' => 0, 'causas_creadas' => 0, 'imputados_creados' => 0, 'actualizadas' => 0, 'sin_coincidencia' => 0, 'sin_cambios' => 0, 'archivos' => []];
+        try {
+            $result = ['archivos_procesados' => 0, 'archivos_omitidos' => 0, 'procesadas' => 0, 'causas_creadas' => 0, 'imputados_creados' => 0, 'actualizadas' => 0, 'sin_coincidencia' => 0, 'sin_cambios' => 0, 'archivos' => []];
 
-        foreach ($this->archivosActualizacion as $archivo) {
-            $extension = strtolower($archivo->getClientOriginalExtension());
+            foreach ($this->archivosActualizacion as $archivo) {
+                $extension = strtolower($archivo->getClientOriginalExtension());
 
-            if ($extension === 'zip') {
-                foreach ($this->procesarZipActualizacion($reader, $archivo->getRealPath(), $archivo->getClientOriginalName()) as $detalle) {
-                    $this->acumularResultadoActualizacion($result, $detalle);
+                if ($extension === 'zip') {
+                    foreach ($this->procesarZipActualizacion($reader, $archivo->getRealPath(), $archivo->getClientOriginalName()) as $detalle) {
+                        $this->acumularResultadoActualizacion($result, $detalle);
+                    }
+
+                    continue;
                 }
 
-                continue;
+                $this->acumularResultadoActualizacion($result, $this->procesarArchivoActualizacion($reader, $archivo->getRealPath(), $archivo->getClientOriginalName()));
             }
 
-            $this->acumularResultadoActualizacion($result, $this->procesarArchivoActualizacion($reader, $archivo->getRealPath(), $archivo->getClientOriginalName()));
+            $this->resultadoActualizacion = $result;
+            $this->reset('archivosActualizacion');
+            session()->flash('ok', "Actualizacion completada: {$result['actualizadas']} actualizados y {$result['imputados_creados']} imputados creados.");
+        } catch (\Throwable $exception) {
+            report($exception);
+            $this->addError('archivosActualizacion', 'No fue posible procesar los archivos. Revise el formato e intente nuevamente.');
         }
-
-        $this->resultadoActualizacion = $result;
-        $this->reset('archivosActualizacion');
-        session()->flash('ok', "Actualizacion completada: {$result['actualizadas']} actualizados y {$result['imputados_creados']} imputados creados.");
     }
 
     private function procesarArchivoActualizacion(SafeSpreadsheetReader $reader, string $path, string $archivo): array
@@ -440,6 +495,7 @@ class VisitaCarcelPage extends Component
     {
         $this->causaSeleccionadaId = null;
         $this->cerrarFormularioImputado();
+        $this->cerrarFormularioRevisionPp();
     }
 
     public function abrirFormularioImputado(): void
@@ -492,6 +548,129 @@ class VisitaCarcelPage extends Component
         $imputado->delete();
 
         $this->dispatch('app-toast', message: 'Imputado eliminado del catálogo.');
+    }
+
+    public function abrirEdicionImputado(int $imputadoId): void
+    {
+        Gate::authorize('visita_carcel.gestionar');
+
+        $imputado = VisitaCarcelImputado::query()->with('historial')->findOrFail($imputadoId);
+        $this->imputadoEditandoId = $imputado->id;
+        $this->imputadoEdicion = [
+            'nombre' => $imputado->nombre,
+            'rut' => $imputado->rut,
+            'penal' => $imputado->penal,
+            'delito' => $imputado->delito,
+            'fecha_ingreso_pp' => $imputado->fecha_ingreso_pp->toDateString(),
+            'plazo_cierre' => $imputado->plazo_cierre?->toDateString(),
+            'ultima_rev_pp' => $imputado->ultima_rev_pp?->toDateString(),
+            'juez' => $imputado->juez,
+            'defensor' => $imputado->defensor,
+            'fecha_ult_res' => $imputado->fecha_ult_res?->toDateString(),
+            'ult_resolucion' => $imputado->ult_resolucion,
+        ];
+        $this->historialEdicion = $imputado->historial->take(5)->map(fn (VisitaCarcelImputadoHistorial $entry): array => [
+            'fecha' => $entry->created_at->format('d/m/Y H:i'),
+            'usuario_id' => $entry->user_id,
+            'cambios' => $entry->cambios,
+        ])->all();
+        $this->resetValidation();
+    }
+
+    public function cerrarEdicionImputado(): void
+    {
+        $this->reset(['imputadoEditandoId', 'imputadoEdicion', 'historialEdicion']);
+        $this->resetValidation();
+    }
+
+    public function guardarEdicionImputado(): void
+    {
+        Gate::authorize('visita_carcel.gestionar');
+
+        $validated = $this->validate([
+            'imputadoEdicion.nombre' => ['required', 'string', 'max:255'],
+            'imputadoEdicion.rut' => ['required', 'string', 'max:20'],
+            'imputadoEdicion.penal' => ['required', 'string', 'max:255'],
+            'imputadoEdicion.delito' => ['required', 'string'],
+            'imputadoEdicion.fecha_ingreso_pp' => ['required', 'date'],
+            'imputadoEdicion.plazo_cierre' => ['nullable', 'date'],
+            'imputadoEdicion.ultima_rev_pp' => ['nullable', 'date'],
+            'imputadoEdicion.juez' => ['nullable', 'string', 'max:255'],
+            'imputadoEdicion.defensor' => ['nullable', 'string', 'max:255'],
+            'imputadoEdicion.fecha_ult_res' => ['nullable', 'date'],
+            'imputadoEdicion.ult_resolucion' => ['nullable', 'string'],
+        ]);
+
+        $imputado = VisitaCarcelImputado::query()->findOrFail($this->imputadoEditandoId);
+        $payload = $validated['imputadoEdicion'];
+        $changes = [];
+
+        foreach ($payload as $field => $value) {
+            $old = $imputado->getRawOriginal($field);
+            if ((string) $old !== (string) $value) {
+                $changes[$field] = ['old' => $old, 'new' => $value];
+            }
+        }
+
+        if ($changes !== []) {
+            DB::transaction(function () use ($imputado, $payload, $changes): void {
+                $imputado->update($payload + ['updated_by' => Auth::id()]);
+                VisitaCarcelImputadoHistorial::query()->create([
+                    'visita_carcel_imputado_id' => $imputado->id,
+                    'user_id' => Auth::id(),
+                    'archivo' => 'Edición manual desde ficha de causa',
+                    'cambios' => $changes,
+                ]);
+            });
+        }
+
+        $this->cerrarEdicionImputado();
+        $this->dispatch('app-toast', message: $changes === [] ? 'No se detectaron cambios.' : 'Imputado actualizado correctamente.');
+    }
+
+    public function abrirFormularioRevisionPp(int $imputadoId): void
+    {
+        Gate::authorize('visita_carcel.gestionar');
+
+        $imputado = VisitaCarcelImputado::query()->findOrFail($imputadoId);
+        $this->imputadoRevisionPpId = $imputado->id;
+        $this->ultimaRevisionPp = $imputado->ultima_rev_pp?->toDateString() ?? '';
+        $this->resetValidation();
+    }
+
+    public function cerrarFormularioRevisionPp(): void
+    {
+        $this->reset(['imputadoRevisionPpId', 'ultimaRevisionPp']);
+        $this->resetValidation();
+    }
+
+    public function usarFechaActualRevisionPp(): void
+    {
+        $this->ultimaRevisionPp = now('America/Santiago')->toDateString();
+    }
+
+    public function actualizarRevisionPp(): void
+    {
+        Gate::authorize('visita_carcel.gestionar');
+
+        $validated = $this->validate(['ultimaRevisionPp' => ['required', 'date']]);
+        $imputado = VisitaCarcelImputado::query()->findOrFail($this->imputadoRevisionPpId);
+        $fechaAnterior = $imputado->ultima_rev_pp?->toDateString();
+
+        if ($fechaAnterior !== $validated['ultimaRevisionPp']) {
+            DB::transaction(function () use ($imputado, $fechaAnterior, $validated): void {
+                $imputado->update(['ultima_rev_pp' => $validated['ultimaRevisionPp'], 'updated_by' => Auth::id()]);
+                VisitaCarcelImputadoHistorial::query()->create([
+                    'visita_carcel_imputado_id' => $imputado->id,
+                    'user_id' => Auth::id(),
+                    'archivo' => 'Actualización manual de última revisión PP',
+                    'cambios' => ['ultima_rev_pp' => ['old' => $fechaAnterior, 'new' => $validated['ultimaRevisionPp']]],
+                ]);
+            });
+        }
+
+        $this->cerrarFormularioRevisionPp();
+        $this->dispatch('app-toast', message: 'Última revisión de PP actualizada correctamente.');
     }
 
     public function eliminarCausa(int $causaId): void
@@ -670,6 +849,13 @@ class VisitaCarcelPage extends Component
     private function rowIsEmpty(array $data): bool
     {
         return collect($data)->every(fn ($value) => trim((string) $value) === '');
+    }
+
+    private function agregarErrorImportacion(array &$result, int $fila, string $motivo): void
+    {
+        if (count($result['errores']) < 20) {
+            $result['errores'][] = "Fila {$fila}: {$motivo}";
+        }
     }
 
     private function normalizeHeader(string $value): string
