@@ -76,3 +76,50 @@ test('creation uses the configured solicitantes catalog', function (string $comp
     'oficios' => [OficioTabla::class, Oficio::class],
     'libertades' => [LibertadTabla::class, Libertad::class],
 ]);
+
+test('creation reuses the lowest deleted number', function (string $component, string $model) {
+    $this->seed(RolesAndPermissionsSeeder::class);
+
+    $user = User::factory()->create();
+    $user->assignRole('SuperAdmin');
+    $this->actingAs($user);
+
+    $solicitante = Funcionario::create([
+        'nombre' => 'Solicitante Catalogo',
+        'rol' => 'sala_causa',
+        'email' => 'solicitante@example.cl',
+        'fecha_cumpleanos' => '1990-01-01',
+    ]);
+
+    $numeroUno = $model::create([
+        'Numentregado' => 1,
+        'año' => now()->year,
+        'CausaAsig' => 'UNO',
+        'UserSolicitante' => $solicitante->nombre,
+        'UserDirigido' => 'Motivo uno',
+    ]);
+    $numeroDos = $model::create([
+        'Numentregado' => 2,
+        'año' => now()->year,
+        'CausaAsig' => 'DOS',
+        'UserSolicitante' => $solicitante->nombre,
+        'UserDirigido' => 'Motivo dos',
+    ]);
+
+    $numeroUno->delete();
+    $numeroDos->delete();
+    $numeroDos->forceFill(['deleted_at' => now()->subMinute()])->saveQuietly();
+
+    Livewire::test($component)
+        ->set('newCausaAsig', 'NUEVO')
+        ->set('newUserSolicitante', $solicitante->nombre)
+        ->set('newUserDirigido', 'Motivo nuevo')
+        ->call('create')
+        ->assertHasNoErrors();
+
+    expect($model::query()->value('Numentregado'))->toBe(1);
+    expect($model::onlyTrashed()->value('Numentregado'))->toBe(2);
+})->with([
+    'oficios' => [OficioTabla::class, Oficio::class],
+    'libertades' => [LibertadTabla::class, Libertad::class],
+]);

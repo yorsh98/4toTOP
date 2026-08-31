@@ -161,7 +161,7 @@ class OficioTabla extends Component
         $lib = DB::transaction(function () use ($anio) {
             $candidato = Oficio::onlyTrashed()
                 ->where('año', $anio)
-                ->orderBy('deleted_at', 'asc')
+                ->orderBy('Numentregado')
                 ->lockForUpdate()
                 ->first();
 
