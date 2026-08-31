@@ -160,6 +160,31 @@ test('manager reviews and explicitly creates missing causes from a Visita Cárce
         ->and(VisitaCarcelImputadoHistorial::query()->latest('id')->firstOrFail()->archivo)->toBe('Comparación libro Visita Cárcel');
 });
 
+test('manager reviews and creates a pending imputado in an existing cause', function () {
+    $user = visitaCarcelManager();
+    Penal::query()->firstOrCreate(['nombre' => 'CCP Valdivia'], ['activo' => true]);
+    $causa = VisitaCarcelCausa::query()->create(['ruc' => '2600000099-9', 'rit' => '500-2026']);
+
+    Livewire::actingAs($user)
+        ->test(VisitaCarcelPage::class)
+        ->call('abrirFormularioImportacion')
+        ->set('tipoImportacion', 'libro')
+        ->set('archivoMovimientos', UploadedFile::fake()->createWithContent('libro.xlsx', visitaCarcelLibroComparacionPlanilla()))
+        ->call('importarMovimientos')
+        ->assertHasNoErrors()
+        ->assertSet('resultadoImportacion.causas_no_encontradas', 0)
+        ->assertSet('resultadoImportacion.imputados_no_encontrados', 1)
+        ->assertSet('imputadosPendientes.0.nombre', 'Ana Pérez')
+        ->call('abrirRevisionImputadosPendientes')
+        ->assertSee('Imputados pendientes en causas existentes')
+        ->call('crearImputadosPendientes')
+        ->assertHasNoErrors();
+
+    expect($causa->imputados()->count())->toBe(1)
+        ->and($causa->imputados()->firstOrFail()->nombre)->toBe('Ana Pérez')
+        ->and(VisitaCarcelImputadoHistorial::query()->latest('id')->firstOrFail()->archivo)->toBe('Comparación libro Visita Cárcel');
+});
+
 test('comparison resolves the penal from the worksheet title before its contents', function () {
     $user = visitaCarcelManager();
     Penal::query()->firstOrCreate(['nombre' => 'CDP Stgo Uno'], ['activo' => true]);

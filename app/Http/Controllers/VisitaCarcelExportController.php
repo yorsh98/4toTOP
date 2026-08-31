@@ -17,7 +17,11 @@ class VisitaCarcelExportController extends Controller
         $pendientes = collect(session('visita_carcel.causas_pendientes', []))
             ->flatMap(fn (array $causa) => collect($causa['imputados'])->map(fn (array $imputado) => [
                 'rit' => $causa['rit'], 'ruc' => $causa['ruc'], 'anio' => str($causa['rit'])->afterLast('-')->toString(),
-                'nombre' => $imputado['nombre'], 'rut' => $imputado['rut'], 'hoja' => $imputado['hoja'], 'estado' => 'Pendiente de ingreso',
+                'nombre' => $imputado['nombre'], 'rut' => $imputado['rut'], 'hoja' => $imputado['hoja'], 'estado' => 'Pendiente de ingreso', 'tipo' => 'Causa nueva',
+            ]))
+            ->concat(collect(session('visita_carcel.imputados_pendientes', []))->map(fn (array $imputado) => [
+                'rit' => $imputado['rit'], 'ruc' => $imputado['ruc'], 'anio' => str($imputado['rit'])->afterLast('-')->toString(),
+                'nombre' => $imputado['nombre'], 'rut' => $imputado['rut'], 'hoja' => $imputado['hoja'], 'estado' => 'Pendiente de ingreso', 'tipo' => 'Imputado en causa existente',
             ]));
 
         abort_if($comparacion->isEmpty() && $pendientes->isEmpty(), 422, 'Primero ejecuta una comparacion para exportar sus resultados.');
@@ -32,18 +36,18 @@ class VisitaCarcelExportController extends Controller
                 $sheet->setTitle('Comparacion');
                 $libroVisitaCarcel = $comparacion->contains(fn (array $causa) => isset($causa['nombre']));
                 $headers = $libroVisitaCarcel
-                    ? ['RIT', 'RUC', 'AÑO', 'IMPUTADO', 'RUT', 'HOJA', 'ESTADO']
+                    ? ['RIT', 'RUC', 'AÑO', 'IMPUTADO', 'RUT', 'HOJA', 'ESTADO', 'TIPO']
                     : ['RIT', 'RUC', 'AÑO'];
                 $sheet->fromArray([$headers], null, 'A1');
 
                 foreach ($comparacion->sortBy(['rit', 'ruc'])->values() as $index => $causa) {
                     $sheet->fromArray($libroVisitaCarcel
-                        ? [$causa['rit'], $causa['ruc'], $causa['anio'], $causa['nombre'], $causa['rut'], $causa['hoja'], $causa['estado']]
+                        ? [$causa['rit'], $causa['ruc'], $causa['anio'], $causa['nombre'], $causa['rut'], $causa['hoja'], $causa['estado'], $causa['tipo'] ?? 'Coincidencia']
                         : [$causa['rit'], $causa['ruc'], $causa['anio']], null, 'A'.($index + 2));
                 }
 
                 $sheet->freezePane('A2');
-                $lastColumn = $libroVisitaCarcel ? 'G' : 'C';
+                $lastColumn = $libroVisitaCarcel ? 'H' : 'C';
                 $sheet->setAutoFilter("A1:{$lastColumn}1");
                 foreach (range('A', $lastColumn) as $column) {
                     $sheet->getColumnDimension($column)->setAutoSize(true);
