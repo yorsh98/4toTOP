@@ -45,8 +45,33 @@ const bindLivewireToastListeners = () => {
     });
 };
 
+const bindLivewireErrorPages = () => {
+    if (window.__livewireErrorPagesBound || !window.Livewire) {
+        return;
+    }
+
+    window.__livewireErrorPagesBound = true;
+
+    window.Livewire.hook('request', ({ fail }) => {
+        fail(({ status, content, preventDefault }) => {
+            if (![401, 403, 404, 419, 429, 500, 503].includes(status)
+                || typeof content !== 'string'
+                || !content.includes('Registro de navegación')) {
+                return;
+            }
+
+            preventDefault();
+            document.open();
+            document.write(content);
+            document.close();
+        });
+    });
+};
+
 document.addEventListener('livewire:init', bindLivewireToastListeners);
+document.addEventListener('livewire:init', bindLivewireErrorPages);
 bindLivewireToastListeners();
+bindLivewireErrorPages();
 
 const showFlashNotifications = (root = document) => {
     const notifications = [
