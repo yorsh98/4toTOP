@@ -56,6 +56,39 @@ test('manager creates a cause without imputados', function () {
     expect($causa->imputados()->count())->toBe(0);
 });
 
+test('manager adds, soft deletes and restores a penal', function () {
+    $user = visitaCarcelManager();
+
+    $component = Livewire::actingAs($user)
+        ->test(VisitaCarcelPage::class)
+        ->call('seleccionarModo', 'alimentacion')
+        ->call('abrirGestionPenales')
+        ->set('nuevoPenal', 'CDP Yumbel')
+        ->call('guardarPenal')
+        ->assertHasNoErrors()
+        ->assertSee('CDP Yumbel');
+
+    $penal = Penal::query()->where('nombre', 'CDP Yumbel')->firstOrFail();
+    $component->call('eliminarPenal', $penal->id)->assertHasNoErrors();
+
+    expect(Penal::withTrashed()->findOrFail($penal->id)->trashed())->toBeTrue();
+
+    $component->set('nuevoPenal', 'C.D.P. DE YUMBEL')->call('guardarPenal')->assertHasNoErrors();
+
+    expect(Penal::query()->where('nombre', 'CDP Yumbel')->firstOrFail()->activo)->toBeTrue();
+});
+
+test('viewer cannot manage penales', function () {
+    $user = User::factory()->create();
+    $user->givePermissionTo('visita_carcel.ver');
+
+    Livewire::actingAs($user)
+        ->test(VisitaCarcelPage::class)
+        ->set('nuevoPenal', 'CDP Yumbel')
+        ->call('guardarPenal')
+        ->assertForbidden();
+});
+
 test('manager can view the required alimentación spreadsheet format', function () {
     $user = visitaCarcelManager();
 
@@ -101,6 +134,99 @@ test('comparison import shows a file error instead of failing when the reader re
         ->assertHasErrors(['archivoMovimientos' => 'El contenido del archivo no coincide con el formato permitido.']);
 });
 
+test('manager reviews and explicitly creates missing causes from a Visita Cárcel workbook', function () {
+    $user = visitaCarcelManager();
+    Penal::query()->firstOrCreate(['nombre' => 'CCP Valdivia'], ['activo' => true]);
+
+    Livewire::actingAs($user)
+        ->test(VisitaCarcelPage::class)
+        ->call('abrirFormularioImportacion')
+        ->set('tipoImportacion', 'libro')
+        ->set('archivoMovimientos', UploadedFile::fake()->createWithContent('libro.xlsx', visitaCarcelLibroComparacionPlanilla()))
+        ->call('importarMovimientos')
+        ->assertHasNoErrors()
+        ->assertSet('resultadoImportacion.causas_no_encontradas', 1)
+        ->assertSee('Causas no ingresadas en este sistema')
+        ->call('abrirRevisionCausasPendientes')
+        ->assertSee('Causas e imputados a agregar')
+        ->call('crearCausasPendientes')
+        ->assertHasNoErrors();
+
+    $causa = VisitaCarcelCausa::query()->where('ruc', '2600000099-9')->firstOrFail();
+
+    expect($causa->rit)->toBe('500-2026')
+        ->and($causa->imputados()->count())->toBe(1)
+        ->and($causa->imputados()->firstOrFail()->penal)->toBe('CCP Valdivia')
+        ->and(VisitaCarcelImputadoHistorial::query()->latest('id')->firstOrFail()->archivo)->toBe('Comparación libro Visita Cárcel');
+});
+
+test('comparison resolves the penal from the worksheet title before its contents', function () {
+    $user = visitaCarcelManager();
+    Penal::query()->firstOrCreate(['nombre' => 'CDP Stgo Uno'], ['activo' => true]);
+
+    Livewire::actingAs($user)
+        ->test(VisitaCarcelPage::class)
+        ->call('abrirFormularioImportacion')
+        ->set('tipoImportacion', 'libro')
+        ->set('archivoMovimientos', UploadedFile::fake()->createWithContent('libro.xlsx', visitaCarcelLibroComparacionPlanilla('C.D.P. SANTIAGO I')))
+        ->call('importarMovimientos')
+        ->call('crearCausasPendientes')
+        ->assertHasNoErrors();
+
+    expect(VisitaCarcelCausa::query()->where('ruc', '2600000099-9')->firstOrFail()->imputados()->firstOrFail()->penal)->toBe('CDP Stgo Uno');
+});
+
+test('comparison leaves generic worksheet titles without a penal', function () {
+    $user = visitaCarcelManager();
+    Penal::query()->firstOrCreate(['nombre' => 'CCP Valdivia'], ['activo' => true]);
+
+    Livewire::actingAs($user)
+        ->test(VisitaCarcelPage::class)
+        ->call('abrirFormularioImportacion')
+        ->set('tipoImportacion', 'libro')
+        ->set('archivoMovimientos', UploadedFile::fake()->createWithContent('libro.xlsx', visitaCarcelLibroComparacionPlanilla('Hoja 1')))
+        ->call('importarMovimientos')
+        ->assertSet('causasPendientes.0.imputados.0.valido', false)
+        ->assertSet('causasPendientes.0.imputados.0.motivo', 'Falta: penal.')
+        ->call('crearCausasPendientes')
+        ->assertHasNoErrors();
+
+    expect(VisitaCarcelCausa::query()->where('ruc', '2600000099-9')->doesntExist())->toBeTrue();
+});
+
+test('comparison recognizes every active penal from its worksheet title', function (string $titulo, string $penal, string $ruc) {
+    $user = visitaCarcelManager();
+    Penal::query()->firstOrCreate(['nombre' => $penal], ['activo' => true]);
+
+    Livewire::actingAs($user)
+        ->test(VisitaCarcelPage::class)
+        ->set('tipoImportacion', 'libro')
+        ->set('archivoMovimientos', UploadedFile::fake()->createWithContent('libro.xlsx', visitaCarcelLibroComparacionPlanilla($titulo, $ruc)))
+        ->call('importarMovimientos')
+        ->call('crearCausasPendientes')
+        ->assertHasNoErrors();
+
+    expect(VisitaCarcelCausa::query()->where('ruc', $ruc)->firstOrFail()->imputados()->firstOrFail()->penal)->toBe($penal);
+})->with([
+    'Colina II' => ['C.C.P. DE COLINA II', 'CCP Colina II', '2600000101-1'],
+    'La Serena' => ['C.C.P. DE LA SERENA', 'CCP La Serena', '2600000102-2'],
+    'Nueva Imperial' => ['C.C.P. NUEVA IMPERIAL', 'CCP Nueva Imperial', '2600000103-3'],
+    'Talca' => ['C.C.P. TALCA', 'CCP Talca', '2600000104-4'],
+    'Valdivia' => ['C.C.P. VALDIVIA', 'CCP Valdivia', '2600000105-5'],
+    'Valparaiso' => ['C.C.P. VALPARAISO', 'CCP Valparaiso', '2600000106-6'],
+    'Puente Alto' => ['C.D.P. PUENTE ALTO', 'CDP Puente Alto', '2600000107-7'],
+    'Santiago Sur' => ['C.D.P. DE SANTIAGO SUR', 'CDP Stgo Sur', '2600000108-8'],
+    'Santiago Uno' => ['C.D.P. SANTIAGO I', 'CDP Stgo Uno', '2600000109-9'],
+    'Pudahuel Norte' => ['C.D.T. PUDAHUEL NORTE', 'CDT Pudahuel Norte', '2600000110-0'],
+    'Biobio' => ['C.P. BIOBIO', 'CP Biobio', '2600000111-1'],
+    'La Laguna Talca' => ['C.P. DE LA LAGUNA TALCA', 'CP la Laguna Talca', '2600000112-2'],
+    'Puerto Montt' => ['C.P. PUERTO MONTT', 'CP Puerto Montt', '2600000113-3'],
+    'Rancagua' => ['C.P. RANCAGUA', 'CP Rancagua', '2600000114-4'],
+    'San Miguel' => ['C.P.F. DE SAN MIGUEL', 'CPF San Miguel', '2600000115-5'],
+    'PDI Borgono' => ['CUARTEL GENERAL PDI BORGOÑO', 'Cuartel Gral. PDI Borgoño', '2600000116-6'],
+    'REPAS' => ['REPAS', 'REPAS', '2600000117-7'],
+]);
+
 test('causes are paginated and searching returns to the first page', function () {
     $user = User::factory()->create();
     $user->givePermissionTo('visita_carcel.ver');
@@ -137,7 +263,7 @@ test('manager adds an imputado from the cause record', function () {
         ->call('verFicha', $causa->id)
         ->set('nombre', 'Maria Gonzalez Rojas')
         ->set('rut', '15.987.654-3')
-        ->set('penal', 'Colina 1')
+        ->set('penal', 'CCP Colina II')
         ->set('delito', 'Homicidio')
         ->set('fechaIngresoPp', '2026-08-02')
         ->call('guardarImputado')
@@ -146,6 +272,40 @@ test('manager adds an imputado from the cause record', function () {
 
     expect(VisitaCarcelCausa::query()->count())->toBe(1)
         ->and($causa->imputados()->count())->toBe(1);
+});
+
+test('manager can only add an imputado with an active penal', function () {
+    $user = visitaCarcelManager();
+    $causa = VisitaCarcelCausa::query()->create(['ruc' => '2301234567-8', 'rit' => '142-2026']);
+
+    Livewire::actingAs($user)
+        ->test(VisitaCarcelPage::class)
+        ->call('verFicha', $causa->id)
+        ->call('abrirFormularioImputado')
+        ->set('nombre', 'Maria Gonzalez Rojas')
+        ->set('rut', '15.987.654-3')
+        ->set('penal', 'Penal inexistente')
+        ->set('delito', 'Homicidio')
+        ->set('fechaIngresoPp', '2026-08-02')
+        ->call('guardarImputado')
+        ->assertHasErrors(['penal']);
+});
+
+test('editing preserves a penal that was soft deleted', function () {
+    $user = visitaCarcelManager();
+    $penal = Penal::query()->create(['nombre' => 'CDP Yumbel', 'activo' => true]);
+    $penal->delete();
+    $causa = VisitaCarcelCausa::query()->create(['ruc' => '2301234567-8', 'rit' => '142-2026']);
+    $imputado = $causa->imputados()->create(['nombre' => 'Juan Perez Soto', 'rut' => '12.345.678-9', 'penal' => 'CDP Yumbel', 'delito' => 'Robo', 'fecha_ingreso_pp' => '2026-01-01']);
+
+    Livewire::actingAs($user)
+        ->test(VisitaCarcelPage::class)
+        ->call('abrirEdicionImputado', $imputado->id)
+        ->assertSee('Penal inactivo: CDP Yumbel')
+        ->call('guardarEdicionImputado')
+        ->assertHasNoErrors();
+
+    expect($imputado->refresh()->penal)->toBe('CDP Yumbel');
 });
 
 test('notifications show imputados from day 160 through day 180', function () {
@@ -479,6 +639,25 @@ function visitaCarcelComparacionPlanilla(array $filas): string
         ...$filas,
     ]);
     $path = tempnam(sys_get_temp_dir(), 'visita-carcel-comparacion-');
+    (new Xlsx($planilla))->save($path);
+
+    try {
+        return file_get_contents($path);
+    } finally {
+        @unlink($path);
+    }
+}
+
+function visitaCarcelLibroComparacionPlanilla(string $titulo = 'CCP VALDIVIA', string $ruc = '2600000099-9'): string
+{
+    $planilla = new Spreadsheet;
+    $planilla->getActiveSheet()->setTitle($titulo);
+    $planilla->getActiveSheet()->fromArray([
+        ['Lugar de Reclusion', 'CCP Valdivia'], [], [], [], [],
+        ['Tribunal', 'Rit', 'Año', 'Ruc', 'Imputado', 'Rut Imputado', 'Delito', 'Fec. Ingreso Pri. Prev.', 'Plazo Cierre', 'Ultima Rev. Preven.', 'Juez', 'Defensor', 'Fec. Ult. Resolución', 'Ult. Resolución', 'RPA', 'P/P Suspendida'],
+        ['4 TOP Santiago', 500, 2026, $ruc, 'Ana Pérez', '12.345.678-9', 'Robo', '20/07/2022', '20/08/2026', '21/08/2026', 'Juez', 'Defensor', '22/08/2026', 'Resolución', 'No', 'No'],
+    ]);
+    $path = tempnam(sys_get_temp_dir(), 'visita-carcel-libro-');
     (new Xlsx($planilla))->save($path);
 
     try {
