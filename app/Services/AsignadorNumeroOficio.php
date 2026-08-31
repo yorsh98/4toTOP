@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Models\Oficio;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Throwable;
 
 class AsignadorNumeroOficio
@@ -14,12 +13,10 @@ class AsignadorNumeroOficio
      * Si existe un Oficio soft-deleted de ese año, lo reutiliza (restore).
      * Si no, crea un nuevo correlativo (max+1).
      *
-     * @param  int    $anio
      * @param  array  $payload  Campos para llenar (CausaAsig, UserSolicitante, UserDirigido, etc.)
-     * @param  int    $maxRetries Reintentos por colisión de índice único (concurrencia)
-     * @return \App\Models\Oficio
+     * @param  int  $maxRetries  Reintentos por colisión de índice único (concurrencia)
      *
-     * @throws \Throwable
+     * @throws Throwable
      */
     public function asignar(int $anio, array $payload, int $maxRetries = 3): Oficio
     {
@@ -28,10 +25,10 @@ class AsignadorNumeroOficio
         inicio:
         try {
             return DB::transaction(function () use ($anio, $payload) {
-                // (A) Buscar candidato soft-deleted del mismo año (el más antiguo borrado)
+                // (A) Buscar candidato soft-deleted del mismo año (el menor número)
                 $candidato = Oficio::onlyTrashed()
                     ->where('año', $anio)
-                    ->orderBy('deleted_at', 'asc')
+                    ->orderBy('Numentregado')
                     ->first();
 
                 if ($candidato) {
@@ -50,12 +47,12 @@ class AsignadorNumeroOficio
                 $siguiente = $max ? ($max + 1) : 1;
 
                 // Crear nuevo
-                $nuevo = new Oficio();
-                $nuevo->Numentregado   = $siguiente;
-                $nuevo->año            = $anio;
-                $nuevo->CausaAsig      = $payload['CausaAsig']      ?? '';
-                $nuevo->UserSolicitante= $payload['UserSolicitante']?? '';
-                $nuevo->UserDirigido   = $payload['UserDirigido']   ?? '';
+                $nuevo = new Oficio;
+                $nuevo->Numentregado = $siguiente;
+                $nuevo->año = $anio;
+                $nuevo->CausaAsig = $payload['CausaAsig'] ?? '';
+                $nuevo->UserSolicitante = $payload['UserSolicitante'] ?? '';
+                $nuevo->UserDirigido = $payload['UserDirigido'] ?? '';
                 $nuevo->save(); // protegido por índice único compuesto (solo activos)
 
                 return $nuevo;
@@ -76,6 +73,7 @@ class AsignadorNumeroOficio
     protected function esColisionUnicidad(Throwable $e): bool
     {
         $msg = $e->getMessage();
+
         return str_contains($msg, 'Integrity constraint violation')
             || str_contains($msg, 'Duplicate entry')
             || str_contains($msg, '1062');

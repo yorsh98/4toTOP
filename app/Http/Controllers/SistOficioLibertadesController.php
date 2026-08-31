@@ -68,7 +68,7 @@ class SistOficioLibertadesController extends Controller
                 /** @var Model|Builder $modelClass */
                 $candidato = $modelClass::onlyTrashed()
                     ->where('año', $anio)
-                    ->orderBy('deleted_at', 'asc')
+                    ->orderBy('Numentregado')
                     ->lockForUpdate()
                     ->first();
 

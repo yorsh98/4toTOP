@@ -161,7 +161,7 @@ class LibertadTabla extends Component
         $lib = DB::transaction(function () use ($anio) {
             $candidato = Libertad::onlyTrashed()
                 ->where('año', $anio)
-                ->orderBy('deleted_at', 'asc')
+                ->orderBy('Numentregado')
                 ->lockForUpdate()
                 ->first();
 
