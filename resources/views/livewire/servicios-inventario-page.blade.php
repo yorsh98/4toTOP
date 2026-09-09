@@ -105,9 +105,14 @@
 
         <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
             <div class="mb-4 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-                <div>
-                    <h3 class="text-lg font-semibold text-slate-900">Listado de activos</h3>
-                    <p class="mt-1 text-sm text-slate-600">Busca por nombre, codigo, serie o sector.</p>
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                    <div>
+                        <h3 class="text-lg font-semibold text-slate-900">Listado de activos</h3>
+                        <p class="mt-1 text-sm text-slate-600">Busca por nombre, codigo, serie o sector.</p>
+                    </div>
+                    <a href="{{ route('backoffice.servicios.inventario.exportar') }}" class="inline-flex items-center justify-center" title="Exportar Excel" aria-label="Exportar Excel">
+                        <i class="fas fa-file-excel inline-block" style="color:#217346; font-size:32px;" aria-hidden="true"></i>
+                    </a>
                 </div>
                 <div class="grid gap-3 sm:grid-cols-3 lg:w-2/3">
                     <div>

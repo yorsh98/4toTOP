@@ -4,6 +4,7 @@ use App\Livewire\ServiciosInventarioPage;
 use App\Models\Activo;
 use App\Models\Sector;
 use App\Models\User;
+use Carbon\Carbon;
 use Database\Seeders\ServiciosRoleSeeder;
 use Livewire\Livewire;
 
@@ -27,6 +28,28 @@ test('user with servicios ver permission can see inventory backoffice', function
         ->get(route('backoffice.servicios.inventario'))
         ->assertSuccessful()
         ->assertSee('Inventario de servicios');
+});
+
+test('user with servicios ver permission can export all inventory', function () {
+    Carbon::setTestNow('2026-09-09 10:00:00');
+    $sectorPisoSiete = Sector::factory()->create(['piso' => '7MO', 'nombre' => 'Sector siete']);
+    $sectorSubterraneo = Sector::factory()->create(['piso' => 'SUBTERRANEO', 'nombre' => 'Bodega subterránea']);
+    Activo::factory()->for($sectorPisoSiete)->create(['nombre' => 'Activo piso siete']);
+    Activo::factory()->for($sectorSubterraneo)->create(['nombre' => 'Activo subterráneo']);
+    $user = User::factory()->create();
+    $user->givePermissionTo('servicios.ver');
+
+    $this->actingAs($user)
+        ->get(route('backoffice.servicios.inventario.exportar'))
+        ->assertDownload('inventario_servicios_20260909_100000.xlsx');
+
+    Carbon::setTestNow();
+});
+
+test('user without servicios permission cannot export inventory', function () {
+    $this->actingAs(User::factory()->create())
+        ->get(route('backoffice.servicios.inventario.exportar'))
+        ->assertForbidden();
 });
 
 test('user with servicios crear permission can create activo', function () {
