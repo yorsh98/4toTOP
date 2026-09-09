@@ -22,6 +22,7 @@ use App\Http\Controllers\oficiolibertadController;
 use App\Http\Controllers\procController;
 use App\Http\Controllers\prograController;
 use App\Http\Controllers\PrograMailController;
+use App\Http\Controllers\ServiciosInventarioExportController;
 use App\Http\Controllers\SistOficioLibertadesController;
 use App\Http\Controllers\tabla2Controller;
 use App\Http\Controllers\tablasController;
@@ -159,6 +160,9 @@ Route::get('/backoffice/ttypp/export', TtyppExportController::class)
     ->middleware(['auth', 'can:ttypp.exportar']);
 Route::get('/backoffice/servicios/inventario', ServiciosInventarioPage::class)
     ->name('backoffice.servicios.inventario')
+    ->middleware(['auth', 'can:servicios.ver']);
+Route::get('/backoffice/servicios/inventario/exportar', ServiciosInventarioExportController::class)
+    ->name('backoffice.servicios.inventario.exportar')
     ->middleware(['auth', 'can:servicios.ver']);
 Route::get('/backoffice/servicios/mapa', ServiciosMapaPage::class)
     ->name('backoffice.servicios.mapa')
