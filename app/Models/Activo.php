@@ -19,6 +19,7 @@ class Activo extends Model
         'numero_serie',
         'estado',
         'observaciones',
+        'origen_importacion',
     ];
 
     protected $attributes = [

@@ -101,6 +101,8 @@ class SectorSeeder extends Seeder
             ['8VO', 'SERVICIOS_HALL', 'Servicios'],
             ['8VO', 'ADM', 'ADM'],
             ['8VO', 'ESPACIO_INFERIOR', 'Encargados'],
+            ['SUBTERRANEO', 's13', 'Bodega subterránea S13'],
+            ['SUBTERRANEO', 's03', 'Bodega subterránea S03'],
             ['7MO', '7_ESPACIO_INFERIOR', 'por designar'],
             ['7MO', '7_por designar', 'por designar'],
             ['7MO', '7_Publico', 'Publico'],

@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             ServiciosRoleSeeder::class,
             SectorSeeder::class,
             ActivoSeeder::class,
+            EtlActivosSeeder::class,
             DocumentosCatalogSeeder::class,
             VisitaCarcelCatalogSeeder::class,
         ]);
