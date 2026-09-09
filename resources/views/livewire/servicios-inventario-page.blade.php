@@ -51,9 +51,9 @@
                     <div>
                         <label class="text-sm font-medium text-slate-700">Sector</label>
                         <div class="mt-1 flex rounded-lg bg-slate-100 p-1">
-                            @foreach ([7, 8, 9] as $floor)
+                            @foreach ([7 => 'Piso 7', 8 => 'Piso 8', 9 => 'Piso 9', 0 => 'Subterráneo'] as $floor => $label)
                                 <button type="button" wire:click="selectPiso({{ $floor }})" class="flex-1 rounded-md px-3 py-1.5 text-sm font-semibold transition {{ $piso === $floor ? 'bg-blue-700 text-white shadow' : 'text-slate-600 hover:bg-white' }}">
-                                    Piso {{ $floor }}
+                                    {{ $label }}
                                 </button>
                             @endforeach
                         </div>

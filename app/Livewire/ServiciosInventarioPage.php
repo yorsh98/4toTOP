@@ -57,7 +57,6 @@ class ServiciosInventarioPage extends Component
                 'nullable',
                 'string',
                 'max:255',
-                Rule::unique('activos', 'codigo_inventario')->ignore($this->editingId),
             ],
             'numero_serie' => ['nullable', 'string', 'max:255'],
             'estado' => ['required', 'string', Rule::in($this->estados())],
@@ -82,7 +81,7 @@ class ServiciosInventarioPage extends Component
 
     public function selectPiso(int $piso): void
     {
-        if (! in_array($piso, [7, 8, 9], true)) {
+        if (! in_array($piso, [0, 7, 8, 9], true)) {
             return;
         }
 
@@ -193,6 +192,7 @@ class ServiciosInventarioPage extends Component
     private function floorLabel(): string
     {
         return match ($this->piso) {
+            0 => 'SUBTERRANEO',
             7 => '7MO',
             9 => '9NO',
             default => '8VO',
