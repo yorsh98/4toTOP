@@ -1,0 +1,69 @@
+- generic [ref=f1e25]:
+  - navigation [ref=f1e26]:
+    - complementary [ref=f1e27]:
+      - generic [ref=f1e28]:
+        - link "Inicio" [ref=f1e29] [cursor=pointer]:
+          - /url: http://127.0.0.1:8000/dashboard
+        - button "" [ref=f1e32] [cursor=pointer]
+      - link " Insumos" [ref=f1e36] [cursor=pointer]:
+        - /url: http://127.0.0.1:8000/insumos/solicitudes
+        - generic [ref=f1e37]: 
+        - generic [ref=f1e39]: Insumos
+      - generic [ref=f1e40]:
+        - generic [ref=f1e41]:
+          - paragraph [ref=f1e42]: E2E Solicitante
+          - paragraph [ref=f1e43]: e2e.solicitante@invalid.test
+        - generic [ref=f1e44]:
+          - link " Notificaciones" [ref=f1e45] [cursor=pointer]:
+            - /url: http://127.0.0.1:8000/insumos/notificaciones
+            - generic [ref=f1e46]: 
+            - generic [ref=f1e48]: Notificaciones
+          - link " Perfil" [ref=f1e49] [cursor=pointer]:
+            - /url: http://127.0.0.1:8000/profile
+            - generic [ref=f1e50]: 
+            - generic [ref=f1e51]: Perfil
+          - button " Salir" [ref=f1e52] [cursor=pointer]:
+            - generic [ref=f1e53]: 
+            - generic [ref=f1e54]: Salir
+    - text:   
+  - generic [ref=f1e55]:
+    - banner [ref=f1e56]:
+      - generic [ref=f1e59]:
+        - paragraph [ref=f1e60]: Insumos · Solicitudes
+        - heading "Solicitudes de insumos" [level=2] [ref=f1e61]
+    - main [ref=f1e62]:
+      - generic [ref=f1e63]:
+        - navigation "Navegación de Insumos" [ref=f1e64]:
+          - link "Solicitudes" [ref=f1e66] [cursor=pointer]:
+            - /url: http://127.0.0.1:8000/insumos/solicitudes
+        - generic [ref=f1e67]:
+          - generic [ref=f1e68]:
+            - generic [ref=f1e69]: Buscar insumo
+            - searchbox "Buscar insumo" [ref=f1e70]: E2E Papel solicitud
+            - generic [ref=f1e167]:
+              - generic [ref=f1e168]:
+                - paragraph [ref=f1e169]: E2E Papel solicitud
+                - paragraph [ref=f1e170]: 10 UN disponibles
+              - button "Agregar" [active] [ref=f1e171] [cursor=pointer]
+          - generic [ref=f1e154]:
+            - heading "Solicitud" [level=2] [ref=f1e155]
+            - generic [ref=f1e172]:
+              - generic [ref=f1e173]: E2E Papel solicitud
+              - spinbutton [ref=f1e174]: "1"
+              - button "Quitar" [ref=f1e175] [cursor=pointer]
+            - generic [ref=f1e158]: Firma
+            - combobox "Firma" [ref=f1e159]:
+              - option "E2E Solicitante"
+              - option "Sala 701" [selected]
+              - option "Sala 801"
+              - option "Sala 802"
+              - option "Sala 803"
+              - option "Sala 901"
+              - option "Sala 902"
+              - option "Sala 903"
+            - generic [ref=f1e160]: Observacion
+            - textbox "Observacion" [ref=f1e161]: Validación Playwright parcial
+            - button "Enviar solicitud" [ref=f1e162] [cursor=pointer]
+        - generic [ref=f1e163]:
+          - heading "Mis solicitudes" [level=2] [ref=f1e164]
+          - paragraph [ref=f1e166]: Aun no tiene solicitudes.

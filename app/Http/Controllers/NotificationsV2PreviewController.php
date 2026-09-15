@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\NotificationsV2\Application\Services\TtyppListadoNotifier;
 use App\NotificationsV2\Application\Services\TurnoOneWeeklySummaryNotifier;
 use App\NotificationsV2\Application\Services\TurnoTwoAcdWeeklySummaryNotifier;
-use App\NotificationsV2\Application\Services\TtyppListadoNotifier;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 

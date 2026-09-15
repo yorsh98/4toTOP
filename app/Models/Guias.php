@@ -15,8 +15,6 @@ class Guias extends Model
         'email',
         'telefono1',
         'telefono2',
-        'institucion'
+        'institucion',
     ];
-
-    
 }

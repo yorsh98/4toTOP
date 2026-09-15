@@ -10,7 +10,7 @@ class Audiencia extends Model
     use HasFactory;
 
     protected $fillable = [
-        'fecha', 'rit', 'sala', 'ubicacion', 'hora_inicio', 
+        'fecha', 'rit', 'sala', 'ubicacion', 'hora_inicio',
         'ruc', 'cta_zoom', 'tipo_audiencia', 'num_testigos',
         'num_peritos', 'duracion', 'delito', 'jueces_inhabilitados',
         'encargado_causa', 'encargado_ttp', 'encargado_ttp_zoom',
@@ -21,14 +21,14 @@ class Audiencia extends Model
         'jueces_inhabilitados' => 'array',
         'acusados' => 'array',
         'fecha' => 'date',
-        'hora_inicio' => 'datetime:H:i'
+        'hora_inicio' => 'datetime:H:i',
     ];
 
     public static function rules()
     {
         return [
             'fecha' => 'required|date',
-            'rit'  => 'required|string',
+            'rit' => 'required|string',
             'sala' => 'required',
             'ubicacion' => 'nullable|string',
             'hora_inicio' => 'required',
@@ -40,7 +40,7 @@ class Audiencia extends Model
             'duracion' => 'nullable|string',
             'delito' => 'nullable|string',
             'jueces_inhabilitados' => 'nullable|string',
-            'encargado_causa' => 'required|string', 
+            'encargado_causa' => 'required|string',
             'encargado_ttp' => 'nullable|string',
             'encargado_ttp_zoom' => 'nullable|string',
             'acusados' => 'required|array|min:1',
@@ -54,8 +54,8 @@ class Audiencia extends Model
             'JuezR' => 'required|string',
             'JuezI' => 'nullable|string',
             'anfitrion' => 'nullable|string',
-            'obs' => 'nullable|string'
+            'obs' => 'nullable|string',
         ];
-        
+
     }
 }

@@ -10,8 +10,9 @@ class Oficio extends Model
     use SoftDeletes;
 
     protected $table = 'oficio'; // manteniendo tu nombre singular
+
     protected $fillable = [
-        'Numentregado','año','CausaAsig','UserSolicitante','UserDirigido',
+        'Numentregado', 'año', 'CausaAsig', 'UserSolicitante', 'UserDirigido',
     ];
 
     protected $casts = [

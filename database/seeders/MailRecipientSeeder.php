@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\MailRecipient;
+use Illuminate\Database\Seeder;
 
 class MailRecipientSeeder extends Seeder
 {
@@ -153,7 +153,7 @@ class MailRecipientSeeder extends Seeder
             ['nombre' => null, 'email' => 'top1247s05@pjud.cl', 'orden' => 138],
             ['nombre' => 'Correo Sala 6', 'email' => 'top1247s06@pjud.cl', 'orden' => 139],
             ['nombre' => null, 'email' => 'tzurita@pjud.cl', 'orden' => 140],
-            ['nombre' => null, 'email' => 'vojeda@pjud.cl', 'orden' => 141]
+            ['nombre' => null, 'email' => 'vojeda@pjud.cl', 'orden' => 141],
         ];
 
         foreach ($rows as $i => $r) {
@@ -162,7 +162,7 @@ class MailRecipientSeeder extends Seeder
                 [
                     'nombre' => $r['nombre'],
                     'activo' => true,
-                    'orden'  => $r['orden'],
+                    'orden' => $r['orden'],
                 ]
             );
         }

@@ -3,6 +3,8 @@
 use App\Livewire\ServiciosMapaPage;
 use App\Livewire\ServiciosMapaPublicPage;
 use App\Models\Activo;
+use App\Models\Insumo;
+use App\Models\InsumoExistencia;
 use App\Models\Sector;
 use App\Models\User;
 use Database\Seeders\SectorSeeder;
@@ -157,7 +159,7 @@ test('map and inventory searches filter independently', function () {
         ->test(ServiciosMapaPage::class)
         ->set('mapSearch', 'MAP-001')
         ->assertSet('inventorySearch', '')
-        ->assertSee('1 activo encontrado en el plano')
+        ->assertSee('1 sector encontrado en el plano')
         ->assertSeeHtml('border-cyan-300 bg-cyan-600/80 text-white ring-4 ring-cyan-200')
         ->set('inventorySearch', 'TAB-001')
         ->assertSet('mapSearch', 'MAP-001')
@@ -207,6 +209,43 @@ test('guest can access public services map', function () {
         ->assertDontSeeHtml('<th class="px-3 py-2 text-left font-semibold text-slate-700">Piso</th>')
         ->assertDontSeeHtml('<th class="px-3 py-2 text-left font-semibold text-slate-700">Estado</th>')
         ->assertDontSee('Observacion interna privada');
+});
+
+test('stock is visible only on the private services map', function () {
+    $sector = Sector::factory()->create(['nombre' => 'Bodega con insumos', 'identificador_mapa' => '837']);
+    $insumo = Insumo::create(['codigo' => 'MAP-INS-001', 'nombre' => 'Insumo confidencial', 'unidad_medida' => 'UN']);
+    InsumoExistencia::create(['insumo_id' => $insumo->id, 'sector_id' => $sector->id, 'cantidad' => 12]);
+    $user = User::factory()->create();
+    $user->givePermissionTo('servicios.ver');
+
+    Livewire::actingAs($user)
+        ->test(ServiciosMapaPage::class)
+        ->call('selectHotspot', '837')
+        ->assertSee('Stock en bodegas')
+        ->assertSee('Insumo confidencial')
+        ->assertSee('12 unidades de insumos')
+        ->assertSee('0 / 12')
+        ->assertDontSeeHtml('bg-emerald-600');
+
+    Livewire::test(ServiciosMapaPublicPage::class)
+        ->call('selectHotspot', '837')
+        ->assertDontSee('Stock en bodegas')
+        ->assertDontSee('Insumo confidencial')
+        ->assertDontSee('MAP-INS-001');
+});
+
+test('private map search finds sectors by insumo code and name', function () {
+    $sector = Sector::factory()->create(['nombre' => 'Bodega buscable', 'identificador_mapa' => '837']);
+    $insumo = Insumo::create(['codigo' => 'MAP-SEARCH-INS', 'nombre' => 'Toner buscable', 'unidad_medida' => 'UN']);
+    InsumoExistencia::create(['insumo_id' => $insumo->id, 'sector_id' => $sector->id, 'cantidad' => 4]);
+    $user = User::factory()->create();
+    $user->givePermissionTo('servicios.ver');
+
+    Livewire::actingAs($user)
+        ->test(ServiciosMapaPage::class)
+        ->set('mapSearch', 'SEARCH-INS')
+        ->assertSee('1 sector encontrado en el plano')
+        ->assertSeeHtml('border-cyan-300 bg-cyan-600/80 text-white ring-4 ring-cyan-200');
 });
 
 test('guest search filters public map inventory without navigation', function () {

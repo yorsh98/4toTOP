@@ -19,9 +19,9 @@ class Ausentismo extends Model
     ];
 
     protected $casts = [
-        'fecha_inicio'  => 'date:Y-m-d',
+        'fecha_inicio' => 'date:Y-m-d',
         'fecha_termino' => 'date:Y-m-d',
-        'created_at'    => 'datetime',
-        'updated_at'    => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 }

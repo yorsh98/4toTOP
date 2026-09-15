@@ -27,19 +27,19 @@ return new class extends Migration
             $table->string('delito')->nullable();
             $table->json('jueces_inhabilitados')->nullable();
             $table->string('encargado_causa');
-            $table->string('acta'); 
+            $table->string('acta');
             $table->string('encargado_ttp')->nullable();
             $table->string('encargado_ttp_zoom')->nullable();
             $table->json('acusados'); // JSON estructurado con campos específicos
             $table->enum('estado', ['POR_REALIZARSE', 'EN_CURSO', 'RECESO', 'FINALIZADA'])->default('POR_REALIZARSE');
-            $table->string('anfitrion')->nullable();    
+            $table->string('anfitrion')->nullable();
             $table->string('JuezP')->nullable();
             $table->string('JuezR');
-            $table->string('JuezI')->nullable();   
+            $table->string('JuezI')->nullable();
             $table->string('obs')->nullable();
-            $table->timestamps();            
+            $table->timestamps();
             $table->index(['fecha', 'estado']);
-            
+
         });
     }
 

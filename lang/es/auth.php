@@ -42,6 +42,5 @@ return [
 
     'throttle' => 'Autenticacion fallida',
     'failed' => 'Autenticacion fallida',
-    
 
 ];

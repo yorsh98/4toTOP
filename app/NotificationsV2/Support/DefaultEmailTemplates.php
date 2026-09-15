@@ -516,4 +516,24 @@ HTML;
     {
         return '{{ line }} RIT: {{ rit }} Documentos: {{ documentos_url }} Bitacora publica: {{ bitacora_public_url }} Nota: Para visualizar la bitacora de pruebas deben estar conectados a la VPN corporativa.';
     }
+
+    public static function insumosHtml(): string
+    {
+        return <<<'HTML'
+<!doctype html>
+<html lang="es"><body style="margin:0;padding:24px;background:#f8fafc;font-family:Arial,Helvetica,sans-serif;color:#1f2937;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center">
+    <table role="presentation" width="640" cellpadding="0" cellspacing="0" style="max-width:640px;background:#ffffff;border:1px solid #cbd5e1;">
+      <tr><td style="padding:24px;"><h1 style="margin:0 0 14px;color:#0f766e;font-size:22px;">{{ title }}</h1><p style="margin:0 0 14px;">{{ line }}</p><ul style="margin:0;padding-left:20px;">{{ items_html }}</ul>{{ firma_html }}</td></tr>
+      <tr><td style="padding:14px 24px;background:#f8fafc;border-top:1px solid #e2e8f0;color:#64748b;font-size:12px;">Correo automatico del Sistema de Insumos.</td></tr>
+    </table>
+  </td></tr></table>
+</body></html>
+HTML;
+    }
+
+    public static function insumosText(): string
+    {
+        return '{{ title }}. {{ line }} Detalle: {{ items_text }}. {{ firma_text }}';
+    }
 }

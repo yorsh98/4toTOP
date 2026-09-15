@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Carbon\Carbon;
-use App\Models\Turno;
-use App\Models\Ausentismo;
 use App\Models\Audiencia;
+use App\Models\Ausentismo;
+use App\Models\Turno;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
 
 class PrograController extends Controller
 {
@@ -36,21 +36,21 @@ class PrograController extends Controller
         // JUECES AUSENTES (vigentes para la fecha)
         // =========================
         $juecesAusentes = Ausentismo::query()
-            ->select(['funcionario_nombre','cargo','observacion','tipo_permiso','fecha_inicio','fecha_termino'])
+            ->select(['funcionario_nombre', 'cargo', 'observacion', 'tipo_permiso', 'fecha_inicio', 'fecha_termino'])
             ->where(function ($q) {
                 $q->where('cargo', 'LIKE', '%JUEZ%')
-                  ->orWhere('cargo', 'LIKE', '%JUEZA%');
+                    ->orWhere('cargo', 'LIKE', '%JUEZA%');
             })
             ->whereDate('fecha_inicio', '<=', $fecha)
             ->where(function ($q) use ($fecha) {
                 $q->whereNull('fecha_termino')
-                  ->orWhereDate('fecha_termino', '>=', $fecha);
+                    ->orWhereDate('fecha_termino', '>=', $fecha);
             })
             ->orderBy('funcionario_nombre')
             ->get()
             ->map(function ($r) {
                 return [
-                    'nombre'  => mb_strtoupper($r->funcionario_nombre ?? ''),
+                    'nombre' => mb_strtoupper($r->funcionario_nombre ?? ''),
                     'funcion' => $r->observacion ?: ($r->tipo_permiso ?: '—'),
                 ];
             });
@@ -64,10 +64,13 @@ class PrograController extends Controller
 
         // Normaliza y extrae el número de sala (ej. "Sala 801 (Zoom)" -> 801)
         $parseSala = function ($raw) {
-            if ($raw === null) return null;
-            if (preg_match('/\d{3,}/', (string)$raw, $m)) {
+            if ($raw === null) {
+                return null;
+            }
+            if (preg_match('/\d{3,}/', (string) $raw, $m)) {
                 return (int) $m[0];
             }
+
             return null;
         };
 
@@ -78,14 +81,19 @@ class PrograController extends Controller
             // 1) Con sala primero (grupo 0), sin sala al final (grupo 1)
             $ga = is_null($sa) ? 1 : 0;
             $gb = is_null($sb) ? 1 : 0;
-            if ($ga !== $gb) return $ga <=> $gb;
+            if ($ga !== $gb) {
+                return $ga <=> $gb;
+            }
 
             // 2) Ambas con sala: orden numérico ascendente
-            if ($ga === 0 && $sa !== $sb) return $sa <=> $sb;
+            if ($ga === 0 && $sa !== $sb) {
+                return $sa <=> $sb;
+            }
 
             // 3) Desempate por hora ascendente (si existe)
-            $ha = $a->hora_inicio ? (string)$a->hora_inicio : '';
-            $hb = $b->hora_inicio ? (string)$b->hora_inicio : '';
+            $ha = $a->hora_inicio ? (string) $a->hora_inicio : '';
+            $hb = $b->hora_inicio ? (string) $b->hora_inicio : '';
+
             return strcmp($ha, $hb);
         })->values();
 
@@ -99,30 +107,38 @@ class PrograController extends Controller
             if ($v instanceof \DateTimeInterface) {
                 return Carbon::parse($v)->toDateTimeString();
             }
+
             return $v === null ? null : (string) $v;
         };
 
         // Normalizador de tipo_audiencia -> grupos
         $tipoGrupo = function (?string $t) {
             $t = mb_strtoupper(trim($t ?? ''));
-            if (str_contains($t, 'JUICIO'))  return 'juicio';
-            if (str_contains($t, 'LECTURA')) return 'lectura';
-            if (str_contains($t, 'CORTA'))   return 'corta';
+            if (str_contains($t, 'JUICIO')) {
+                return 'juicio';
+            }
+            if (str_contains($t, 'LECTURA')) {
+                return 'lectura';
+            }
+            if (str_contains($t, 'CORTA')) {
+                return 'corta';
+            }
+
             return $t === '' ? 'juicio' : 'corta';
         };
 
         // ---- Mapeos por tipo (conversión defensiva) ----
         $mapJuicio = function ($a) use ($asText) {
             $hora = $a->hora_inicio instanceof \DateTimeInterface
-                ? \Carbon\Carbon::parse($a->hora_inicio)->format('H:i')
-                : ($a->hora_inicio ? (string)$a->hora_inicio : null);
+                ? Carbon::parse($a->hora_inicio)->format('H:i')
+                : ($a->hora_inicio ? (string) $a->hora_inicio : null);
 
             $inh = $asText($a->jueces_inhabilitados) ?: 'NO';
 
             $sala = $asText($a->sala);
             $zoom = $asText($a->cta_zoom);
             $segSala = implode(' y ', array_filter([
-                $sala ? 'Sala ' . $sala : null,
+                $sala ? 'Sala '.$sala : null,
                 $zoom ?: null,
             ], fn ($v) => $v !== null && $v !== ''));
 
@@ -131,12 +147,12 @@ class PrograController extends Controller
             $rit = $asText($a->rit);
             $ruc = $asText($a->ruc);
             $segIds = implode(' - ', array_filter([
-                $rit ? 'RIT ' . $rit : null,
-                $ruc ? 'RUC ' . $ruc : null,
+                $rit ? 'RIT '.$rit : null,
+                $ruc ? 'RUC '.$ruc : null,
             ], fn ($v) => $v !== null && $v !== ''));
 
             $duracion = $asText($a->duracion);
-            $segDur = $duracion ? ('Duración ' . $duracion) : null;
+            $segDur = $duracion ? ('Duración '.$duracion) : null;
 
             $obs = $asText($a->obs);
 
@@ -150,25 +166,25 @@ class PrograController extends Controller
             ], fn ($v) => $v !== null && $v !== '');
 
             return [
-                'encabezado'   => implode(' - ', $partes),
+                'encabezado' => implode(' - ', $partes),
                 'num_testigos' => $asText($a->num_testigos),
-                'num_peritos'  => $asText($a->num_peritos),
-                'delito'       => $asText($a->delito),
-                'inhabil'      => $inh,
-                'encargado'    => $asText($a->encargado_causa),
-                'juez_p'       => $asText($a->JuezP),
-                'acta'         => $asText($a->acta),
-                'juez_r'       => $asText($a->JuezR),
-                'ttpp'         => $asText($a->encargado_ttp),
-                'ttpp_zoom'    => $asText($a->encargado_ttp_zoom),
-                'juez_i'       => $asText($a->JuezI),
-                'zoom'         => $asText($a->cta_zoom),
+                'num_peritos' => $asText($a->num_peritos),
+                'delito' => $asText($a->delito),
+                'inhabil' => $inh,
+                'encargado' => $asText($a->encargado_causa),
+                'juez_p' => $asText($a->JuezP),
+                'acta' => $asText($a->acta),
+                'juez_r' => $asText($a->JuezR),
+                'ttpp' => $asText($a->encargado_ttp),
+                'ttpp_zoom' => $asText($a->encargado_ttp_zoom),
+                'juez_i' => $asText($a->JuezI),
+                'zoom' => $asText($a->cta_zoom),
 
-                'acusados'     => collect($a->acusados ?? [])->map(function ($x) use ($asText) {
+                'acusados' => collect($a->acusados ?? [])->map(function ($x) use ($asText) {
                     return [
-                        'nombre'       => $asText($x['nombre_completo'] ?? ''),
-                        'situacion'    => $asText($x['situacion'] ?? null),
-                        'medidas'      => $asText($x['medida_cautelar'] ?? null),
+                        'nombre' => $asText($x['nombre_completo'] ?? ''),
+                        'situacion' => $asText($x['situacion'] ?? null),
+                        'medidas' => $asText($x['medida_cautelar'] ?? null),
                         'notificacion' => $asText($x['forma_notificacion'] ?? null),
                     ];
                 })->values()->all(),
@@ -177,29 +193,29 @@ class PrograController extends Controller
 
         $mapLectura = function ($a) use ($asText) {
             $hora = $a->hora_inicio instanceof \DateTimeInterface
-                ? \Carbon\Carbon::parse($a->hora_inicio)->format('H:i')
-                : ($a->hora_inicio ? (string)$a->hora_inicio : null);
+                ? Carbon::parse($a->hora_inicio)->format('H:i')
+                : ($a->hora_inicio ? (string) $a->hora_inicio : null);
 
             $sala = $asText($a->sala);
             $zoom = $asText($a->cta_zoom);
             $segSala = implode(' y ', array_filter([
-                $sala ? 'Sala ' . $sala : null,
+                $sala ? 'Sala '.$sala : null,
                 $zoom ?: null,
             ], fn ($v) => $v !== null && $v !== ''));
 
             $partes = array_filter([
                 $segSala ?: null,
                 $hora ? "$hora Horas" : 'LECTURA DE SENTENCIA',
-                'RIT ' . $asText($a->rit) . ' - RUC ' . $asText($a->ruc),
+                'RIT '.$asText($a->rit).' - RUC '.$asText($a->ruc),
                 $asText($a->obs) ?: null,
             ], fn ($v) => $v !== null && $v !== '');
 
             return [
                 'encabezado' => implode(' - ', $partes),
-                'encargado'  => $asText($a->encargado_causa),
-                'juez_r'     => $asText($a->JuezR),
-                'acta'       => $asText($a->acta),
-                'acusados'   => collect($a->acusados ?? [])->map(fn ($x) => [
+                'encargado' => $asText($a->encargado_causa),
+                'juez_r' => $asText($a->JuezR),
+                'acta' => $asText($a->acta),
+                'acusados' => collect($a->acusados ?? [])->map(fn ($x) => [
                     'nombre' => $asText($x['nombre_completo'] ?? ''),
                 ])->values()->all(),
             ];
@@ -207,21 +223,21 @@ class PrograController extends Controller
 
         $mapCorta = function ($a) use ($asText) {
             $hora = $a->hora_inicio instanceof \DateTimeInterface
-                ? \Carbon\Carbon::parse($a->hora_inicio)->format('H:i')
-                : ($a->hora_inicio ? (string)$a->hora_inicio : null);
+                ? Carbon::parse($a->hora_inicio)->format('H:i')
+                : ($a->hora_inicio ? (string) $a->hora_inicio : null);
 
             $sala = $asText($a->sala);
             $zoom = $asText($a->cta_zoom);
             $segSala = implode(' y ', array_filter([
-                $sala ? 'Sala ' . $sala : null,
+                $sala ? 'Sala '.$sala : null,
                 $zoom ?: null,
             ], fn ($v) => $v !== null && $v !== ''));
 
             $rit = $asText($a->rit);
             $ruc = $asText($a->ruc);
             $segIds = implode(' - ', array_filter([
-                $rit ? 'RIT ' . $rit : null,
-                $ruc ? 'RUC ' . $ruc : null,
+                $rit ? 'RIT '.$rit : null,
+                $ruc ? 'RUC '.$ruc : null,
             ], fn ($v) => $v !== null && $v !== ''));
 
             $obs = $asText($a->obs);
@@ -236,17 +252,17 @@ class PrograController extends Controller
             return [
                 'encabezado' => implode(' - ', $partes),
 
-                'anfitrion'  => $asText($a->anfitrion),
-                'juez_p'     => $asText($a->JuezP),
-                'acta'       => $asText($a->acta),
-                'juez_r'     => $asText($a->JuezR),
-                'encargado'  => $asText($a->encargado_causa),
-                'juez_i'     => $asText($a->JuezI),
-                'zoom'       => $asText($a->cta_zoom),
+                'anfitrion' => $asText($a->anfitrion),
+                'juez_p' => $asText($a->JuezP),
+                'acta' => $asText($a->acta),
+                'juez_r' => $asText($a->JuezR),
+                'encargado' => $asText($a->encargado_causa),
+                'juez_i' => $asText($a->JuezI),
+                'zoom' => $asText($a->cta_zoom),
 
-                'acusados'   => collect($a->acusados ?? [])->map(function ($x) use ($asText) {
+                'acusados' => collect($a->acusados ?? [])->map(function ($x) use ($asText) {
                     return [
-                        'nombre'    => $asText($x['nombre_completo'] ?? ''),
+                        'nombre' => $asText($x['nombre_completo'] ?? ''),
                         'situacion' => $asText($x['situacion'] ?? null),
                     ];
                 })->values()->all(),
@@ -254,9 +270,9 @@ class PrograController extends Controller
         };
 
         // Agrupación en el orden solicitado en la vista: Juicios -> Lecturas -> Cortas
-        $juicios  = $audiencias->filter(fn($a) => $tipoGrupo($a->tipo_audiencia) === 'juicio')->map($mapJuicio)->values();
-        $lecturas = $audiencias->filter(fn($a) => $tipoGrupo($a->tipo_audiencia) === 'lectura')->map($mapLectura)->values();
-        $cortas   = $audiencias->filter(fn($a) => $tipoGrupo($a->tipo_audiencia) === 'corta')->map($mapCorta)->values();
+        $juicios = $audiencias->filter(fn ($a) => $tipoGrupo($a->tipo_audiencia) === 'juicio')->map($mapJuicio)->values();
+        $lecturas = $audiencias->filter(fn ($a) => $tipoGrupo($a->tipo_audiencia) === 'lectura')->map($mapLectura)->values();
+        $cortas = $audiencias->filter(fn ($a) => $tipoGrupo($a->tipo_audiencia) === 'corta')->map($mapCorta)->values();
 
         // Fecha legible
         $fechaHuman = Carbon::parse($fecha, $tz)->translatedFormat('j \\d\\e F Y');

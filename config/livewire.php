@@ -1,6 +1,8 @@
 <?php
 
 return [
+    'pagination_theme' => 'bootstrap',
+
     'temporary_file_upload' => [
         // Must not be lower than the document validation limit.
         'rules' => ['required', 'file', 'max:20480'],
