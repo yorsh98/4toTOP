@@ -10,8 +10,9 @@ class Libertad extends Model
     use SoftDeletes;
 
     protected $table = 'libertad'; // manteniendo tu nombre singular
+
     protected $fillable = [
-        'Numentregado','año','CausaAsig','UserSolicitante','UserDirigido',
+        'Numentregado', 'año', 'CausaAsig', 'UserSolicitante', 'UserDirigido',
     ];
 
     protected $casts = [

@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
@@ -74,7 +75,7 @@ return new class extends Migration
         string $roleHasPermissionsTable,
         string $roleName,
         array $permissionNames,
-        \Illuminate\Support\Collection $permissionIds,
+        Collection $permissionIds,
     ): void {
         $roleId = DB::table($rolesTable)
             ->where('name', $roleName)

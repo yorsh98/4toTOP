@@ -29,6 +29,7 @@ class RolePermissionsPage extends Component
         'visita_carcel' => 'Visita Carcel',
         'servicios' => 'Servicios',
         'mapa_servicios' => 'Mapa Servicios',
+        'insumos' => 'Insumos',
         'seguridad' => 'Seguridad',
     ];
 
@@ -59,6 +60,8 @@ class RolePermissionsPage extends Component
         'navbar.servicios.editable' => ['servicios.crear', 'servicios.editar', 'servicios.eliminar'],
         'navbar.mapa_servicios.visible' => ['servicios.ver'],
         'navbar.mapa_servicios.editable' => ['servicios.editar'],
+        'navbar.insumos.visible' => ['insumos.solicitar'],
+        'navbar.insumos.editable' => ['insumos.gestionar', 'insumos.inventario', 'insumos.importar', 'insumos.reportes'],
         'navbar.seguridad.visible' => ['seguridad.roles.ver', 'seguridad.permisos.ver', 'seguridad.auditoria.ver'],
         'navbar.seguridad.editable' => ['seguridad.roles.gestionar', 'seguridad.permisos.gestionar', 'seguridad.usuarios_roles.gestionar'],
     ];

@@ -17,7 +17,7 @@ class buscadorsentencias extends Model
         'fecha_decision',
         'glosa_decision',
         'juez',
-        'instancia'
+        'instancia',
     ];
 
     protected $casts = [

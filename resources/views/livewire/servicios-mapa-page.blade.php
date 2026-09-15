@@ -136,10 +136,17 @@
                 <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Activos registrados</p>
                 <p class="mt-2 font-black text-slate-950 {{ $isPublic ? 'text-2xl' : 'text-3xl' }}">{{ number_format($totalActivos) }}</p>
             </div>
-            <div class="rounded-2xl border border-slate-200 bg-white shadow-sm {{ $isPublic ? 'p-3 sm:p-4' : 'p-5' }}">
-                <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Sector seleccionado</p>
-                <p class="truncate text-sm font-semibold text-slate-700 {{ $isPublic ? 'mt-2' : 'mt-3' }}">{{ $selectedSector?->nombre ?? $selectedHotspot['label'] ?? 'Sin seleccion' }}</p>
-            </div>
+            @if ($isPublic)
+                <div class="rounded-2xl border border-slate-200 bg-white shadow-sm p-3 sm:p-4">
+                    <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Sector seleccionado</p>
+                    <p class="truncate mt-2 text-sm font-semibold text-slate-700">{{ $selectedSector?->nombre ?? $selectedHotspot['label'] ?? 'Sin seleccion' }}</p>
+                </div>
+            @else
+                <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Stock en bodegas</p>
+                    <p class="mt-2 text-3xl font-black text-slate-950">{{ number_format($totalInsumos) }}</p>
+                </div>
+            @endif
         </section>
 
         <section class="border border-slate-200 bg-white shadow-sm {{ $isPublic ? 'rounded-2xl p-3 sm:p-4' : 'rounded-[2rem] p-4 sm:p-5' }}">
@@ -165,7 +172,7 @@
                         <span class="sr-only">Buscar en el mapa</span>
                         <input type="search" wire:model.live.debounce.300ms="{{ $isPublic ? 'search' : 'mapSearch' }}" placeholder="{{ $isPublic ? 'Buscar activo o sector...' : 'Buscar activo, codigo, serie o sector en el mapa...' }}" class="w-full rounded-2xl border-slate-300 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500">
                         @if (! $isPublic && $mapSearch !== '')
-                            <span class="mt-1 block text-xs font-semibold text-cyan-700">{{ $mapSearchResultCount }} {{ $mapSearchResultCount === 1 ? 'activo encontrado en el plano' : 'activos encontrados en el plano' }}</span>
+                            <span class="mt-1 block text-xs font-semibold text-cyan-700">{{ $mapSearchResultCount }} {{ $mapSearchResultCount === 1 ? 'sector encontrado en el plano' : 'sectores encontrados en el plano' }}</span>
                         @endif
                     </label>
                 </div>
@@ -182,13 +189,13 @@
                                 wire:key="hotspot-{{ $piso }}-{{ $hotspot['identificador'] }}"
                                 wire:click="selectHotspot(@js($hotspot['identificador']))"
                                 style="left: {{ $hotspot['x'] }}px; top: {{ $hotspot['y'] }}px; width: {{ $hotspot['w'] }}px; height: {{ $hotspot['h'] }}px;"
-                                aria-label="{{ $hotspot['label'] }}, {{ $hotspot['activos_count'] }} activos"
+                                aria-label="{{ $hotspot['label'] }}, {{ $hotspot['activos_count'] }} activos{{ $isPublic || $hotspot['insumos_count'] === 0 ? '' : ', '.$hotspot['insumos_count'].' insumos' }}"
                                 class="group absolute flex items-center justify-center rounded-md border-2 px-2 text-center text-[11px] font-black uppercase leading-tight shadow-sm transition hover:z-20 hover:-translate-y-0.5 hover:border-cyan-300 hover:bg-blue-700 hover:text-white focus:z-20 focus:outline-none focus:ring-4 focus:ring-cyan-300 {{ ($selectedHotspot['identificador'] ?? null) === $hotspot['identificador'] ? 'z-10 border-cyan-300 bg-blue-700/80 text-white ring-4 ring-cyan-200' : ($hotspot['is_map_match'] ? 'z-10 border-cyan-300 bg-cyan-600/80 text-white ring-4 ring-cyan-200' : (($hotspot['has_data'] ? 'border-blue-700 bg-blue-600/75 text-white' : 'border-blue-300 bg-blue-200/70 text-blue-950').($hotspot['is_map_dimmed'] ? ' opacity-30' : '')) ) }}"
-                                title="{{ $hotspot['label'] }} - {{ $hotspot['activos_count'] }} activos"
+                                title="{{ $hotspot['label'] }} - {{ $hotspot['activos_count'] }} activos{{ $isPublic || $hotspot['insumos_count'] === 0 ? '' : ' - '.$hotspot['insumos_count'].' insumos' }}"
                             >
                                 <span class="drop-shadow">{{ $hotspot['label'] }}</span>
                                 <span class="absolute -right-2 -top-2 rounded-full border border-white bg-white px-1.5 py-0.5 text-[10px] font-black text-slate-950 shadow">
-                                    {{ $hotspot['activos_count'] }}
+                                    {{ ! $isPublic && $hotspot['insumos_count'] > 0 ? $hotspot['activos_count'].' / '.$hotspot['insumos_count'] : $hotspot['activos_count'] }}
                                 </span>
                             </button>
                         @empty
@@ -319,6 +326,19 @@
                         <div class="mb-4 rounded-2xl bg-blue-50 p-4 text-sm font-semibold text-blue-900">
                             {{ $selectedSector->activos->count() }} {{ $selectedSector->activos->count() === 1 ? 'activo registrado' : 'activos registrados' }} en este sector.
                         </div>
+
+                        @unless ($isPublic)
+                            <div class="mb-4 rounded-2xl bg-emerald-50 p-4">
+                                <p class="text-sm font-semibold text-emerald-950">{{ $selectedSector->insumo_existencias_sum_cantidad ?? 0 }} unidades de insumos en esta bodega.</p>
+                                <div class="mt-3 space-y-2">
+                                    @forelse ($selectedSector->insumoExistencias as $existencia)
+                                        <p class="text-sm text-emerald-900">{{ $existencia->insumo->codigo }} · {{ $existencia->insumo->nombre }}: {{ $existencia->cantidad }} {{ $existencia->insumo->unidad_medida }}</p>
+                                    @empty
+                                        <p class="text-sm text-emerald-800">No hay insumos almacenados en este sector.</p>
+                                    @endforelse
+                                </div>
+                            </div>
+                        @endunless
 
                         <div class="space-y-3">
                             @forelse ($selectedSector->activos as $activo)

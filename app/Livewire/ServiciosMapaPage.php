@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Activo;
+use App\Models\InsumoExistencia;
 use App\Models\Sector;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Layout;
@@ -113,13 +114,19 @@ class ServiciosMapaPage extends Component
 
     public function render()
     {
-        $sectores = Sector::query()
+        $sectoresQuery = Sector::query()
             ->where('piso', $this->floorLabel())
             ->with(['activos' => fn ($query) => $query->latest('id')])
             ->withCount('activos')
-            ->orderBy('nombre')
-            ->get()
-            ->keyBy('identificador_mapa');
+            ->orderBy('nombre');
+
+        if (! $this->publicMode) {
+            $sectoresQuery
+                ->with(['insumoExistencias.insumo' => fn ($query) => $query->orderBy('nombre')])
+                ->withSum('insumoExistencias', 'cantidad');
+        }
+
+        $sectores = $sectoresQuery->get()->keyBy('identificador_mapa');
 
         $selectedSector = $this->selectedSectorId
             ? $sectores->firstWhere('id', $this->selectedSectorId)
@@ -173,6 +180,18 @@ class ServiciosMapaPage extends Component
                 ->unique()
                 ->all();
 
+        if (! $this->publicMode && $mapSearch !== '') {
+            $search = "%{$mapSearch}%";
+            $mapMatchingSectorIds = array_values(array_unique([
+                ...$mapMatchingSectorIds,
+                ...InsumoExistencia::query()
+                    ->whereHas('sector', fn ($query) => $query->where('piso', $this->floorLabel()))
+                    ->whereHas('insumo', fn ($query) => $query->where('codigo', 'like', $search)->orWhere('nombre', 'like', $search))
+                    ->pluck('sector_id')
+                    ->all(),
+            ]));
+        }
+
         $publicActivos = $this->publicMode
             ? Activo::query()
                 ->with('sector')
@@ -204,6 +223,7 @@ class ServiciosMapaPage extends Component
             'selectedHotspot' => $this->selectedHotspot($sectores),
             'totalSectores' => $sectores->count(),
             'totalActivos' => $sectores->sum('activos_count'),
+            'totalInsumos' => $this->publicMode ? 0 : $sectores->sum('insumo_existencias_sum_cantidad'),
             'activos' => $activos,
             'publicActivos' => $publicActivos,
             'imagePath' => asset("images/planos/Plano_Piso_{$this->piso}.webp"),
@@ -233,7 +253,8 @@ class ServiciosMapaPage extends Component
                     'label' => $sector?->nombre ?? $hotspot['label'],
                     'sector' => $sector,
                     'activos_count' => $sector?->activos_count ?? 0,
-                    'has_data' => $sector !== null && $sector->activos_count > 0,
+                    'insumos_count' => $this->publicMode ? 0 : (int) ($sector?->insumo_existencias_sum_cantidad ?? 0),
+                    'has_data' => $sector !== null && ($sector->activos_count > 0 || (! $this->publicMode && ($sector->insumo_existencias_sum_cantidad ?? 0) > 0)),
                     'is_map_match' => $hasMapSearch && $sector !== null && in_array($sector->id, $matchingSectorIds, true),
                     'is_map_dimmed' => $hasMapSearch && ($sector === null || ! in_array($sector->id, $matchingSectorIds, true)),
                 ];

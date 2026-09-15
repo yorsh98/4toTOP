@@ -79,6 +79,8 @@ class RolesAndPermissionsSeeder extends Seeder
             'navbar.servicios.editable',
             'navbar.mapa_servicios.visible',
             'navbar.mapa_servicios.editable',
+            'navbar.insumos.visible',
+            'navbar.insumos.editable',
             'visita_carcel.ver',
             'visita_carcel.gestionar',
             'sentencias.importar',
@@ -89,6 +91,11 @@ class RolesAndPermissionsSeeder extends Seeder
             'ttypp.exportar',
             'ttypp.mail.preview',
             'ttypp.mail.enviar',
+            'insumos.solicitar',
+            'insumos.gestionar',
+            'insumos.inventario',
+            'insumos.importar',
+            'insumos.reportes',
         ];
 
         foreach ($permissions as $permissionName) {

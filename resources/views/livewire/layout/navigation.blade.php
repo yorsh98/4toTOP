@@ -13,6 +13,11 @@ new class extends Component
 }; ?>
 
 @php
+    $unreadInsumosNotifications = auth()->user()
+        ->unreadNotifications()
+        ->where('type', \App\Notifications\InsumosServiciosNotification::class)
+        ->count();
+
     $menuItems = [
         [
             'label' => __('Inicio'),
@@ -127,6 +132,14 @@ new class extends Component
             'accent' => '#65a30d',
         ],
         [
+            'label' => __('Insumos'),
+            'route' => 'insumos.solicitudes',
+            'active' => 'insumos.*',
+            'icon' => 'fa-solid fa-box-open',
+            'permissions' => ['navbar.insumos.visible', 'navbar.insumos.editable'],
+            'accent' => '#0891b2',
+        ],
+        [
             'label' => __('Seguridad'),
             'route' => 'seguridad.roles.index',
             'active' => 'seguridad.*',
@@ -222,6 +235,16 @@ new class extends Component
             </div>
 
             <div class="space-y-1">
+                <a
+                    href="{{ route('insumos.notificaciones') }}"
+                    wire:navigate
+                    title="{{ __('Notificaciones de Insumos') }}"
+                    :class="collapsed ? 'justify-center' : ''"
+                    class="flex items-center rounded-md px-3 py-2 text-sm text-slate-200 hover:bg-slate-800/60 hover:text-white transition"
+                >
+                    <span class="relative"><i class="fa-solid fa-bell text-base" :class="collapsed ? '' : 'mr-3'"></i>@if ($unreadInsumosNotifications)<span class="absolute -right-2 -top-2 min-w-4 rounded-full bg-red-500 px-1 text-center text-[10px] font-bold text-white">{{ $unreadInsumosNotifications }}</span>@endif</span>
+                    <span x-show="!collapsed" x-transition.opacity.duration.200ms x-cloak>{{ __('Notificaciones') }}</span>
+                </a>
                 <a
                     href="{{ route('profile') }}"
                     wire:navigate

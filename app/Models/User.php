@@ -3,14 +3,16 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
+    /** @use HasFactory<UserFactory> */
     use HasFactory, HasRoles, Notifiable;
 
     /**
@@ -71,5 +73,15 @@ class User extends Authenticatable
     public function isSuspended(): bool
     {
         return $this->suspended_at !== null;
+    }
+
+    public function insumoSolicitudes(): HasMany
+    {
+        return $this->hasMany(InsumoSolicitud::class, 'solicitante_user_id');
+    }
+
+    public function insumoAsignaciones(): HasMany
+    {
+        return $this->hasMany(InsumoMovimiento::class, 'asignado_a_user_id');
     }
 }

@@ -2,22 +2,26 @@
 
 namespace App\Livewire;
 
+use App\Models\buscadorsentencias;
 use Livewire\Component;
 use Livewire\WithPagination;
-use App\Models\buscadorsentencias;
 
 class BuscadorSentenciasTabla extends Component
 {
     use WithPagination;
 
     public string $search = '';
+
     public string $filtroInstancia = '';
+
     public int $perPage = 10;
 
     public string $sortField = 'fecha_decision';
+
     public string $sortDirection = 'desc';
 
     protected $paginationTheme = 'bootstrap';
+
     // Para mantener estado en la URL (opcional pero útil)
     protected $queryString = [
         'search' => ['except' => ''],
@@ -28,17 +32,30 @@ class BuscadorSentenciasTabla extends Component
     ];
 
     // Cada vez que cambie search/filtro/perPage, vuelve a página 1
-    public function updatedSearch() { $this->resetPage(); }
-    public function updatedFiltroInstancia() { $this->resetPage(); }
-    public function updatedPerPage() { $this->resetPage(); }
+    public function updatedSearch()
+    {
+        $this->resetPage();
+    }
+
+    public function updatedFiltroInstancia()
+    {
+        $this->resetPage();
+    }
+
+    public function updatedPerPage()
+    {
+        $this->resetPage();
+    }
 
     public function sortBy(string $field): void
     {
         $allowed = [
-            'ruc','rit','ano','nombre_partes','materia','fecha_decision','glosa_decision','juez','instancia'
+            'ruc', 'rit', 'ano', 'nombre_partes', 'materia', 'fecha_decision', 'glosa_decision', 'juez', 'instancia',
         ];
 
-        if (!in_array($field, $allowed, true)) return;
+        if (! in_array($field, $allowed, true)) {
+            return;
+        }
 
         if ($this->sortField === $field) {
             $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';

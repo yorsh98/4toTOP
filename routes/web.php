@@ -35,6 +35,12 @@ use App\Livewire\BitacoraPruebasPage;
 use App\Livewire\BitacoraPruebasPublicPage;
 use App\Livewire\DocumentosBackofficePage;
 use App\Livewire\FuncionariosPage;
+use App\Livewire\InsumosGestionPage;
+use App\Livewire\InsumosImportacionesPage;
+use App\Livewire\InsumosInventarioPage;
+use App\Livewire\InsumosNotificacionesPage;
+use App\Livewire\InsumosReportesPage;
+use App\Livewire\InsumosSolicitudesPage;
 use App\Livewire\Security\AuditPage;
 use App\Livewire\Security\RolePermissionsPage;
 use App\Livewire\Security\RolesPage;
@@ -167,6 +173,24 @@ Route::get('/backoffice/servicios/inventario/exportar', ServiciosInventarioExpor
 Route::get('/backoffice/servicios/mapa', ServiciosMapaPage::class)
     ->name('backoffice.servicios.mapa')
     ->middleware(['auth', 'can:servicios.ver']);
+Route::get('/insumos/solicitudes', InsumosSolicitudesPage::class)
+    ->name('insumos.solicitudes')
+    ->middleware('auth');
+Route::get('/insumos/notificaciones', InsumosNotificacionesPage::class)
+    ->name('insumos.notificaciones')
+    ->middleware('auth');
+Route::get('/insumos/gestion', InsumosGestionPage::class)
+    ->name('insumos.gestion')
+    ->middleware('auth');
+Route::get('/insumos/inventario', InsumosInventarioPage::class)
+    ->name('insumos.inventario')
+    ->middleware('auth');
+Route::get('/insumos/importaciones', InsumosImportacionesPage::class)
+    ->name('insumos.importaciones')
+    ->middleware('auth');
+Route::get('/insumos/reportes', InsumosReportesPage::class)
+    ->name('insumos.reportes')
+    ->middleware('auth');
 Route::get('/audios-salas', AudiosSalasPage::class)
     ->name('audios-salas.index')
     ->middleware(['auth', 'can:audios_salas.ver']);

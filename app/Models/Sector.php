@@ -22,4 +22,9 @@ class Sector extends Model
     {
         return $this->hasMany(Activo::class);
     }
+
+    public function insumoExistencias(): HasMany
+    {
+        return $this->hasMany(InsumoExistencia::class);
+    }
 }

@@ -1,7 +1,7 @@
 <?php
 
 return [
-    
+
     'required' => 'El campo :attribute es obligatorio.',
     'email' => 'El campo :attribute debe ser una dirección de correo válida.',
     'confirmed' => 'La confirmación de :attribute no coincide.',
@@ -120,6 +120,5 @@ return [
     'uploaded' => 'El campo :attribute no se pudo subir.',
     'url' => 'El formato del campo :attribute es inválido.',
     'uuid' => 'El campo :attribute debe ser un UUID válido.',
-
 
 ];

@@ -1,0 +1,232 @@
+- generic [ref=f3e2]:
+  - navigation [ref=f3e3]:
+    - complementary [ref=f3e4]:
+      - generic [ref=f3e5]:
+        - link "Inicio" [ref=f3e6] [cursor=pointer]:
+          - /url: http://127.0.0.1:8000/dashboard
+        - button "" [ref=f3e9] [cursor=pointer]
+      - link " Insumos" [ref=f3e13] [cursor=pointer]:
+        - /url: http://127.0.0.1:8000/insumos/solicitudes
+        - generic [ref=f3e14]: 
+        - generic [ref=f3e16]: Insumos
+      - generic [ref=f3e17]:
+        - generic [ref=f3e18]:
+          - paragraph [ref=f3e19]: E2E Gestion
+          - paragraph [ref=f3e20]: e2e.gestion@invalid.test
+        - generic [ref=f3e21]:
+          - link " Notificaciones" [ref=f3e22] [cursor=pointer]:
+            - /url: http://127.0.0.1:8000/insumos/notificaciones
+            - generic [ref=f3e23]: 
+            - generic [ref=f3e25]: Notificaciones
+          - link " Perfil" [ref=f3e26] [cursor=pointer]:
+            - /url: http://127.0.0.1:8000/profile
+            - generic [ref=f3e27]: 
+            - generic [ref=f3e28]: Perfil
+          - button " Salir" [ref=f3e29] [cursor=pointer]:
+            - generic [ref=f3e30]: 
+            - generic [ref=f3e31]: Salir
+    - text:   
+  - generic [ref=f3e32]:
+    - banner [ref=f3e33]:
+      - generic [ref=f3e36]:
+        - paragraph [ref=f3e37]: Insumos · Gestión
+        - heading "Gestión de insumos" [level=2] [ref=f3e38]
+    - main [ref=f3e39]:
+      - generic [ref=f3e40]:
+        - navigation "Navegación de Insumos" [ref=f3e41]:
+          - link "Gestión" [ref=f3e43] [cursor=pointer]:
+            - /url: http://127.0.0.1:8000/insumos/gestion
+        - generic [ref=f3e44]:
+          - generic [ref=f3e45]:
+            - heading "Solicitudes pendientes" [level=2] [ref=f3e46]
+            - 'button "Solicitud #4 E2E Solicitante pendiente" [ref=f3e48] [cursor=pointer]':
+              - text: "Solicitud #4 E2E Solicitante"
+              - generic [ref=f3e49]: pendiente
+          - paragraph [ref=f3e51]: Seleccione una solicitud para registrar una entrega o rechazo.
+        - generic [ref=f3e52]:
+          - heading "Asignacion directa" [level=2] [ref=f3e53]
+          - generic [ref=f3e54]:
+            - combobox [ref=f3e55]:
+              - option "Persona asignada" [selected]
+              - option "E2E Funcionario"
+              - option "jorge trons"
+              - option "prueba"
+              - option "prueba"
+            - combobox [ref=f3e56]:
+              - option "Insumo" [selected]
+              - option "ACCO CLIPS PLASTICO (UNIDAD)"
+              - option "ADAPTADOR DISPLAYPORT A HDMI"
+              - option "ALARGADOR MULTIPLE"
+              - option "ALCOHOL GEL BIDON 5 LITROS"
+              - option "ALCOHOL GEL INDIVIDUAL"
+              - option "ALMOHADILLA DACTILAR"
+              - option "APRETADOR DE DOCUMENTOS (METALICO 25 MM)"
+              - option "ARCHIVADOR PALANCA OFICIO COLOR NEGRO - AZUL - CAFÉ"
+              - option "ARCHIVADOR VINILICO OFICIO TERMOLAMINADO"
+              - option "AUDIFONO"
+              - option "BANDEJA PORTAPAPELES"
+              - option "BANDERITAS AUTOADHESIVAS (MARCADOR-SEPARADOR)"
+              - option "BANDERITAS POST-IT ADOSABLES"
+              - option "BATERIA PARA UPS INFERIOR A 3 UTM"
+              - option "BLOCK BORRADOR 1/2 OFICIO"
+              - option "BLOCK MATEMATICAS OFICIO 80 HOJAS"
+              - option "BOLSA PARA BASURA 0,50 X0,70 CMS. PAQUETE"
+              - option "BOLSA PARA BASURA DE 0,70X0,90 CM. PAQUETE"
+              - option "BOLSA ZIPLOC"
+              - option "BORRADOR PARA PIZARRA"
+              - option "CABLE ACTIVO USB 2.0 A-A 10 METROS"
+              - option "CABLE ESPIRAL TELEFONICO"
+              - option "CABLE HDMI A HDMI"
+              - option "CABLE PARA MICROFONO"
+              - option "CABLE PARA MICROFONO 3 MT."
+              - option "CABLE UTP CAT5E"
+              - option "CAJA DE ARCHIVO STANDARD"
+              - option "CANALETA DE PISO"
+              - option "CARGADOR DE PILA"
+              - option "CARPETA PLASTICAS OFICIO"
+              - option "CARPETA TRANSPARENTES"
+              - option "CHINCHES (CAJA DE 100 UN.)"
+              - option "CINTA ADHESIVA PARA EMBALAJE"
+              - option "CINTA AISLADORA PLASTICA 3M 1600 (ROLLO)"
+              - option "CINTA DELIMITADORA DE AREAS AUTOADHESIVA"
+              - option "CINTA DOBLE CONTACTO ROLLO"
+              - option "CINTA SEÑAL DE PELIGRO"
+              - option "CLIP DE 30 MM. (CAJA DE 100 UN.)"
+              - option "CLORO GEL 900 ML"
+              - option "CORCHETERA MEDIANA"
+              - option "CORCHETERA SEMI INDUSTRIAL"
+              - option "CORCHETES"
+              - option "CORCHETES 26/6"
+              - option "CORRECTOR LAPIZ"
+              - option "CUADERNO UNIVERSITARIO"
+              - option "CUCHARA PLASTICA"
+              - option "CUCHILLOS CARTONEROS GRANDES"
+              - option "DEDAL DE GOMA"
+              - option "DESINFECTANTE AMBIENTAL"
+              - option "DESTACADORES DE TEXTO COLOR 1"
+              - option "DOBLE CLIP 25 MM."
+              - option "DOBLE CLIP GRANDE 51 MM."
+              - option "DOBLE CLIP MEDIANO 32 MM."
+              - option "DRUM FOTOCONDUCTOR B431 44574301"
+              - option "E2E Lapiz directo"
+              - option "E2E Papel solicitud"
+              - option "ELASTICO BILLETES (PAQUETE DE 1 KILO.)"
+              - option "ELASTICO BOLSA 50 GRS"
+              - option "ENVASE DISPENSADOR ALCOHOL GEL INDIVIDUAL"
+              - option "ESPIRALES 12 MM. (80 HOJAS)"
+              - option "ESPIRALES 16 MM. (130 HOJAS)"
+              - option "ESPIRALES 20 MM. (160 HOJAS)"
+              - option "ESPIRALES 26 MM. (240 HOJAS)"
+              - option "ESPIRALES 40 MM"
+              - option "ESPIRALES 8 MM. (45 HOJAS)"
+              - option "ESPONJAS PARA LOZA"
+              - option "ETIQUETAS AUTOADHESIVAS"
+              - option "EXTENSION ELECTRICA DE 20 MTS"
+              - option "FOTOCONDUCTOR HP LASER 408DN 332A"
+              - option "FUNDAS PARA MICROFONO"
+              - option "FUNDAS PLASTICAS ARCHIVO TAMAÑO OFICIO"
+              - option "GOMAS PARA BORRAR"
+              - option "HERVIDOR"
+              - option "JARRO PARA AGUA"
+              - option "LAPICES DE COLORES"
+              - option "LAPIZ BIC PUNTA FINA COLOR AZUL"
+              - option "LAPIZ BIC PUNTA FINA COLOR NEGRO"
+              - option "LAPIZ GEL 0.7 MM. AZUL"
+              - option "LAPIZ GEL 0.7 MM. NEGRO"
+              - option "LAPIZ GEL 0.7 MM. ROJO"
+              - 'option "LAPIZ GRAFITO NEGRO # 2"'
+              - option "LAPIZ PASTA AZUL"
+              - option "LAPIZ PASTA NEGRO"
+              - option "LAPIZ PASTA ROJO"
+              - option "LAPIZ PASTA VERDE"
+              - option "LAVALOZAS LIQUIDO"
+              - option "LIBRETA DE CORRESPONDENCIA"
+              - option "LIBRO CONTROL DE ASISTENCIA"
+              - option "LIMPIADOR CIF CREMA MULTIUSO"
+              - option "LOMOS AUTOADHESIVOS PARA ARCH. (PAQ. DE 10 UNID.)"
+              - option "LUPA"
+              - option "MAGIC CLIP"
+              - option "MAQUINA PARA MAGIC CLIPPER"
+              - option "MASCARILLA DESECHABLE 3 PLIEGUES"
+              - option "MASCARILLA DESECHABLE KN95"
+              - option "MICAS TRANSPARENTES CARTA"
+              - option "MICAS TRANSPARENTES OFICIO"
+              - option "MICROFONO PARA PC"
+              - option "MINAS 0,5"
+              - option "MINAS 0,7"
+              - option "MOUSE"
+              - option "PAÑOS ABSORBENTES SPONGI"
+              - option "PAÑUELOS DESECHABLES (CAJA)"
+              - option "PAPEL CARTA FOTOCOPIADORA (RESMAS DE 500 HJS.)"
+              - option "PAPEL OFICIO COLOR MULTIPROPOSITO"
+              - option "PAPEL OFICIO FOTOCOPIADORA (RESMAS DE 500 HJS.)"
+              - option "PAPELERO METALICO"
+              - option "PARLANTES COMPUTADOR"
+              - option "PEGAMENTO EN BARRA DE 22 GRS."
+              - option "PEGAMENTO LIQUIDO EN TUBO"
+              - option "PENDRIVE"
+              - option "PENDRIVE 128 GB"
+              - option "PERFORADOR SEMI INDUSTRIAL"
+              - option "PERFORADOR TORRE 138"
+              - option "PILA 9 VOLT (BATERIA)"
+              - option "PILA AA 1,5 VOLT"
+              - option "PILA AA RECARGABLE"
+              - option "PILA AAA 1,5 VOLT"
+              - option "PILA AAA RECARGABLE"
+              - option "PILA RECARGABLE"
+              - option "PLUMON AZUL PARA PIZARRA"
+              - option "PLUMON GRANDE NEGRO"
+              - option "PLUMON NEGRO PARA PIZARRA"
+              - option "PLUMON ROJO PARA PIZARRA"
+              - option "PORTA POST-IT"
+              - option "PORTA TACO"
+              - option "PORTACLIPS"
+              - option "PORTACREDENCIALES"
+              - option "PORTALAPICES"
+              - option "PORTAMINAS 0,5"
+              - option "PORTAMINAS 0,7"
+              - option "PORTASCOTCH"
+              - 'option "POST-IT # 653 ( 51 X 38 MM.)"'
+              - option "POST-IT 76X76 MM"
+              - option "POUCHES TAMA?O OFICIO 125 MICRONES PARA TERMOLAMINADORA"
+              - option "REGLA METALICA"
+              - option "REGLA PLASTICAS DE 30 CMS."
+              - option "RELOJ"
+              - option "REVOLVEDOR"
+              - option "SACACORCHETE PALANCA"
+              - option "SACACORCHETE PINZA"
+              - option "SACAPUNTAS CHICO ( METALICO )"
+              - option "SCOTCH (CHICO) TRANSPARENTE ROLLO 18 MM. X 30 MTS."
+              - option "SEPARADOR DE ARCHIVO MENSUAL (1-12)"
+              - option "SEPARADOR DE ARCHIVO TAMA?O OFICIO (JUEGO DE 6 POSICION"
+              - option "SERVILLETA PAPEL"
+              - option "SOBRE 1/2 OFICIO (UNIDAD)"
+              - option "SOBRE SACO EXTRA OFICIO PAPEL KRAFT"
+              - option "SOBRE SACO OFICIO"
+              - option "SOBRES 1/2 OFICIO SIN LOGO"
+              - option "SWITCH 5 PUERTOS"
+              - option "TACO APUNTES"
+              - option "TAZON"
+              - option "TECLADO"
+              - option "TIJERAS"
+              - option "TINTA AZUL PARA TIMBRE AUTOMATICO"
+              - option "TINTA NEGRA PARA TIMBRE AUTOMATICO"
+              - option "TINTA VERDE PARA TIMBRE AUTOMATICO"
+              - option "TOALLA DE PAPEL"
+              - option "TOALLA DE PAPEL PARA DISPENSADOR AUTOMATICO"
+              - option "TONER IMPRESORA HP LASER 408DN 330X"
+              - option "TONER IMPRESORA LASER OKIDATA B-431 DN 44574901"
+              - option "TONER KYOCERA TK-3122"
+              - option "TONER PARA IMPRESORA LEXMARK MS 415 NEGRO"
+              - option "TONER SAMSUNG NEGRO MLT-D203U (15000PAG)"
+              - option "UNIDAD DE IMAGEN LEXMARK 500Z 50F0Z00"
+              - option "UNIDAD FOTOCONDUCTORA LEXMARK 56F0Z00"
+              - option "VASO PLASTICO DESECHABLE"
+              - option "VASO TERMICO DESECHABLE"
+              - option "VASOS ALTOS"
+              - option "VIRUTILLA PARA LOZA"
+            - generic [ref=f3e57]:
+              - spinbutton [ref=f3e58]: "1"
+              - button "Agregar" [ref=f3e59] [cursor=pointer]
+          - textbox "Observacion opcional" [ref=f3e60]
+          - button "Registrar asignacion directa" [ref=f3e61] [cursor=pointer]

@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpSpreadsheet\IOFactory;
@@ -13,7 +14,7 @@ class BuscadorSentenciasSeeder extends Seeder
     {
         $path = database_path('seeders/data/sentencias_para_el_buscador.xlsx');
 
-        if (!file_exists($path)) {
+        if (! file_exists($path)) {
             throw new \RuntimeException("No se encontró el archivo XLSX en: {$path}");
         }
 
@@ -32,7 +33,7 @@ class BuscadorSentenciasSeeder extends Seeder
             }
         }
 
-        if (!$headerRow) {
+        if (! $headerRow) {
             throw new \RuntimeException("No se encontró la fila de encabezados (celda A='RUC').");
         }
 
@@ -48,12 +49,12 @@ class BuscadorSentenciasSeeder extends Seeder
             $ano = $sheet->getCell("C{$r}")->getValue();
 
             // Si la fila está vacía, la saltamos
-            if ($ruc === '' && (string)$rit === '' && (string)$ano === '') {
+            if ($ruc === '' && (string) $rit === '' && (string) $ano === '') {
                 continue;
             }
 
             $nombrePartes = trim((string) $sheet->getCell("D{$r}")->getValue());
-            $materia      = trim((string) $sheet->getCell("E{$r}")->getValue());
+            $materia = trim((string) $sheet->getCell("E{$r}")->getValue());
 
             // FECHA DECISION (columna F): puede venir como DateTime, número Excel o string
             $fechaCell = $sheet->getCell("F{$r}")->getValue();
@@ -68,7 +69,7 @@ class BuscadorSentenciasSeeder extends Seeder
                 if ($tmp !== '') {
                     // por si viene "2024-02-05 00:00:00" o "2024-02-05"
                     try {
-                        $fechaDecision = \Carbon\Carbon::parse($tmp)->format('Y-m-d');
+                        $fechaDecision = Carbon::parse($tmp)->format('Y-m-d');
                     } catch (\Throwable $e) {
                         $fechaDecision = null;
                     }
@@ -76,8 +77,8 @@ class BuscadorSentenciasSeeder extends Seeder
             }
 
             $glosa = trim((string) $sheet->getCell("G{$r}")->getValue());
-            $juez  = trim((string) $sheet->getCell("H{$r}")->getValue());
-            $inst  = trim((string) $sheet->getCell("I{$r}")->getValue());
+            $juez = trim((string) $sheet->getCell("H{$r}")->getValue());
+            $inst = trim((string) $sheet->getCell("I{$r}")->getValue());
 
             // Normalizaciones leves
             $rit = is_numeric($rit) ? (int) $rit : null;
@@ -85,17 +86,17 @@ class BuscadorSentenciasSeeder extends Seeder
             $ruc = $ruc !== '' ? $ruc : null;
 
             $batch[] = [
-                'ruc'            => $ruc,
-                'rit'            => $rit,
-                'ano'            => $ano,
-                'nombre_partes'  => $nombrePartes !== '' ? $nombrePartes : null,
-                'materia'        => $materia !== '' ? $materia : null,
+                'ruc' => $ruc,
+                'rit' => $rit,
+                'ano' => $ano,
+                'nombre_partes' => $nombrePartes !== '' ? $nombrePartes : null,
+                'materia' => $materia !== '' ? $materia : null,
                 'fecha_decision' => $fechaDecision,
                 'glosa_decision' => $glosa !== '' ? $glosa : null,
-                'juez'           => $juez !== '' ? $juez : null,
-                'instancia'      => $inst !== '' ? $inst : null,
-                'created_at'     => $now,
-                'updated_at'     => $now,
+                'juez' => $juez !== '' ? $juez : null,
+                'instancia' => $inst !== '' ? $inst : null,
+                'created_at' => $now,
+                'updated_at' => $now,
             ];
 
             if (count($batch) >= $batchSize) {
@@ -104,7 +105,7 @@ class BuscadorSentenciasSeeder extends Seeder
             }
         }
 
-        if (!empty($batch)) {
+        if (! empty($batch)) {
             DB::table('buscadorsentencias')->insert($batch);
         }
     }

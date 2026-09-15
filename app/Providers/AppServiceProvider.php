@@ -14,12 +14,13 @@ use App\NotificationsV2\Infrastructure\Mail\MailChannelSender;
 use App\Policies\GuiasPolicy;
 use Illuminate\Mail\Events\MessageSending;
 use Illuminate\Mail\Events\MessageSent;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
-use Symfony\Component\Mime\Email;
 use Symfony\Component\Mime\Address;
+use Symfony\Component\Mime\Email;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -41,6 +42,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Paginator::useBootstrapFive();
+
         Event::listen(MessageSending::class, function (MessageSending $event): void {
             $messageId = $this->resolveMessageIdFromEmail($event->message);
 

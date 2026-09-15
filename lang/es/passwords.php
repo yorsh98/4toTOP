@@ -1,4 +1,5 @@
 <?php
+
 // lang/es/passwords.php
 return [
     'reset' => 'Tu contraseña ha sido restablecida.',
@@ -7,5 +8,4 @@ return [
     'token' => 'Este token de restablecimiento de contraseña no es válido.',
     'user' => 'No se encontró ningún usuario con esa dirección de correo electrónico.',
 
-    
 ];
