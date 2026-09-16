@@ -11,10 +11,10 @@ class Penal extends Model
 
     protected $table = 'penales';
 
-    protected $fillable = ['nombre', 'activo'];
+    protected $fillable = ['nombre', 'activo', 'exportar_en_santiago'];
 
     protected function casts(): array
     {
-        return ['activo' => 'boolean'];
+        return ['activo' => 'boolean', 'exportar_en_santiago' => 'boolean'];
     }
 }
