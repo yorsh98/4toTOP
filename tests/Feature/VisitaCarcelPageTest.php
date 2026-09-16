@@ -10,6 +10,7 @@ use App\Services\SafeSpreadsheetReader;
 use Carbon\Carbon;
 use Illuminate\Http\UploadedFile;
 use Livewire\Livewire;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xls;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
@@ -64,18 +65,124 @@ test('manager adds, soft deletes and restores a penal', function () {
         ->call('seleccionarModo', 'alimentacion')
         ->call('abrirGestionPenales')
         ->set('nuevoPenal', 'CDP Yumbel')
+        ->set('nuevoPenalEnSantiago', true)
         ->call('guardarPenal')
         ->assertHasNoErrors()
         ->assertSee('CDP Yumbel');
 
     $penal = Penal::query()->where('nombre', 'CDP Yumbel')->firstOrFail();
+    expect($penal->exportar_en_santiago)->toBeTrue();
+
+    $component->call('alternarExportacionSantiago', $penal->id)->assertHasNoErrors();
+    expect($penal->refresh()->exportar_en_santiago)->toBeFalse();
+
     $component->call('eliminarPenal', $penal->id)->assertHasNoErrors();
 
     expect(Penal::withTrashed()->findOrFail($penal->id)->trashed())->toBeTrue();
 
     $component->set('nuevoPenal', 'C.D.P. DE YUMBEL')->call('guardarPenal')->assertHasNoErrors();
 
-    expect(Penal::query()->where('nombre', 'CDP Yumbel')->firstOrFail()->activo)->toBeTrue();
+    expect(Penal::query()->where('nombre', 'CDP Yumbel')->firstOrFail()->activo)->toBeTrue()
+        ->and(Penal::query()->where('nombre', 'CDP Yumbel')->firstOrFail()->exportar_en_santiago)->toBeFalse();
+});
+
+test('penal export groups subscribed active penales with records into the Santiago workbook', function () {
+    $user = visitaCarcelManager();
+    Penal::query()->where('nombre', 'CDP Stgo Uno')->update(['exportar_en_santiago' => true]);
+    Penal::query()->where('nombre', 'CPF San Miguel')->update(['exportar_en_santiago' => true]);
+    Penal::query()->where('nombre', 'REPAS')->update(['exportar_en_santiago' => true]);
+    Penal::query()->where('nombre', 'CCP Valdivia')->update(['exportar_en_santiago' => false]);
+    Penal::query()->where('nombre', 'CDT Pudahuel Norte')->firstOrFail()->delete();
+
+    foreach ([
+        ['2600000101-1', '101-2026', 'Juan Santiago', '11.111.111-1', 'CDP Stgo Uno'],
+        ['2600000102-2', '102-2026', 'Ana San Miguel', '22.222.222-2', 'CPF San Miguel'],
+        ['2600000103-3', '103-2026', 'Luis Valdivia', '33.333.333-3', 'CCP Valdivia'],
+        ['2600000104-4', '104-2026', 'Pedro Pudahuel', '44.444.444-4', 'CDT Pudahuel Norte'],
+    ] as [$ruc, $rit, $nombre, $rut, $penal]) {
+        $causa = VisitaCarcelCausa::query()->create(['ruc' => $ruc, 'rit' => $rit]);
+        $causa->imputados()->create(['nombre' => $nombre, 'rut' => $rut, 'penal' => $penal, 'delito' => 'Robo', 'fecha_ingreso_pp' => '2026-08-01']);
+    }
+
+    $response = $this->actingAs($user)->get(route('visita-carcel.exportar-penales'))->assertOk();
+    $zipPath = tempnam(sys_get_temp_dir(), 'visita-carcel-export-test-');
+    file_put_contents($zipPath, $response->streamedContent());
+    $zip = new ZipArchive;
+    $zip->open($zipPath);
+
+    try {
+        $archivos = collect(range(0, $zip->numFiles - 1))->map(fn (int $index) => $zip->getNameIndex($index));
+        expect($archivos)->toContain('Visita_Carcel_Santiago.xlsx')
+            ->toContain('CCP_Valdivia.xlsx')
+            ->not->toContain('CDP_Stgo_Uno.xlsx')
+            ->not->toContain('CPF_San_Miguel.xlsx')
+            ->not->toContain('CDT_Pudahuel_Norte.xlsx');
+
+        $libroPath = tempnam(sys_get_temp_dir(), 'visita-carcel-santiago-test-');
+        file_put_contents($libroPath, $zip->getFromName('Visita_Carcel_Santiago.xlsx'));
+        $libro = IOFactory::load($libroPath);
+
+        expect($libro->getSheetNames())->toBe(['CDP Santiago Uno', 'CPF San Miguel'])
+            ->and($libro->getSheetByName('CDP Santiago Uno')->getCell('E4')->getValue())->toBe('Juan Santiago')
+            ->and($libro->getSheetByName('CPF San Miguel')->getCell('E4')->getValue())->toBe('Ana San Miguel');
+
+        $libro->disconnectWorksheets();
+        @unlink($libroPath);
+    } finally {
+        $zip->close();
+        @unlink($zipPath);
+    }
+});
+
+test('reportes de control shows operational records and penal totals', function () {
+    $user = visitaCarcelManager();
+    $causa = VisitaCarcelCausa::query()->create(['ruc' => '2301234567-8', 'rit' => '142-2026']);
+    $activo = $causa->imputados()->create(['nombre' => 'Juan Perez Soto', 'rut' => '12.345.678-9', 'penal' => 'CCP Valdivia', 'delito' => 'Robo', 'fecha_ingreso_pp' => '2026-08-01']);
+    $eliminado = $causa->imputados()->create(['nombre' => 'Ana Diaz Soto', 'rut' => '11.111.111-1', 'penal' => 'CCP Valdivia', 'delito' => 'Robo', 'fecha_ingreso_pp' => '2026-08-01']);
+    VisitaCarcelImputadoHistorial::query()->create(['visita_carcel_imputado_id' => $activo->id, 'archivo' => 'Edicion manual', 'cambios' => ['juez' => ['old' => null, 'new' => 'Juez Uno']]]);
+    $eliminado->delete();
+
+    Livewire::actingAs($user)
+        ->test(VisitaCarcelPage::class)
+        ->call('seleccionarModo', 'reportes')
+        ->assertSee('Reportes de control')
+        ->assertSee('Registros agregados')
+        ->assertSee('Registros eliminados')
+        ->assertSee('Registros modificados')
+        ->assertSee('CCP Valdivia')
+        ->assertSee('Juan Perez Soto');
+});
+
+test('manager restores a deleted imputado from reportes de control', function () {
+    $user = visitaCarcelManager();
+    $causa = VisitaCarcelCausa::query()->create(['ruc' => '2301234567-8', 'rit' => '142-2026']);
+    $imputado = $causa->imputados()->create(['nombre' => 'Juan Perez Soto', 'rut' => '12.345.678-9', 'penal' => 'CCP Valdivia', 'delito' => 'Robo', 'fecha_ingreso_pp' => '2026-08-01']);
+    $imputado->delete();
+
+    Livewire::actingAs($user)->test(VisitaCarcelPage::class)->call('restaurarImputado', $imputado->id)->assertHasNoErrors();
+
+    expect(VisitaCarcelImputado::query()->findOrFail($imputado->id)->updated_by)->toBe($user->id);
+});
+
+test('manager restores a deleted causa and its imputados from reportes de control', function () {
+    $user = visitaCarcelManager();
+    $causa = VisitaCarcelCausa::query()->create(['ruc' => '2301234567-8', 'rit' => '142-2026']);
+    $imputado = $causa->imputados()->create(['nombre' => 'Juan Perez Soto', 'rut' => '12.345.678-9', 'penal' => 'CCP Valdivia', 'delito' => 'Robo', 'fecha_ingreso_pp' => '2026-08-01']);
+
+    Livewire::actingAs($user)->test(VisitaCarcelPage::class)->call('eliminarCausa', $causa->id)->call('restaurarCausa', $causa->id)->assertHasNoErrors();
+
+    expect(VisitaCarcelCausa::query()->findOrFail($causa->id)->updated_by)->toBe($user->id)
+        ->and(VisitaCarcelImputado::query()->findOrFail($imputado->id)->updated_by)->toBe($user->id);
+});
+
+test('viewer cannot restore deleted visita carcel records', function () {
+    $user = User::factory()->create();
+    $user->givePermissionTo('visita_carcel.ver');
+    $causa = VisitaCarcelCausa::query()->create(['ruc' => '2301234567-8', 'rit' => '142-2026']);
+    $imputado = $causa->imputados()->create(['nombre' => 'Juan Perez Soto', 'rut' => '12.345.678-9', 'penal' => 'CCP Valdivia', 'delito' => 'Robo', 'fecha_ingreso_pp' => '2026-08-01']);
+    $imputado->delete();
+
+    Livewire::actingAs($user)->test(VisitaCarcelPage::class)->call('restaurarImputado', $imputado->id)->assertForbidden();
 });
 
 test('viewer cannot manage penales', function () {
@@ -333,12 +440,12 @@ test('editing preserves a penal that was soft deleted', function () {
     expect($imputado->refresh()->penal)->toBe('CDP Yumbel');
 });
 
-test('notifications show imputados from day 160 through day 180', function () {
+test('notifications show imputados from day 160 onward and group overdue days as 180 plus', function () {
     Carbon::setTestNow(Carbon::parse('2026-08-24', 'America/Santiago'));
     $user = visitaCarcelManager();
     $causa = VisitaCarcelCausa::query()->create(['ruc' => '2301234567-8', 'rit' => '142-2026']);
 
-    foreach ([160, 180, 181] as $days) {
+    foreach ([159, 160, 180, 181, 365] as $days) {
         $causa->imputados()->create([
             'nombre' => "Imputado {$days}", 'rut' => "12.345.67{$days}-9", 'penal' => 'Santiago 1', 'delito' => 'Robo', 'fecha_ingreso_pp' => '2026-01-01',
             'ultima_rev_pp' => now('America/Santiago')->subDays($days)->toDateString(),
@@ -348,12 +455,17 @@ test('notifications show imputados from day 160 through day 180', function () {
     Livewire::actingAs($user)
         ->test(VisitaCarcelPage::class)
         ->call('seleccionarModo', 'notificaciones')
+        ->assertDontSee('Imputado 159')
         ->assertSee('Imputado 160')
         ->assertSee('Imputado 180')
-        ->assertDontSee('Imputado 181')
+        ->assertSee('Imputado 181')
+        ->assertSee('Imputado 365')
+        ->assertSee('180+')
         ->set('searchNotificaciones', 'Imputado 160')
         ->assertSee('Imputado 160')
-        ->assertDontSee('Imputado 180');
+        ->assertDontSee('Imputado 180')
+        ->assertDontSee('Imputado 181')
+        ->assertDontSee('Imputado 365');
 
     Carbon::setTestNow();
 });

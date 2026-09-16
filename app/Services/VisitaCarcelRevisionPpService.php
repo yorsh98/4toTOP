@@ -14,7 +14,7 @@ class VisitaCarcelRevisionPpService
 
         return VisitaCarcelImputado::query()
             ->with('causa')
-            ->whereBetween('ultima_rev_pp', [$date->copy()->subDays(180)->toDateString(), $date->copy()->subDays(160)->toDateString()])
+            ->whereDate('ultima_rev_pp', '<=', $date->copy()->subDays(160)->toDateString())
             ->get()
             ->each(fn (VisitaCarcelImputado $imputado) => $imputado->setAttribute('dias_plazo', $imputado->ultima_rev_pp->diffInDays($date)))
             ->sortByDesc('dias_plazo')

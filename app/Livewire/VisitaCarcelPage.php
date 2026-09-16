@@ -50,6 +50,8 @@ class VisitaCarcelPage extends Component
 
     public string $nuevoPenal = '';
 
+    public bool $nuevoPenalEnSantiago = false;
+
     public ?int $imputadoRevisionPpId = null;
 
     public string $ultimaRevisionPp = '';
@@ -100,11 +102,17 @@ class VisitaCarcelPage extends Component
 
     public string $searchNotificaciones = '';
 
+    public string $reporteDesde = '';
+
+    public string $reporteHasta = '';
+
     public ?int $causaSeleccionadaId = null;
 
     public function mount(): void
     {
         Gate::authorize('visita_carcel.ver');
+        $this->reporteDesde = now('America/Santiago')->startOfMonth()->toDateString();
+        $this->reporteHasta = now('America/Santiago')->toDateString();
     }
 
     public function render(VisitaCarcelRevisionPpService $revisionPp)
@@ -152,7 +160,11 @@ class VisitaCarcelPage extends Component
             ? $penales->when($this->searchPenales !== '', fn ($items) => $items->filter(fn (Penal $penal) => str_contains(mb_strtolower($penal->nombre), mb_strtolower(trim($this->searchPenales))))->values())
             : collect();
 
-        return view('livewire.visita-carcel-page', compact('causas', 'causaSeleccionada', 'notificaciones', 'totalImputados', 'penales', 'penalesGestion', 'totalPenales'));
+        $reporte = $this->modo === 'reportes'
+            ? $this->reporteControl()
+            : ['agregados' => collect(), 'eliminados' => collect(), 'modificados' => collect(), 'por_penal' => collect(), 'total_imputados' => 0];
+
+        return view('livewire.visita-carcel-page', compact('causas', 'causaSeleccionada', 'notificaciones', 'totalImputados', 'penales', 'penalesGestion', 'totalPenales', 'reporte'));
     }
 
     public function updatingSearch(): void
@@ -164,7 +176,7 @@ class VisitaCarcelPage extends Component
     {
         Gate::authorize('visita_carcel.ver');
 
-        if (! in_array($modo, ['comparacion', 'alimentacion', 'notificaciones'], true)) {
+        if (! in_array($modo, ['comparacion', 'alimentacion', 'notificaciones', 'reportes'], true)) {
             return;
         }
 
@@ -221,7 +233,7 @@ class VisitaCarcelPage extends Component
 
     public function cerrarGestionPenales(): void
     {
-        $this->reset(['gestionPenalesAbierta', 'searchPenales', 'nuevoPenal']);
+        $this->reset(['gestionPenalesAbierta', 'searchPenales', 'nuevoPenal', 'nuevoPenalEnSantiago']);
         $this->resetValidation();
     }
 
@@ -229,25 +241,25 @@ class VisitaCarcelPage extends Component
     {
         Gate::authorize('visita_carcel.gestionar');
 
-        $this->validate(['nuevoPenal' => ['required', 'string', 'max:255']]);
+        $this->validate(['nuevoPenal' => ['required', 'string', 'max:255'], 'nuevoPenalEnSantiago' => ['boolean']]);
         $nombre = trim($this->nuevoPenal);
         $existente = Penal::withTrashed()->get()->first(fn (Penal $penal) => $this->normalizarPenal($penal->nombre) === $this->normalizarPenal($nombre));
 
         if ($existente?->trashed()) {
             $existente->restore();
-            $existente->update(['activo' => true]);
+            $existente->update(['activo' => true, 'exportar_en_santiago' => $this->nuevoPenalEnSantiago]);
             $mensaje = "Penal {$existente->nombre} restaurado.";
         } elseif ($existente) {
             $this->addError('nuevoPenal', 'Este penal ya está activo.');
 
             return;
         } else {
-            Penal::query()->create(['nombre' => $nombre, 'activo' => true]);
+            Penal::query()->create(['nombre' => $nombre, 'activo' => true, 'exportar_en_santiago' => $this->nuevoPenalEnSantiago]);
             $mensaje = "Penal {$nombre} agregado.";
         }
 
-        $this->reset('nuevoPenal');
-        $this->resetValidation('nuevoPenal');
+        $this->reset(['nuevoPenal', 'nuevoPenalEnSantiago']);
+        $this->resetValidation(['nuevoPenal', 'nuevoPenalEnSantiago']);
         session()->flash('ok', $mensaje);
     }
 
@@ -257,6 +269,15 @@ class VisitaCarcelPage extends Component
 
         Penal::query()->findOrFail($penalId)->delete();
         session()->flash('ok', 'Penal eliminado de los activos.');
+    }
+
+    public function alternarExportacionSantiago(int $penalId): void
+    {
+        Gate::authorize('visita_carcel.gestionar');
+
+        $penal = Penal::query()->findOrFail($penalId);
+        $penal->update(['exportar_en_santiago' => ! $penal->exportar_en_santiago]);
+        $this->dispatch('app-toast', message: $penal->exportar_en_santiago ? 'Penal incluido en el libro Santiago.' : 'Penal retirado del libro Santiago.');
     }
 
     public function importarMovimientos(SafeSpreadsheetReader $reader): void
@@ -897,6 +918,82 @@ class VisitaCarcelPage extends Component
         }
 
         $this->dispatch('app-toast', message: 'Causa eliminada del catálogo.');
+    }
+
+    public function restaurarImputado(int $imputadoId): void
+    {
+        Gate::authorize('visita_carcel.gestionar');
+
+        DB::transaction(function () use ($imputadoId): void {
+            $imputado = VisitaCarcelImputado::query()->withTrashed()->findOrFail($imputadoId);
+
+            if (! $imputado->trashed()) {
+                return;
+            }
+
+            $causa = VisitaCarcelCausa::query()->withTrashed()->findOrFail($imputado->visita_carcel_causa_id);
+            if ($causa->trashed()) {
+                $causa->restore();
+                $causa->update(['updated_by' => Auth::id()]);
+            }
+
+            $imputado->restore();
+            $imputado->update(['updated_by' => Auth::id()]);
+        });
+
+        $this->dispatch('app-toast', message: 'Imputado restaurado correctamente.');
+    }
+
+    public function restaurarCausa(int $causaId): void
+    {
+        Gate::authorize('visita_carcel.gestionar');
+
+        DB::transaction(function () use ($causaId): void {
+            $causa = VisitaCarcelCausa::query()->withTrashed()->findOrFail($causaId);
+            $imputados = $causa->imputados()->withTrashed()->get();
+
+            if ($causa->trashed()) {
+                $causa->restore();
+                $causa->update(['updated_by' => Auth::id()]);
+            }
+
+            foreach ($imputados->filter->trashed() as $imputado) {
+                $imputado->restore();
+                $imputado->update(['updated_by' => Auth::id()]);
+            }
+        });
+
+        $this->dispatch('app-toast', message: 'Causa e imputados asociados restaurados correctamente.');
+    }
+
+    private function reporteControl(): array
+    {
+        $desde = Carbon::parse($this->reporteDesde ?: now('America/Santiago')->startOfMonth())->startOfDay();
+        $hasta = Carbon::parse($this->reporteHasta ?: now('America/Santiago'))->endOfDay();
+
+        $agregados = VisitaCarcelCausa::query()->withTrashed()->whereBetween('created_at', [$desde, $hasta])->get()
+            ->map(fn (VisitaCarcelCausa $causa) => ['tipo' => 'Causa', 'descripcion' => "RUC {$causa->ruc} · RIT {$causa->rit}", 'fecha' => $causa->created_at])
+            ->concat(VisitaCarcelImputado::query()->withTrashed()->with('causa')->whereBetween('created_at', [$desde, $hasta])->get()
+                ->map(fn (VisitaCarcelImputado $imputado) => ['tipo' => 'Imputado', 'descripcion' => "{$imputado->nombre} · {$imputado->rut}", 'fecha' => $imputado->created_at]))
+            ->sortByDesc('fecha')->values();
+
+        $eliminados = VisitaCarcelCausa::query()->withTrashed()->whereBetween('deleted_at', [$desde, $hasta])->get()
+            ->map(fn (VisitaCarcelCausa $causa) => ['tipo' => 'Causa', 'id' => $causa->id, 'descripcion' => "RUC {$causa->ruc} · RIT {$causa->rit}", 'fecha' => $causa->deleted_at])
+            ->concat(VisitaCarcelImputado::query()->withTrashed()->with('causa')->whereBetween('deleted_at', [$desde, $hasta])->get()
+                ->map(fn (VisitaCarcelImputado $imputado) => ['tipo' => 'Imputado', 'id' => $imputado->id, 'descripcion' => "{$imputado->nombre} · {$imputado->rut}", 'fecha' => $imputado->deleted_at]))
+            ->sortByDesc('fecha')->values();
+
+        $modificados = VisitaCarcelImputadoHistorial::query()->with('imputado')->whereBetween('created_at', [$desde, $hasta])->get()
+            ->map(fn (VisitaCarcelImputadoHistorial $historial) => ['descripcion' => "{$historial->imputado->nombre} · {$historial->archivo}", 'fecha' => $historial->created_at])
+            ->sortByDesc('fecha')->values();
+
+        return [
+            'agregados' => $agregados,
+            'eliminados' => $eliminados,
+            'modificados' => $modificados,
+            'por_penal' => VisitaCarcelImputado::query()->select('penal', DB::raw('COUNT(*) as total'))->groupBy('penal')->orderBy('penal')->get(),
+            'total_imputados' => VisitaCarcelImputado::query()->count(),
+        ];
     }
 
     private function procesarZipActualizacion(SafeSpreadsheetReader $reader, string $path, string $archivo): array
