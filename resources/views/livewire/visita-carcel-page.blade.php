@@ -3,7 +3,35 @@
 </x-slot:header>
 
 <div class="py-2">
-    <style>[aria-labelledby="ficha-causa-title"] table tbody td:last-child { white-space: nowrap; }</style>
+    <style>
+        [aria-labelledby="ficha-causa-title"] table tbody td:last-child { white-space: nowrap; }
+
+        .reporte-control-scroll {
+            overscroll-behavior: contain;
+            scrollbar-gutter: stable;
+        }
+
+        @media (min-width: 1024px) {
+            .reporte-control-resumen {
+                height: min(32rem, calc(100dvh - 22rem));
+                min-height: 20rem;
+            }
+
+            .reporte-control-columna {
+                display: flex;
+                min-height: 0;
+                flex-direction: column;
+                overflow: hidden;
+            }
+
+            .reporte-control-scroll {
+                min-height: 0;
+                max-height: none;
+                flex: 1;
+                overflow-y: auto;
+            }
+        }
+    </style>
     <div class="mx-auto max-w-7xl space-y-5 px-4 sm:px-6 lg:px-8">
         <x-flash-notifications />
 
@@ -175,16 +203,16 @@
                     @endforeach
                 </div>
 
-                <div class="grid divide-y divide-slate-200 lg:grid-cols-[minmax(0,1fr)_minmax(340px,0.9fr)] lg:divide-x lg:divide-y-0">
-                    <div class="p-5 sm:p-6">
+                <div class="reporte-control-resumen grid divide-y divide-slate-200 lg:grid-cols-[minmax(0,1fr)_minmax(340px,0.9fr)] lg:divide-x lg:divide-y-0">
+                    <div class="reporte-control-columna p-5 sm:p-6">
                         <div class="flex items-center justify-between gap-3"><div><p class="font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">Presos por penal</p><p class="mt-1 text-sm text-slate-600">Distribución actual de imputados activos.</p></div><span class="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700">{{ $reporte['por_penal']->count() }} penales</span></div>
-                        <div class="mt-4 overflow-hidden rounded-xl border border-slate-200"><table class="w-full text-sm"><tbody class="divide-y divide-slate-100">@forelse ($reporte['por_penal'] as $penal)<tr><td class="px-4 py-3 font-medium text-slate-800">{{ $penal->penal }}</td><td class="px-4 py-3 text-right font-mono text-sm font-bold tabular-nums text-emerald-700">{{ $penal->total }}</td></tr>@empty<tr><td class="px-4 py-8 text-center text-sm text-slate-500">No hay imputados activos.</td></tr>@endforelse</tbody></table></div>
+                        <div class="reporte-control-scroll mt-4 overflow-hidden overflow-y-auto rounded-xl border border-slate-200"><table class="w-full text-sm"><tbody class="divide-y divide-slate-100">@forelse ($reporte['por_penal'] as $penal)<tr><td class="px-4 py-3 font-medium text-slate-800">{{ $penal->penal }}</td><td class="px-4 py-3 text-right font-mono text-sm font-bold tabular-nums text-emerald-700">{{ $penal->total }}</td></tr>@empty<tr><td class="px-4 py-8 text-center text-sm text-slate-500">No hay imputados activos.</td></tr>@endforelse</tbody></table></div>
                     </div>
 
-                    <div class="bg-slate-50/70 p-5 sm:p-6">
+                    <div class="reporte-control-columna bg-slate-50/70 p-5 sm:p-6">
                         <p class="font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-rose-700">Rollback de eliminados</p>
                         <p class="mt-1 text-sm text-slate-600">Restaurar una causa recupera también sus imputados eliminados asociados.</p>
-                        <div class="mt-4 max-h-72 space-y-2 overflow-y-auto pr-1">
+                        <div class="reporte-control-scroll mt-4 max-h-72 space-y-2 overflow-y-auto pr-1">
                             @forelse ($reporte['eliminados'] as $registro)
                                 <article class="flex items-center justify-between gap-3 rounded-xl border border-rose-100 bg-white p-3"><div class="min-w-0"><p class="font-mono text-[10px] font-bold uppercase tracking-[0.1em] text-rose-700">{{ $registro['tipo'] }} · {{ $registro['fecha']->format('d/m/Y H:i') }}</p><p class="mt-1 truncate text-sm font-medium text-slate-800" title="{{ $registro['descripcion'] }}">{{ $registro['descripcion'] }}</p></div>@can('visita_carcel.gestionar')<button type="button" @if ($registro['tipo'] === 'Causa') wire:click="restaurarCausa({{ $registro['id'] }})" wire:confirm="Se restaurará la causa y sus imputados eliminados asociados. ¿Continuar?" @else wire:click="restaurarImputado({{ $registro['id'] }})" wire:confirm="Se restaurará este imputado. ¿Continuar?" @endif class="shrink-0 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-800 hover:bg-emerald-100">Restaurar</button>@endcan</article>
                             @empty
