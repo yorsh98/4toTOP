@@ -39,7 +39,7 @@
             <div class="mx-auto flex min-w-max shrink-0 items-center rounded-2xl border border-slate-200 bg-white p-1.5 shadow-sm sm:w-fit">
                 <button type="button" wire:click="seleccionarModo('comparacion')" @class(['rounded-xl px-4 py-2 text-sm font-semibold transition sm:px-6', 'bg-[#0A2E5D] text-white shadow-sm' => $modo === 'comparacion', 'text-slate-600 hover:bg-slate-50' => $modo !== 'comparacion'])>Importar archivos</button>
                 <button type="button" wire:click="seleccionarModo('alimentacion')" @class(['rounded-xl px-4 py-2 text-sm font-semibold transition sm:px-6', 'bg-rose-700 text-white shadow-sm' => $modo === 'alimentacion', 'text-slate-600 hover:bg-slate-50' => $modo !== 'alimentacion'])>Exportar visita de cárcel</button>
-                <button type="button" wire:click="seleccionarModo('reportes')" @class(['rounded-xl px-4 py-2 text-sm font-semibold transition sm:px-6', 'bg-emerald-700 text-white shadow-sm' => $modo === 'reportes', 'text-slate-600 hover:bg-slate-50' => $modo !== 'reportes'])>Reportes de control</button>
+                @can('visita_carcel.reportes')<button type="button" wire:click="seleccionarModo('reportes')" @class(['rounded-xl px-4 py-2 text-sm font-semibold transition sm:px-6', 'bg-emerald-700 text-white shadow-sm' => $modo === 'reportes', 'text-slate-600 hover:bg-slate-50' => $modo !== 'reportes'])>Reportes de control</button>@endcan
                 <button type="button" wire:click="seleccionarModo('notificaciones')" @class(['rounded-xl px-4 py-2 text-sm font-semibold transition sm:px-6', 'bg-amber-700 text-white shadow-sm' => $modo === 'notificaciones', 'text-slate-600 hover:bg-slate-50' => $modo !== 'notificaciones'])>Plazo revisión de PP</button>
             </div>
         </div>

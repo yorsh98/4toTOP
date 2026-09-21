@@ -17,7 +17,7 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Spatie\Permission\Models\Permission;
 
 beforeEach(function () {
-    foreach (['navbar.visita_carcel.visible', 'visita_carcel.ver', 'visita_carcel.gestionar'] as $permission) {
+    foreach (['navbar.visita_carcel.visible', 'visita_carcel.ver', 'visita_carcel.gestionar', 'visita_carcel.reportes'] as $permission) {
         Permission::findOrCreate($permission, 'web');
     }
 });
@@ -34,7 +34,19 @@ test('user with permission can access the visita carcel module', function () {
     $this->actingAs($user)
         ->get(route('visita-carcel.index'))
         ->assertOk()
-        ->assertSee('Comparacion de causas');
+        ->assertSee('Comparacion de causas')
+        ->assertDontSee('Reportes de control');
+});
+
+test('user without report permission cannot open reportes de control', function () {
+    $user = User::factory()->create();
+    $user->givePermissionTo('visita_carcel.ver');
+
+    Livewire::actingAs($user)
+        ->test(VisitaCarcelPage::class)
+        ->assertDontSee('Reportes de control')
+        ->call('seleccionarModo', 'reportes')
+        ->assertForbidden();
 });
 
 test('manager creates a cause without imputados', function () {
@@ -135,14 +147,15 @@ test('penal export groups subscribed active penales with records into the Santia
 });
 
 test('reportes de control shows operational records and penal totals', function () {
-    $user = visitaCarcelManager();
+    $user = User::factory()->create();
+    $user->givePermissionTo(['visita_carcel.ver', 'visita_carcel.reportes']);
     $causa = VisitaCarcelCausa::query()->create(['ruc' => '2301234567-8', 'rit' => '142-2026']);
     $activo = $causa->imputados()->create(['nombre' => 'Juan Perez Soto', 'rut' => '12.345.678-9', 'penal' => 'CCP Valdivia', 'delito' => 'Robo', 'fecha_ingreso_pp' => '2026-08-01']);
     $eliminado = $causa->imputados()->create(['nombre' => 'Ana Diaz Soto', 'rut' => '11.111.111-1', 'penal' => 'CCP Valdivia', 'delito' => 'Robo', 'fecha_ingreso_pp' => '2026-08-01']);
     VisitaCarcelImputadoHistorial::query()->create(['visita_carcel_imputado_id' => $activo->id, 'archivo' => 'Edicion manual', 'cambios' => ['juez' => ['old' => null, 'new' => 'Juez Uno']]]);
     $eliminado->delete();
 
-    Livewire::actingAs($user)
+    $component = Livewire::actingAs($user)
         ->test(VisitaCarcelPage::class)
         ->call('seleccionarModo', 'reportes')
         ->assertSee('Reportes de control')
@@ -151,6 +164,8 @@ test('reportes de control shows operational records and penal totals', function 
         ->assertSee('Registros modificados')
         ->assertSee('CCP Valdivia')
         ->assertSee('Juan Perez Soto');
+
+    expect($component->html())->not->toContain('wire:click="restaurar');
 });
 
 test('manager restores a deleted imputado from reportes de control', function () {
@@ -226,6 +241,46 @@ test('comparison import reports the reason for each skipped row', function () {
         ->assertSet('resultadoImportacion.causas_no_encontradas', 1)
         ->assertSet('resultadoImportacion.duplicados', 1)
         ->assertSet('resultadoImportacion.errores.0', 'Fila 3: el RIT 143-2026 no coincide con el catálogo.');
+});
+
+test('simple comparison replaces stale workbook data and exports for a non admin manager', function () {
+    $user = visitaCarcelManager();
+    VisitaCarcelCausa::query()->create(['ruc' => '2301234567-8', 'rit' => '142-2026']);
+    Penal::query()->firstOrCreate(['nombre' => 'CCP Valdivia'], ['activo' => true]);
+    $this->actingAs($user);
+
+    Livewire::test(VisitaCarcelPage::class)
+        ->set('tipoImportacion', 'libro')
+        ->set('archivoMovimientos', UploadedFile::fake()->createWithContent('libro.xlsx', visitaCarcelLibroComparacionPlanilla()))
+        ->call('importarMovimientos')
+        ->assertHasNoErrors()
+        ->assertSet('causasPendientes.0.ruc', '2600000099-9')
+        ->set('tipoImportacion', 'simple')
+        ->set('archivoMovimientos', UploadedFile::fake()->createWithContent('comparacion.xlsx', visitaCarcelComparacionPlanilla([
+            [142, 2026, '2301234567-8'],
+        ])))
+        ->call('importarMovimientos')
+        ->assertHasNoErrors()
+        ->assertSet('causasPendientes', [])
+        ->assertSet('imputadosPendientes', []);
+
+    expect(session('visita_carcel.tipo_comparacion'))->toBe('simple')
+        ->and(session()->has('visita_carcel.causas_pendientes'))->toBeFalse()
+        ->and(session()->has('visita_carcel.imputados_pendientes'))->toBeFalse();
+
+    $response = $this->get(route('visita-carcel.exportar-por-penal'))->assertOk()->assertDownload();
+    $path = $response->baseResponse->getFile()->getPathname();
+    $libro = IOFactory::load($path);
+
+    try {
+        expect($libro->getActiveSheet()->rangeToArray('A1:C2'))->toBe([
+            ['RIT', 'RUC', 'AÑO'],
+            ['142-2026', '2301234567-8', '2026'],
+        ]);
+    } finally {
+        $libro->disconnectWorksheets();
+        @unlink($path);
+    }
 });
 
 test('comparison import shows a file error instead of failing when the reader rejects it', function () {

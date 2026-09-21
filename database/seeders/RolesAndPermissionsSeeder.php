@@ -83,6 +83,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'navbar.insumos.editable',
             'visita_carcel.ver',
             'visita_carcel.gestionar',
+            'visita_carcel.reportes',
             'sentencias.importar',
             'ttypp.ver',
             'ttypp.crear',
