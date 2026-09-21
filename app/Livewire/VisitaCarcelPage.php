@@ -119,6 +119,10 @@ class VisitaCarcelPage extends Component
     {
         Gate::authorize('visita_carcel.ver');
 
+        if ($this->modo === 'reportes') {
+            Gate::authorize('visita_carcel.reportes');
+        }
+
         $causasQuery = VisitaCarcelCausa::query()
             ->withCount('imputados')
             ->when($this->search !== '', function ($query) {
@@ -178,6 +182,10 @@ class VisitaCarcelPage extends Component
 
         if (! in_array($modo, ['comparacion', 'alimentacion', 'notificaciones', 'reportes'], true)) {
             return;
+        }
+
+        if ($modo === 'reportes') {
+            Gate::authorize('visita_carcel.reportes');
         }
 
         $this->modo = $modo;
@@ -357,7 +365,13 @@ class VisitaCarcelPage extends Component
 
             $this->resultadoImportacion = $result;
             $this->coincidenciasCruce = array_values($matches);
+            $this->causasPendientes = [];
+            $this->causasPendientesSeleccionadas = [];
+            $this->imputadosPendientes = [];
+            $this->imputadosPendientesSeleccionados = [];
             session()->put('visita_carcel.comparacion', $this->coincidenciasCruce);
+            session()->put('visita_carcel.tipo_comparacion', 'simple');
+            session()->forget(['visita_carcel.causas_pendientes', 'visita_carcel.imputados_pendientes']);
             $this->reset('archivoMovimientos');
             session()->flash('ok', 'Comparacion completada. Los resultados son temporales y no se guardaron en el catalogo.');
         } catch (\RuntimeException $exception) {
@@ -473,6 +487,7 @@ class VisitaCarcelPage extends Component
             $this->resultadoImportacion = $result;
             $this->coincidenciasCruce = array_values(array_filter($matches, 'is_array'));
             session()->put('visita_carcel.comparacion', $this->coincidenciasCruce);
+            session()->put('visita_carcel.tipo_comparacion', 'libro');
             session()->put('visita_carcel.causas_pendientes', $this->causasPendientes);
             session()->put('visita_carcel.imputados_pendientes', $this->imputadosPendientes);
             $this->reset('archivoMovimientos');
@@ -488,7 +503,7 @@ class VisitaCarcelPage extends Component
     public function salirModoCruce(): void
     {
         $this->reset(['coincidenciasCruce', 'resultadoImportacion', 'causasPendientes', 'causasPendientesSeleccionadas', 'imputadosPendientes', 'imputadosPendientesSeleccionados']);
-        session()->forget(['visita_carcel.comparacion', 'visita_carcel.causas_pendientes', 'visita_carcel.imputados_pendientes']);
+        session()->forget(['visita_carcel.comparacion', 'visita_carcel.tipo_comparacion', 'visita_carcel.causas_pendientes', 'visita_carcel.imputados_pendientes']);
     }
 
     public function actualizarDesdeArchivos(SafeSpreadsheetReader $reader): void
