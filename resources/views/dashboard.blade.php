@@ -18,6 +18,7 @@
             ['name' => 'Visita Carcel', 'description' => 'Centraliza la gestion de visitas a recinto penitenciario.', 'route' => 'visita-carcel.index', 'icon' => 'fa-building-shield', 'permissions' => ['navbar.visita_carcel.visible', 'visita_carcel.ver'], 'accent' => '#be123c'],
             ['name' => 'Servicios', 'description' => 'Administra el inventario de servicios.', 'route' => 'backoffice.servicios.inventario', 'icon' => 'fa-boxes-stacked', 'permissions' => ['servicios.ver'], 'accent' => '#0d9488'],
             ['name' => 'Mapa de Servicios', 'description' => 'Explora la cobertura de servicios.', 'route' => 'backoffice.servicios.mapa', 'icon' => 'fa-map-location-dot', 'permissions' => ['servicios.ver'], 'accent' => '#65a30d'],
+            ['name' => 'Insumos', 'description' => 'Solicita y consulta los insumos disponibles.', 'route' => 'insumos.solicitudes', 'icon' => 'fa-box-open', 'permissions' => ['navbar.insumos.visible', 'navbar.insumos.editable', 'insumos.solicitar'], 'accent' => '#0891b2'],
             ['name' => 'Seguridad', 'description' => 'Administra roles, usuarios y auditoría.', 'route' => 'seguridad.roles.index', 'icon' => 'fa-shield-halved', 'permissions' => ['navbar.seguridad.visible', 'navbar.seguridad.editable'], 'accent' => '#475569'],
         ];
 
