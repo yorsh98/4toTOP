@@ -381,6 +381,320 @@ test('comparison leaves generic worksheet titles without a penal', function () {
     expect(VisitaCarcelCausa::query()->where('ruc', '2600000099-9')->doesntExist())->toBeTrue();
 });
 
+test('manager assigns an active penal before creating a pending workbook imputado', function (bool $causaExistente) {
+    $user = visitaCarcelManager();
+    $penal = Penal::query()->firstOrCreate(['nombre' => 'CCP Valdivia'], ['activo' => true]);
+    Penal::query()->create(['nombre' => 'Penal inactivo de prueba', 'activo' => false]);
+    $eliminado = Penal::query()->create(['nombre' => 'Penal eliminado de prueba', 'activo' => true]);
+    $eliminado->delete();
+    if ($causaExistente) {
+        VisitaCarcelCausa::query()->create(['ruc' => '2600000099-9', 'rit' => '500-2026']);
+    }
+    $propiedad = $causaExistente ? 'imputadosPendientes.0' : 'causasPendientes.0.imputados.0';
+    $tipo = $causaExistente ? 'imputado' : 'causa';
+
+    $component = Livewire::actingAs($user)->test(VisitaCarcelPage::class)
+        ->set('tipoImportacion', 'libro')
+        ->set('archivoMovimientos', UploadedFile::fake()->createWithContent('libro.xlsx', visitaCarcelLibroComparacionPlanilla('Hoja 1')))
+        ->call('importarMovimientos')
+        ->assertDontSee('Asignar penal de reclusión')
+        ->call($causaExistente ? 'abrirRevisionImputadosPendientes' : 'abrirRevisionCausasPendientes')
+        ->assertSee('Asignar penal de reclusión')
+        ->assertSee('penal-pendiente-'.$tipo.'-0-0', false)
+        ->assertDontSee('Penal inactivo de prueba')
+        ->assertDontSee('Penal eliminado de prueba')
+        ->assertSet($propiedad.'.valido', false)
+        ->call('asignarPenalPendiente', $tipo, 0, 0, (string) $penal->id)
+        ->assertHasNoErrors()
+        ->assertSet($propiedad.'.penal', 'CCP Valdivia')
+        ->assertSet($propiedad.'.campos.penal', 'CCP Valdivia')
+        ->assertSet($propiedad.'.valido', true)
+        ->assertSee('Penal asignado. Listo para ingresar.');
+
+    $clave = $causaExistente ? 'imputados_pendientes' : 'causas_pendientes';
+    $ruta = $causaExistente ? '0.campos.penal' : '0.imputados.0.campos.penal';
+    expect(data_get(session('visita_carcel.'.$clave), $ruta))->toBe('CCP Valdivia');
+    expect(VisitaCarcelImputado::query()->count())->toBe(0);
+
+    if ($causaExistente) {
+        $component->call('abrirRevisionImputadosPendientes')
+            ->set('imputadosPendientesSeleccionados', [$component->get('imputadosPendientes')[0]['id']]);
+    }
+    $component->call($causaExistente ? 'crearImputadosPendientes' : 'crearCausasPendientes')
+        ->assertHasNoErrors()
+        ->assertDontSee('Asignar penal de reclusión');
+
+    $imputado = VisitaCarcelImputado::query()->sole();
+    expect($imputado->penal)->toBe('CCP Valdivia')
+        ->and($imputado->historial()->sole()->cambios['penal']['nuevo'])->toBe('CCP Valdivia');
+})->with(['causa nueva' => false, 'causa existente' => true]);
+
+test('pending penal assignment rejects unavailable establishments', function (string $estado) {
+    $user = visitaCarcelManager();
+    $penal = Penal::query()->create(['nombre' => 'Penal no disponible', 'activo' => $estado !== 'inactivo']);
+    if ($estado === 'eliminado') {
+        $penal->delete();
+    }
+
+    Livewire::actingAs($user)->test(VisitaCarcelPage::class)
+        ->set('tipoImportacion', 'libro')
+        ->set('archivoMovimientos', UploadedFile::fake()->createWithContent('libro.xlsx', visitaCarcelLibroComparacionPlanilla('Hoja 1')))
+        ->call('importarMovimientos')
+        ->call('asignarPenalPendiente', 'causa', 0, 0, $estado === 'inexistente' ? '99999999' : (string) $penal->id)
+        ->assertHasErrors(['penalPendiente.causa.0.0'])
+        ->assertSet('causasPendientes.0.imputados.0.penal', null)
+        ->assertSet('causasPendientes.0.imputados.0.valido', false);
+})->with(['inactivo', 'eliminado', 'inexistente']);
+
+test('creating workbook pending causes immediately includes them in the active comparison', function () {
+    $user = visitaCarcelManager();
+    $existente = VisitaCarcelCausa::query()->create(['ruc' => '2600000098-8', 'rit' => '499-2026']);
+    $existente->imputados()->create(['nombre' => 'Imputado existente', 'rut' => '11.111.111-1', 'penal' => 'CCP Valdivia', 'delito' => 'Robo', 'fecha_ingreso_pp' => '2026-01-01']);
+
+    $planilla = new Spreadsheet;
+    $planilla->getActiveSheet()->setTitle('CCP VALDIVIA')->fromArray([
+        ['Rit', 'Año', 'Ruc', 'Imputado', 'Rut Imputado', 'Delito', 'Fec. Ingreso Pri. Prev.'],
+        [499, 2026, '2600000098-8', 'Imputado existente', '11.111.111-1', 'Robo', '01/01/2026'],
+        [500, 2026, '2600000099-9', 'Imputado nuevo', '12.345.678-9', 'Robo', '01/01/2026'],
+    ]);
+    $path = tempnam(sys_get_temp_dir(), 'visita-refresco-');
+    try {
+        (new Xlsx($planilla))->save($path);
+        $contenido = file_get_contents($path);
+    } finally {
+        unlink($path);
+    }
+
+    Livewire::actingAs($user)->test(VisitaCarcelPage::class)
+        ->set('tipoImportacion', 'libro')
+        ->set('archivoMovimientos', UploadedFile::fake()->createWithContent('libro.xlsx', $contenido))
+        ->call('importarMovimientos')
+        ->assertViewHas('totalImputados', 1)
+        ->call('abrirRevisionCausasPendientes')
+        ->call('crearCausasPendientes')
+        ->assertHasNoErrors()
+        ->assertSet('revisionCausasPendientesAbierta', false)
+        ->assertSet('resultadoImportacion.causas_no_encontradas', 0)
+        ->assertViewHas('totalImputados', 2)
+        ->assertViewHas('causas', fn ($causas) => $causas->pluck('ruc')->contains('2600000099-9'));
+});
+
+test('assigning a penal preserves other missing workbook fields', function () {
+    $user = visitaCarcelManager();
+    $penal = Penal::query()->firstOrCreate(['nombre' => 'CCP Valdivia'], ['activo' => true]);
+
+    Livewire::actingAs($user)->test(VisitaCarcelPage::class)
+        ->set('tipoImportacion', 'libro')
+        ->set('archivoMovimientos', UploadedFile::fake()->createWithContent('libro.xlsx', visitaCarcelLibroComparacionPlanilla('Hoja 1', delito: '')))
+        ->call('importarMovimientos')
+        ->call('asignarPenalPendiente', 'causa', 0, 0, (string) $penal->id)
+        ->assertSet('causasPendientes.0.imputados.0.valido', false)
+        ->assertSet('causasPendientes.0.imputados.0.motivo', 'Falta: delito.')
+        ->call('crearCausasPendientes');
+
+    expect(VisitaCarcelImputado::query()->count())->toBe(0);
+});
+
+test('pending cause creation rechecks that an assigned penal is still active', function () {
+    $user = visitaCarcelManager();
+    $penal = Penal::query()->firstOrCreate(['nombre' => 'CCP Valdivia'], ['activo' => true]);
+    $component = Livewire::actingAs($user)->test(VisitaCarcelPage::class)
+        ->set('tipoImportacion', 'libro')
+        ->set('archivoMovimientos', UploadedFile::fake()->createWithContent('libro.xlsx', visitaCarcelLibroComparacionPlanilla('Hoja 1')))
+        ->call('importarMovimientos')
+        ->call('asignarPenalPendiente', 'causa', 0, 0, (string) $penal->id);
+
+    $penal->update(['activo' => false]);
+    $component->call('crearCausasPendientes');
+
+    expect(VisitaCarcelImputado::query()->count())->toBe(0);
+});
+
+test('viewer cannot assign a penal to workbook pending records', function () {
+    $user = User::factory()->create();
+    $user->givePermissionTo('visita_carcel.ver');
+
+    Livewire::actingAs($user)->test(VisitaCarcelPage::class)
+        ->call('asignarPenalPendiente', 'causa', 0, 0, '1')
+        ->assertForbidden();
+});
+
+test('comparison identifies absent active causes and refreshes recoverable deletions', function (string $formato) {
+    $user = visitaCarcelManager();
+    $presente = VisitaCarcelCausa::query()->create(['ruc' => '2600000099-9', 'rit' => '500-2026']);
+    $ausente = VisitaCarcelCausa::query()->create(['ruc' => '2600000100-0', 'rit' => '501-2026']);
+    $imputado = $ausente->imputados()->create(['nombre' => 'Persona ausente del archivo', 'rut' => '11.111.111-1', 'penal' => 'CCP Valdivia', 'delito' => 'Robo', 'fecha_ingreso_pp' => '2026-01-01']);
+    $eliminada = VisitaCarcelCausa::query()->create(['ruc' => '2600000101-1', 'rit' => '502-2026']);
+    $eliminada->delete();
+    $contenido = $formato === 'simple'
+        ? visitaCarcelComparacionPlanilla([[500, 2026, '2600000099-9'], [500, 2026, '2600000099-9']])
+        : visitaCarcelLibroComparacionPlanilla();
+
+    $component = Livewire::actingAs($user)->test(VisitaCarcelPage::class)
+        ->call('abrirFormularioImportacion')
+        ->set('tipoImportacion', $formato)
+        ->set('archivoMovimientos', UploadedFile::fake()->createWithContent('comparacion.xlsx', $contenido))
+        ->call('importarMovimientos')
+        ->assertHasNoErrors()
+        ->assertSet('comparacionAusenciasDisponible', true)
+        ->assertSet('causasAusentesIds', [$ausente->id])
+        ->assertSee('Revisar causas ausentes')
+        ->assertDontSee('Persona ausente del archivo')
+        ->call('abrirRevisionCausasAusentes')
+        ->assertSet('revisionCausasAusentesAbierta', true)
+        ->assertSee('Persona ausente del archivo')
+        ->call('cerrarRevisionCausasAusentes')
+        ->assertDontSee('Persona ausente del archivo')
+        ->call('abrirRevisionCausasAusentes')
+        ->assertViewHas('causasAusentes', fn ($causas) => $causas->total() === 1 && $causas->first()->imputados->sole()->penal === 'CCP Valdivia');
+
+    expect($ausente->fresh()->trashed())->toBeFalse();
+    $component->call('eliminarCausaAusente', $ausente->id)
+        ->assertHasNoErrors()
+        ->assertDontSee('Persona ausente del archivo')
+        ->assertViewHas('causasAusentes', fn ($causas) => $causas->total() === 0);
+
+    expect($ausente->fresh()->trashed())->toBeTrue()
+        ->and($imputado->fresh()->trashed())->toBeTrue()
+        ->and($ausente->fresh()->deleted_by)->toBe($user->id)
+        ->and($presente->fresh()->trashed())->toBeFalse();
+})->with(['simple', 'libro']);
+
+test('a present RUC with a different RIT is never proposed as absent', function (string $formato) {
+    $user = visitaCarcelManager();
+    VisitaCarcelCausa::query()->create(['ruc' => '2600000099-9', 'rit' => '999-2026']);
+    $contenido = $formato === 'simple'
+        ? visitaCarcelComparacionPlanilla([[500, 2026, '2600000099-9']])
+        : visitaCarcelLibroComparacionPlanilla();
+
+    Livewire::actingAs($user)->test(VisitaCarcelPage::class)
+        ->set('tipoImportacion', $formato)
+        ->set('archivoMovimientos', UploadedFile::fake()->createWithContent('comparacion.xlsx', $contenido))
+        ->call('importarMovimientos')
+        ->assertSet('resultadoImportacion.inconsistencias', 1)
+        ->assertSet('comparacionAusenciasDisponible', true)
+        ->assertSet('causasAusentesIds', [])
+        ->call('abrirRevisionCausasAusentes')
+        ->assertSee('No hay causas activas ausentes por revisar');
+})->with(['simple', 'libro']);
+
+test('absent cause review can delete each imputado without deleting the cause or siblings', function (string $formato) {
+    $user = visitaCarcelManager();
+    $causa = VisitaCarcelCausa::query()->create(['ruc' => '2600000100-0', 'rit' => '501-2026']);
+    $primero = $causa->imputados()->create(['nombre' => 'Persona para eliminar', 'rut' => '11.111.111-1', 'penal' => 'CCP Valdivia', 'delito' => 'Robo', 'fecha_ingreso_pp' => '2026-01-01']);
+    $segundo = $causa->imputados()->create(['nombre' => 'Persona para conservar', 'rut' => '12.345.678-9', 'penal' => 'CCP Valdivia', 'delito' => 'Robo', 'fecha_ingreso_pp' => '2026-01-01']);
+    $contenido = $formato === 'simple'
+        ? visitaCarcelComparacionPlanilla([[500, 2026, '2600000099-9']])
+        : visitaCarcelLibroComparacionPlanilla();
+
+    $component = Livewire::actingAs($user)->test(VisitaCarcelPage::class)
+        ->set('tipoImportacion', $formato)
+        ->set('archivoMovimientos', UploadedFile::fake()->createWithContent('comparacion.xlsx', $contenido))
+        ->call('importarMovimientos')
+        ->call('abrirRevisionCausasAusentes')
+        ->assertSee('Eliminar imputado')
+        ->call('eliminarImputado', $primero->id)
+        ->assertHasNoErrors()
+        ->assertSet('revisionCausasAusentesAbierta', true)
+        ->assertDontSee('Persona para eliminar')
+        ->assertSee('Persona para conservar')
+        ->assertViewHas('causasAusentes', fn ($causas) => $causas->total() === 1 && $causas->first()->imputados->count() === 1);
+
+    expect($primero->fresh()->trashed())->toBeTrue()
+        ->and($primero->fresh()->deleted_by)->toBe($user->id)
+        ->and($segundo->fresh()->trashed())->toBeFalse()
+        ->and($causa->fresh()->trashed())->toBeFalse();
+
+    $component->call('eliminarImputado', $segundo->id)
+        ->assertSee('Sin imputados activos asociados.')
+        ->assertViewHas('causasAusentes', fn ($causas) => $causas->first()->imputados->isEmpty());
+    expect($causa->fresh()->trashed())->toBeFalse();
+})->with(['simple', 'libro']);
+
+test('missing RUC rows prevent proposals for absent causes', function () {
+    $user = visitaCarcelManager();
+    VisitaCarcelCausa::query()->create(['ruc' => '2600000099-9', 'rit' => '500-2026']);
+
+    Livewire::actingAs($user)->test(VisitaCarcelPage::class)
+        ->call('abrirFormularioImportacion')
+        ->set('archivoMovimientos', UploadedFile::fake()->createWithContent('comparacion.xlsx', visitaCarcelComparacionPlanilla([[500, 2026, '']])))
+        ->call('importarMovimientos')
+        ->assertSet('comparacionAusenciasDisponible', false)
+        ->assertSet('causasAusentesIds', [])
+        ->assertSee('No se determinaron causas ausentes');
+});
+
+test('a new comparison and exiting clear previous absent cause proposals', function () {
+    $user = visitaCarcelManager();
+    $causa = VisitaCarcelCausa::query()->create(['ruc' => '2600000099-9', 'rit' => '500-2026']);
+
+    Livewire::actingAs($user)->test(VisitaCarcelPage::class)
+        ->call('abrirFormularioImportacion')
+        ->set('archivoMovimientos', UploadedFile::fake()->createWithContent('primera.xlsx', visitaCarcelComparacionPlanilla([[1, 2026, 'otro-ruc']])))
+        ->call('importarMovimientos')
+        ->assertSet('causasAusentesIds', [$causa->id])
+        ->set('archivoMovimientos', UploadedFile::fake()->createWithContent('vacia.xlsx', visitaCarcelComparacionPlanilla([])))
+        ->call('importarMovimientos')
+        ->assertSet('causasAusentesIds', [])
+        ->assertSet('comparacionAusenciasDisponible', false)
+        ->assertSee('No se determinaron causas ausentes')
+        ->call('salirModoCruce')
+        ->assertSet('avisoComparacionAusencias', '')
+        ->assertDontSee('Causas no presentes en el archivo');
+});
+
+test('absent cause action rejects a cause present in the file', function () {
+    $user = visitaCarcelManager();
+    $causa = VisitaCarcelCausa::query()->create(['ruc' => '2600000099-9', 'rit' => '500-2026']);
+
+    Livewire::actingAs($user)->test(VisitaCarcelPage::class)
+        ->set('archivoMovimientos', UploadedFile::fake()->createWithContent('comparacion.xlsx', visitaCarcelComparacionPlanilla([[500, 2026, '2600000099-9']])))
+        ->call('importarMovimientos')
+        ->call('eliminarCausaAusente', $causa->id)
+        ->assertStatus(422);
+
+    expect($causa->fresh()->trashed())->toBeFalse();
+});
+
+test('viewer cannot delete absent causes', function () {
+    $user = User::factory()->create();
+    $user->givePermissionTo('visita_carcel.ver');
+
+    Livewire::actingAs($user)->test(VisitaCarcelPage::class)
+        ->call('eliminarCausaAusente', 1)
+        ->assertForbidden();
+});
+
+test('workbook absence comparison reads every sheet and rejects omitted sheets', function (bool $hojaInvalida) {
+    $user = visitaCarcelManager();
+    VisitaCarcelCausa::query()->create(['ruc' => '2600000099-9', 'rit' => '500-2026']);
+    VisitaCarcelCausa::query()->create(['ruc' => '2600000100-0', 'rit' => '501-2026']);
+    $ausente = VisitaCarcelCausa::query()->create(['ruc' => '2600000101-1', 'rit' => '502-2026']);
+    $planilla = new Spreadsheet;
+    foreach (['2600000099-9', '2600000100-0'] as $indice => $ruc) {
+        $hoja = $indice === 0 ? $planilla->getActiveSheet() : $planilla->createSheet();
+        $hoja->setTitle('Hoja '.($indice + 1))->fromArray([
+            $hojaInvalida && $indice === 1 ? ['Encabezados desconocidos'] : ['Rit', 'Año', 'Ruc', 'Imputado', 'Rut Imputado'],
+            [500 + $indice, 2026, $ruc, 'Persona del libro', '12.345.678-9'],
+        ]);
+    }
+    $path = tempnam(sys_get_temp_dir(), 'visita-ausencias-');
+    try {
+        (new Xlsx($planilla))->save($path);
+        $contenido = file_get_contents($path);
+    } finally {
+        unlink($path);
+    }
+
+    Livewire::actingAs($user)->test(VisitaCarcelPage::class)
+        ->set('tipoImportacion', 'libro')
+        ->set('archivoMovimientos', UploadedFile::fake()->createWithContent('libro.xlsx', $contenido))
+        ->call('importarMovimientos')
+        ->assertHasNoErrors()
+        ->assertSet('comparacionAusenciasDisponible', ! $hojaInvalida)
+        ->assertSet('causasAusentesIds', $hojaInvalida ? [] : [$ausente->id]);
+})->with(['todas las hojas válidas' => false, 'hoja omitida' => true]);
+
 test('comparison recognizes every active penal from its worksheet title', function (string $titulo, string $penal, string $ruc) {
     $user = visitaCarcelManager();
     Penal::query()->firstOrCreate(['nombre' => $penal], ['activo' => true]);
@@ -455,6 +769,11 @@ test('manager adds an imputado from the cause record', function () {
         ->set('fechaIngresoPp', '2026-08-02')
         ->call('guardarImputado')
         ->assertHasNoErrors()
+        ->assertSet('formularioImputadoAbierto', false)
+        ->assertSee('Maria Gonzalez Rojas')
+        ->assertSee('Homicidio')
+        ->assertViewHas('totalImputados', 1)
+        ->assertViewHas('causaSeleccionada', fn ($ficha) => $ficha->imputados->count() === 1)
         ->assertDispatched('app-toast');
 
     expect(VisitaCarcelCausa::query()->count())->toBe(1)
@@ -565,13 +884,18 @@ test('manager edits an imputado and records every changed field', function () {
 
     Livewire::actingAs($user)
         ->test(VisitaCarcelPage::class)
+        ->call('verFicha', $causa->id)
         ->call('abrirEdicionImputado', $imputado->id)
         ->assertSet('imputadoEdicion.nombre', 'Juan Perez Soto')
         ->set('imputadoEdicion.nombre', 'Juan Perez Actualizado')
         ->set('imputadoEdicion.ultima_rev_pp', '2026-08-20')
         ->set('imputadoEdicion.ult_resolucion', 'Resolución actualizada')
         ->call('guardarEdicionImputado')
-        ->assertHasNoErrors();
+        ->assertHasNoErrors()
+        ->assertSet('imputadoEditandoId', null)
+        ->assertSee('Juan Perez Actualizado')
+        ->assertDontSee('Juan Perez Soto')
+        ->assertViewHas('causaSeleccionada', fn ($ficha) => $ficha->imputados->sole()->nombre === 'Juan Perez Actualizado');
 
     $historial = VisitaCarcelImputadoHistorial::query()->latest('id')->firstOrFail();
 
@@ -840,14 +1164,14 @@ function visitaCarcelComparacionPlanilla(array $filas): string
     }
 }
 
-function visitaCarcelLibroComparacionPlanilla(string $titulo = 'CCP VALDIVIA', string $ruc = '2600000099-9'): string
+function visitaCarcelLibroComparacionPlanilla(string $titulo = 'CCP VALDIVIA', string $ruc = '2600000099-9', string $delito = 'Robo'): string
 {
     $planilla = new Spreadsheet;
     $planilla->getActiveSheet()->setTitle($titulo);
     $planilla->getActiveSheet()->fromArray([
         ['Lugar de Reclusion', 'CCP Valdivia'], [], [], [], [],
         ['Tribunal', 'Rit', 'Año', 'Ruc', 'Imputado', 'Rut Imputado', 'Delito', 'Fec. Ingreso Pri. Prev.', 'Plazo Cierre', 'Ultima Rev. Preven.', 'Juez', 'Defensor', 'Fec. Ult. Resolución', 'Ult. Resolución', 'RPA', 'P/P Suspendida'],
-        ['4 TOP Santiago', 500, 2026, $ruc, 'Ana Pérez', '12.345.678-9', 'Robo', '20/07/2022', '20/08/2026', '21/08/2026', 'Juez', 'Defensor', '22/08/2026', 'Resolución', 'No', 'No'],
+        ['4 TOP Santiago', 500, 2026, $ruc, 'Ana Pérez', '12.345.678-9', $delito, '20/07/2022', '20/08/2026', '21/08/2026', 'Juez', 'Defensor', '22/08/2026', 'Resolución', 'No', 'No'],
     ]);
     $path = tempnam(sys_get_temp_dir(), 'visita-carcel-libro-');
     (new Xlsx($planilla))->save($path);
