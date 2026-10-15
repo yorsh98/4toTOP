@@ -251,7 +251,8 @@
                     </div>
                     <span class="inline-flex items-center justify-center rounded-full bg-rose-50 px-3 py-2.5 text-xs font-semibold text-rose-700">Total: {{ $totalImputados }}</span>
                     @can('visita_carcel.gestionar')
-                        @if ($coincidenciasCruce !== [])<a href="{{ route('visita-carcel.exportar-por-penal') }}" class="inline-flex items-center justify-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-800 transition hover:bg-emerald-100"><i class="fa-solid fa-file-excel" aria-hidden="true"></i> Exportar comparacion</a><button type="button" wire:click="salirModoCruce" class="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700">Salir de comparacion</button>@endif
+                        @if ($coincidenciasCruce !== [])<a href="{{ route('visita-carcel.exportar-por-penal') }}" class="inline-flex items-center justify-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-800 transition hover:bg-emerald-100"><i class="fa-solid fa-file-excel" aria-hidden="true"></i> Exportar comparacion</a>@endif
+                        @if ($resultadoImportacion !== [])<button type="button" wire:click="salirModoCruce" class="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700">Salir de comparacion</button>@endif
                         <button type="button" wire:click="abrirFormularioCausa" class="inline-flex items-center justify-center gap-2 rounded-lg border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm font-semibold text-rose-800 transition hover:bg-rose-100"><i class="fa-solid fa-plus" aria-hidden="true"></i> Nueva causa</button>
                         <button type="button" wire:click="abrirInformacionImportacion" class="inline-flex size-11 items-center justify-center rounded-lg border border-sky-200 bg-sky-50 text-[#0A2E5D] transition hover:bg-sky-100" title="Ver formato requerido" aria-label="Ver formato requerido"><i class="fa-solid fa-circle-info text-lg" aria-hidden="true"></i></button>
                         <button type="button" wire:click="abrirFormularioImportacion" class="inline-flex items-center justify-center gap-2 rounded-lg bg-[#0A2E5D] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-sky-700"><i class="fa-solid fa-file-arrow-up" aria-hidden="true"></i> Importar para comparar</button>
@@ -268,8 +269,89 @@
                     @if ($resultadoImportacion['errores'] ?? [])<section class="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4"><p class="font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-amber-800">Filas no procesadas</p><ul class="mt-2 space-y-1 text-sm text-amber-900">@foreach ($resultadoImportacion['errores'] as $error)<li>{{ $error }}</li>@endforeach</ul>@if (count($resultadoImportacion['errores']) === 20)<p class="mt-2 text-xs text-amber-800">Se muestran los primeros 20 motivos.</p>@endif</section>@endif
                     @if ($causasPendientes !== [])<section class="mt-5 flex flex-col gap-3 border-l-4 border-amber-600 bg-amber-50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"><div class="flex items-center gap-3"><span class="inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-amber-700 font-mono text-sm font-bold text-white">{{ count($causasPendientes) }}</span><p class="text-sm font-semibold text-amber-950">Causas no ingresadas en este sistema</p></div><button type="button" wire:click="abrirRevisionCausasPendientes" class="self-start rounded-lg bg-amber-700 px-3 py-2 text-sm font-semibold text-white hover:bg-amber-800 sm:self-auto">Revisar causas</button></section>@endif
                     @if ($imputadosPendientes !== [])<section class="mt-3 flex flex-col gap-3 border-l-4 border-sky-700 bg-sky-50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"><div class="flex items-center gap-3"><span class="inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-[#0A2E5D] font-mono text-sm font-bold text-white">{{ count($imputadosPendientes) }}</span><p class="text-sm font-semibold text-slate-900">Imputados pendientes en causas existentes</p></div><button type="button" wire:click="abrirRevisionImputadosPendientes" class="self-start rounded-lg bg-[#0A2E5D] px-3 py-2 text-sm font-semibold text-white hover:bg-sky-700 sm:self-auto">Revisar imputados</button></section>@endif
+                    @if ($comparacionAusenciasDisponible)
+                        <section class="mt-3 flex flex-col gap-3 border-l-4 border-rose-700 bg-rose-50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+                            <div class="flex items-center gap-3">
+                                <span class="inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-rose-700 font-mono text-sm font-bold text-white" role="status">{{ $causasAusentes->total() }}</span>
+                                <p class="text-sm font-semibold text-rose-950">Causas no presentes en el archivo</p>
+                            </div>
+                            <button type="button" wire:click="abrirRevisionCausasAusentes" class="self-start rounded-lg bg-rose-700 px-3 py-2 text-sm font-semibold text-white hover:bg-rose-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-700 sm:self-auto">Revisar causas ausentes</button>
+                        </section>
+                    @elseif ($avisoComparacionAusencias !== '')
+                        <p class="mt-3 border-l-4 border-amber-600 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900" role="status">{{ $avisoComparacionAusencias }}</p>
+                    @endif
                 </div>
             </section>
+        @endif
+
+        @if ($revisionCausasAusentesAbierta && $comparacionAusenciasDisponible)
+            @teleport('body')
+            <div class="fixed inset-0 z-[60] bg-slate-950/40" role="dialog" aria-modal="true" aria-labelledby="causas-ausentes-title">
+                <section class="absolute inset-y-0 right-0 flex w-full max-w-3xl flex-col overflow-hidden bg-white shadow-2xl">
+                    <header class="flex items-start justify-between border-b border-slate-200 px-5 py-5 sm:px-7">
+                        <div>
+                            <p class="font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-rose-700">Baja pendiente</p>
+                            <h3 id="causas-ausentes-title" class="mt-1 text-xl font-semibold text-slate-900">Causas no presentes en el archivo</h3>
+                            <p class="mt-1 text-sm text-slate-600">Revise las {{ $causasAusentes->total() }} causas antes de eliminarlas del catálogo.</p>
+                        </div>
+                        <button type="button" wire:click="cerrarRevisionCausasAusentes" class="inline-flex size-9 shrink-0 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100" aria-label="Cerrar causas ausentes"><i class="fa-solid fa-xmark text-lg" aria-hidden="true"></i></button>
+                    </header>
+                    <div class="flex-1 space-y-3 overflow-y-auto p-5 sm:p-7">
+                        <details class="rounded-xl border border-rose-100 bg-rose-50/60 p-4 text-xs leading-5 text-slate-600">
+                            <summary class="cursor-pointer font-semibold text-rose-800">Comparación con todo el catálogo activo</summary>
+                            <p class="mt-2">El archivo debe contener el listado completo. Si corresponde solo a algunos penales, la ausencia de una causa no confirma que deba eliminarse. Los RUC presentes con un RIT distinto se informan como inconsistencias.</p>
+                        </details>
+                        @forelse ($causasAusentes as $causaAusente)
+                            <article wire:key="causa-ausente-{{ $causaAusente->id }}" class="rounded-xl border border-slate-200">
+                                <div class="border-b border-slate-100 p-4">
+                                    <strong class="block text-slate-900">RUC {{ $causaAusente->ruc }} · RIT {{ $causaAusente->rit }}</strong>
+                                    <p class="mt-1 text-xs text-slate-500">No encontrada en el archivo · {{ $causaAusente->imputados->count() }} imputados activos</p>
+                                </div>
+                                <div class="divide-y divide-slate-100">
+                                    @forelse ($causaAusente->imputados as $imputadoAusente)
+                                        <div wire:key="ausente-imputado-{{ $imputadoAusente->id }}" class="p-4 text-sm">
+                                            <div class="flex flex-wrap items-center justify-between gap-2">
+                                                <p class="break-words font-medium text-slate-900">{{ $imputadoAusente->nombre }}</p>
+                                                <span class="font-mono text-xs text-slate-500">{{ $imputadoAusente->rut }}</span>
+                                            </div>
+                                            <p class="mt-1 break-words text-xs text-slate-600">{{ $imputadoAusente->penal }} · {{ $imputadoAusente->delito }}</p>
+                                            @can('visita_carcel.gestionar')
+                                                <div class="mt-3 flex justify-end">
+                                                    <button type="button" wire:click="eliminarImputado({{ $imputadoAusente->id }})"
+                                                        wire:confirm="Se eliminará únicamente a {{ $imputadoAusente->nombre }} (RUT {{ $imputadoAusente->rut }}) de esta causa. La causa y los demás imputados se conservarán. ¿Continuar?"
+                                                        wire:loading.attr="disabled" wire:target="eliminarImputado,eliminarCausaAusente"
+                                                        class="rounded-lg border border-rose-200 bg-white px-3 py-2 text-xs font-semibold text-rose-700 hover:bg-rose-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-700 disabled:opacity-60">Eliminar imputado</button>
+                                                </div>
+                                            @endcan
+                                        </div>
+                                    @empty
+                                        <p class="p-4 text-sm text-slate-500">Sin imputados activos asociados.</p>
+                                    @endforelse
+                                </div>
+                                <div class="flex flex-wrap justify-end gap-2 border-t border-slate-100 p-4">
+                                    <button type="button" wire:click="verFicha({{ $causaAusente->id }})" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50">Ver ficha</button>
+                                    @can('visita_carcel.gestionar')
+                                        <button type="button" wire:click="eliminarCausaAusente({{ $causaAusente->id }})"
+                                            wire:confirm="Se eliminará la causa RUC {{ $causaAusente->ruc }} y sus {{ $causaAusente->imputados->count() }} imputados activos. Podrás restaurarlos desde Reportes de control. ¿Continuar?"
+                                            wire:loading.attr="disabled" wire:target="eliminarCausaAusente"
+                                            class="rounded-lg bg-rose-700 px-3 py-2 text-xs font-semibold text-white hover:bg-rose-800 disabled:opacity-60">Eliminar causa</button>
+                                    @endcan
+                                </div>
+                            </article>
+                        @empty
+                            <p class="rounded-xl border border-dashed border-slate-300 px-4 py-8 text-center text-sm text-slate-500">No hay causas activas ausentes por revisar en esta comparación.</p>
+                        @endforelse
+                        @if ($causasAusentes->hasPages())
+                            <div class="pt-2">{{ $causasAusentes->links() }}</div>
+                        @endif
+                    </div>
+                    <footer class="flex flex-wrap items-center justify-end gap-2 border-t border-slate-200 bg-white px-5 py-4 sm:px-7">
+                        <p class="mr-auto max-w-sm text-xs leading-5 text-slate-500">Las bajas pueden restaurarse desde Reportes de control.</p>
+                        <button type="button" wire:click="cerrarRevisionCausasAusentes" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Cerrar revisión</button>
+                    </footer>
+                </section>
+            </div>
+            @endteleport
         @endif
 
         @if ($informacionImportacionAbierta)
@@ -280,7 +362,9 @@
 
         @if ($revisionCausasPendientesAbierta)
             @teleport('body')
-            <div class="fixed inset-0 z-[60] bg-slate-950/40" role="dialog" aria-modal="true" aria-labelledby="causas-pendientes-title"><section class="absolute inset-y-0 right-0 flex w-full max-w-3xl flex-col overflow-hidden bg-white shadow-2xl"><header class="flex items-start justify-between border-b border-slate-200 px-5 py-5 sm:px-7"><div><p class="font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-amber-700">Ingreso pendiente</p><h3 id="causas-pendientes-title" class="mt-1 text-xl font-semibold text-slate-900">Causas e imputados a agregar</h3><p class="mt-1 text-sm text-slate-600">Revise la selección antes de ingresar al catálogo.</p></div><button type="button" wire:click="cerrarRevisionCausasPendientes" class="inline-flex size-9 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100" aria-label="Cerrar"><i class="fa-solid fa-xmark text-lg" aria-hidden="true"></i></button></header><div class="flex-1 space-y-3 overflow-y-auto p-5 sm:p-7">@foreach ($causasPendientes as $causa)<article wire:key="causa-pendiente-{{ $causa['ruc'] }}" class="rounded-xl border border-slate-200"><label class="flex cursor-pointer items-start gap-3 border-b border-slate-100 p-4"><input type="checkbox" wire:model="causasPendientesSeleccionadas" value="{{ $causa['ruc'] }}" class="mt-1 rounded border-slate-300 text-amber-700 focus:ring-amber-700"><span><strong class="block text-slate-900">RUC {{ $causa['ruc'] }} · RIT {{ $causa['rit'] }}</strong><span class="mt-1 block text-xs text-slate-500">{{ implode(', ', $causa['hojas']) }}</span></span></label><div class="divide-y divide-slate-100">@foreach ($causa['imputados'] as $imputado)<div class="p-4 text-sm"><div class="flex flex-wrap items-center justify-between gap-2"><p class="font-medium text-slate-900">{{ $imputado['nombre'] ?: 'Sin nombre' }}</p><span class="font-mono text-xs text-slate-500">{{ $imputado['rut'] ?: 'Sin RUT' }}</span></div><p class="mt-1 text-xs text-slate-600">{{ $imputado['penal'] ?: 'Penal no identificado' }} · {{ $imputado['delito'] ?: 'Sin delito' }}</p>@if (! $imputado['valido'])<p class="mt-2 text-xs font-semibold text-red-700">No se ingresará: {{ $imputado['motivo'] }}</p>@endif</div>@endforeach</div></article>@endforeach</div><footer class="flex flex-wrap justify-end gap-2 border-t border-slate-200 bg-white px-5 py-4 sm:px-7">@error('causasPendientesSeleccionadas')<p class="mr-auto self-center text-sm text-red-600">{{ $message }}</p>@enderror<button type="button" wire:click="cerrarRevisionCausasPendientes" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700">Cancelar</button><button type="button" wire:click="crearCausasPendientes" wire:confirm="Se crearán las causas seleccionadas y sus imputados válidos. ¿Desea continuar?" class="rounded-lg bg-amber-700 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-800">Ingresar seleccionadas</button></footer></section></div>
+            <div class="fixed inset-0 z-[60] bg-slate-950/40" role="dialog" aria-modal="true" aria-labelledby="causas-pendientes-title"><section class="absolute inset-y-0 right-0 flex w-full max-w-3xl flex-col overflow-hidden bg-white shadow-2xl"><header class="flex items-start justify-between border-b border-slate-200 px-5 py-5 sm:px-7"><div><p class="font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-amber-700">Ingreso pendiente</p><h3 id="causas-pendientes-title" class="mt-1 text-xl font-semibold text-slate-900">Causas e imputados a agregar</h3><p class="mt-1 text-sm text-slate-600">Revise la selección antes de ingresar al catálogo.</p></div><button type="button" wire:click="cerrarRevisionCausasPendientes" class="inline-flex size-9 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100" aria-label="Cerrar"><i class="fa-solid fa-xmark text-lg" aria-hidden="true"></i></button></header><div class="flex-1 space-y-3 overflow-y-auto p-5 sm:p-7">@foreach ($causasPendientes as $indiceCausa => $causa)<article wire:key="causa-pendiente-{{ $causa['ruc'] }}" class="rounded-xl border border-slate-200"><label class="flex cursor-pointer items-start gap-3 border-b border-slate-100 p-4"><input type="checkbox" wire:model="causasPendientesSeleccionadas" value="{{ $causa['ruc'] }}" class="mt-1 rounded border-slate-300 text-amber-700 focus:ring-amber-700"><span><strong class="block text-slate-900">RUC {{ $causa['ruc'] }} · RIT {{ $causa['rit'] }}</strong><span class="mt-1 block text-xs text-slate-500">{{ implode(', ', $causa['hojas']) }}</span></span></label><div class="divide-y divide-slate-100">@foreach ($causa['imputados'] as $indiceImputado => $imputado)<div class="p-4 text-sm"><div class="flex flex-wrap items-center justify-between gap-2"><p class="font-medium text-slate-900">{{ $imputado['nombre'] ?: 'Sin nombre' }}</p><span class="font-mono text-xs text-slate-500">{{ $imputado['rut'] ?: 'Sin RUT' }}</span></div><p class="mt-1 text-xs text-slate-600">{{ $imputado['penal'] ?: 'Penal no identificado' }} · {{ $imputado['delito'] ?: 'Sin delito' }}</p>
+@include('livewire.partials.visita-carcel-penal-pendiente', ['tipo' => 'causa', 'indice' => $indiceCausa, 'subindice' => $indiceImputado])
+@if (! $imputado['valido'])<p class="mt-2 text-xs font-semibold text-red-700">No se ingresará: {{ $imputado['motivo'] }}</p>@endif</div>@endforeach</div></article>@endforeach</div><footer class="flex flex-wrap justify-end gap-2 border-t border-slate-200 bg-white px-5 py-4 sm:px-7">@error('causasPendientesSeleccionadas')<p class="mr-auto self-center text-sm text-red-600">{{ $message }}</p>@enderror<button type="button" wire:click="cerrarRevisionCausasPendientes" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700">Cancelar</button><button type="button" wire:click="crearCausasPendientes" wire:confirm="Se crearán las causas seleccionadas y sus imputados válidos. ¿Desea continuar?" class="rounded-lg bg-amber-700 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-800">Ingresar seleccionadas</button></footer></section></div>
             @endteleport
         @endif
 
@@ -292,7 +376,9 @@
 
         @if ($revisionImputadosPendientesAbierta)
             @teleport('body')
-            <div class="fixed inset-0 z-[60] bg-slate-950/40" role="dialog" aria-modal="true" aria-labelledby="imputados-pendientes-title"><section class="absolute inset-y-0 right-0 flex w-full max-w-3xl flex-col overflow-hidden bg-white shadow-2xl"><header class="flex items-start justify-between border-b border-slate-200 px-5 py-5 sm:px-7"><div><p class="font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-sky-700">Ingreso pendiente</p><h3 id="imputados-pendientes-title" class="mt-1 text-xl font-semibold text-slate-900">Imputados pendientes en causas existentes</h3><p class="mt-1 text-sm text-slate-600">Seleccione solo los imputados que desea agregar a causas ya registradas.</p></div><button type="button" wire:click="cerrarRevisionCausasPendientes" class="inline-flex size-9 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100" aria-label="Cerrar"><i class="fa-solid fa-xmark text-lg" aria-hidden="true"></i></button></header><div class="flex-1 space-y-3 overflow-y-auto p-5 sm:p-7">@foreach ($imputadosPendientes as $imputado)<article wire:key="imputado-pendiente-separado-{{ $imputado['id'] }}" class="rounded-xl border border-slate-200"><label class="flex cursor-pointer items-start gap-3 p-4"><input type="checkbox" wire:model="imputadosPendientesSeleccionados" value="{{ $imputado['id'] }}" @disabled(! $imputado['valido']) class="mt-1 rounded border-slate-300 text-sky-700 focus:ring-sky-700"><span class="min-w-0 flex-1"><strong class="block text-slate-900">{{ $imputado['nombre'] ?: 'Sin nombre' }} <span class="font-mono text-xs font-normal text-slate-500">{{ $imputado['rut'] ?: 'Sin RUT' }}</span></strong><span class="mt-1 block text-xs text-slate-600">RUC {{ $imputado['ruc'] }} · RIT {{ $imputado['rit'] }} · {{ $imputado['penal'] ?: 'Penal no identificado' }}</span><span class="mt-1 block text-xs text-slate-500">{{ $imputado['delito'] ?: 'Sin delito' }} · {{ $imputado['hoja'] }}, fila {{ $imputado['fila'] }}</span>@if (! $imputado['valido'])<span class="mt-2 block text-xs font-semibold text-red-700">No se ingresará: {{ $imputado['motivo'] }}</span>@endif</span></label></article>@endforeach</div><footer class="flex flex-wrap justify-end gap-2 border-t border-slate-200 bg-white px-5 py-4 sm:px-7">@error('imputadosPendientesSeleccionados')<p class="mr-auto self-center text-sm text-red-600">{{ $message }}</p>@enderror<button type="button" wire:click="cerrarRevisionCausasPendientes" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700">Cancelar</button><button type="button" wire:click="crearImputadosPendientes" wire:confirm="Se crearán los imputados seleccionados en sus causas existentes. ¿Desea continuar?" class="rounded-lg bg-[#0A2E5D] px-4 py-2 text-sm font-semibold text-white hover:bg-sky-700">Ingresar imputados seleccionados</button></footer></section></div>
+            <div class="fixed inset-0 z-[60] bg-slate-950/40" role="dialog" aria-modal="true" aria-labelledby="imputados-pendientes-title"><section class="absolute inset-y-0 right-0 flex w-full max-w-3xl flex-col overflow-hidden bg-white shadow-2xl"><header class="flex items-start justify-between border-b border-slate-200 px-5 py-5 sm:px-7"><div><p class="font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-sky-700">Ingreso pendiente</p><h3 id="imputados-pendientes-title" class="mt-1 text-xl font-semibold text-slate-900">Imputados pendientes en causas existentes</h3><p class="mt-1 text-sm text-slate-600">Seleccione solo los imputados que desea agregar a causas ya registradas.</p></div><button type="button" wire:click="cerrarRevisionCausasPendientes" class="inline-flex size-9 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100" aria-label="Cerrar"><i class="fa-solid fa-xmark text-lg" aria-hidden="true"></i></button></header><div class="flex-1 space-y-3 overflow-y-auto p-5 sm:p-7">@foreach ($imputadosPendientes as $indiceImputado => $imputado)<article wire:key="imputado-pendiente-separado-{{ $imputado['id'] }}" class="rounded-xl border border-slate-200"><label class="flex cursor-pointer items-start gap-3 p-4"><input type="checkbox" wire:model="imputadosPendientesSeleccionados" value="{{ $imputado['id'] }}" @disabled(! $imputado['valido']) class="mt-1 rounded border-slate-300 text-sky-700 focus:ring-sky-700"><span class="min-w-0 flex-1"><strong class="block text-slate-900">{{ $imputado['nombre'] ?: 'Sin nombre' }} <span class="font-mono text-xs font-normal text-slate-500">{{ $imputado['rut'] ?: 'Sin RUT' }}</span></strong><span class="mt-1 block text-xs text-slate-600">RUC {{ $imputado['ruc'] }} · RIT {{ $imputado['rit'] }} · {{ $imputado['penal'] ?: 'Penal no identificado' }}</span><span class="mt-1 block text-xs text-slate-500">{{ $imputado['delito'] ?: 'Sin delito' }} · {{ $imputado['hoja'] }}, fila {{ $imputado['fila'] }}</span>@if (! $imputado['valido'])<span class="mt-2 block text-xs font-semibold text-red-700">No se ingresará: {{ $imputado['motivo'] }}</span>@endif</span></label>
+<div class="px-4 pb-4">@include('livewire.partials.visita-carcel-penal-pendiente', ['tipo' => 'imputado', 'indice' => $indiceImputado, 'subindice' => 0])</div>
+</article>@endforeach</div><footer class="flex flex-wrap justify-end gap-2 border-t border-slate-200 bg-white px-5 py-4 sm:px-7">@error('imputadosPendientesSeleccionados')<p class="mr-auto self-center text-sm text-red-600">{{ $message }}</p>@enderror<button type="button" wire:click="cerrarRevisionCausasPendientes" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700">Cancelar</button><button type="button" wire:click="crearImputadosPendientes" wire:confirm="Se crearán los imputados seleccionados en sus causas existentes. ¿Desea continuar?" class="rounded-lg bg-[#0A2E5D] px-4 py-2 text-sm font-semibold text-white hover:bg-sky-700">Ingresar imputados seleccionados</button></footer></section></div>
             @endteleport
         @endif
 
@@ -353,7 +439,7 @@
     if (! window.visitaCarcelDrawerClosing) {
         window.visitaCarcelDrawerClosing = true;
 
-        const drawerIds = ['gestion-penales-title', 'causas-pendientes-title', 'imputados-pendientes-title', 'ficha-causa-title'];
+        const drawerIds = ['gestion-penales-title', 'causas-pendientes-title', 'imputados-pendientes-title', 'causas-ausentes-title', 'ficha-causa-title'];
         const drawers = () => drawerIds.map((id) => document.querySelector(`[aria-labelledby="${id}"]`)).filter(Boolean);
         const close = (drawer) => drawer?.querySelector('button[aria-label^="Cerrar"]')?.click();
 

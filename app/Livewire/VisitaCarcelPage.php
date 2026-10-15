@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\File;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\WithPagination;
@@ -67,6 +68,17 @@ class VisitaCarcelPage extends Component
     public array $resultadoImportacion = [];
 
     public array $coincidenciasCruce = [];
+
+    #[Locked]
+    public array $causasAusentesIds = [];
+
+    #[Locked]
+    public bool $comparacionAusenciasDisponible = false;
+
+    #[Locked]
+    public string $avisoComparacionAusencias = '';
+
+    public bool $revisionCausasAusentesAbierta = false;
 
     public string $tipoImportacion = 'simple';
 
@@ -141,6 +153,11 @@ class VisitaCarcelPage extends Component
             ? (clone $causasQuery)->get()->sum('imputados_count')
             : 0;
         $causas = $causasQuery->paginate(10);
+        $causasAusentes = VisitaCarcelCausa::query()
+            ->whereIn('id', $this->causasAusentesIds)
+            ->with('imputados')
+            ->orderBy('ruc')
+            ->paginate(10, ['*'], 'ausentesPage');
 
         $notificaciones = $this->modo === 'notificaciones'
             ? $revisionPp->recordsForDate(now('America/Santiago'))
@@ -168,7 +185,7 @@ class VisitaCarcelPage extends Component
             ? $this->reporteControl()
             : ['agregados' => collect(), 'eliminados' => collect(), 'modificados' => collect(), 'por_penal' => collect(), 'total_imputados' => 0];
 
-        return view('livewire.visita-carcel-page', compact('causas', 'causaSeleccionada', 'notificaciones', 'totalImputados', 'penales', 'penalesGestion', 'totalPenales', 'reporte'));
+        return view('livewire.visita-carcel-page', compact('causas', 'causasAusentes', 'causaSeleccionada', 'notificaciones', 'totalImputados', 'penales', 'penalesGestion', 'totalPenales', 'reporte'));
     }
 
     public function updatingSearch(): void
@@ -292,6 +309,9 @@ class VisitaCarcelPage extends Component
     {
         Gate::authorize('visita_carcel.gestionar');
 
+        $this->reset(['causasAusentesIds', 'comparacionAusenciasDisponible', 'avisoComparacionAusencias', 'revisionCausasAusentesAbierta']);
+        $this->resetPage('ausentesPage');
+
         $this->validate([
             'archivoMovimientos' => ['required', File::types(['xlsx', 'xls'])->max(20 * 1024)],
             'tipoImportacion' => ['required', 'in:simple,libro'],
@@ -316,6 +336,8 @@ class VisitaCarcelPage extends Component
 
             $result = ['filas_procesadas' => 0, 'movimientos_creados' => 0, 'duplicados' => 0, 'causas_no_encontradas' => 0, 'imputados_no_encontrados' => 0, 'coincidencias_ambiguas' => 0, 'inconsistencias' => 0, 'errores' => []];
             $matches = [];
+            $rucsPresentes = [];
+            $lecturaIncompleta = false;
 
             foreach ($rows as $index => $row) {
                 $data = $this->rowData($headers, $row);
@@ -326,6 +348,11 @@ class VisitaCarcelPage extends Component
                 $result['filas_procesadas']++;
                 $fila = $index + 2;
                 $ruc = trim((string) $data['ruc']);
+                if ($ruc !== '') {
+                    $rucsPresentes[$ruc] = true;
+                } else {
+                    $lecturaIncompleta = true;
+                }
                 $rit = trim((string) $data['rit']).'-'.trim((string) $data['anocausa']);
 
                 if ($ruc === '' || $rit === '-') {
@@ -364,6 +391,7 @@ class VisitaCarcelPage extends Component
             }
 
             $this->resultadoImportacion = $result;
+            $this->compararCausasAusentes($rucsPresentes, $lecturaIncompleta);
             $this->coincidenciasCruce = array_values($matches);
             $this->causasPendientes = [];
             $this->causasPendientesSeleccionadas = [];
@@ -391,11 +419,14 @@ class VisitaCarcelPage extends Component
             $pending = [];
             $pendingImputados = [];
             $seen = [];
+            $rucsPresentes = [];
+            $lecturaIncompleta = false;
 
             foreach ($spreadsheet->getWorksheetIterator() as $sheet) {
                 $rows = $sheet->toArray(null, true, false, true);
                 $header = $this->encabezadosLibroComparacion($rows);
                 if ($header === null) {
+                    $lecturaIncompleta = true;
                     $result['hojas_omitidas']++;
                     $this->agregarErrorImportacion($result, 0, "hoja {$sheet->getTitle()}: no se encontraron las columnas del libro Visita Cárcel.");
 
@@ -415,6 +446,11 @@ class VisitaCarcelPage extends Component
                     $result['filas_procesadas']++;
                     $fila = $headerRow + $index + 2;
                     $ruc = trim((string) $data['ruc']);
+                    if ($ruc !== '') {
+                        $rucsPresentes[$ruc] = true;
+                    } else {
+                        $lecturaIncompleta = true;
+                    }
                     $rit = trim((string) $data['rit']).'-'.trim((string) $data['ano']);
                     $rut = $this->normalizarRut((string) $data['rut']);
                     $fingerprint = hash('sha256', implode('|', [$ruc, $rit, $rut ?: $this->normalizarTexto((string) $data['imputado'])]));
@@ -485,6 +521,7 @@ class VisitaCarcelPage extends Component
             $this->imputadosPendientesSeleccionados = collect($this->imputadosPendientes)->filter(fn (array $imputado) => $imputado['valido'])->pluck('id')->all();
             $result['causas_no_encontradas'] = count($this->causasPendientes);
             $this->resultadoImportacion = $result;
+            $this->compararCausasAusentes($rucsPresentes, $lecturaIncompleta);
             $this->coincidenciasCruce = array_values(array_filter($matches, 'is_array'));
             session()->put('visita_carcel.comparacion', $this->coincidenciasCruce);
             session()->put('visita_carcel.tipo_comparacion', 'libro');
@@ -502,8 +539,44 @@ class VisitaCarcelPage extends Component
 
     public function salirModoCruce(): void
     {
-        $this->reset(['coincidenciasCruce', 'resultadoImportacion', 'causasPendientes', 'causasPendientesSeleccionadas', 'imputadosPendientes', 'imputadosPendientesSeleccionados']);
+        $this->reset(['coincidenciasCruce', 'resultadoImportacion', 'causasPendientes', 'causasPendientesSeleccionadas', 'imputadosPendientes', 'imputadosPendientesSeleccionados', 'causasAusentesIds', 'comparacionAusenciasDisponible', 'avisoComparacionAusencias', 'revisionCausasAusentesAbierta']);
+        $this->resetPage('ausentesPage');
         session()->forget(['visita_carcel.comparacion', 'visita_carcel.tipo_comparacion', 'visita_carcel.causas_pendientes', 'visita_carcel.imputados_pendientes']);
+    }
+
+    private function compararCausasAusentes(array $rucsPresentes, bool $lecturaIncompleta): void
+    {
+        if ($lecturaIncompleta || $rucsPresentes === []) {
+            $this->avisoComparacionAusencias = 'No se determinaron causas ausentes: el archivo está vacío, contiene filas sin RUC o tiene hojas que no pudieron compararse. Corrige el archivo y vuelve a importar.';
+
+            return;
+        }
+
+        $this->causasAusentesIds = VisitaCarcelCausa::query()
+            ->whereNotIn('ruc', array_keys($rucsPresentes))
+            ->pluck('id')->all();
+        $this->comparacionAusenciasDisponible = true;
+    }
+
+    public function abrirRevisionCausasAusentes(): void
+    {
+        Gate::authorize('visita_carcel.ver');
+
+        $this->revisionCausasAusentesAbierta = $this->comparacionAusenciasDisponible;
+    }
+
+    public function cerrarRevisionCausasAusentes(): void
+    {
+        $this->revisionCausasAusentesAbierta = false;
+    }
+
+    public function eliminarCausaAusente(int $causaId): void
+    {
+        Gate::authorize('visita_carcel.gestionar');
+        abort_unless($this->comparacionAusenciasDisponible && in_array($causaId, $this->causasAusentesIds, true), 422);
+
+        $this->eliminarCausa($causaId);
+        $this->resetPage('ausentesPage');
     }
 
     public function actualizarDesdeArchivos(SafeSpreadsheetReader $reader): void
@@ -723,6 +796,7 @@ class VisitaCarcelPage extends Component
         Gate::authorize('visita_carcel.ver');
 
         $this->causaSeleccionadaId = $causaId;
+        $this->revisionCausasAusentesAbierta = false;
     }
 
     public function cerrarFicha(): void
@@ -1116,6 +1190,43 @@ class VisitaCarcelPage extends Component
         $this->revisionCausasPendientesAbierta = $this->causasPendientes !== [];
     }
 
+    public function asignarPenalPendiente(string $tipo, int $indice, int $subindice, string $penalId): void
+    {
+        Gate::authorize('visita_carcel.gestionar');
+        abort_unless(in_array($tipo, ['causa', 'imputado'], true), 422);
+
+        $clave = $tipo === 'causa' ? 'causas_pendientes' : 'imputados_pendientes';
+        $pendientes = session('visita_carcel.'.$clave, []);
+        $datos = $tipo === 'causa'
+            ? ($pendientes[$indice]['imputados'][$subindice] ?? null)
+            : ($pendientes[$indice] ?? null);
+        abort_unless($datos && ($datos['penal_manual'] ?? blank($datos['campos']['penal'] ?? null)), 422);
+
+        $campo = "penalPendiente.{$tipo}.{$indice}.{$subindice}";
+        $this->resetValidation($campo);
+        $penal = Penal::query()->where('activo', true)->find($penalId);
+        if (! $penal) {
+            $this->addError($campo, 'Seleccione un penal activo.');
+
+            return;
+        }
+
+        $datos['penal_manual'] = true;
+        $datos['penal'] = $penal->nombre;
+        $datos['campos']['penal'] = $penal->nombre;
+        $datos = $this->validarDatosPendientes($datos);
+
+        if ($tipo === 'causa') {
+            $pendientes[$indice]['imputados'][$subindice] = $datos;
+            $this->causasPendientes = $pendientes;
+        } else {
+            $pendientes[$indice] = $datos;
+            $this->imputadosPendientes = $pendientes;
+        }
+
+        session()->put('visita_carcel.'.$clave, $pendientes);
+    }
+
     public function abrirRevisionImputadosPendientes(): void
     {
         Gate::authorize('visita_carcel.gestionar');
@@ -1135,7 +1246,12 @@ class VisitaCarcelPage extends Component
 
         $seleccionadas = array_flip($this->causasPendientesSeleccionadas);
         $pendientes = collect(session('visita_carcel.causas_pendientes', $this->causasPendientes))
-            ->filter(fn (array $causa) => isset($seleccionadas[$causa['ruc']]));
+            ->filter(fn (array $causa) => isset($seleccionadas[$causa['ruc']]))
+            ->map(function (array $causa): array {
+                $causa['imputados'] = array_map($this->validarDatosPendientes(...), $causa['imputados']);
+
+                return $causa;
+            });
 
         if ($pendientes->isEmpty()) {
             $this->addError('causasPendientesSeleccionadas', 'Seleccione al menos una causa para ingresar.');
@@ -1187,6 +1303,7 @@ class VisitaCarcelPage extends Component
                         'archivo' => 'Comparación libro Visita Cárcel',
                         'cambios' => collect($datos['campos'])->map(fn ($valor) => ['anterior' => null, 'nuevo' => $valor])->all(),
                     ]);
+                    $this->registrarIngresoEnComparacion($causa, $imputado, $datos['hoja']);
                     $imputadosCreados++;
                 }
             });
@@ -1196,6 +1313,9 @@ class VisitaCarcelPage extends Component
         $this->causasPendientesSeleccionadas = collect($this->causasPendientes)->pluck('ruc')->all();
         session()->put('visita_carcel.causas_pendientes', $this->causasPendientes);
         $this->resultadoImportacion['causas_no_encontradas'] = count($this->causasPendientes);
+        if ($creadas > 0) {
+            $this->resetPage();
+        }
         $this->revisionCausasPendientesAbierta = false;
         session()->flash('ok', "Se ingresaron {$creadas} causas y {$imputadosCreados} imputados. {$omitidas} causas fueron omitidas.");
     }
@@ -1206,7 +1326,8 @@ class VisitaCarcelPage extends Component
 
         $seleccionados = array_flip($this->imputadosPendientesSeleccionados);
         $pendientes = collect(session('visita_carcel.imputados_pendientes', $this->imputadosPendientes))
-            ->filter(fn (array $imputado) => isset($seleccionados[$imputado['id']]));
+            ->filter(fn (array $imputado) => isset($seleccionados[$imputado['id']]))
+            ->map($this->validarDatosPendientes(...));
 
         if ($pendientes->isEmpty()) {
             $this->addError('imputadosPendientesSeleccionados', 'Seleccione al menos un imputado para ingresar.');
@@ -1247,6 +1368,7 @@ class VisitaCarcelPage extends Component
                     'archivo' => 'Comparación libro Visita Cárcel',
                     'cambios' => collect($pendiente['campos'])->map(fn ($valor) => ['anterior' => null, 'nuevo' => $valor])->all(),
                 ]);
+                $this->registrarIngresoEnComparacion($causa, $imputado, $pendiente['hoja']);
                 $creados++;
                 $resueltos[] = $pendiente['id'];
             });
@@ -1255,8 +1377,25 @@ class VisitaCarcelPage extends Component
         $this->imputadosPendientes = collect($this->imputadosPendientes)->reject(fn (array $imputado) => in_array($imputado['id'], $resueltos, true))->values()->all();
         $this->imputadosPendientesSeleccionados = collect($this->imputadosPendientes)->filter(fn (array $imputado) => $imputado['valido'])->pluck('id')->all();
         session()->put('visita_carcel.imputados_pendientes', $this->imputadosPendientes);
+        $this->resultadoImportacion['imputados_no_encontrados'] = count($this->imputadosPendientes);
         $this->revisionImputadosPendientesAbierta = false;
         session()->flash('ok', "Se ingresaron {$creados} imputados. {$omitidos} fueron omitidos.");
+    }
+
+    private function registrarIngresoEnComparacion(VisitaCarcelCausa $causa, VisitaCarcelImputado $imputado, string $hoja): void
+    {
+        $this->coincidenciasCruce[] = [
+            'ruc' => $causa->ruc,
+            'rit' => $causa->rit,
+            'anio' => str($causa->rit)->afterLast('-')->toString(),
+            'causa_id' => $causa->id,
+            'nombre' => $imputado->nombre,
+            'rut' => $imputado->rut,
+            'hoja' => $hoja,
+            'estado' => 'Encontrado',
+        ];
+        $this->resultadoImportacion['movimientos_creados'] = count($this->coincidenciasCruce);
+        session()->put('visita_carcel.comparacion', $this->coincidenciasCruce);
     }
 
     private function encabezadosLibroComparacion(array $rows): ?array
@@ -1297,10 +1436,21 @@ class VisitaCarcelPage extends Component
             'juez' => (trim((string) $data['juez']) ?: null), 'defensor' => (trim((string) $data['defensor']) ?: null),
             'fecha_ult_res' => $data['fecha_ult_res'], 'ult_resolucion' => (trim((string) $data['ult_resolucion']) ?: null),
         ];
-        $faltantes = collect(['nombre' => 'imputado', 'rut' => 'RUT', 'penal' => 'penal', 'delito' => 'delito', 'fecha_ingreso_pp' => 'fecha de ingreso PP'])
-            ->filter(fn ($etiqueta, $campo) => blank($campos[$campo]))->values()->all();
 
-        return ['ruc' => $ruc, 'rit' => $rit, 'nombre' => $campos['nombre'], 'rut' => $campos['rut'], 'penal' => $penal, 'delito' => $campos['delito'], 'hoja' => $hoja, 'fila' => $fila, 'valido' => $faltantes === [], 'motivo' => $faltantes === [] ? null : 'Falta: '.implode(', ', $faltantes).'.', 'campos' => $campos];
+        return $this->validarDatosPendientes(['ruc' => $ruc, 'rit' => $rit, 'nombre' => $campos['nombre'], 'rut' => $campos['rut'], 'penal' => $penal, 'penal_manual' => $penal === null, 'delito' => $campos['delito'], 'hoja' => $hoja, 'fila' => $fila, 'campos' => $campos]);
+    }
+
+    private function validarDatosPendientes(array $datos): array
+    {
+        $faltantes = collect(['nombre' => 'imputado', 'rut' => 'RUT', 'penal' => 'penal', 'delito' => 'delito', 'fecha_ingreso_pp' => 'fecha de ingreso PP'])
+            ->filter(fn ($etiqueta, $campo) => blank($datos['campos'][$campo]))->values()->all();
+        if (filled($datos['campos']['penal']) && ! in_array($datos['campos']['penal'], $this->nombresPenalesActivos(), true)) {
+            $faltantes[] = 'penal activo';
+        }
+        $datos['valido'] = $faltantes === [];
+        $datos['motivo'] = $faltantes === [] ? null : 'Falta: '.implode(', ', $faltantes).'.';
+
+        return $datos;
     }
 
     private function penalPlanilla(array $rows, int $filaEncabezados, string $nombreHoja = ''): ?string
