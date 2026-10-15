@@ -4,8 +4,8 @@ return [
     'pagination_theme' => 'bootstrap',
 
     'temporary_file_upload' => [
-        // Must not be lower than the document validation limit.
-        'rules' => ['required', 'file', 'max:20480'],
+        // The converter accepts up to 50 MB of audio; each component applies its own stricter rule.
+        'rules' => ['required', 'file', 'max:51200'],
         'disk' => null,
         'directory' => null,
         'middleware' => null,

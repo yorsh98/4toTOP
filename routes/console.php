@@ -13,6 +13,8 @@ ScheduleFacade::command('notificaciones:ausentismo-diario')
     ->timezone((string) config('notifications_v2.schedule.timezone', 'America/Santiago'))
     ->withoutOverlapping();
 
+ScheduleFacade::command('conversions:clean')->hourly()->withoutOverlapping();
+
 ScheduleFacade::command('notificaciones:ttypp-diario')
     ->dailyAt('08:10')
     ->timezone((string) config('notifications_v2.schedule.timezone', 'America/Santiago'))
