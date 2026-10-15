@@ -67,7 +67,6 @@
                 </header>
                 <x-navbar />
 
-
                     <main class="mt-8">
                     <div class="grid gap-6 pt-1 mb-6 lg:grid-cols-1 lg:gap-8">
                             <div
@@ -432,6 +431,11 @@
                                 <div class="pt-3 sm:pt-5">
                                     <h2 class="text-xl font-semibold text-black ">BITACORA PRUEBAS</h2>
                                 </div>
+                            </a>
+
+                            <a href="{{ route('conversions.public') }}" class="flex items-center gap-4 rounded-xl bg-white/92 p-6 shadow-[0_12px_30px_rgba(15,23,42,0.14)] ring-1 ring-slate-900/10 backdrop-blur-[2px] transition-all duration-300 hover:-translate-y-0.5 hover:text-black/80 hover:shadow-[0_18px_38px_rgba(15,23,42,0.2)] hover:ring-slate-900/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF2D20] lg:pb-10">
+                                <span class="flex size-12 shrink-0 items-center justify-center rounded-full bg-[#2D8CFF]/10 sm:size-16"><i class="fa-solid fa-arrow-right-arrow-left text-2xl text-[#0A2E5D]" aria-hidden="true"></i></span>
+                                <span class="pt-3 sm:pt-5"><strong class="block text-xl font-semibold text-black">CONVERTIR ARCHIVOS</strong><span class="mt-2 block text-sm text-slate-700">PDF a Word · M4A a MP3</span></span>
                             </a>
 
                             <details class="group rounded-xl bg-white/92 p-6 shadow-[0_12px_30px_rgba(15,23,42,0.14)] ring-1 ring-slate-900/10 backdrop-blur-[2px] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(15,23,42,0.2)] hover:ring-slate-900/20   ">

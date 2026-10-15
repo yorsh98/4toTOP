@@ -12,6 +12,7 @@ use App\Http\Controllers\ausenciasController;
 use App\Http\Controllers\ausentismoController;
 use App\Http\Controllers\buscadorsentenciasController;
 use App\Http\Controllers\docController;
+use App\Http\Controllers\DownloadConversionController;
 use App\Http\Controllers\guiasController;
 use App\Http\Controllers\guiastelefonicasController;
 use App\Http\Controllers\libertadController;
@@ -31,9 +32,11 @@ use App\Http\Controllers\TurnoController;
 use App\Http\Controllers\VisitaCarcelExportController;
 use App\Http\Controllers\VisitaCarcelPenalesExportController;
 use App\Livewire\AudiosSalasPage;
+use App\Livewire\BackofficeFileConverterPage;
 use App\Livewire\BitacoraPruebasPage;
 use App\Livewire\BitacoraPruebasPublicPage;
 use App\Livewire\DocumentosBackofficePage;
+use App\Livewire\FileConversionHistoryPage;
 use App\Livewire\FuncionariosPage;
 use App\Livewire\InsumosGestionPage;
 use App\Livewire\InsumosImportacionesPage;
@@ -41,6 +44,7 @@ use App\Livewire\InsumosInventarioPage;
 use App\Livewire\InsumosNotificacionesPage;
 use App\Livewire\InsumosReportesPage;
 use App\Livewire\InsumosSolicitudesPage;
+use App\Livewire\PublicFileConverterPage;
 use App\Livewire\Security\AuditPage;
 use App\Livewire\Security\RolePermissionsPage;
 use App\Livewire\Security\RolesPage;
@@ -63,6 +67,12 @@ use Illuminate\Support\Facades\Route;
 */
 // Home principal: envia la informacion de turnos a la vista.
 Route::get('/', [TurnoController::class, 'enviarTurno'])->name('welcome');
+Route::get('/convertir-archivos', PublicFileConverterPage::class)->name('conversions.public');
+Route::get('/conversiones/descargar/{conversion:token}', DownloadConversionController::class)->name('conversions.download');
+Route::get('/backoffice/convertir-archivos', BackofficeFileConverterPage::class)
+    ->middleware(['auth', 'can:navbar.conversiones.visible'])->name('conversions.backoffice');
+Route::get('/backoffice/convertir-archivos/registro', FileConversionHistoryPage::class)
+    ->middleware(['auth', 'can:conversiones.ver_registro'])->name('conversions.history');
 
 /*
 |--------------------------------------------------------------------------

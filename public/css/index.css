@@ -1,5 +1,5 @@
 /*ESTILOS DE LOS SISTEMAS INTERNOS*/
-section{
+#screenshot-container section{
     display: flex;
     width: 600px;
     height: 430px;
@@ -7,7 +7,7 @@ section{
     overflow: hidden;
     
   }
-  section img{
+  #screenshot-container section img{
     width: 1px;
     flex-grow: 1;
     object-fit: cover;
@@ -15,7 +15,7 @@ section{
     transition: width 0.5s ease, opacity 0.5s ease;
     border:2px solid black ;
   }
-  section img:hover{
+  #screenshot-container section img:hover{
     cursor: pointer;
     width: 300px;
     opacity: 1;

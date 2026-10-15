@@ -100,6 +100,14 @@ new class extends Component
             'accent' => '#ea580c',
         ],
         [
+            'label' => 'Convertir archivos',
+            'route' => 'conversions.backoffice',
+            'active' => 'conversions.*',
+            'icon' => 'fa-solid fa-arrow-right-arrow-left',
+            'permissions' => ['navbar.conversiones.visible'],
+            'accent' => '#0284c7',
+        ],
+        [
             'label' => __('Audios de Salas'),
             'route' => 'audios-salas.index',
             'active' => 'audios-salas.*',
