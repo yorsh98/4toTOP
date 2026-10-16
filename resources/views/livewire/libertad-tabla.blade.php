@@ -109,7 +109,7 @@
                     <th wire:click="sortBy('CausaAsig')">CAUSA ASIG</th>
                     <th wire:click="sortBy('UserSolicitante')">SOLICITANTE</th>
                     <th wire:click="sortBy('UserDirigido')">MOTIVO / DIRIGIDO</th>
-                    <th wire:click="sortBy('created_at')">CREADO</th>
+                    <th wire:click="sortBy('updated_at')">FECHA UTILIZACIÓN</th>
                     @if($isFull)
                         <th>ACCIONES</th>
                     @endif
@@ -123,7 +123,7 @@
                         <td>{{ $l->CausaAsig }}</td>
                         <td>{{ $l->UserSolicitante }}</td>
                         <td>{{ $l->UserDirigido }}</td>
-                        <td>{{ optional($l->created_at)->format('Y-m-d H:i') }}</td>
+                        <td>{{ ($l->updated_at ?? $l->created_at)?->format('Y-m-d H:i') }}</td>
 
                         @if($isFull)
                             <td class="d-flex gap-2">
