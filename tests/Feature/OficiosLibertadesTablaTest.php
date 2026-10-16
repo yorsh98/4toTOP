@@ -41,6 +41,28 @@ test('public tables start with the current year and allow selecting another year
     'libertades' => [LibertadTabla::class, Libertad::class],
 ]);
 
+test('tables show the last date between created and updated as FECHA UTILIZACIÓN', function (string $component, string $model) {
+    $registro = $model::create([
+        'Numentregado' => 1,
+        'año' => now()->year,
+        'CausaAsig' => 'FECHA',
+        'UserSolicitante' => 'Solicitante fecha',
+        'UserDirigido' => 'Motivo fecha',
+    ]);
+
+    $creado = $registro->created_at->format('Y-m-d H:i');
+    $actualizado = now()->addDay();
+    $registro->forceFill(['updated_at' => $actualizado])->saveQuietly();
+
+    Livewire::test($component, ['modo' => 'vista'])
+        ->assertSee('FECHA UTILIZACIÓN')
+        ->assertSee($actualizado->format('Y-m-d H:i'))
+        ->assertDontSee($creado);
+})->with([
+    'oficios' => [OficioTabla::class, Oficio::class],
+    'libertades' => [LibertadTabla::class, Libertad::class],
+]);
+
 test('creation uses the configured solicitantes catalog', function (string $component, string $model) {
     $this->seed(RolesAndPermissionsSeeder::class);
 
