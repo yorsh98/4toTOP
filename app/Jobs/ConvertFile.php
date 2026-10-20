@@ -7,6 +7,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use League\Uri\Uri;
 use Symfony\Component\Process\Process;
 
 class ConvertFile implements ShouldQueue
@@ -63,11 +64,15 @@ class ConvertFile implements ShouldQueue
     {
         $directory = dirname($output);
         $converted = $directory.'/'.pathinfo($input, PATHINFO_FILENAME).'.docx';
+        $profilePath = $directory.'/lo-profile';
+        $profileUri = PHP_OS_FAMILY === 'Windows'
+            ? Uri::fromWindowsPath($profilePath)
+            : Uri::fromUnixPath($profilePath);
 
         try {
             $process = new Process([
                 config('conversions.libreoffice'),
-                '-env:UserInstallation=file://'.str_replace('%2F', '/', rawurlencode($directory.'/lo-profile')),
+                '-env:UserInstallation='.$profileUri,
                 '--headless', '--infilter=writer_pdf_import',
                 '--convert-to', 'docx:Office Open XML Text',
                 '--outdir', $directory, $input,
