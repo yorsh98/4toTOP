@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Validation\Rules\File;
 use Illuminate\Validation\ValidationException;
 use Livewire\WithFileUploads;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 trait ConvertsFiles
 {
@@ -59,6 +60,14 @@ trait ConvertsFiles
 
     protected function authorizeConversion(): void {}
 
+    /** The converter's own limit, capped by what PHP accepts (upload_max_filesize / post_max_size). */
+    protected function maxUploadBytes(): int
+    {
+        $converterLimit = config($this->format === 'pdf' ? 'conversions.pdf_max_kb' : 'conversions.audio_max_kb') * 1024;
+
+        return (int) min($converterLimit, UploadedFile::getMaxFilesize());
+    }
+
     public function render()
     {
         $this->authorizeConversion();
@@ -71,6 +80,7 @@ trait ConvertsFiles
         return view('livewire.file-converter', [
             'area' => $this->area(),
             'jobs' => $jobs,
+            'maxUploadBytes' => $this->maxUploadBytes(),
             'remainingByFormat' => $this->area() === 'frontoffice' ? [
                 'pdf' => max(0, config('conversions.public_limit') - app(FileConversionService::class)->used($sessionHash, 'pdf')),
                 'm4a' => max(0, config('conversions.public_limit') - app(FileConversionService::class)->used($sessionHash, 'm4a')),

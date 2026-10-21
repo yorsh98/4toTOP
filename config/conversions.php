@@ -4,7 +4,8 @@ return [
     'disk' => env('CONVERSIONS_DISK', 'local'),
     'public_limit' => 2,
     'pdf_max_kb' => 20 * 1024,
-    'pdf_max_pages' => (int) env('CONVERSIONS_PDF_MAX_PAGES', 200),
+    // Measured: 1,285 pages convert in ~80 s with ~2.6 GB of RAM in pdf2docx.
+    'pdf_max_pages' => (int) env('CONVERSIONS_PDF_MAX_PAGES', 1500),
     'audio_max_kb' => 50 * 1024,
     'download_hours' => 24,
     'ffmpeg' => env('CONVERSIONS_FFMPEG', 'ffmpeg'),
