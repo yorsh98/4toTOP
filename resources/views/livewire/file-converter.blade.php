@@ -53,10 +53,13 @@
                         </div>
                     @endif
 
-                    <div>
+                    @php($maxUpload = Illuminate\Support\Number::fileSize($maxUploadBytes, maxPrecision: 1))
+                    {{-- Checked in the capture phase so an oversized file never starts an upload the server would drop. --}}
+                    <div x-data="{ tooLarge: false }" x-on:change.capture="tooLarge = ($event.target.files[0]?.size ?? 0) > {{ $maxUploadBytes }}; if (tooLarge) { $event.stopPropagation(); $event.target.value = ''; }">
                         <label for="conversion-file" class="mb-1.5 block text-sm font-semibold text-slate-800">Archivo {{ strtoupper($format) }}</label>
                         <input id="conversion-file" type="file" wire:model="file" accept="{{ $format === 'pdf' ? '.pdf,application/pdf' : '.m4a,audio/mp4,audio/x-m4a' }}" class="block w-full rounded-lg border border-dashed border-sky-300 bg-sky-50/60 p-4 text-sm text-slate-700 file:mr-4 file:rounded-lg file:border-0 file:bg-[#0A2E5D] file:px-4 file:py-2 file:font-semibold file:text-white hover:file:bg-sky-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-700">
-                        <p class="mt-2 text-xs text-slate-600">{{ $format === 'pdf' ? 'PDF con texto seleccionable · máximo 20 MB. El Word reconstruye párrafos, tablas, encabezados y pies; revísalo antes de usarlo.' : 'Audio M4A · máximo 50 MB.' }}</p>
+                        <p class="mt-2 text-xs text-slate-600">{{ $format === 'pdf' ? 'PDF con texto seleccionable · máximo '.$maxUpload.'. El Word reconstruye párrafos, tablas, encabezados y pies; revísalo antes de usarlo.' : 'Audio M4A · máximo '.$maxUpload.'.' }}</p>
+                        <p x-show="tooLarge" style="display: none" class="mt-1 text-sm text-red-700" role="alert">El archivo supera el máximo de {{ $maxUpload }} que acepta el servidor. Reduce su tamaño (por ejemplo, dividiéndolo o comprimiéndolo) e inténtalo de nuevo.</p>
                         @error('file') <p class="mt-1 text-sm text-red-700">{{ $message }}</p> @enderror
                         @error('format') <p class="mt-1 text-sm text-red-700">{{ $message }}</p> @enderror
                     </div>

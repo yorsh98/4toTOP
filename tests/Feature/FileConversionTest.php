@@ -12,6 +12,7 @@ use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Number;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
 use Symfony\Component\Process\Process;
@@ -313,6 +314,15 @@ it('explains password protected and damaged PDFs', function (string $stderr, str
     'password' => ['Command Line Error: Incorrect password', 'protegido con contraseña'],
     'damaged' => ['Syntax Error: Couldn\'t find trailer dictionary', 'dañado'],
 ]);
+
+it('shows the upload limit the server really accepts', function () {
+    config()->set('conversions.pdf_max_kb', 1024 * 1024);
+    $phpLimit = Symfony\Component\HttpFoundation\File\UploadedFile::getMaxFilesize();
+
+    Livewire::test(PublicFileConverterPage::class)
+        ->assertSee('máximo '.Number::fileSize($phpLimit, maxPrecision: 1))
+        ->assertSee('> '.$phpLimit, false);
+});
 
 it('rejects PDFs over the page limit', function () {
     config()->set('conversions.pdf_max_pages', 1);
