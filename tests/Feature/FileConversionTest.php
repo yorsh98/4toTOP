@@ -7,27 +7,36 @@ use App\Livewire\PublicFileConverterPage;
 use App\Models\FileConversion;
 use App\Models\User;
 use App\Services\FileConversionService;
+use App\Services\LibreOfficeDocxNormalizer;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
+use Symfony\Component\Process\Process;
 
 function conversionPdf(string $content, bool $styled = false): string
 {
-    $stream = $content === '' ? '' : ($styled
+    return conversionPdfPages([$content === '' ? '' : ($styled
         ? 'BT /F2 18 Tf 72 750 Td ('.$content.') Tj ET BT /F1 12 Tf 72 720 Td (Texto editable) Tj ET'
-        : 'BT /F1 12 Tf 72 720 Td ('.$content.') Tj ET');
+        : 'BT /F1 12 Tf 72 720 Td ('.$content.') Tj ET')]);
+}
+
+/** One content stream per page; /F1 is Helvetica, /F2 Helvetica-Bold and /Im1 a grey image (scan stand-in). */
+function conversionPdfPages(array $streams): string
+{
+    $count = count($streams);
     $objects = [
         '<< /Type /Catalog /Pages 2 0 R >>',
-        '<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
-        '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R'.($styled ? ' /F2 6 0 R' : '').' >> >> /Contents 5 0 R >>',
+        '<< /Type /Pages /Kids ['.implode(' ', array_map(fn ($i) => (6 + 2 * $i).' 0 R', array_keys($streams))).'] /Count '.$count.' >>',
         '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>',
-        '<< /Length '.strlen($stream).' >>'."\nstream\n{$stream}\nendstream",
+        '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>',
+        "<< /Type /XObject /Subtype /Image /Width 1 /Height 1 /ColorSpace /DeviceGray /BitsPerComponent 8 /Length 1 >>\nstream\n\x80\nendstream",
     ];
-    if ($styled) {
-        $objects[] = '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>';
+    foreach ($streams as $i => $stream) {
+        $objects[] = '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> /XObject << /Im1 5 0 R >> >> /Contents '.(7 + 2 * $i).' 0 R >>';
+        $objects[] = '<< /Length '.strlen($stream).' >>'."\nstream\n{$stream}\nendstream";
     }
     $pdf = "%PDF-1.4\n";
     $offsets = [0];
@@ -44,6 +53,48 @@ function conversionPdf(string $content, bool $styled = false): string
     }
 
     return $pdf."trailer\n<< /Size ".(count($objects) + 1)." /Root 1 0 R >>\nstartxref\n{$start}\n%%EOF\n";
+}
+
+function queuedPdfConversion(string $pdf, string $name = 'acta'): FileConversion
+{
+    $token = (string) Str::uuid();
+    $job = FileConversion::create([
+        'token' => $token, 'area' => 'frontoffice', 'format' => 'pdf',
+        'status' => 'queued', 'original_name' => "{$name}.pdf", 'result_name' => "{$name}.docx",
+        'input_path' => "conversions/{$token}/original.pdf", 'actor_name' => 'Ana',
+        'ip_address' => '127.0.0.1', 'session_hash' => hash('sha256', 'test'),
+    ]);
+    Storage::disk('local')->put($job->input_path, $pdf);
+
+    return $job;
+}
+
+function docxPart(FileConversion $job, string $part): string|false
+{
+    $document = new ZipArchive;
+    $document->open(Storage::disk('local')->path($job->output_path));
+    $xml = $document->getFromName($part);
+    $document->close();
+
+    return $xml;
+}
+
+/** An executable shell script, for standing in for an external tool. */
+function fakeTool(string $body): string
+{
+    $path = tempnam(sys_get_temp_dir(), 'conversion-tool-');
+    file_put_contents($path, "#!/bin/sh\n{$body}\n");
+    chmod($path, 0755);
+
+    return $path;
+}
+
+function pdf2docxAvailable(): bool
+{
+    $process = new Process([config('conversions.python'), '-I', '-c', 'import pdf2docx']);
+    $process->run();
+
+    return $process->isSuccessful();
 }
 
 beforeEach(function () {
@@ -138,43 +189,139 @@ it('marks unavailable conversion engines as failed without consuming frontoffice
         ->and(app(FileConversionService::class)->used($job->session_hash, 'm4a'))->toBe(0);
 });
 
-it('converts a text PDF to an editable DOCX with LibreOffice', function () {
-    $token = (string) Str::uuid();
-    $job = FileConversion::create([
-        'token' => $token, 'area' => 'frontoffice', 'format' => 'pdf',
-        'status' => 'queued', 'original_name' => 'acta.pdf', 'result_name' => 'acta.docx',
-        'input_path' => "conversions/{$token}/original.pdf", 'actor_name' => 'Ana',
-        'ip_address' => '127.0.0.1', 'session_hash' => hash('sha256', 'test'),
-    ]);
-    Storage::disk('local')->put($job->input_path, conversionPdf('Acta del tribunal', styled: true));
+it('converts a text PDF with LibreOffice and anchors its boxes to the page', function () {
+    config()->set('conversions.pdf_engine', 'libreoffice');
+    $pdf = conversionPdf('Acta del tribunal', styled: true);
+    $job = queuedPdfConversion($pdf);
 
     (new ConvertFile($job->id))->handle();
 
     $job->refresh();
-    expect($job->status)->toBe('ready');
-    $document = new ZipArchive;
-    expect($document->open(Storage::disk('local')->path($job->output_path)))->toBeTrue()
-        ->and($document->getFromName('word/document.xml'))->toContain('Acta del tribunal')
+    expect($job->status)->toBe('ready')
+        ->and($job->engine)->toBe('libreoffice')
+        ->and($job->input_sha256)->toBe(hash('sha256', $pdf))
+        ->and($job->output_sha256)->toBe(hash_file('sha256', Storage::disk('local')->path($job->output_path)))
+        ->and(docxPart($job, 'word/document.xml'))->toContain('Acta del tribunal')
         ->toContain('Texto editable')
-        ->toContain('<w:b');
-    $document->close();
-    Storage::disk('local')->assertMissing("conversions/{$token}/extracted.txt");
+        ->toContain('<w:b')
+        ->toContain('relativeFrom="page"')
+        ->not->toContain('relativeFrom="column"')
+        ->not->toContain('relativeFrom="paragraph"');
+    Storage::disk('local')->assertMissing("conversions/{$job->token}/converted.docx");
+});
+
+it('reconstructs paragraphs with pdf2docx and moves repeated page content to the header and footer', function () {
+    config()->set('conversions.pdf_engine', 'pdf2docx');
+    $footer = 'BT /F1 8 Tf 400 40 Td (Codigo: KPXXCVKWLRX) Tj ET';
+    $job = queuedPdfConversion(conversionPdfPages([
+        'BT /F2 16 Tf 72 700 Td (Acta del tribunal) Tj ET BT /F1 12 Tf 72 670 Td (Primera pagina del documento judicial.) Tj ET '.$footer,
+        'BT /F1 12 Tf 72 700 Td (Segunda pagina con mas texto editable.) Tj ET '.$footer,
+    ]));
+
+    (new ConvertFile($job->id))->handle();
+
+    $job->refresh();
+    $body = docxPart($job, 'word/document.xml');
+    expect($job->status)->toBe('ready')
+        ->and($job->engine)->toBe('pdf2docx')
+        ->and($body)->toContain('Acta del tribunal')->toContain('Segunda pagina')->toContain('<w:b')
+        ->not->toContain('w:txbxContent')
+        ->not->toContain('KPXXCVKWLRX')
+        ->and(docxPart($job, 'word/footer1.xml'))->toContain('Codigo: KPXXCVKWLRX')->toContain('mso-position-vertical-relative:page');
+})->skip(fn () => ! pdf2docxAvailable(), 'pdf2docx is not installed for CONVERSIONS_PYTHON');
+
+it('fails visibly instead of falling back when the configured engine is unavailable', function () {
+    config()->set(['conversions.pdf_engine' => 'pdf2docx', 'conversions.python' => '/does-not-exist/python3']);
+    $job = queuedPdfConversion(conversionPdf('Acta del tribunal'));
+
+    (new ConvertFile($job->id))->handle();
+
+    expect($job->fresh()->status)->toBe('failed')
+        ->and($job->fresh()->engine)->toBe('pdf2docx')
+        ->and($job->fresh()->output_path)->toBeNull();
 });
 
 it('rejects PDFs without selectable text with a useful message', function () {
-    $token = (string) Str::uuid();
-    $job = FileConversion::create([
-        'token' => $token, 'area' => 'frontoffice', 'format' => 'pdf',
-        'status' => 'queued', 'original_name' => 'escaneado.pdf', 'result_name' => 'escaneado.docx',
-        'input_path' => "conversions/{$token}/original.pdf", 'actor_name' => 'Ana',
-        'ip_address' => '127.0.0.1', 'session_hash' => hash('sha256', 'test'),
-    ]);
-    Storage::disk('local')->put($job->input_path, conversionPdf(''));
+    $job = queuedPdfConversion(conversionPdf(''), 'escaneado');
 
     (new ConvertFile($job->id))->handle();
 
     expect($job->fresh()->status)->toBe('failed')
         ->and($job->fresh()->error_message)->toContain('requieren OCR');
+});
+
+it('warns which pages of a mixed PDF have no selectable text', function () {
+    config()->set('conversions.pdf_engine', 'libreoffice');
+    $job = queuedPdfConversion(conversionPdfPages([
+        'BT /F1 12 Tf 72 720 Td (Resolucion con texto seleccionable) Tj ET',
+        'q 500 0 0 700 50 50 cm /Im1 Do Q',
+    ]));
+
+    (new ConvertFile($job->id))->handle();
+
+    expect($job->fresh()->status)->toBe('ready')
+        ->and($job->fresh()->notice)->toContain('la página 2');
+});
+
+it('recognises scanned pages with OCR when it is configured', function () {
+    config()->set('conversions.pdf_engine', 'libreoffice');
+    $recognised = tempnam(sys_get_temp_dir(), 'ocr-result-');
+    file_put_contents($recognised, conversionPdf('Texto reconocido por OCR'));
+    config()->set('conversions.ocrmypdf', fakeTool('for last; do :; done; cp '.escapeshellarg($recognised).' "$last"'));
+    $job = queuedPdfConversion(conversionPdf(''), 'escaneado');
+
+    (new ConvertFile($job->id))->handle();
+
+    expect($job->fresh()->status)->toBe('ready')
+        ->and($job->fresh()->notice)->toContain('OCR')
+        ->and(docxPart($job->fresh(), 'word/document.xml'))->toContain('Texto reconocido por OCR');
+    Storage::disk('local')->assertMissing("conversions/{$job->token}/ocr.pdf");
+});
+
+it('explains password protected and damaged PDFs', function (string $stderr, string $message) {
+    config()->set('conversions.pdfinfo', fakeTool('echo '.escapeshellarg($stderr).' >&2; exit 1'));
+    $job = queuedPdfConversion(conversionPdf('Acta del tribunal'));
+
+    (new ConvertFile($job->id))->handle();
+
+    expect($job->fresh()->status)->toBe('failed')
+        ->and($job->fresh()->error_message)->toContain($message);
+})->with([
+    'password' => ['Command Line Error: Incorrect password', 'protegido con contraseña'],
+    'damaged' => ['Syntax Error: Couldn\'t find trailer dictionary', 'dañado'],
+]);
+
+it('rejects PDFs over the page limit', function () {
+    config()->set('conversions.pdf_max_pages', 1);
+    $job = queuedPdfConversion(conversionPdfPages(['BT /F1 12 Tf 72 720 Td (Uno) Tj ET', 'BT /F1 12 Tf 72 720 Td (Dos) Tj ET']));
+
+    (new ConvertFile($job->id))->handle();
+
+    expect($job->fresh()->error_message)->toContain('máximo es 1');
+});
+
+it('sends white LibreOffice backgrounds behind the text but keeps coloured masks', function () {
+    $path = tempnam(sys_get_temp_dir(), 'normalize-').'.docx';
+    $archive = new ZipArchive;
+    $archive->open($path, ZipArchive::CREATE);
+    $archive->addFromString('word/document.xml', '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:v="urn:schemas-microsoft-com:vml"><w:body>'
+        .'<wp:anchor><wp:positionH relativeFrom="column"/><wp:positionV relativeFrom="paragraph"/></wp:anchor>'
+        .'<v:shape id="white" coordsize="10,10" fillcolor="white" style="position:absolute;margin-left:1pt"/>'
+        .'<v:shape id="black" coordsize="10,10" fillcolor="black" style="position:absolute;margin-left:2pt"/>'
+        .'</w:body></w:document>');
+    $archive->addFromString('word/media/image1.png', 'unchanged');
+    $archive->close();
+
+    app(LibreOfficeDocxNormalizer::class)->normalize($path);
+
+    $archive->open($path);
+    $xml = $archive->getFromName('word/document.xml');
+    expect($xml)->toContain('relativeFrom="page"')->not->toContain('relativeFrom="column"')
+        ->and($xml)->toMatch('/id="white"[^>]*z-index:-2147483000/')
+        ->and($xml)->not->toMatch('/id="black"[^>]*z-index/')
+        ->and($xml)->toMatch('/id="black"[^>]*mso-position-vertical-relative:page/')
+        ->and($archive->getFromName('word/media/image1.png'))->toBe('unchanged');
+    $archive->close();
 });
 
 it('allows authorized backoffice users unlimited jobs and limits access to the register', function () {
