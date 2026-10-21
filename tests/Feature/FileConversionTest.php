@@ -24,8 +24,8 @@ function conversionPdf(string $content, bool $styled = false): string
         : 'BT /F1 12 Tf 72 720 Td ('.$content.') Tj ET')]);
 }
 
-/** One content stream per page; /F1 is Helvetica, /F2 Helvetica-Bold and /Im1 a grey image (scan stand-in). */
-function conversionPdfPages(array $streams): string
+/** One content stream per page; /F1 is Helvetica, /F2 Helvetica-Bold and /Im1 a grey image (scan stand-in). Pages are Letter unless $heights gives another height in points. */
+function conversionPdfPages(array $streams, array $heights = []): string
 {
     $count = count($streams);
     $objects = [
@@ -36,7 +36,7 @@ function conversionPdfPages(array $streams): string
         "<< /Type /XObject /Subtype /Image /Width 1 /Height 1 /ColorSpace /DeviceGray /BitsPerComponent 8 /Length 1 >>\nstream\n\x80\nendstream",
     ];
     foreach ($streams as $i => $stream) {
-        $objects[] = '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> /XObject << /Im1 5 0 R >> >> /Contents '.(7 + 2 * $i).' 0 R >>';
+        $objects[] = '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 '.($heights[$i] ?? 792).'] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> /XObject << /Im1 5 0 R >> >> /Contents '.(7 + 2 * $i).' 0 R >>';
         $objects[] = '<< /Length '.strlen($stream).' >>'."\nstream\n{$stream}\nendstream";
     }
     $pdf = "%PDF-1.4\n";
@@ -252,6 +252,96 @@ it('keeps the page count when the letterhead is missing from the last page', fun
         ->toContain('w:lineRule="exact"')
         ->and(array_filter($footers, fn ($xml) => str_contains($xml, 'Pedro Montt')))->toHaveCount(1)
         ->and(array_filter($footers, fn ($xml) => ! str_contains($xml, 'Pedro Montt')))->toHaveCount(1);
+})->skip(fn () => ! pdf2docxAvailable(), 'pdf2docx is not installed for CONVERSIONS_PYTHON');
+
+/** All header and footer parts of a converted DOCX. */
+function docxHeaderFooterParts(FileConversion $job): array
+{
+    $document = new ZipArchive;
+    $document->open(Storage::disk('local')->path($job->output_path));
+    $parts = [];
+    for ($i = 0; $i < $document->numFiles; $i++) {
+        $name = $document->getNameIndex($i);
+        if (preg_match('#^word/(header|footer)\d+\.xml$#', $name)) {
+            $parts[$name] = $document->getFromName($name);
+        }
+    }
+    $document->close();
+
+    return $parts;
+}
+
+it('moves each footer of a merged PDF to its own pages', function () {
+    config()->set('conversions.pdf_engine', 'pdf2docx');
+    $page = fn (string $footer, int $n) => 'BT /F1 12 Tf 72 700 Td (Pagina '.$n.' del expediente unido.) Tj ET BT /F1 8 Tf 400 30 Td ('.$footer.') Tj ET';
+    // Three pages of a first document and four of a second: the first footer is on less than half the pages.
+    $job = queuedPdfConversion(conversionPdfPages([
+        $page('Codigo: PRIMERDOC', 1), $page('Codigo: PRIMERDOC', 2), $page('Codigo: PRIMERDOC', 3),
+        $page('Codigo: SEGUNDODOC', 4), $page('Codigo: SEGUNDODOC', 5), $page('Codigo: SEGUNDODOC', 6), $page('Codigo: SEGUNDODOC', 7),
+    ]));
+
+    (new ConvertFile($job->id))->handle();
+
+    $job->refresh();
+    $parts = implode('', docxHeaderFooterParts($job));
+    expect($job->status)->toBe('ready')
+        ->and(docxPart($job, 'word/document.xml'))->not->toContain('PRIMERDOC')->not->toContain('SEGUNDODOC')
+        ->and($parts)->toContain('Codigo: PRIMERDOC')->toContain('Codigo: SEGUNDODOC');
+})->skip(fn () => ! pdf2docxAvailable(), 'pdf2docx is not installed for CONVERSIONS_PYTHON');
+
+it('turns printed page numbers into a Word page field that starts at the PDF number', function () {
+    config()->set('conversions.pdf_engine', 'pdf2docx');
+    $page = fn (int $printed) => 'BT /F1 12 Tf 72 700 Td (Considerando numero '.$printed.' de la sentencia.) Tj ET BT /F1 10 Tf 300 40 Td ('.$printed.') Tj ET';
+    $job = queuedPdfConversion(conversionPdfPages([$page(41), $page(42), $page(43)]));
+
+    (new ConvertFile($job->id))->handle();
+
+    $job->refresh();
+    $body = docxPart($job, 'word/document.xml');
+    expect($job->status)->toBe('ready')
+        ->and(preg_match('#<w:t[^>]*>\s*4[123]\s*</w:t>#', $body))->toBe(0)
+        ->and($body)->toContain('w:start="41"')
+        ->and(implode('', docxHeaderFooterParts($job)))->toContain('w:instr=" PAGE "');
+})->skip(fn () => ! pdf2docxAvailable(), 'pdf2docx is not installed for CONVERSIONS_PYTHON');
+
+it('gives every page size its own bottom margin', function () {
+    config()->set('conversions.pdf_engine', 'pdf2docx');
+    $footer = 'BT /F1 8 Tf 400 30 Td (Codigo: TJTRBUDSNXZ) Tj ET';
+    $body = fn (int $y, string $text) => 'BT /F1 12 Tf 72 '.$y.' Td ('.$text.') Tj ET ';
+    // Letter pages with a footer, then a Legal page whose text reaches its bottom.
+    $job = queuedPdfConversion(conversionPdfPages([
+        $body(700, 'Primera pagina carta.').$footer, $body(700, 'Segunda pagina carta.').$footer, $body(700, 'Tercera pagina carta.').$footer,
+        $body(950, 'Pagina oficio.').$body(60, 'Ultima linea de la pagina oficio.'),
+    ], [792, 792, 792, 1008]));
+
+    (new ConvertFile($job->id))->handle();
+
+    $job->refresh();
+    preg_match_all('#<w:pgSz w:w="\d+" w:h="(\d+)"[^>]*/>\s*<w:pgMar [^>]*w:bottom="(\d+)"#', docxPart($job, 'word/document.xml'), $sections, PREG_SET_ORDER);
+    $legal = collect($sections)->first(fn ($section) => (int) $section[1] > 18000);
+    expect($job->status)->toBe('ready')
+        ->and($legal)->not->toBeNull()
+        ->and((int) $legal[2])->toBeLessThan(60 * 20);
+})->skip(fn () => ! pdf2docxAvailable(), 'pdf2docx is not installed for CONVERSIONS_PYTHON');
+
+it('keeps a flattened e-signature box as a picture with its text as alt text', function () {
+    config()->set('conversions.pdf_engine', 'pdf2docx');
+    // Two signature boxes side by side, as the tribunal stamps them: frame, blue bar, seal image and text.
+    $signature = fn (int $x, string $name, string $role) => '0.18 0.43 0.70 RG 1 w '.$x.' 600 255 100 re S 0.18 0.43 0.70 rg '.$x.' 600 17 100 re f '
+        .'q 80 0 0 80 '.($x + 160).' 610 cm /Im1 Do Q BT /F2 10 Tf '.($x + 22).' 670 Td ('.$name.') Tj ET '
+        .'BT /F1 9 Tf '.($x + 22).' 655 Td ('.$role.') Tj ET ';
+    $job = queuedPdfConversion(conversionPdfPages(['BT /F1 12 Tf 72 740 Td (Firmaron la sentencia los jueces.) Tj ET '
+        .$signature(42, 'Erick Humberto Aravena Ibarra', 'Juez Presidente').$signature(300, 'Claudia Patricia Morgado Moscoso', 'Juez Integrante')]));
+
+    (new ConvertFile($job->id))->handle();
+
+    $job->refresh();
+    $body = docxPart($job, 'word/document.xml');
+    expect($job->status)->toBe('ready')
+        ->and($body)->not->toContain('<w:tbl>')
+        ->toContain('descr="Firma electrónica: Erick Humberto Aravena Ibarra Juez Presidente / Claudia Patricia Morgado Moscoso Juez Integrante"')
+        ->toContain('Firmaron la sentencia')
+        ->and(substr_count($body, 'descr="Firma electrónica'))->toBe(1);
 })->skip(fn () => ! pdf2docxAvailable(), 'pdf2docx is not installed for CONVERSIONS_PYTHON');
 
 it('fails visibly instead of falling back when the configured engine is unavailable', function () {
