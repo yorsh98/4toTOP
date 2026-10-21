@@ -13,8 +13,7 @@ return new class extends Migration
             Permission::findOrCreate($name, 'web');
         }
 
-        foreach (['SuperAdmin', 'AdminOperacion'] as $name) {
-            $role = Role::findByName($name, 'web');
+        foreach (Role::where('guard_name', 'web')->whereIn('name', ['SuperAdmin', 'AdminOperacion'])->get() as $role) {
             $role->givePermissionTo(['navbar.conversiones.visible', 'conversiones.ver_registro']);
         }
 
