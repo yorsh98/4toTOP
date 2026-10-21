@@ -15,6 +15,7 @@ class FileConversion extends Model
         'token', 'area', 'format', 'status', 'original_name', 'result_name',
         'input_path', 'output_path', 'user_id', 'actor_name', 'ip_address',
         'session_hash', 'user_agent', 'error_message', 'finished_at', 'expires_at', 'files_deleted_at',
+        'engine', 'input_sha256', 'output_sha256', 'notice',
     ];
 
     protected function casts(): array

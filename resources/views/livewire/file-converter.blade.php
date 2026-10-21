@@ -56,7 +56,7 @@
                     <div>
                         <label for="conversion-file" class="mb-1.5 block text-sm font-semibold text-slate-800">Archivo {{ strtoupper($format) }}</label>
                         <input id="conversion-file" type="file" wire:model="file" accept="{{ $format === 'pdf' ? '.pdf,application/pdf' : '.m4a,audio/mp4,audio/x-m4a' }}" class="block w-full rounded-lg border border-dashed border-sky-300 bg-sky-50/60 p-4 text-sm text-slate-700 file:mr-4 file:rounded-lg file:border-0 file:bg-[#0A2E5D] file:px-4 file:py-2 file:font-semibold file:text-white hover:file:bg-sky-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-700">
-                        <p class="mt-2 text-xs text-slate-600">{{ $format === 'pdf' ? 'PDF con texto seleccionable · máximo 20 MB. Revisa el diseño del Word generado antes de usarlo.' : 'Audio M4A · máximo 50 MB.' }}</p>
+                        <p class="mt-2 text-xs text-slate-600">{{ $format === 'pdf' ? 'PDF con texto seleccionable · máximo 20 MB. El Word reconstruye párrafos, tablas, encabezados y pies; revísalo antes de usarlo.' : 'Audio M4A · máximo 50 MB.' }}</p>
                         @error('file') <p class="mt-1 text-sm text-red-700">{{ $message }}</p> @enderror
                         @error('format') <p class="mt-1 text-sm text-red-700">{{ $message }}</p> @enderror
                     </div>
@@ -80,6 +80,9 @@
                         <div class="min-w-0">
                             <p class="break-all text-sm font-semibold text-slate-800">{{ $job->original_name }}</p>
                             <p class="mt-1 text-xs text-slate-500">{{ strtoupper($job->format) }} → {{ $job->format === 'pdf' ? 'DOCX' : 'MP3' }} · {{ $job->created_at->format('d/m/Y H:i') }}</p>
+                            @if ($job->status === 'ready' && $job->notice)
+                                <p class="mt-1 text-xs font-medium text-amber-800">{{ $job->notice }}</p>
+                            @endif
                         </div>
                         @if ($job->status === 'ready' && $job->expires_at?->isFuture())
                             <a href="{{ route('conversions.download', $job) }}" class="rounded-lg {{ $area === 'frontoffice' ? 'bg-blue-700 hover:bg-blue-800' : 'bg-sky-700 hover:bg-sky-800' }} px-4 py-2 text-sm font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-700">Descargar {{ $job->format === 'pdf' ? 'Word' : 'MP3' }}</a>

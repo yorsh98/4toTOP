@@ -1,0 +1,7 @@
+# PDF -> Word engine (scripts/pdf_to_docx.py). Install into a dedicated virtualenv:
+#   python3 -m venv .venv-conversions && .venv-conversions/bin/pip install -r scripts/requirements.txt
+# then set CONVERSIONS_PYTHON=<absolute path>/.venv-conversions/bin/python
+# PyMuPDF is AGPL-3.0 or Artifex commercial: review licensing before exposing the converter publicly.
+pdf2docx==0.5.13
+pymupdf==2.0
+python-docx==1.2.0
