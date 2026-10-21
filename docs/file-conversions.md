@@ -9,7 +9,7 @@ El frontoffice (`/convertir-archivos`) permite dos PDF y dos M4A por sesión. El
 1. **Inspección (Poppler).** `pdfinfo` rechaza PDF protegidos con contraseña, dañados o con más de `CONVERSIONS_PDF_MAX_PAGES` páginas (200). `pdftotext` y `pdfimages` detectan, página por página, las que no tienen texto seleccionable y sí imágenes (escaneadas).
 2. **Escaneados.** Si `CONVERSIONS_OCRMYPDF` está configurado se aplica OCR (`--skip-text`, idiomas `CONVERSIONS_OCR_LANGUAGES`, por defecto `spa`) y se avisa de revisar el texto reconocido. Sin OCR, un PDF sin texto se rechaza y uno mixto se convierte avisando qué páginas quedan solo como imagen.
 3. **Motor (`CONVERSIONS_PDF_ENGINE`).** Si falla el motor configurado, la conversión falla: no se cambia en silencio a otro motor.
-   - `pdf2docx` (predeterminado): `scripts/pdf_to_docx.py` reconstruye párrafos, tablas e imágenes. Antes, el contenido repetido en la misma posición en todas las páginas (logo, QR y texto de validación) pasa al encabezado o pie de Word como objetos anclados a la página, como hace Acrobat XI. Las firmas y anotaciones se conservan como imagen de su apariencia en el mismo lugar, así que su texto no es editable.
+   - `pdf2docx` (predeterminado): `scripts/pdf_to_docx.py` reconstruye párrafos, tablas e imágenes. Antes, el contenido repetido en la misma posición dentro del 20 % superior o inferior de la página (membrete, logo, dirección, QR y texto de validación) pasa al encabezado o pie de Word como objetos anclados a la página, como hace Acrobat XI. Para eso basta con que aparezca en al menos dos páginas y en la mitad de ellas. Cada página recibe solo lo que tenía, de modo que una última página sin membrete queda sin él. El interlineado se escribe **exacto**, medido en el PDF: así una fuente sustituta (por ejemplo, Bookman Old Style → URW Bookman en Linux) no cambia la altura de las líneas ni hace que el contenido pase a otra hoja. Si se aumenta el tamaño de letra en Word, hay que ajustar también el interlineado. Las firmas y anotaciones se conservan como imagen de su apariencia en el mismo lugar, así que su texto no es editable.
    - `libreoffice`: `writer_pdf_import` produce cuadros de texto posicionados. `LibreOfficeDocxNormalizer` corrige el desplazamiento de unos 28 pt anclando los objetos a la página y lleva detrás del texto solo los fondos **blancos**, para no destapar máscaras o tachaduras de color.
 4. **Validación.** El DOCX debe ser un ZIP/XML válido con texto. Se entrega tal cual lo produjo el motor y su SHA-256 queda registrado.
 
@@ -21,6 +21,8 @@ Medición con `AA 401-2026.pdf` (5 páginas), renderizado con LibreOffice 26.2 y
 | LibreOffice sin normalizar | 5 | +28,7 pt | 182 cuadros de texto; contenido tapado en la página 5 |
 | LibreOffice normalizado | 5 | +0,4 pt | cuadros de texto |
 | pdf2docx + encabezado/pie | 5 | −2,1 pt | párrafos, tablas, encabezado/pie |
+
+Con `RIT 222-2026.pdf` (8 páginas tamaño Oficio, membrete ausente en la última), la versión anterior producía 15 páginas porque el membrete quedaba en el cuerpo y desbordaba cada hoja. Ahora produce 8, con todas las palabras en la misma página que en el PDF y un desfase vertical mediano de −2,1 pt.
 
 No se probó en Microsoft Word. Diferencias conocidas frente a Acrobat: listas como texto «1.» en vez de numeración de Word, texto de firmas como imagen y pequeñas variaciones de cortes de línea por sustitución de fuentes (Arial/Helvetica → Liberation Sans/Nimbus Sans en Linux). Instalar las fuentes del documento en el servidor reduce esas variaciones.
 

@@ -2,12 +2,14 @@
 
 Usage: python3 -I pdf_to_docx.py <input.pdf> <output.docx>
 
-Before reconstruction, content repeated at the same position on every page (logos,
-QR/validation blocks) is moved to the Word header/footer as page-anchored objects,
+Before reconstruction, content repeated at the same position in the top/bottom band of
+most pages (letterheads, logos, addresses, QR/validation blocks) is moved to each page's
+Word header/footer as page-anchored objects,
 and form/annotation appearances (e.g. signature boxes) are kept as images in place.
 """
 
 import io
+import itertools
 import re
 import sys
 import tempfile
@@ -16,12 +18,15 @@ from xml.sax.saxutils import escape
 
 import pymupdf
 from docx import Document
+from docx.enum.section import WD_SECTION_START
 from docx.oxml import parse_xml
 from docx.oxml.ns import nsdecls
 from docx.shared import Pt
 from pdf2docx import Converter
+from pdf2docx.layout.Blocks import Blocks
 
 TOLERANCE = 2.0
+BAND = 0.2  # share of the page height, at top and bottom, where letterheads and footers live
 EMU_PER_PT = 12700
 VML_NS = 'xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office"'
 
@@ -31,34 +36,36 @@ def same_box(a, b):
 
 
 def repeated_artifacts(doc):
-    """Images and text blocks drawn at the same place on every page."""
+    """Images and text blocks drawn at the same place in the top/bottom band of most pages.
+
+    Documents often omit the letterhead on some pages (e.g. a final signature page), so an
+    artifact only needs to repeat on at least two pages and half of them. Each artifact
+    records the pages it is on: those pages get it in their header/footer, the others do not.
+    """
     if doc.page_count < 2:
-        return [], []
+        return []
 
-    def page_images(page):
-        found = []
-        for info in page.get_images(full=True):
-            for rect in page.get_image_rects(info[0]):
-                found.append((info[0], tuple(rect)))
-        return found
-
-    def page_texts(page):
-        found = []
+    artifacts = []
+    for number, page in enumerate(doc):
+        band = page.rect.height * BAND
+        found = [('image', info[0], tuple(rect), None)
+                 for info in page.get_images(full=True) for rect in page.get_image_rects(info[0])]
         for block in page.get_text('dict')['blocks']:
             if block['type'] == 0:
                 text = ' '.join(s['text'] for line in block['lines'] for s in line['spans']).strip()
                 if text:
-                    found.append((text, tuple(block['bbox']), block))
-        return found
+                    found.append(('text', text, tuple(block['bbox']), block))
 
-    pages = list(doc)
-    images = [(xref, box) for xref, box in page_images(pages[0])
-              if all(any(x == xref and same_box(box, b) for x, b in page_images(p)) for p in pages[1:])]
-    others = [page_texts(p) for p in pages[1:]]
-    texts = [(box, block) for text, box, block in page_texts(pages[0])
-             if all(any(t == text and same_box(box, b) for t, b, _ in found) for found in others)]
+        for kind, key, box, block in found:
+            if box[3] > band and box[1] < page.rect.height - band:
+                continue
+            match = next((a for a in artifacts if a['kind'] == kind and a['key'] == key and same_box(a['box'], box)), None)
+            if match is None:
+                artifacts.append({'kind': kind, 'key': key, 'box': box, 'block': block, 'pages': {number}})
+            else:
+                match['pages'].add(number)
 
-    return images, texts
+    return [a for a in artifacts if len(a['pages']) >= 2 and len(a['pages']) * 2 >= doc.page_count]
 
 
 def image_png(doc, xref):
@@ -122,17 +129,33 @@ def run_xml(span):
     return f'<w:r><w:rPr>{props}</w:rPr><w:t xml:space="preserve">{escape(span["text"])}</w:t></w:r>'
 
 
+def physical_rows(lines):
+    """PDF lines sharing a baseline row, left to right; space-only fragments are dropped unless the row is empty."""
+    rows = []
+    for line in sorted(lines, key=lambda l: (round(l['bbox'][1]), l['bbox'][0])):
+        if rows and abs(rows[-1][0]['bbox'][1] - line['bbox'][1]) <= TOLERANCE:
+            rows[-1].append(line)
+        else:
+            rows.append([line])
+    has_text = lambda line: any(s['text'].strip() for s in line['spans'])
+    return [[l for l in row if has_text(l)] or row[:1] for row in rows]
+
+
 def text_box_xml(block, page_width, index):
-    """A page-anchored VML text box per block (as Acrobat XI writes them); one paragraph per line, PDF line pitch."""
+    """A page-anchored VML text box per block (as Acrobat XI writes them); one paragraph per row, PDF line pitch.
+    Further fragments on the same row are placed with tab stops at their PDF position."""
     x0, y0, x1, y1 = block['bbox']
-    lines = block['lines']
+    rows = physical_rows(block['lines'])
     paragraphs = ''
-    for number, line in enumerate(lines):
-        pitch = (lines[number + 1]['bbox'][1] - line['bbox'][1]) if number + 1 < len(lines) else line['bbox'][3] - line['bbox'][1]
+    for number, row in enumerate(rows):
+        top, bottom = row[0]['bbox'][1], max(l['bbox'][3] for l in row)
+        pitch = (rows[number + 1][0]['bbox'][1] - top) if number + 1 < len(rows) else bottom - top
+        stops = ''.join(f'<w:tab w:val="left" w:pos="{round((l["bbox"][0] - x0) * 20)}"/>' for l in row[1:])
+        runs = ''.join(('<w:r><w:tab/></w:r>' if i else '') + ''.join(run_xml(s) for s in l['spans']) for i, l in enumerate(row))
         paragraphs += (
-            f'<w:p><w:pPr><w:spacing w:before="0" w:after="0" w:line="{max(round(pitch * 20), 20)}" w:lineRule="exact"/>'
-            f'<w:ind w:left="{round((line["bbox"][0] - x0) * 20)}" w:right="0"/></w:pPr>'
-            + ''.join(run_xml(span) for span in line['spans']) + '</w:p>'
+            f'<w:p><w:pPr>{f"<w:tabs>{stops}</w:tabs>" if stops else ""}'
+            f'<w:spacing w:before="0" w:after="0" w:line="{max(round(pitch * 20), 20)}" w:lineRule="exact"/>'
+            f'<w:ind w:left="{round((row[0]["bbox"][0] - x0) * 20)}" w:right="0"/></w:pPr>{runs}</w:p>'
         )
     # Substituted fonts are often a little wider than the PDF ones: leave room so lines do not wrap.
     width = min((x1 - x0) * 1.1 + 2, page_width - x0)
@@ -144,55 +167,88 @@ def text_box_xml(block, page_width, index):
     )
 
 
-def move_to_header_footer(docx_path, doc, images, texts):
-    word = Document(docx_path)
-    page_height = doc[0].rect.height
-    section = word.sections[0]
+def fill_header_footer(section, doc, artifacts, page, counter):
+    """Writes this page's artifacts into the section's own header/footer; returns the footer top."""
     header, footer = section.header, section.footer
     header.is_linked_to_previous = footer.is_linked_to_previous = False
-    targets = {'header': header, 'footer': footer}
-    footer_top = page_height
+    footer_top = page.rect.height
 
-    for index, (xref, box) in enumerate(images, start=1):
-        target = targets['header' if box[1] < page_height / 2 else 'footer']
-        if target is footer:
-            footer_top = min(footer_top, box[1])
-        rid, _ = target.part.get_or_add_image(io.BytesIO(image_png(doc, xref)))
-        paragraph = target.paragraphs[0] if target.paragraphs else target.add_paragraph()
-        paragraph._p.append(parse_xml(anchor_image_xml(rid, box, index)))
-
-    for index, (box, block) in enumerate(texts, start=1):
-        target = targets['header' if box[1] < page_height / 2 else 'footer']
+    for artifact in artifacts:
+        box = artifact['box']
+        target = header if box[1] < page.rect.height / 2 else footer
         if target is footer:
             footer_top = min(footer_top, box[1])
         paragraph = target.paragraphs[0] if target.paragraphs else target.add_paragraph()
-        paragraph._p.append(parse_xml(text_box_xml(block, doc[0].rect.width, index)))
+        index = next(counter)
+        if artifact['kind'] == 'image':
+            rid, _ = target.part.get_or_add_image(io.BytesIO(image_png(doc, artifact['key'])))
+            paragraph._p.append(parse_xml(anchor_image_xml(rid, box, index)))
+        else:
+            paragraph._p.append(parse_xml(text_box_xml(artifact['block'], page.rect.width, index)))
 
     for part in (header, footer):
         anchor = part.paragraphs[0] if part.paragraphs else part.add_paragraph()
         anchor.paragraph_format.space_before = anchor.paragraph_format.space_after = Pt(0)
         anchor.paragraph_format.line_spacing = Pt(1)
 
-    for each in word.sections:
-        each.header_distance = each.footer_distance = Pt(min(36, max(0, page_height - footer_top) / 2))
-        if footer_top < page_height:
-            each.bottom_margin = Pt(max(page_height - footer_top, 0))
+    return footer_top
+
+
+def move_to_header_footer(docx_path, doc, artifacts):
+    """Each page gets exactly the artifacts it had; consecutive pages with the same set share one header/footer."""
+    word = Document(docx_path)
+    counter = itertools.count(1)
+    page_number, previous, footer_top = -1, None, None
+
+    for index, section in enumerate(word.sections):
+        # pdf2docx starts every page with a new-page section; column layouts add continuous ones.
+        if index == 0 or section.start_type != WD_SECTION_START.CONTINUOUS:
+            page_number = min(page_number + 1, doc.page_count - 1)
+        page = doc[page_number]
+        present = frozenset(i for i, a in enumerate(artifacts) if page_number in a['pages'])
+
+        if index > 0 and present == previous:
+            section.header.is_linked_to_previous = section.footer.is_linked_to_previous = True
+        else:
+            footer_top = fill_header_footer(section, doc, [artifacts[i] for i in sorted(present)], page, counter)
+            previous = present
+
+        free_bottom = page.rect.height - footer_top
+        section.footer_distance = Pt(min(36, max(0, free_bottom) / 2))
+        if free_bottom > 0:
+            section.bottom_margin = Pt(free_bottom)
+        # Word and LibreOffice push the body below the header paragraph: keep it inside the top margin.
+        section.header_distance = Pt(max(0, min(36, section.top_margin.pt - 2)))
+
     word.save(docx_path)
 
 
+def use_exact_line_spacing():
+    """pdf2docx writes line spacing relative to the PDF font's metrics. Opened where that font is
+    missing (e.g. Bookman Old Style on Linux), a substitute font changes every line height and pages
+    overflow into extra ones. Exact spacing keeps the PDF line pitch whatever font is installed."""
+    def parse_line_spacing(self):
+        for block in self._instances:
+            if block.is_text_block:
+                block.line_space_type = 0
+                block.parse_exact_line_spacing()
+
+    Blocks._parse_line_spacing = parse_line_spacing
+
+
 def main(source, target):
+    use_exact_line_spacing()
     doc = pymupdf.open(source)
     if doc.needs_pass:
         print('El PDF está protegido con contraseña.', file=sys.stderr)
         return 3
 
-    images, texts = repeated_artifacts(doc)
-    for page in doc:
+    artifacts = repeated_artifacts(doc)
+    for number, page in enumerate(doc):
         flatten_annotations(page)
-        for _, box in images:
-            page.add_redact_annot(box)
-        for box, _ in texts:
-            page.add_redact_annot(box)
+        for artifact in artifacts:
+            if number in artifact['pages']:
+                page.add_redact_annot(artifact['box'])
         page.apply_redactions(images=pymupdf.PDF_REDACT_IMAGE_REMOVE, graphics=pymupdf.PDF_REDACT_LINE_ART_NONE)
 
     with tempfile.TemporaryDirectory() as work:
@@ -204,8 +260,8 @@ def main(source, target):
         finally:
             converter.close()
 
-    if images or texts:
-        move_to_header_footer(target, pymupdf.open(source), images, texts)
+    if artifacts:
+        move_to_header_footer(target, pymupdf.open(source), artifacts)
     return 0
 
 

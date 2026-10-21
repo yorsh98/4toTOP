@@ -230,6 +230,29 @@ it('reconstructs paragraphs with pdf2docx and moves repeated page content to the
         ->and(docxPart($job, 'word/footer1.xml'))->toContain('Codigo: KPXXCVKWLRX')->toContain('mso-position-vertical-relative:page');
 })->skip(fn () => ! pdf2docxAvailable(), 'pdf2docx is not installed for CONVERSIONS_PYTHON');
 
+it('keeps the page count when the letterhead is missing from the last page', function () {
+    config()->set('conversions.pdf_engine', 'pdf2docx');
+    $letterhead = 'BT /F2 12 Tf 72 760 Td (Poder Judicial) Tj ET BT /F1 9 Tf 72 30 Td (Pedro Montt 1606 Torre G 4) Tj ET ';
+    $body = fn (string $text) => 'BT /F1 12 Tf 72 700 Td ('.$text.') Tj ET';
+    $job = queuedPdfConversion(conversionPdfPages([
+        $letterhead.$body('Primera pagina del auto de apertura.'),
+        $letterhead.$body('Segunda pagina del auto de apertura.'),
+        $body('Pagina final con la firma del juez.'),
+    ]));
+
+    (new ConvertFile($job->id))->handle();
+
+    $job->refresh();
+    $body = docxPart($job, 'word/document.xml');
+    $footers = array_filter(array_map(fn ($n) => docxPart($job, "word/footer{$n}.xml"), range(1, 4)));
+    expect($job->status)->toBe('ready')
+        ->and(substr_count($body, '<w:sectPr'))->toBe(3)
+        ->and($body)->not->toContain('Pedro Montt')->not->toContain('Poder Judicial')
+        ->toContain('w:lineRule="exact"')
+        ->and(array_filter($footers, fn ($xml) => str_contains($xml, 'Pedro Montt')))->toHaveCount(1)
+        ->and(array_filter($footers, fn ($xml) => ! str_contains($xml, 'Pedro Montt')))->toHaveCount(1);
+})->skip(fn () => ! pdf2docxAvailable(), 'pdf2docx is not installed for CONVERSIONS_PYTHON');
+
 it('fails visibly instead of falling back when the configured engine is unavailable', function () {
     config()->set(['conversions.pdf_engine' => 'pdf2docx', 'conversions.python' => '/does-not-exist/python3']);
     $job = queuedPdfConversion(conversionPdf('Acta del tribunal'));
