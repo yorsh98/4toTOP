@@ -49,7 +49,22 @@ Las mediciones se hicieron renderizando el DOCX con LibreOffice 26.2. Para cada 
 
 ## Estado
 
-- [ ] Fase 1
-- [ ] Fase 2
+- [x] **Fase 1**: hecha. Margen inferior por página, sin agrandarlo nunca; pies y membretes por tramos; números de página como campo `PAGE`; tests de regresión para PDF unido, Carta + Oficio y números de página.
+- [x] **Fase 2**: hecha. Los recuadros de firma aplanados se conservan como imagen, las firmas de una misma fila como una sola imagen, y su texto queda como texto alternativo. Hay test de regresión.
 - [ ] Fase 3
 - [ ] Fase 4
+
+### Resultado de las fases 1 y 2 con `90-2023 final.pdf`
+
+Renderizado con LibreOffice usando las fuentes incrustadas en el PDF:
+
+| Tramo | Antes | Después |
+|---|---|---|
+| Pp. 1–80 (primer documento) | 0 desbordes | 0 |
+| Pp. 81–85 (Oficio) | 5 | **0** |
+| Pp. 86–1.285 (sentencia) | 299 | **102** |
+| Total de hojas | 1.581 | **1.373** |
+
+Las firmas de las dos últimas páginas se ven como en el original. AA 401 (5 páginas) y RIT 222 (8 páginas) no cambian.
+
+Las 102 páginas restantes tienen un párrafo que ocupa una línea más que en el PDF; por ejemplo, en la página 98 las líneas coinciden con ±0,3 pt hasta un párrafo en Garamond cursiva justificada que suma una línea (+20,6 pt). Puede ser en parte un efecto de la prueba: el PDF trae cada estilo de Garamond en dos subconjuntos y solo uno pudo cargarse, así que algunos caracteres se dibujaron con una fuente más ancha. Hay que confirmarlo en Word con Garamond completa (fase 4). Sin las fuentes del documento, el resultado sigue en unas 2.500 hojas (fase 3).
