@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Number;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
+use Spatie\Permission\Models\Role;
 use Symfony\Component\Process\Process;
 
 function conversionPdf(string $content, bool $styled = false): string
@@ -101,6 +102,19 @@ function pdf2docxAvailable(): bool
 beforeEach(function () {
     Storage::fake('local');
     Queue::fake();
+});
+
+it('migrates conversion permissions when AdminOperacion is absent and can be retried', function () {
+    Role::where('name', 'AdminOperacion')->where('guard_name', 'web')->delete();
+    $role = Role::findOrCreate('SuperAdmin', 'web');
+    $migration = require database_path('migrations/2026_09_23_000001_add_file_conversion_permissions.php');
+
+    $migration->up();
+    $migration->up();
+
+    expect($role->fresh()->hasPermissionTo('navbar.conversiones.visible'))->toBeTrue()
+        ->and($role->fresh()->hasPermissionTo('conversiones.ver_registro'))->toBeTrue()
+        ->and(Role::where('name', 'AdminOperacion')->exists())->toBeFalse();
 });
 
 it('limits frontoffice to two conversions per format and records the declared actor', function () {
