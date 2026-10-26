@@ -100,3 +100,63 @@ new MutationObserver((mutations) => {
         });
     });
 }).observe(document.body, { childList: true, subtree: true });
+
+// "Organizar PDF" (/convertir-archivos): thumbnails drawn with pdf.js, loaded only when that tool is used.
+window.pdfOrganizer = (maxPages) => ({
+    pages: [],
+    loading: false,
+    error: null,
+    dragged: null,
+
+    async load(file) {
+        this.pages = [];
+        this.error = null;
+        this.sync();
+        if (!file) {
+            return;
+        }
+
+        this.loading = true;
+        try {
+            const { renderThumbnails } = await import('./pdf-thumbnails');
+            await renderThumbnails(file, maxPages, ({ page, src }) => this.pages.push({ page, src, rotation: 0 }));
+        } catch (error) {
+            console.error(error);
+            this.pages = [];
+            this.error = error.message?.startsWith('Organizar') ? error.message : 'No se pudo leer el PDF para mostrar sus páginas.';
+        } finally {
+            this.loading = false;
+            this.sync();
+        }
+    },
+
+    rotate(index) {
+        this.pages[index].rotation = (this.pages[index].rotation + 90) % 360;
+        this.sync();
+    },
+
+    remove(index) {
+        this.pages.splice(index, 1);
+        this.sync();
+    },
+
+    move(from, to) {
+        if (to < 0 || to >= this.pages.length || from === to) {
+            return;
+        }
+        this.pages.splice(to, 0, this.pages.splice(from, 1)[0]);
+        this.sync();
+    },
+
+    drop(index) {
+        if (this.dragged !== null) {
+            this.move(this.dragged, index);
+        }
+        this.dragged = null;
+    },
+
+    // Deferred: the plan travels with the next request (the submit), not on every change.
+    sync() {
+        this.$wire.set('options.plan', JSON.stringify(this.pages.map(({ page, rotation }) => ({ page, rotation }))), false);
+    },
+});

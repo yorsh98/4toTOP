@@ -1,7 +1,12 @@
-# PDF -> Word engine (scripts/pdf_to_docx.py). Install into a dedicated virtualenv:
+# Conversion engines: PDF -> Word (scripts/pdf_to_docx.py), page tools (scripts/pdf_pages.py) and OCR (OCRmyPDF).
+# Install into a dedicated virtualenv:
 #   python3 -m venv .venv-conversions && .venv-conversions/bin/pip install -r scripts/requirements.txt
 # then set CONVERSIONS_PYTHON=<absolute path>/.venv-conversions/bin/python
 # PyMuPDF is AGPL-3.0 or Artifex commercial: review licensing before exposing the converter publicly.
 pdf2docx==0.5.13
 pymupdf==2.0
 python-docx==1.2.0
+# Page tools: EXIF orientation of photos (images to PDF).
+pillow==13.0.0
+# OCR (also needs the tesseract-ocr and tesseract-ocr-spa system packages and Ghostscript).
+ocrmypdf==17.13.0
