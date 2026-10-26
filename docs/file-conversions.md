@@ -2,7 +2,7 @@
 
 > Referencia de calidad: [PDF a Word con Acrobat XI como referencia obligatoria](plan-pdf-word-acrobat-xi.md). El motor actual **no es Adobe**: busca una salida equivalente (párrafos, tablas, encabezados y pies como Acrobat XI), no la procedencia ni identidad binaria de Acrobat.
 
-El frontoffice (`/convertir-archivos`) permite, por sesión, dos usos de cada herramienta (`public_limit`). Las herramientas se agrupan como en iLovePDF: *Convertir* (PDF a Word, Word a PDF, Imagen a PDF, M4A a MP3), *Organizar* (Unir, Dividir, Rotar, Organizar), *Optimizar* (Comprimir, OCR) y *Editar* (Números de página). La herramienta elegida queda en la URL (`?herramienta=ocr`).
+El frontoffice (`/convertir-archivos`) permite, por sesión, dos usos de cada herramienta (`public_limit`). Las herramientas se agrupan como en iLovePDF: *Convertir* (PDF a Word, Word a PDF, Imagen a PDF, M4A a MP3), *Organizar* (Unir, Dividir, Rotar, Organizar), *Optimizar* (Comprimir, OCR) y *Editar* (Números de página, Cortar audio). La herramienta elegida queda en la URL (`?herramienta=ocr`).
 
 Cada herramienta es una clase de `app/Conversions` registrada en `config('conversions.tools')` (etiqueta, grupo, extensiones, tamaño máximo y, si acepta varios archivos, cuántos). Valida sus opciones (`options.*` en la página) en `prepare()`, antes de encolar, y hace el trabajo en `process()`, dentro del job `ConvertFile`. Las opciones quedan en la columna `options` del registro. Para agregar una herramienta: crear su clase, registrarla y, si tiene opciones, agregar `resources/views/livewire/partials/conversion-tools/<formato>.blade.php`. El backoffice (`/backoffice/convertir-archivos`) requiere el permiso `navbar.conversiones.visible`; el registro requiere `conversiones.ver_registro`. Los archivos se guardan en el disco privado `local` y se eliminan mediante `conversions:clean`; el registro persiste, con el motor usado, los SHA-256 de entrada y salida y los avisos mostrados.
 
@@ -63,6 +63,24 @@ OCRmyPDF (Tesseract, español) agrega una capa de texto invisible y seleccionabl
 - **Comprimir.** Ghostscript `pdfwrite` con tres niveles: extrema (`/screen`, 72 ppp), recomendada (`/ebook`, 150 ppp) y baja (`/printer`, 300 ppp). Si el resultado no ahorra al menos un 5 %, se entrega el original sin cambios, con su firma intacta. El aviso muestra el tamaño antes y después. Se verifica que no cambie el número de páginas.
 - **Word a PDF.** LibreOffice (DOC, DOCX, ODT, RTF) con un perfil propio por trabajo. Si el servidor no tiene las fuentes del documento, la paginación puede cambiar: conviene instalar las fuentes que usa el tribunal.
 
+## Cortar audio
+
+Editor al estilo de Audacity (plan en [Implementacion_CortarAudios.md](Implementacion_CortarAudios.md)). Al subir el archivo, `AudioInspector` mide su duración con `ffprobe` y calcula la forma de onda en el servidor: hasta 50 picos por segundo y como máximo 200.000 puntos, que viajan una sola vez en el evento `audio-loaded`. El navegador dibuja la onda con `wavesurfer.js` 7.12.12 y reproduce el archivo local. No lo decodifica ni lo descarga del servidor, así que un audio de 50 MB ocupa unos 10 MB de memoria en la pestaña.
+
+- **Regiones:** se marcan arrastrando sobre la onda, con «Agregar región en el cursor» o escribiendo inicio y fin (`h:mm:ss.mmm`, `m:ss.mmm` o segundos). Si se escribe un inicio posterior al fin, la región se desplaza conservando su duración. Se puede deshacer y rehacer, y hay atajos de Audacity (Espacio, `Ctrl+Z`, `Ctrl+I`, `Supr`, `[` `]`, `Ctrl+1`/`Ctrl+3`; la lista completa está en «Todos los atajos del editor»). Máximo: 200 regiones.
+- **Modos:** *Conservar lo marcado* (une las regiones, o entrega cada una en un archivo aparte; varias van en un ZIP), *Quitar lo marcado* y *Silenciar lo marcado* (misma duración). Opcionalmente: fundido de 0,1, 0,5 o 2 s (en las uniones, o al inicio y fin de cada archivo aparte) y normalización de volumen (`loudnorm`, conservando la frecuencia original).
+- **Servidor:** no confía en el navegador. `prepare()` vuelve a medir el audio y valida, ordena y une las regiones. `process()` siempre recodifica: `-c copy` cortaría en límites de trama y dejaría clics. Después mide cada archivo producido y falla si su duración difiere más de 0,15 s de lo esperado.
+- **Formatos:**
+  - **Entrada:** MP3, M4A, WAV, OGG, OPUS, FLAC, AAC, WMA y AMR. `oga` y `asf` son alias aceptados que no se muestran: el sistema detecta los WMA como ASF.
+  - **Salida:** MP3 (192 kb/s), M4A (AAC 192 kb/s), WAV (16 bits), OGG (Vorbis q5) y FLAC.
+  - El navegador no reproduce WMA ni AMR. Con esos formatos se avisa, pero la onda y el corte funcionan igual.
+- **Límites:** 50 MB y 4 horas (`CONVERSIONS_AUDIO_MAX_SECONDS`). El tiempo del job es `max(360, duración / 10 + 120)` s: 1.560 s para 4 horas, por debajo de `DB_QUEUE_RETRY_AFTER`.
+- **Mediciones** (equipo de desarrollo, FFmpeg 7.0.2):
+  - Onda de 1 hora de audio: 1,83 s.
+  - Corte de esa hora, recodificado a MP3: 16,46 s.
+  - MP3 de 48 MB (50 min), de la subida a la onda dibujada: 4,9 s.
+- **Corregido:** `dragToSeek` de wavesurfer 7 le quita el arrastre a la selección de regiones, así que no se usa. Un clic sigue moviendo el cursor.
+
 ## Requisitos del servidor
 
 - Python 3 con el entorno de los motores (PyMuPDF, pdf2docx, Pillow, OCRmyPDF), fijado en `scripts/requirements.lock.txt`. Se instala en `.venv-conversions` y se configura `CONVERSIONS_PYTHON=<ruta absoluta>/.venv-conversions/bin/python` y `CONVERSIONS_OCRMYPDF=<ruta absoluta>/.venv-conversions/bin/ocrmypdf`.
@@ -72,7 +90,7 @@ OCRmyPDF (Tesseract, español) agrega una capa de texto invisible y seleccionabl
 - Poppler (`pdfinfo`, `pdftotext`, `pdfimages`; rutas en `CONVERSIONS_PDFINFO`, `CONVERSIONS_PDFTOTEXT`, `CONVERSIONS_PDFIMAGES`). Unir y dividir PDF también requieren el entorno Python de `CONVERSIONS_PYTHON` (PyMuPDF).
 - OCR: Tesseract 5 con español (paquetes del sistema `tesseract-ocr` y `tesseract-ocr-spa`; no vienen por pip) y Ghostscript (`CONVERSIONS_GHOSTSCRIPT`, que también usa Comprimir). OCRmyPDF viene en el entorno Python.
 - LibreOffice para Word a PDF y, con el filtro `writer_pdf_import`, para PDF a Word si `CONVERSIONS_PDF_ENGINE=libreoffice` (`CONVERSIONS_LIBREOFFICE` si su ejecutable tiene otra ubicación). Cada trabajo usa su propio perfil dentro del directorio temporal privado.
-- FFmpeg con `libmp3lame` disponible para el trabajador de cola (`CONVERSIONS_FFMPEG` si su ejecutable tiene otra ubicación).
+- FFmpeg y FFprobe (vienen juntos en el paquete `ffmpeg` de Ubuntu y en el build *essentials* de Windows) disponibles para el trabajador de cola, con los codificadores `libmp3lame`, `aac`, `pcm_s16le`, `libvorbis` y `flac`. Si sus ejecutables están en otra ubicación: `CONVERSIONS_FFMPEG` y `CONVERSIONS_FFPROBE`.
 - Cola de base de datos migrada y trabajador activo (`php artisan queue:work`). Cada job declara su tiempo límite: 360 s, o 1920 s con OCR. `DB_QUEUE_RETRY_AFTER` (2100 s por defecto) debe ser mayor que el más largo. Si `.env` lo define con un valor menor, ajustarlo. En desarrollo, `composer run dev` usa `queue:listen --timeout=0`, porque el valor por defecto de 60 s cortaba las conversiones largas. Programar `php artisan schedule:run` cada minuto en producción para limpiar los archivos expirados.
 - PHP y servidor web con `upload_max_filesize` y `post_max_size` superiores a 50 MB (recomendado: `64M`). Livewire acepta hasta 50 MB. Si PHP tiene un límite menor (el valor de fábrica es 2 MB), descarta el archivo antes de que llegue a Laravel. Cada herramienta tiene su máximo por archivo (20 MB o 50 MB; ver `config('conversions.tools')`). El formulario muestra el límite efectivo, el menor entre el de la herramienta y el de PHP, y avisa antes de subir un archivo que lo supere. El límite se ajusta en el `php.ini` que usa cada servidor:
   - `php artisan serve` / `composer run dev`: el `php.ini` de la CLI (`php --ini`; en Ubuntu, `/etc/php/8.x/cli/php.ini`). Sin cambiarlo, se puede lanzar `PHP_INI_SCAN_DIR=":/ruta/con/uploads.ini" composer run dev`, donde `uploads.ini` contiene las dos líneas.

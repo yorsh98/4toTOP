@@ -21,7 +21,7 @@ scripts/build-offline-bundle.sh windows 3.13 --full
 scripts/build-offline-bundle.sh linux 3.12 24.04 --full
 ```
 
-`--full` agrega LibreOffice (Word a PDF) y FFmpeg (M4A a MP3). Omítelo si el servidor ya los tiene: `conversions:check` lo dice.
+`--full` agrega LibreOffice (Word a PDF) y FFmpeg con FFprobe (M4A a MP3, Cortar audio). Omítelo si el servidor ya los tiene: `conversions:check` lo dice.
 
 El resultado queda en `build/offline-<sistema>-py<versión>.zip` (Windows) o `.tar.gz` (Linux). Dentro hay `wheels/` con los 47 paquetes Python, `requirements.lock.txt`, `SHA256SUMS.txt` y, según el sistema, `installers/` y `tessdata/` o `debs/`. Copia ese archivo al servidor, junto con el repositorio ya actualizado y su `public/build` (ver el paso 5).
 
@@ -34,7 +34,7 @@ El resultado queda en `build/offline-<sistema>-py<versión>.zip` (Windows) o `.t
 | Tesseract 5 con español y `osd` | OCR, Imagen a PDF con OCR, PDF a Word de escaneos | `.deb` / instalador y `tessdata/` |
 | Ghostscript | Comprimir, OCR | `.deb` / instalador |
 | LibreOffice | Word a PDF | solo con `--full` |
-| FFmpeg | M4A a MP3 | solo con `--full` |
+| FFmpeg y FFprobe | M4A a MP3, Cortar audio | solo con `--full` |
 
 `spa` es el idioma del reconocimiento y `osd` permite enderezar páginas giradas.
 
@@ -64,7 +64,7 @@ CONVERSIONS_OCR_JOBS=4
 DB_QUEUE_RETRY_AFTER=2100
 ```
 
-Sin `CONVERSIONS_OCRMYPDF`, la herramienta OCR no aparece y PDF a Word rechaza los PDF escaneados. Opcionales, con su valor por defecto: `CONVERSIONS_OCR_MAX_PAGES=1000`, `CONVERSIONS_OCR_TIMEOUT=1800`, `CONVERSIONS_OCR_LANGUAGES=spa`, `CONVERSIONS_GHOSTSCRIPT=gs`, `CONVERSIONS_LIBREOFFICE=libreoffice`, `CONVERSIONS_FFMPEG=ffmpeg`, `CONVERSIONS_PDFINFO`, `CONVERSIONS_PDFTOTEXT`, `CONVERSIONS_PDFIMAGES`.
+Sin `CONVERSIONS_OCRMYPDF`, la herramienta OCR no aparece y PDF a Word rechaza los PDF escaneados. Opcionales, con su valor por defecto: `CONVERSIONS_OCR_MAX_PAGES=1000`, `CONVERSIONS_OCR_TIMEOUT=1800`, `CONVERSIONS_OCR_LANGUAGES=spa`, `CONVERSIONS_GHOSTSCRIPT=gs`, `CONVERSIONS_LIBREOFFICE=libreoffice`, `CONVERSIONS_FFMPEG=ffmpeg`, `CONVERSIONS_FFPROBE=ffprobe`, `CONVERSIONS_AUDIO_MAX_SECONDS=14400`, `CONVERSIONS_PDFINFO`, `CONVERSIONS_PDFTOTEXT`, `CONVERSIONS_PDFIMAGES`.
 
 - **`CONVERSIONS_OCR_JOBS`:** núcleos que usa cada OCR. Con 4, 40 páginas reales tardaron 42 s y 1000 páginas toman unos 18 minutos. No lo pongas por encima de los núcleos del servidor.
 - **`DB_QUEUE_RETRY_AFTER`:** debe ser **mayor** que el trabajo más largo (1920 s con OCR). Si `.env` ya lo define con 420 u otro valor menor, cámbialo: con un valor menor, la cola da por perdido un OCR largo y lo vuelve a lanzar.
@@ -156,6 +156,7 @@ Prueba manual, en este orden:
    CONVERSIONS_PDFIMAGES=C:/poppler/Library/bin/pdfimages.exe
    CONVERSIONS_LIBREOFFICE=C:/Program Files/LibreOffice/program/soffice.exe
    CONVERSIONS_FFMPEG=C:/ffmpeg/bin/ffmpeg.exe
+   CONVERSIONS_FFPROBE=C:/ffmpeg/bin/ffprobe.exe
    CONVERSIONS_OCR_JOBS=4
    DB_QUEUE_RETRY_AFTER=2100
    ```
