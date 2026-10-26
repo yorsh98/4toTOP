@@ -39,7 +39,8 @@ return [
             'connection' => env('DB_QUEUE_CONNECTION'),
             'table' => env('DB_QUEUE_TABLE', 'jobs'),
             'queue' => env('DB_QUEUE', 'default'),
-            'retry_after' => (int) env('DB_QUEUE_RETRY_AFTER', 420),
+            // Longer than the longest job: OCR of 1,000 pages (conversions.ocr_timeout + 120 s, see OcrPdfTool).
+            'retry_after' => (int) env('DB_QUEUE_RETRY_AFTER', 2100),
             'after_commit' => false,
         ],
 
