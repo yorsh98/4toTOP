@@ -2,6 +2,8 @@
 
 Fecha: 26 de octubre de 2026. Origen: `~/Descargas/audacity/` (`audacity-win-2.0.4.exe` y `Lame_v3.99.3_for_Windows.exe`).
 
+> La orden de trabajo detallada está en [Implementacion_CortarAudios.md](Implementacion_CortarAudios.md). Donde discrepen, manda esa. En particular, la reproducción se hace con el archivo local del navegador, sin vista previa en el servidor.
+
 ## Qué hay en el binario
 
 Análisis estático con REA (`open_binary`, `inspect_pe_resources`, `inspect_with_objdump`), `objdump -p` y `strings`. No se ejecutó nada.
