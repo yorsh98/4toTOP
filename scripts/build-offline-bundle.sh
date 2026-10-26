@@ -11,7 +11,7 @@
 #       Tesseract + Spanish, Ghostscript, Poppler and python3-venv, downloaded with Docker in a clean
 #       ubuntu:<version> container that has python3, as an Ubuntu Server does.
 #
-#   --full also adds LibreOffice (Word a PDF) and FFmpeg (M4A a MP3), if the server lacks them.
+#   --full also adds LibreOffice (Word a PDF) and FFmpeg with FFprobe (M4A a MP3, Cortar audio), if the server lacks them.
 #
 # Output: build/offline-<platform>-py<version>.zip (Windows) or .tar.gz (Linux).
 # Note: LibreOffice's mature ("still") branch is chosen on purpose: the oldest one in /stable.
