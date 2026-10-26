@@ -79,29 +79,29 @@ class SplitPdfTool extends ConversionTool
     }
 
     /**
-     * Moves a single part to result.pdf, or packs several into result.zip.
+     * Moves a single part to result.<extension>, or packs several into result.zip.
      *
      * @param  array<string, string>  $parts  file name in the ZIP => path
      */
-    public static function deliver(array $parts, string $directory): string
+    public static function deliver(array $parts, string $directory, string $extension = 'pdf'): string
     {
         if (count($parts) === 1) {
-            if (! rename(reset($parts), $directory.'/result.pdf')) {
-                throw new \RuntimeException('No se pudo guardar el PDF.');
+            if (! rename(reset($parts), $directory.'/result.'.$extension)) {
+                throw new \RuntimeException('No se pudo guardar el archivo.');
             }
 
-            return $directory.'/result.pdf';
+            return $directory.'/result.'.$extension;
         }
 
         $archive = new \ZipArchive;
         if ($archive->open($directory.'/result.zip', \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== true) {
-            throw new \RuntimeException('No se pudo crear el ZIP con los PDF.');
+            throw new \RuntimeException('No se pudo crear el ZIP.');
         }
         foreach ($parts as $name => $path) {
             $archive->addFile($path, $name);
         }
         if (! $archive->close()) {
-            throw new \RuntimeException('No se pudo crear el ZIP con los PDF.');
+            throw new \RuntimeException('No se pudo crear el ZIP.');
         }
 
         return $directory.'/result.zip';

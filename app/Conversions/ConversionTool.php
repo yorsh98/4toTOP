@@ -61,6 +61,11 @@ abstract class ConversionTool
         return false;
     }
 
+    public function needsAudioProbe(): bool
+    {
+        return false;
+    }
+
     /** Extension of the result; a tool may still deliver another one (a split with one part is a PDF, not a ZIP). */
     abstract public function resultExtension(): string;
 

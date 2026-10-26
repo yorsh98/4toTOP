@@ -62,7 +62,7 @@
 
                     @php($maxUpload = Illuminate\Support\Number::fileSize($maxUploadBytes, maxPrecision: 1))
                     @php($accept = collect($tool->config['accept'])->map(fn ($extension) => '.'.$extension)->push($tool->acceptsPdf() ? 'application/pdf' : null)->filter()->implode(','))
-                    @php($types = collect($tool->config['accept'])->map(fn ($extension) => strtoupper($extension))->join(', ', ' o '))
+                    @php($types = collect($tool->config['accept'])->diff($tool->config['aliases'] ?? [])->map(fn ($extension) => strtoupper($extension))->join(', ', ' o '))
                     @if ($tool->multiple())
                         {{-- Uploaded one by one so the total is not bound by post_max_size, and each file is checked as it arrives. --}}
                         <div wire:key="upload-multiple-{{ $format }}" x-data="{
@@ -120,6 +120,7 @@
                             <p class="mt-2 text-xs text-slate-600">{{ match ($format) {
                                 'pdf' => 'PDF con texto seleccionable · máximo '.$maxUpload.'. El Word reconstruye párrafos, tablas, encabezados y pies; revísalo antes de usarlo.',
                                 'm4a' => 'Audio M4A · máximo '.$maxUpload.'.',
+                                'audiocut' => 'Audio · máximo '.$maxUpload.' y '.App\Services\AudioInspector::limit(config('conversions.audio_max_seconds')).' de duración.',
                                 'word2pdf' => $types.' · máximo '.$maxUpload.'. Si el servidor no tiene las fuentes del documento, la paginación puede cambiar.',
                                 'ocr' => 'PDF escaneado de hasta '.number_format(config('conversions.ocr_max_pages'), 0, ',', '.').' páginas · máximo '.$maxUpload.'. Un PDF grande puede tardar varios minutos.',
                                 default => 'Un PDF · máximo '.$maxUpload.'.',

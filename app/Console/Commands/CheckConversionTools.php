@@ -2,6 +2,8 @@
 
 namespace App\Console\Commands;
 
+use App\Conversions\AudioCutTool;
+use App\Conversions\ConversionTool;
 use App\Conversions\OcrPdfTool;
 use App\Services\PdfOcr;
 use Illuminate\Console\Command;
@@ -27,7 +29,9 @@ class CheckConversionTools extends Command
             $this->check('Poppler pdfimages', 'PDF a Word', [config('conversions.pdfimages'), '-v']),
             $this->check('Ghostscript', 'Comprimir, OCR', [config('conversions.ghostscript'), '--version']),
             $this->check('LibreOffice', 'Word a PDF', [config('conversions.libreoffice'), '--version']),
-            $this->check('FFmpeg', 'M4A a MP3', [config('conversions.ffmpeg'), '-version']),
+            $this->check('FFmpeg', 'M4A a MP3, Cortar audio', [config('conversions.ffmpeg'), '-version']),
+            $this->check('FFprobe', 'Cortar audio', [config('conversions.ffprobe'), '-version']),
+            $this->audioEncoders(),
             $this->ocr(),
             $this->queue(),
             $this->uploads(),
@@ -100,9 +104,23 @@ PY, $directory.'/scan.pdf']);
     private function queue(): array
     {
         $retryAfter = (int) config('queue.connections.'.config('queue.default').'.retry_after');
-        $needed = OcrPdfTool::ocrTimeout();
+        $needed = max(OcrPdfTool::ocrTimeout(), ConversionTool::for('audiocut')->timeout(['duration' => config('conversions.audio_max_seconds')]));
 
-        return $this->row('Cola: retry_after', $retryAfter > $needed, 'OCR de PDF largos', "retry_after = {$retryAfter} s; debe superar {$needed} s (DB_QUEUE_RETRY_AFTER).");
+        return $this->row('Cola: retry_after', $retryAfter > $needed, 'OCR, Cortar audio', "retry_after = {$retryAfter} s; debe superar {$needed} s (DB_QUEUE_RETRY_AFTER).");
+    }
+
+    private function audioEncoders(): array
+    {
+        $process = new Process([config('conversions.ffmpeg'), '-hide_banner', '-encoders']);
+        $process->setTimeout(30);
+        try {
+            $process->run();
+            $missing = array_filter(array_column(array_column(AudioCutTool::ENCODERS, 'args'), 1), fn ($codec) => ! preg_match('/\b'.preg_quote($codec, '/').'\s/', $process->getOutput()));
+
+            return $this->row('Codificadores de audio', $process->isSuccessful() && $missing === [], 'Cortar audio', $missing ? 'Faltan: '.implode(', ', $missing) : 'MP3, AAC, PCM, Vorbis y FLAC.');
+        } catch (\Throwable $exception) {
+            return $this->row('Codificadores de audio', false, 'Cortar audio', mb_substr($exception->getMessage(), 0, 120));
+        }
     }
 
     /** PHP's own limits: those of this console. The web server may use another php.ini; check it too. */

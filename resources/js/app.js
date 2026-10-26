@@ -160,3 +160,26 @@ window.pdfOrganizer = (maxPages) => ({
         this.$wire.set('options.plan', JSON.stringify(this.pages.map(({ page, rotation }) => ({ page, rotation }))), false);
     },
 });
+
+window.audioCutter = (maxRegions) => ({
+    ready: false, error: null, pendingFile: null, pendingPeaks: null, disposed: false,
+    load(file) { this.pendingFile = file; },
+    loaded(event) { this.pendingPeaks = event; },
+    destroy() { this.disposed = true; },
+    async init() {
+        try {
+            const { createCutter } = await import('./audio-editor');
+            if (this.disposed) return;
+            const file = this.pendingFile;
+            const peaks = this.pendingPeaks;
+            Object.assign(this, createCutter(maxRegions));
+            this.pendingFile = this.pendingPeaks = null;
+            this.ready = true;
+            if (file) this.load(file);
+            if (peaks) this.loaded(peaks);
+        } catch (error) {
+            console.error(error);
+            this.error = 'No se pudo cargar el editor de audio. Recarga la página e inténtalo de nuevo.';
+        }
+    },
+});

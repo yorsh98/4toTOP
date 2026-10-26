@@ -2,6 +2,7 @@
 
 use App\Conversions\ConversionTool;
 use App\Models\FileConversion;
+use App\Services\AudioInspector;
 use App\Services\FileConversionService;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Number;
@@ -281,4 +282,68 @@ function pdfPageGeometry(string $path): array
     $process->mustRun();
 
     return json_decode($process->getOutput(), true);
+}
+
+function ffmpegAvailable(): bool
+{
+    foreach (['ffmpeg', 'ffprobe'] as $program) {
+        $process = new Process([config('conversions.'.$program), '-version']);
+        $process->run();
+        if (! $process->isSuccessful()) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+function audioEncoder(string $extension): string
+{
+    return match ($extension) {
+        'mp3' => 'libmp3lame', 'm4a', 'aac' => 'aac', 'ogg', 'oga' => 'libvorbis',
+        'opus' => 'libopus', 'wav' => 'pcm_s16le', 'wma', 'asf' => 'wmav2', 'amr' => 'libopencore_amrnb',
+        'flac' => 'flac',
+    };
+}
+
+function audioEncoderAvailable(string $extension): bool
+{
+    $process = new Process([config('conversions.ffmpeg'), '-hide_banner', '-encoders']);
+    $process->run();
+
+    return $process->isSuccessful() && (bool) preg_match('/\b'.preg_quote(audioEncoder($extension), '/').'\s/', $process->getOutput());
+}
+
+function conversionAudio(string $extension, float $seconds = 10, int $frequency = 440): string
+{
+    $directory = sys_get_temp_dir().'/audio-fixture-'.bin2hex(random_bytes(6));
+    mkdir($directory, 0700);
+    $path = $directory.'/tone.'.$extension;
+    try {
+        $process = new Process([config('conversions.ffmpeg'), '-nostdin', '-y', '-v', 'error', '-f', 'lavfi', '-i', 'sine=frequency='.$frequency.':duration='.sprintf('%.3F', $seconds), '-codec:a', audioEncoder($extension), ...($extension === 'amr' ? ['-ar', '8000', '-ac', '1'] : []), $path]);
+        $process->setTimeout(600)->mustRun();
+
+        return file_get_contents($path);
+    } finally {
+        if (is_file($path)) {
+            unlink($path);
+        }
+        rmdir($directory);
+    }
+}
+
+function audioDuration(string $path): float
+{
+    return app(AudioInspector::class)->probe($path)['duration'];
+}
+
+function meanVolume(string $path, float $start, float $end): float
+{
+    $process = new Process([config('conversions.ffmpeg'), '-nostdin', '-hide_banner', '-ss', sprintf('%.3F', $start), '-to', sprintf('%.3F', $end), '-i', $path, '-af', 'volumedetect', '-f', 'null', '-']);
+    $process->mustRun();
+    if (! preg_match('/mean_volume:\s+(-?[\d.]+|-inf) dB/', $process->getErrorOutput(), $match)) {
+        throw new RuntimeException('No volume measurement in FFmpeg output.');
+    }
+
+    return $match[1] === '-inf' ? -INF : (float) $match[1];
 }
