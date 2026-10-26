@@ -2,7 +2,9 @@
 
 > Referencia de calidad: [PDF a Word con Acrobat XI como referencia obligatoria](plan-pdf-word-acrobat-xi.md). El motor actual **no es Adobe**: busca una salida equivalente (párrafos, tablas, encabezados y pies como Acrobat XI), no la procedencia ni identidad binaria de Acrobat.
 
-El frontoffice (`/convertir-archivos`) permite dos PDF y dos M4A por sesión. El backoffice (`/backoffice/convertir-archivos`) requiere el permiso `navbar.conversiones.visible`; el registro requiere `conversiones.ver_registro`. Los archivos se guardan en el disco privado `local` y se eliminan mediante `conversions:clean`; el registro persiste, con el motor usado, los SHA-256 de entrada y salida y los avisos mostrados.
+El frontoffice (`/convertir-archivos`) permite, por sesión, dos usos de cada herramienta (`public_limit`). Las herramientas se agrupan como en iLovePDF: *Convertir* (PDF a Word, Word a PDF, Imagen a PDF, M4A a MP3), *Organizar* (Unir, Dividir, Rotar, Organizar), *Optimizar* (Comprimir, OCR) y *Editar* (Números de página). La herramienta elegida queda en la URL (`?herramienta=ocr`).
+
+Cada herramienta es una clase de `app/Conversions` registrada en `config('conversions.tools')` (etiqueta, grupo, extensiones, tamaño máximo y, si acepta varios archivos, cuántos). Valida sus opciones (`options.*` en la página) en `prepare()`, antes de encolar, y hace el trabajo en `process()`, dentro del job `ConvertFile`. Las opciones quedan en la columna `options` del registro. Para agregar una herramienta: crear su clase, registrarla y, si tiene opciones, agregar `resources/views/livewire/partials/conversion-tools/<formato>.blade.php`. El backoffice (`/backoffice/convertir-archivos`) requiere el permiso `navbar.conversiones.visible`; el registro requiere `conversiones.ver_registro`. Los archivos se guardan en el disco privado `local` y se eliminan mediante `conversions:clean`; el registro persiste, con el motor usado, los SHA-256 de entrada y salida y los avisos mostrados.
 
 ## PDF a Word
 
@@ -28,17 +30,53 @@ Con `90-2023 final.pdf` (1.285 páginas; ver [plan-paginacion-firmas-pdf-word.md
 
 No se probó en Microsoft Word. Diferencias conocidas frente a Acrobat: listas como texto «1.» en vez de numeración de Word, texto de firmas como imagen y pequeñas variaciones de cortes de línea por sustitución de fuentes (Arial/Helvetica → Liberation Sans/Nimbus Sans en Linux). Instalar las fuentes del documento en el servidor reduce esas variaciones.
 
+## Herramientas de páginas (unir, dividir, rotar, organizar, numerar, imágenes)
+
+Siguen los modos de iLovePDF. Las procesa `scripts/pdf_pages.py` con PyMuPDF, del mismo entorno que el motor PDF a Word, sin volver a renderizar las páginas.
+
+Las firmas electrónicas (campos de firma) y las anotaciones no forman parte del contenido de la página: se dibujan encima. Antes de copiar las páginas, su apariencia se integra a la página (`bake`). Así el recuadro de firma se sigue viendo y los enlaces se conservan. Con Poppler, `pdfseparate` borraba la firma (caso `RIT 222-2026.pdf`, página 8) y `pdfunite` borraba los enlaces. Una firma deja de ser verificable criptográficamente en cuanto se reescriben las páginas, con cualquier herramienta. Por eso el resultado avisa que se valide con el código de verificación (QR) del documento. Comprimir y OCR también aplanan primero.
+
+- **Unir.** De 2 a 20 PDF, cada uno de hasta 20 MB y en total hasta 100 MB. Los archivos se suben de uno en uno, así que el total no depende de `post_max_size`. Al llegar cada archivo se lee su número de páginas, de modo que un PDF protegido o dañado se rechaza en ese momento. El orden se cambia con los botones subir y bajar, o con «Ordenar por nombre». El resultado es `<primer archivo>_unido.pdf`, y el SHA-256 de cada entrada queda en `options.inputs`.
+- **Dividir.** Un PDF. Cuando termina de subir se muestra su número de páginas y los rangos se comprueban contra él antes de encolar el trabajo.
+  - *Dividir por rango → personalizados*: `1-3, 5, 8-10`. Cada rango genera un PDF, o uno solo si se marca «Unir todos los rangos».
+  - *Dividir por rango → fijos*: archivos de N páginas; el último puede tener menos.
+  - *Extraer páginas → todas*: un PDF por página.
+  - *Extraer páginas → seleccionar*: las páginas indicadas, por separado o unidas en un PDF.
+
+  Si el resultado es un solo PDF se entrega como `<nombre>_dividido.pdf`. Si son varios, como `<nombre>_dividido.zip`, con partes llamadas `<nombre>_<rango>.pdf`.
+- **Rotar.** Todas las páginas o un rango (`1, 3-5`), 90°, 180° o 270°. Solo cambia la rotación de la página; el contenido no se vuelve a dibujar.
+- **Organizar.** Las miniaturas se dibujan **en el navegador** con pdf.js (`pdfjs-dist`, cargado solo en esta herramienta), así que el servidor no genera imágenes. Se arrastran para reordenar, y cada una se puede rotar o quitar. La página envía el plan (`[{page, rotation}]`) y el servidor lo valida contra el número de páginas real. Hasta 300 páginas, para cuidar la memoria del navegador.
+- **Números de página.** Seis posiciones, margen, tamaño, formato (`1`, `Página 1`, `Página 1 de N`, `Fs. 1` para foliar), primer número y rango de páginas (por ejemplo, desde la 2 para no numerar la carátula). Respeta la rotación de cada página, así que el número queda derecho en escaneos girados.
+- **Imagen a PDF.** Hasta 50 JPG o PNG en el orden elegido. Tamaño de página (ajustar a la imagen, Oficio de 216 × 330 mm, Carta o A4), orientación y margen. Un PDF con todas o uno por imagen (ZIP). Los JPEG se insertan sin recomprimir, y las fotos del celular se enderezan según su orientación EXIF (Pillow). Opcionalmente se les aplica OCR.
+
+## OCR: PDF escaneado a PDF con texto buscable
+
+OCRmyPDF (Tesseract, español) agrega una capa de texto invisible y seleccionable sobre la imagen original de cada página, que no se vuelve a dibujar. Opciones: idioma (español, o español e inglés), enderezar páginas (`--rotate-pages --deskew`), «Rehacer el OCR» (`--redo-ocr`, para escaneos con un OCR malo; si no se marca, las páginas que ya tienen texto no se tocan) y PDF/A.
+
+- Un PDF que ya tiene texto en todas sus páginas se rechaza **antes de encolarlo**, sin consumir el cupo, salvo que se marque «Rehacer el OCR».
+- Hasta `CONVERSIONS_OCR_MAX_PAGES` páginas (1000) y 50 MB. Medido con 4 núcleos (`CONVERSIONS_OCR_JOBS`): 40 páginas reales a 300 ppp en 42 s (unos 1 s por página y 380 MB de RAM). 1000 páginas tardan unos 18 minutos. Un escaneo de 1000 páginas en escala de grises a 300 ppp pesa unos 120 MB, más que el límite de 50 MB. Caben escaneos en blanco y negro (CCITT/JBIG2, unos 30–50 KB por página) o de menor resolución. Subir más requiere aumentar el límite de Livewire y de PHP.
+- El job de OCR tiene su propio tiempo límite: `CONVERSIONS_OCR_TIMEOUT` (1800 s) más 120 s. Por eso `DB_QUEUE_RETRY_AFTER` vale 2100 por defecto y siempre debe ser mayor. El aviso del resultado indica en qué páginas se reconoció texto y en cuáles no se encontró.
+- Sin `CONVERSIONS_OCRMYPDF`, la herramienta OCR no aparece y PDF a Word rechaza los PDF escaneados. Con la variable, PDF a Word también aplica OCR a las páginas escaneadas.
+
+## Comprimir y Word a PDF
+
+- **Comprimir.** Ghostscript `pdfwrite` con tres niveles: extrema (`/screen`, 72 ppp), recomendada (`/ebook`, 150 ppp) y baja (`/printer`, 300 ppp). Si el resultado no ahorra al menos un 5 %, se entrega el original sin cambios, con su firma intacta. El aviso muestra el tamaño antes y después. Se verifica que no cambie el número de páginas.
+- **Word a PDF.** LibreOffice (DOC, DOCX, ODT, RTF) con un perfil propio por trabajo. Si el servidor no tiene las fuentes del documento, la paginación puede cambiar: conviene instalar las fuentes que usa el tribunal.
+
 ## Requisitos del servidor
 
-- Python 3 con el entorno del motor: `python3 -m venv .venv-conversions && .venv-conversions/bin/pip install -r scripts/requirements.txt` y `CONVERSIONS_PYTHON=<ruta absoluta>/.venv-conversions/bin/python`. PyMuPDF se distribuye con licencia AGPL-3.0 o comercial de Artifex: revisar el licenciamiento antes de ofrecer el conversor al público.
-- Poppler (`pdfinfo`, `pdftotext`, `pdfimages`; rutas en `CONVERSIONS_PDFINFO`, `CONVERSIONS_PDFTOTEXT`, `CONVERSIONS_PDFIMAGES`).
-- Opcional: OCRmyPDF con Tesseract y el idioma español (`apt install ocrmypdf tesseract-ocr-spa`) y `CONVERSIONS_OCRMYPDF=ocrmypdf`.
-- LibreOffice con el filtro `writer_pdf_import`, solo si `CONVERSIONS_PDF_ENGINE=libreoffice` (`CONVERSIONS_LIBREOFFICE` si su ejecutable tiene otra ubicación). Cada trabajo usa su propio perfil dentro del directorio temporal privado.
+- Python 3 con el entorno de los motores (PyMuPDF, pdf2docx, Pillow, OCRmyPDF), fijado en `scripts/requirements.lock.txt`. Se instala en `.venv-conversions` y se configura `CONVERSIONS_PYTHON=<ruta absoluta>/.venv-conversions/bin/python` y `CONVERSIONS_OCRMYPDF=<ruta absoluta>/.venv-conversions/bin/ocrmypdf`.
+  - **Con internet:** `python3 -m venv .venv-conversions && .venv-conversions/bin/pip install -r scripts/requirements.lock.txt`.
+  - **Sin internet (producción):** `scripts/build-offline-bundle.sh` arma en un equipo con internet un paquete con los paquetes Python, Tesseract (con español), Ghostscript, Poppler y, con `--full`, LibreOffice y FFmpeg, para Linux (Ubuntu) o Windows. Los pasos están en [despliegue-herramientas-pdf.md](despliegue-herramientas-pdf.md), y `php artisan conversions:check` verifica el resultado en el servidor.
+  - Licencias: PyMuPDF y Ghostscript son AGPL-3.0 (o comerciales de Artifex), OCRmyPDF MPL-2.0 y Tesseract Apache-2.0. Revisar el licenciamiento antes de ofrecer el conversor al público.
+- Poppler (`pdfinfo`, `pdftotext`, `pdfimages`; rutas en `CONVERSIONS_PDFINFO`, `CONVERSIONS_PDFTOTEXT`, `CONVERSIONS_PDFIMAGES`). Unir y dividir PDF también requieren el entorno Python de `CONVERSIONS_PYTHON` (PyMuPDF).
+- OCR: Tesseract 5 con español (paquetes del sistema `tesseract-ocr` y `tesseract-ocr-spa`; no vienen por pip) y Ghostscript (`CONVERSIONS_GHOSTSCRIPT`, que también usa Comprimir). OCRmyPDF viene en el entorno Python.
+- LibreOffice para Word a PDF y, con el filtro `writer_pdf_import`, para PDF a Word si `CONVERSIONS_PDF_ENGINE=libreoffice` (`CONVERSIONS_LIBREOFFICE` si su ejecutable tiene otra ubicación). Cada trabajo usa su propio perfil dentro del directorio temporal privado.
 - FFmpeg con `libmp3lame` disponible para el trabajador de cola (`CONVERSIONS_FFMPEG` si su ejecutable tiene otra ubicación).
-- Cola de base de datos migrada y trabajador activo (`php artisan queue:work --timeout=360`); el valor predeterminado de `DB_QUEUE_RETRY_AFTER` es 420 segundos y debe ser superior al tiempo máximo del trabajo. Si ya existe una configuración explícita de `DB_QUEUE_RETRY_AFTER`, ajustarla. Programar `php artisan schedule:run` cada minuto en producción para limpiar los archivos expirados.
-- PHP y servidor web con `upload_max_filesize` y `post_max_size` superiores a 50 MB (recomendado: `64M`). Livewire acepta hasta 50 MB y la validación del conversor limita PDF a 20 MB y M4A a 50 MB. Si PHP tiene un límite menor (el valor de fábrica es 2 MB), descarta el archivo antes de que llegue a Laravel. El formulario muestra el límite efectivo, el menor entre el del conversor y el de PHP, y avisa antes de subir un archivo que lo supere. El límite se ajusta en el `php.ini` que usa cada servidor:
+- Cola de base de datos migrada y trabajador activo (`php artisan queue:work`). Cada job declara su tiempo límite: 360 s, o 1920 s con OCR. `DB_QUEUE_RETRY_AFTER` (2100 s por defecto) debe ser mayor que el más largo. Si `.env` lo define con un valor menor, ajustarlo. En desarrollo, `composer run dev` usa `queue:listen --timeout=0`, porque el valor por defecto de 60 s cortaba las conversiones largas. Programar `php artisan schedule:run` cada minuto en producción para limpiar los archivos expirados.
+- PHP y servidor web con `upload_max_filesize` y `post_max_size` superiores a 50 MB (recomendado: `64M`). Livewire acepta hasta 50 MB. Si PHP tiene un límite menor (el valor de fábrica es 2 MB), descarta el archivo antes de que llegue a Laravel. Cada herramienta tiene su máximo por archivo (20 MB o 50 MB; ver `config('conversions.tools')`). El formulario muestra el límite efectivo, el menor entre el de la herramienta y el de PHP, y avisa antes de subir un archivo que lo supere. El límite se ajusta en el `php.ini` que usa cada servidor:
   - `php artisan serve` / `composer run dev`: el `php.ini` de la CLI (`php --ini`; en Ubuntu, `/etc/php/8.x/cli/php.ini`). Sin cambiarlo, se puede lanzar `PHP_INI_SCAN_DIR=":/ruta/con/uploads.ini" composer run dev`, donde `uploads.ini` contiene las dos líneas.
   - XAMPP: `C:\xampp\php\php.ini` y reiniciar Apache. `docs/documentos-xampp.md` indica 25M; el conversor necesita 64M.
   - PHP-FPM: el `php.ini` de FPM y reiniciar el servicio.
 
-Se recomienda probar la calidad del DOCX con PDFs representativos del tribunal, abriéndolos en el Word que usan los funcionarios. Después de desplegar: `php artisan migrate` y reiniciar los trabajadores de cola (`php artisan queue:restart`). Las pruebas del motor `pdf2docx` se omiten si `CONVERSIONS_PYTHON` no tiene el paquete instalado.
+Se recomienda probar la calidad del DOCX con PDFs representativos del tribunal, abriéndolos en el Word que usan los funcionarios. Después de desplegar: `php artisan migrate`, `npm run build` (o subir `public/build`, que incluye pdf.js) y reiniciar los trabajadores de cola (`php artisan queue:restart`). Las pruebas (`tests/Feature/FileConversionTest.php` y `PdfToolsTest.php`, con fixtures en `tests/Helpers/conversions.php`) que necesitan Python, OCRmyPDF o Tesseract se omiten si no están instalados. Las pruebas leen `.env.testing`, así que hay que definirlo ahí o al ejecutarlas: `CONVERSIONS_PYTHON=$PWD/.venv-conversions/bin/python ./vendor/bin/pest tests/Feature/FileConversionTest.php tests/Feature/PdfToolsTest.php`. Si no, la salida muestra «deprecated» (por el aviso de PHP 8.5 en `config/database.php`) y oculta que se omitieron.
