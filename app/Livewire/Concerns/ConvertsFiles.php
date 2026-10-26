@@ -4,6 +4,7 @@ namespace App\Livewire\Concerns;
 
 use App\Conversions\ConversionTool;
 use App\Models\FileConversion;
+use App\Services\AudioInspector;
 use App\Services\FileConversionService;
 use App\Services\PdfInspector;
 use Illuminate\Support\Facades\RateLimiter;
@@ -39,6 +40,8 @@ trait ConvertsFiles
     /** Page count of the uploaded PDF, read as soon as it arrives so ranges can be checked. */
     public ?int $pageCount = null;
 
+    public ?float $audioDuration = null;
+
     public array $options = [];
 
     protected function area(): string
@@ -66,7 +69,7 @@ trait ConvertsFiles
         }
 
         $this->format = $format;
-        $this->reset('file', 'files', 'filePages', 'incomingFile', 'pageCount');
+        $this->reset('file', 'files', 'filePages', 'incomingFile', 'pageCount', 'audioDuration');
         $this->options = $this->tool()->defaults();
         $this->resetValidation();
     }
@@ -80,6 +83,25 @@ trait ConvertsFiles
     public function updatedFile(): void
     {
         $this->pageCount = null;
+        $this->audioDuration = null;
+        if ($this->tool()->needsAudioProbe()) {
+            $this->options['segments'] = '[]';
+            $this->validate(['file' => ['required', ...$this->fileRules()]]);
+            try {
+                $inspector = app(AudioInspector::class);
+                $duration = $inspector->probe($this->file->getRealPath())['duration'];
+                $peaks = $inspector->peaks($this->file->getRealPath(), $duration);
+            } catch (\InvalidArgumentException $exception) {
+                throw ValidationException::withMessages(['file' => $exception->getMessage()]);
+            } catch (\RuntimeException $exception) {
+                report($exception);
+                throw ValidationException::withMessages(['file' => 'No se pudo analizar el audio. Vuelve a subirlo e inténtalo de nuevo.']);
+            }
+            $this->audioDuration = $duration;
+            $this->dispatch('audio-loaded', duration: $duration, perSecond: $peaks['per_second'], peaks: $peaks['peaks'], name: $this->file->getClientOriginalName());
+
+            return;
+        }
         if (! $this->tool()->needsPageCount()) {
             return;
         }
@@ -162,7 +184,7 @@ trait ConvertsFiles
         }
 
         $service->create($files, $this->format, $this->area(), $this->area() === 'frontoffice' ? trim($this->actorName) : auth()->user()->name, $options);
-        $this->reset('file', 'files', 'filePages', 'pageCount');
+        $this->reset('file', 'files', 'filePages', 'pageCount', 'audioDuration');
         $this->options = $tool->defaults();
         $this->dispatch('conversion-queued');
     }

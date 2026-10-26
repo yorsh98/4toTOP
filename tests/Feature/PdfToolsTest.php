@@ -207,9 +207,10 @@ it('passes the server check when OCR and the queue are set up', function () {
     enableOcr();
     config()->set('conversions.python', dirname(config('conversions.python')).'/python');
     // Programs this machine may not have (FFmpeg, LibreOffice) are replaced by ones that exist.
-    foreach (['ffmpeg', 'libreoffice', 'ghostscript', 'pdfinfo', 'pdftotext', 'pdfimages'] as $program) {
+    foreach (['ffprobe', 'libreoffice', 'ghostscript', 'pdfinfo', 'pdftotext', 'pdfimages'] as $program) {
         config()->set("conversions.{$program}", fakeTool('echo ok'));
     }
+    config()->set('conversions.ffmpeg', fakeTool('echo "libmp3lame aac pcm_s16le libvorbis flac "'));
     config()->set('conversions.pdftotext', 'pdftotext');
     config()->set('queue.connections.'.config('queue.default').'.retry_after', 2100);
 

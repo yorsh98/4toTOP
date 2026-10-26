@@ -1,5 +1,6 @@
 <?php
 
+use App\Conversions\AudioCutTool;
 use App\Conversions\AudioToMp3Tool;
 use App\Conversions\CompressPdfTool;
 use App\Conversions\ImagesToPdfTool;
@@ -19,6 +20,9 @@ return [
     'pdf_max_pages' => (int) env('CONVERSIONS_PDF_MAX_PAGES', 1500),
     'download_hours' => 24,
     'ffmpeg' => env('CONVERSIONS_FFMPEG', 'ffmpeg'),
+    'ffprobe' => env('CONVERSIONS_FFPROBE', 'ffprobe'),
+    'audio_max_seconds' => (int) env('CONVERSIONS_AUDIO_MAX_SECONDS', 4 * 3600),
+    'audio_cut_max_segments' => 200,
     // pdf2docx: paragraph/table reconstruction with header/footer, closest to Acrobat XI output.
     // libreoffice: visually faithful positioned text boxes, less comfortable to edit.
     'pdf_engine' => env('CONVERSIONS_PDF_ENGINE', 'pdf2docx'),
@@ -42,6 +46,7 @@ return [
      * The tools offered in /convertir-archivos, in display order. "format" (the key) is what file_conversions
      * stores. max_kb is per file; 50 MB is also Livewire's temporary upload limit (config/livewire.php), and
      * scans need it. "multiple" tools take several files uploaded one by one, within max_files and max_total_kb.
+     * "aliases" are accepted extensions left out of the list shown to users (oga is Ogg, asf is how WMA is detected).
      */
     'tools' => [
         'pdf' => ['label' => 'PDF a Word', 'group' => 'Convertir', 'icon' => 'fa-file-word', 'class' => PdfToWordTool::class, 'accept' => ['pdf'], 'max_kb' => 20 * 1024],
@@ -55,5 +60,6 @@ return [
         'compress' => ['label' => 'Comprimir PDF', 'group' => 'Optimizar', 'icon' => 'fa-compress', 'class' => CompressPdfTool::class, 'accept' => ['pdf'], 'max_kb' => 50 * 1024],
         'ocr' => ['label' => 'OCR: PDF con texto buscable', 'group' => 'Optimizar', 'icon' => 'fa-magnifying-glass', 'class' => OcrPdfTool::class, 'accept' => ['pdf'], 'max_kb' => 50 * 1024],
         'pagenum' => ['label' => 'Números de página', 'group' => 'Editar', 'icon' => 'fa-list-ol', 'class' => PageNumbersTool::class, 'accept' => ['pdf'], 'max_kb' => 50 * 1024],
+        'audiocut' => ['label' => 'Cortar audio', 'group' => 'Editar', 'icon' => 'fa-scissors', 'class' => AudioCutTool::class, 'accept' => ['mp3', 'm4a', 'wav', 'ogg', 'oga', 'opus', 'flac', 'aac', 'wma', 'asf', 'amr'], 'aliases' => ['oga', 'asf'], 'max_kb' => 50 * 1024],
     ],
 ];
