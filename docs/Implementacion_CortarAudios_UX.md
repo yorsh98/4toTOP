@@ -337,3 +337,19 @@ Con movimiento reducido, `withViewTransition` cambia directo y la tira se actual
 ## 9) Fuera de alcance
 
 Cambios en la lógica de corte o en los formatos, edición multipista, guardar proyectos, modo oscuro del sitio, rediseñar las demás herramientas del conversor, y los patrones de chat de `chat-motion` (streaming, citas, historial).
+
+## 10) Dónde lo construido difiere de este plan
+
+Donde haya contradicción, manda esta sección. Todo lo demás se implementó como está escrito.
+
+| Plan | Construido | Por qué |
+|---|---|---|
+| Escape y «×» piden confirmación si hay fragmentos o un corte en curso (trampas 3 y 4, `close(force)`, prueba 7.B.7) | Cerrar **conserva el avance** y no pide confirmación; «Abrir el cortador» retoma donde quedó | No se pierde nada al cerrar, así que confirmar solo estorbaría. El criterio «Escape no hace perder trabajo sin confirmar» se cumple porque no hay trabajo que perder |
+| `startOver()` despacha `audio-cutter-reset` | `startOver()` y `editAgain()` los llama Alpine y esperan la respuesta de Livewire; no hay evento | Esos botones desaparecen con el re-render, y el cambio de paso (y su foco) tiene que ocurrir después |
+| Buscar el título del paso y el diálogo con `$refs` | `dialogEl()` y `heading()` los buscan por id en el documento | Justo después de un re-render de Livewire, `$refs` y `$root` de Alpine vuelven vacíos; el foco falló en «Volver a marcar» y «Cortar otro audio» hasta cambiarlo |
+| «Opciones avanzadas» es un `<details>` normal | Lleva `wire:ignore.self`, y `submit()` lo abre si un error de validación está dentro | El `wire:poll.5s` de la raíz lo cerraba cada 5 segundos |
+| Cambio de paso con `withViewTransition()` (M3) | `x-transition` de Alpine con la dirección en `--ac-dir` | Más simple, y la entrada y la salida usan las duraciones del plan (320 ms y 180 ms) |
+| `poll` de 2 s según el estado del trabajo en la raíz | La raíz conserva `wire:poll.5s`; mientras hay un trabajo pendiente, el paso 4 agrega su propio `wire:poll.2s` | No hizo falta tocar la raíz |
+| Mensajes de validación de `ConvertsFiles` sin cambios | El campo `actorName` se llama «nombre» en los mensajes (`El campo nombre es obligatorio.`) | Antes decía «actor name» |
+
+Sin verificar en el navegador: Firefox (no hay uno disponible en el entorno de pruebas).
