@@ -65,9 +65,26 @@ OCRmyPDF (Tesseract, español) agrega una capa de texto invisible y seleccionabl
 
 ## Cortar audio
 
-Editor al estilo de Audacity (plan en [Implementacion_CortarAudios.md](Implementacion_CortarAudios.md)). Al subir el archivo, `AudioInspector` mide su duración con `ffprobe` y calcula la forma de onda en el servidor: hasta 50 picos por segundo y como máximo 200.000 puntos, que viajan una sola vez en el evento `audio-loaded`. El navegador dibuja la onda con `wavesurfer.js` 7.12.12 y reproduce el archivo local. No lo decodifica ni lo descarga del servidor, así que un audio de 50 MB ocupa unos 10 MB de memoria en la pestaña.
+Editor al estilo de Audacity (plan en [Implementacion_CortarAudios.md](Implementacion_CortarAudios.md); rediseño de la interfaz en [Implementacion_CortarAudios_UX.md](Implementacion_CortarAudios_UX.md)). Al subir el archivo, `AudioInspector` mide su duración con `ffprobe` y calcula la forma de onda en el servidor: hasta 50 picos por segundo y como máximo 200.000 puntos, que viajan una sola vez en el evento `audio-loaded`. El navegador dibuja la onda con `wavesurfer.js` 7.12.12 y reproduce el archivo local. No lo decodifica ni lo descarga del servidor, así que un audio de 50 MB ocupa unos 10 MB de memoria en la pestaña.
 
-- **Regiones:** se marcan arrastrando sobre la onda, con «Agregar región en el cursor» o escribiendo inicio y fin (`h:mm:ss.mmm`, `m:ss.mmm` o segundos). Si se escribe un inicio posterior al fin, la región se desplaza conservando su duración. Se puede deshacer y rehacer, y hay atajos de Audacity (Espacio, `Ctrl+Z`, `Ctrl+I`, `Supr`, `[` `]`, `Ctrl+1`/`Ctrl+3`; la lista completa está en «Todos los atajos del editor»). Máximo: 200 regiones.
+**Interfaz.** Elegir «Cortar audio» (o abrir `?herramienta=audiocut`) abre un modal de casi toda la pantalla, que ocupa todo el celular, con cuatro pasos numerados. Un paso solo se habilita cuando el anterior está listo, y el riel de arriba muestra lo decidido en cada paso terminado (un clic vuelve a él):
+
+1. **Sube el audio:** nombre (solo en el sitio público) y archivo, que se puede arrastrar. Al terminar el análisis se pasa solo al paso 2.
+2. **Marca los fragmentos:** la onda sobre fondo oscuro, con reloj y regla de tiempo, y la tira «Así quedará tu audio» con la duración final.
+3. **Elige qué hacer:** tres tarjetas (cada una con su duración resultante) y, en «Opciones avanzadas», fundido, formato y volumen.
+4. **Corta y descarga:** resumen, estado del trabajo y descarga sin salir del modal; después se puede «Volver a marcar este audio» o «Cortar otro audio».
+
+Cerrar el modal (botón o Escape) **conserva el avance**; «Abrir el cortador» lo retoma donde quedó. Un error de validación del servidor (por ejemplo, falta el nombre) lleva al paso que lo contiene. Con `prefers-reduced-motion` las transiciones son instantáneas.
+
+Detalles técnicos que importan al tocar el código:
+
+- El `<dialog>` lleva `wire:ignore.self` y el bloque «Opciones avanzadas» también: el componente tiene `wire:poll.5s`, y cada re-render le quitaría al diálogo su atributo `open` y cerraría ese bloque.
+- Después de un re-render de Livewire, `$refs` y `$root` de Alpine vuelven vacíos durante un momento, y el foco debe moverse justo entonces. Por eso `dialogEl()` y `heading()` en `resources/js/app.js` buscan por id en el documento. No volver a `$refs` para eso.
+- El modal se renderiza una vez por página, así que sus ids (`audio-cutter`, `ac-h1`…`ac-h4`, `conversion-file`) son únicos.
+- «Cortar otro audio» y «Volver a marcar» se resuelven desde Alpine, esperando la respuesta de Livewire, porque esos botones desaparecen con el re-render.
+- El número que muestra el cliente («Así quedará tu audio», tarjetas) lo calcula `plan()` en `audio-editor.js` con la misma regla que `AudioCutTool::spans()`; si una cambia, cambia la otra.
+
+- **Fragmentos:** se marcan arrastrando sobre la onda, con «Agregar un fragmento en el cursor» o escribiendo inicio y fin (`h:mm:ss.mmm`, `m:ss.mmm` o segundos). Si se escribe un inicio posterior al fin, el fragmento se desplaza conservando su duración. Se puede deshacer y rehacer, y hay atajos de Audacity (Espacio, `Ctrl+Z`, `Ctrl+I`, `Supr`, `[` `]`, `Ctrl+1`/`Ctrl+3`; la lista completa está en «Atajos de teclado»). Máximo: 200 fragmentos.
 - **Modos:** *Conservar lo marcado* (une las regiones, o entrega cada una en un archivo aparte; varias van en un ZIP), *Quitar lo marcado* y *Silenciar lo marcado* (misma duración). Opcionalmente: fundido de 0,1, 0,5 o 2 s (en las uniones, o al inicio y fin de cada archivo aparte) y normalización de volumen (`loudnorm`, conservando la frecuencia original).
 - **Servidor:** no confía en el navegador. `prepare()` vuelve a medir el audio y valida, ordena y une las regiones. `process()` siempre recodifica: `-c copy` cortaría en límites de trama y dejaría clics. Después mide cada archivo producido y falla si su duración difiere más de 0,15 s de lo esperado.
 - **Formatos:**
