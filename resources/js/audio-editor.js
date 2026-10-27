@@ -1,5 +1,21 @@
 import WaveSurfer from 'wavesurfer.js';
 import RegionsPlugin from 'wavesurfer.js/dist/plugins/regions.esm.js';
+import TimelinePlugin from 'wavesurfer.js/dist/plugins/timeline.esm.js';
+import { bump } from './lib/chat-motion';
+
+// Fragment look on the dark editing desk, per mode: fill, edges and a pattern so the meaning never rests on colour alone.
+const LOOK = {
+    keep: ['rgba(74, 222, 128, 0.24)', '#4ADE80', 'none', 'auto'],
+    remove: ['rgba(248, 113, 113, 0.16)', '#F87171', 'repeating-linear-gradient(135deg, rgba(248, 113, 113, 0.55) 0 3px, transparent 3px 9px)', 'auto'],
+    silence: ['rgba(148, 163, 184, 0.22)', '#CBD5E1', 'radial-gradient(rgba(226, 232, 240, 0.75) 1px, transparent 1.5px)', '7px 7px'],
+};
+
+const rulerLabel = seconds => {
+    const s = Math.round(seconds);
+    const h = Math.floor(s / 3600);
+    const m = Math.floor(s / 60) % 60;
+    return (h ? h + ':' + String(m).padStart(2, '0') : String(m)) + ':' + String(s % 60).padStart(2, '0');
+};
 
 export function createEditor({ container, file, duration, peaks, onChange, onTime, onPlayable, onSelect, onPlaying }) {
     const bytes = Uint8Array.from(atob(peaks), c => c.charCodeAt(0));
@@ -13,9 +29,13 @@ export function createEditor({ container, file, duration, peaks, onChange, onTim
 
     const wavesurfer = WaveSurfer.create({
         container, media, peaks: [Float32Array.from(bytes, b => b / 255)], duration,
-        height: 128, waveColor: '#64748b', progressColor: '#0A2E5D', cursorColor: '#0369a1',
+        height: 132, waveColor: '#7DD3FC', progressColor: '#E0F2FE', cursorColor: '#FBBF24', cursorWidth: 2,
         // No dragToSeek: in wavesurfer 7 it takes the drag away from region selection. A click still seeks.
-        barWidth: 2, barGap: 1, normalize: true, minPxPerSec: 1,
+        barWidth: 2, barGap: 1, barRadius: 2, normalize: true, minPxPerSec: 1,
+        plugins: [TimelinePlugin.create({
+            height: 22, formatTimeCallback: rulerLabel, secondaryLabelOpacity: 0.55,
+            style: { color: '#94A3B8', fontSize: '11px', fontFamily: "'Red Hat Mono', ui-monospace, monospace" },
+        })],
     });
     const regions = wavesurfer.registerPlugin(RegionsPlugin.create());
     regions.enableDragSelection({ color: 'rgba(21, 128, 61, 0.22)', minLength: 0.05 });
@@ -60,10 +80,14 @@ export function createCutter(maxRegions) {
             this.loading = !!file;
             this.build();
         },
+        // Once the server has measured the audio, the dialog moves on to the waveform by itself.
         loaded(event) {
             if (this.file && event.detail.name && event.detail.name !== this.file.name) return;
             this.peaksEvent = event.detail;
-            this.build();
+            this.duration = event.detail.duration;
+            if (this.step !== 1) return this.build();
+            // Forced: canGo(2) waits for the editor, which build() creates once the waveform's step is visible.
+            setTimeout(() => { this.go(2, true); this.build(); }, 400);
         },
         build() {
             if (!this.file || !this.peaksEvent || editor) return;
@@ -134,6 +158,7 @@ export function createCutter(maxRegions) {
             this.selected = event === 'region-removed' ? (next[0]?.id ?? null) : region.id;
             this.recolor();
             this.sync();
+            this.bumpTotals();
         },
         restore(items) {
             restoring = true;
@@ -147,6 +172,7 @@ export function createCutter(maxRegions) {
             this.error = null;
             this.recolor();
             this.sync();
+            this.bumpTotals();
         },
         undo() {
             if (!editor || !this.history.length) return;
@@ -161,11 +187,65 @@ export function createCutter(maxRegions) {
         select(id) { this.selected = id; this.recolor(); },
         recolor() {
             if (!editor) return;
-            const color = { keep: 'rgba(21, 128, 61, 0.22)', remove: 'rgba(185, 28, 28, 0.22)', silence: 'rgba(71, 85, 105, 0.22)' }[this.$wire.options.mode];
-            editor.regions.getRegions().forEach(region => {
+            const [color, edge, pattern, size] = LOOK[this.$wire.options.mode] ?? LOOK.keep;
+            [...editor.regions.getRegions()].sort((a, b) => a.start - b.start).forEach((region, index) => {
                 region.setOptions({ color });
-                if (region.element) region.element.style.outline = region.id === this.selected ? '2px solid #0369a1' : '';
+                const el = region.element;
+                if (!el) return;
+                Object.assign(el.style, {
+                    backgroundImage: pattern, backgroundSize: size, borderLeft: '2px solid ' + edge, borderRight: '2px solid ' + edge,
+                    outline: region.id === this.selected ? '2px solid #FBBF24' : '', outlineOffset: '-2px',
+                });
+                let label = el.querySelector('[data-ac-label]');
+                if (!label) {
+                    label = document.createElement('span');
+                    label.dataset.acLabel = '';
+                    Object.assign(label.style, {
+                        position: 'absolute', top: '4px', left: '6px', font: "600 11px 'Red Hat Mono', ui-monospace, monospace",
+                        color: '#0B1B33', background: edge, borderRadius: '4px', padding: '0 5px', pointerEvents: 'none',
+                    });
+                    el.appendChild(label);
+                }
+                label.style.background = edge;
+                label.textContent = String(index + 1);
             });
+        },
+        bumpTotals() {
+            this.$nextTick(() => ['count', 'final2', 'final3'].forEach(ref => bump(this.$refs[ref])));
+        },
+        stop() { editor?.wavesurfer.pause(); },
+        /**
+         * The result the server will deliver, for the "Así quedará tu audio" strip: the same rounding, merging and
+         * complement as AudioCutTool::spans(), and one fade less per join.
+         */
+        plan(mode = this.$wire.options.mode) {
+            const total = this.duration;
+            if (!total || !this.regions.length) return { segments: [], final: 0, files: 0 };
+            const merged = [];
+            this.regions.map(r => [Math.max(0, +r.start.toFixed(3)), Math.min(total, +r.end.toFixed(3))])
+                .sort((a, b) => a[0] - b[0])
+                .forEach(([start, end]) => {
+                    const last = merged[merged.length - 1];
+                    if (last && start <= last[1]) last[1] = Math.max(last[1], end);
+                    else merged.push([start, end]);
+                });
+            const marked = { keep: 'keep', remove: 'cut', silence: 'mute' }[mode] ?? 'keep';
+            const rest = mode === 'keep' ? 'cut' : 'keep';
+            const segments = [];
+            let cursor = 0;
+            for (const [start, end] of merged) {
+                if (start - cursor >= 0.01) segments.push({ start: cursor, end: start, kind: rest });
+                segments.push({ start, end, kind: marked });
+                cursor = end;
+            }
+            if (total - cursor >= 0.01) segments.push({ start: cursor, end: total, kind: rest });
+            const kept = segments.filter(segment => segment.kind === 'keep');
+            const options = this.$wire.options;
+            const separate = mode === 'keep' && !!options.separate;
+            const fade = mode === 'silence' ? 0 : (+options.fade_ms || 0) / 1000;
+            const length = kept.reduce((sum, segment) => sum + segment.end - segment.start, 0);
+            const final = mode === 'silence' ? total : length - (!separate && kept.length > 1 ? (kept.length - 1) * fade : 0);
+            return { segments, final, files: separate ? kept.length : 1 };
         },
         async play() {
             if (!editor || !this.playable) return;
