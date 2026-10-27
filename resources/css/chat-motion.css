@@ -1,0 +1,211 @@
+/* ==========================================================================
+   chat-motion.css — animaciones para chat de agentes con RAG
+   Todas las clases usan el prefijo .cm- para no chocar con tu CSS actual.
+   Ajusta los colores en :root para que calcen con tu marca.
+   ========================================================================== */
+
+:root {
+  /* Curvas y tiempos: cambia aquí y se ajusta todo */
+  --cm-ease-out: cubic-bezier(.22, 1, .36, 1);
+  --cm-ease-spring: cubic-bezier(.34, 1.56, .64, 1);
+  --cm-t-fast: 160ms;
+  --cm-t-base: 260ms;
+  --cm-t-slow: 420ms;
+  --cm-stagger: 70ms;
+
+  /* Colores: mapéalos a tus variables existentes si ya tienes un tema */
+  --cm-accent: #2457d6;
+  --cm-accent-soft: #e3ebff;
+  --cm-cite: #b5730c;
+  --cm-cite-soft: #fff2da;
+  --cm-ok: #1d8a5a;
+  --cm-muted: #5d6779;
+  --cm-fg: #18202e;
+  --cm-line: #dde2ec;
+  --cm-shadow: 0 1px 2px rgba(24,32,46,.06), 0 8px 24px rgba(24,32,46,.08);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --cm-accent: #6f97ff; --cm-accent-soft: #1f2c4d;
+    --cm-cite: #f0b450; --cm-cite-soft: #3a2c12;
+    --cm-ok: #4cc68e; --cm-muted: #95a0b4; --cm-fg: #e7ecf4; --cm-line: #2a3445;
+    --cm-shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"], .dark {
+  --cm-accent: #6f97ff; --cm-accent-soft: #1f2c4d;
+  --cm-cite: #f0b450; --cm-cite-soft: #3a2c12;
+  --cm-ok: #4cc68e; --cm-muted: #95a0b4; --cm-fg: #e7ecf4; --cm-line: #2a3445;
+  --cm-shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
+}
+
+/* ---------- 1. Entrada de mensajes ---------- */
+.cm-msg-user { animation: cm-pop var(--cm-t-slow) var(--cm-ease-out) both; transform-origin: bottom right; }
+.cm-msg-bot  { animation: cm-rise var(--cm-t-slow) var(--cm-ease-out) both; transform-origin: bottom left; }
+.cm-rise     { animation: cm-rise var(--cm-t-base) var(--cm-ease-out) both; }
+@keyframes cm-rise { from { opacity: 0; transform: translateY(10px); } }
+@keyframes cm-pop  { from { opacity: 0; transform: translateY(8px) scale(.92); } }
+
+/* Escalonado: pon style="--cm-i: 0..n" en cada hijo */
+.cm-stagger > * { animation-delay: calc(var(--cm-i, 0) * var(--cm-stagger)); }
+
+/* ---------- 2. Indicador de escritura ---------- */
+.cm-typing { display: inline-flex; gap: 4px; padding: 4px 2px; }
+.cm-typing span { width: 7px; height: 7px; border-radius: 50%; background: var(--cm-muted); animation: cm-dot 1s var(--cm-ease-out) infinite; }
+.cm-typing span:nth-child(2) { animation-delay: .15s; }
+.cm-typing span:nth-child(3) { animation-delay: .3s; }
+@keyframes cm-dot { 0%,60%,100% { transform: translateY(0); opacity: .45; } 30% { transform: translateY(-5px); opacity: 1; } }
+
+/* ---------- 3. Recuperación RAG visible ---------- */
+.cm-retrieval { display: flex; flex-direction: column; gap: 8px; font-size: 13px; }
+.cm-shimmer {
+  font-weight: 600;
+  background: linear-gradient(90deg, var(--cm-muted) 0%, var(--cm-fg) 50%, var(--cm-muted) 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  animation: cm-shine 1.4s linear infinite;
+}
+@keyframes cm-shine { to { background-position: -200% 0; } }
+.cm-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.cm-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 11.5px; padding: 4px 8px; border-radius: 7px;
+  border: 1px solid var(--cm-line);
+  animation: cm-rise var(--cm-t-base) var(--cm-ease-out) both;
+}
+.cm-chip .cm-ck {
+  width: 12px; height: 12px; border-radius: 50%; border: 1.5px solid var(--cm-muted);
+  display: grid; place-items: center;
+  transition: all var(--cm-t-base) var(--cm-ease-spring);
+}
+.cm-chip.is-done .cm-ck { background: var(--cm-ok); border-color: var(--cm-ok); transform: scale(1.1); }
+.cm-chip.is-done .cm-ck::after {
+  content: ""; width: 5px; height: 3px;
+  border-left: 1.5px solid #fff; border-bottom: 1.5px solid #fff;
+  transform: rotate(-45deg) translate(0, -1px);
+}
+
+/* ---------- 4. Streaming con citas ---------- */
+.cm-w { opacity: 0; animation: cm-fade var(--cm-t-base) var(--cm-ease-out) forwards; }
+@keyframes cm-fade { to { opacity: 1; } }
+.cm-caret { display: inline-block; width: 2px; height: 1em; background: var(--cm-accent); vertical-align: -2px; margin-left: 2px; animation: cm-blink 1s steps(2) infinite; }
+@keyframes cm-blink { 50% { opacity: 0; } }
+.cm-cite {
+  display: inline-grid; place-items: center;
+  min-width: 18px; height: 18px; padding: 0 4px; margin: 0 2px;
+  border: 0; border-radius: 5px; cursor: pointer;
+  background: var(--cm-cite-soft); color: var(--cm-cite);
+  font: 500 11px/1 ui-monospace, Menlo, monospace; vertical-align: 1px;
+  animation: cm-cite-pop var(--cm-t-slow) var(--cm-ease-spring) both;
+  transition: transform var(--cm-t-fast) var(--cm-ease-out), box-shadow var(--cm-t-fast);
+}
+.cm-cite:hover, .cm-cite:focus-visible { transform: translateY(-2px); outline: none; box-shadow: 0 0 0 2px var(--cm-cite); }
+@keyframes cm-cite-pop { from { transform: scale(0); } }
+
+/* ---------- 5. Tarjetas de fuentes ---------- */
+.cm-src {
+  animation: cm-rise var(--cm-t-slow) var(--cm-ease-out) both;
+  animation-delay: calc(var(--cm-i, 0) * var(--cm-stagger));
+  transition: transform var(--cm-t-base) var(--cm-ease-out), border-color var(--cm-t-fast), box-shadow var(--cm-t-base);
+}
+.cm-src:hover, .cm-src.is-linked { transform: translateY(-3px); border-color: var(--cm-cite); box-shadow: var(--cm-shadow); }
+.cm-score { height: 3px; border-radius: 2px; background: var(--cm-line); overflow: hidden; }
+.cm-score > i {
+  display: block; height: 100%; width: var(--cm-score, 50%); background: var(--cm-cite);
+  transform-origin: left; animation: cm-grow .8s var(--cm-ease-out) both;
+  animation-delay: calc(var(--cm-i, 0) * var(--cm-stagger) + 200ms);
+}
+@keyframes cm-grow { from { transform: scaleX(0); } }
+
+/* Contador que salta al llegar una fuente nueva */
+.cm-bump { animation: cm-bump var(--cm-t-slow) var(--cm-ease-spring); }
+@keyframes cm-bump { 40% { transform: scale(1.35); } }
+
+/* ---------- 6. Cambio de agente ---------- */
+.cm-pill-track { position: relative; }
+.cm-pill {
+  position: absolute; left: 0; right: 0; top: 0; z-index: 0;
+  border-radius: 10px; box-shadow: var(--cm-shadow);
+  transition: transform var(--cm-t-slow) var(--cm-ease-spring), height var(--cm-t-slow) var(--cm-ease-spring);
+}
+.cm-pill-track > :not(.cm-pill) { position: relative; z-index: 1; }
+
+/* View Transitions: ponle estos nombres a los elementos que deben "transformarse" */
+.cm-vt-avatar { view-transition-name: cm-agent-avatar; }
+.cm-vt-name   { view-transition-name: cm-agent-name; }
+.cm-vt-feed   { view-transition-name: cm-feed; }
+::view-transition-old(cm-feed) { animation: cm-vt-out 180ms var(--cm-ease-out) both; }
+::view-transition-new(cm-feed) { animation: cm-vt-in 320ms var(--cm-ease-out) both; }
+@keyframes cm-vt-out { to { opacity: 0; transform: translateY(-6px); } }
+@keyframes cm-vt-in  { from { opacity: 0; transform: translateY(10px); } }
+
+/* ---------- 7. Botón enviar ↔ detener ---------- */
+.cm-send { display: grid; place-items: center; transition: transform var(--cm-t-fast) var(--cm-ease-out), background var(--cm-t-base); }
+.cm-send:active { transform: scale(.92); }
+.cm-send > * { grid-area: 1 / 1; transition: transform var(--cm-t-base) var(--cm-ease-spring), opacity var(--cm-t-fast); }
+.cm-send .cm-icon-stop { opacity: 0; transform: scale(.4) rotate(-90deg); }
+.cm-send.is-busy .cm-icon-send { opacity: 0; transform: scale(.4) rotate(90deg); }
+.cm-send.is-busy .cm-icon-stop { opacity: 1; transform: none; }
+
+/* ---------- 8. Panel lateral de fuentes ---------- */
+.cm-drawer { transform: translateX(102%); transition: transform var(--cm-t-slow) var(--cm-ease-out); }
+.cm-drawer.is-open { transform: none; }
+.cm-scrim { opacity: 0; pointer-events: none; transition: opacity var(--cm-t-base) var(--cm-ease-out); }
+.cm-scrim.is-open { opacity: 1; pointer-events: auto; }
+.cm-drawer li { opacity: 0; transform: translateX(16px); transition: opacity var(--cm-t-base) var(--cm-ease-out), transform var(--cm-t-slow) var(--cm-ease-out); transition-delay: calc(var(--cm-i, 0) * 50ms + 120ms); }
+.cm-drawer.is-open li { opacity: 1; transform: none; }
+
+/* ---------- 9. Microinteracciones generales ---------- */
+.cm-press { transition: transform var(--cm-t-fast) var(--cm-ease-out); }
+.cm-press:active { transform: scale(.96); }
+.cm-lift { transition: transform var(--cm-t-fast) var(--cm-ease-out), border-color var(--cm-t-fast), background var(--cm-t-fast); }
+.cm-lift:hover { transform: translateY(-2px); }
+.cm-focus-ring { transition: border-color var(--cm-t-base) var(--cm-ease-out), box-shadow var(--cm-t-base) var(--cm-ease-out); }
+.cm-focus-ring:focus-within { border-color: var(--cm-accent); box-shadow: 0 0 0 4px var(--cm-accent-soft); }
+.cm-online { width: 7px; height: 7px; border-radius: 50%; background: var(--cm-ok); animation: cm-pulse 2.4s ease-in-out infinite; }
+@keyframes cm-pulse { 0%,100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--cm-ok) 50%, transparent); } 50% { box-shadow: 0 0 0 5px transparent; } }
+
+/* ---------- 10. Nuevo chat ---------- */
+/* Bienvenida: cada bloque hijo entra escalonado. Pon style="--cm-i: 0..n" en cada uno */
+.cm-welcome > * { animation: cm-rise var(--cm-t-slow) var(--cm-ease-out) both; animation-delay: calc(var(--cm-i, 0) * 80ms); }
+
+/* Nombres para View Transitions: el input y las sugerencias "viajan" entre
+   el centro (bienvenida) y el borde inferior (chat). Deben ser únicos en la página. */
+.cm-vt-composer { view-transition-name: cm-composer; }
+.cm-vt-suggest  { view-transition-name: cm-suggest; }
+.cm-vt-welcome  { view-transition-name: cm-welcome; }
+::view-transition-group(cm-composer),
+::view-transition-group(cm-suggest) { animation-duration: 480ms; animation-timing-function: var(--cm-ease-out); }
+::view-transition-old(cm-welcome) { animation: cm-welcome-out 220ms var(--cm-ease-out) both; }
+::view-transition-new(cm-welcome) { animation: cm-vt-fade 240ms var(--cm-ease-out) both; }
+@keyframes cm-welcome-out { to { opacity: 0; transform: translateY(-16px) scale(.98); } }
+@keyframes cm-vt-fade { from { opacity: 0; } }
+
+/* Entrada en el historial: el ítem se abre espacio desde altura 0.
+   Estructura: <li class="cm-hist-item is-new"><div> …botón… </div></li> */
+.cm-hist-item { display: grid; grid-template-rows: 1fr; }
+.cm-hist-item > * { min-height: 0; overflow: hidden; }
+.cm-hist-item.is-new { animation: cm-hist-in 560ms var(--cm-ease-out) both; }
+@keyframes cm-hist-in { from { grid-template-rows: 0fr; opacity: 0; transform: translateX(-12px); } }
+
+/* Título pendiente (brilla mientras el agente responde) y cursor del tipeo */
+.cm-title-pending {
+  background: linear-gradient(90deg, var(--cm-muted) 0%, var(--cm-fg) 50%, var(--cm-muted) 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  animation: cm-shine 1.4s linear infinite;
+}
+.cm-tcaret { display: inline-block; width: 1.5px; height: .95em; background: var(--cm-accent); vertical-align: -1px; margin-left: 1px; animation: cm-blink .8s steps(2) infinite; }
+
+/* Mensajes restaurados (al abrir un chat del historial): sin animación de entrada */
+.cm-static, .cm-static * { animation: none !important; }
+.cm-static .cm-w { opacity: 1; }
+
+/* ---------- Accesibilidad: movimiento reducido ---------- */
+@media (prefers-reduced-motion: reduce) {
+  [class*="cm-"], [class*="cm-"] *, ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) {
+    animation-duration: 1ms !important; animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important; transition-delay: 0ms !important;
+  }
+}

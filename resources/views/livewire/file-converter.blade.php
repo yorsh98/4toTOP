@@ -41,7 +41,7 @@
                             <h3 class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">{{ $group }}</h3>
                             <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                                 @foreach ($groupTools as $option => $optionTool)
-                                    <button type="button" wire:click="selectFormat('{{ $option }}')" aria-pressed="{{ $format === $option ? 'true' : 'false' }}" class="flex items-center justify-between gap-3 rounded-xl border-2 p-4 text-left transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-700 {{ $format === $option ? 'border-sky-700 bg-sky-50 text-[#0A2E5D]' : 'border-slate-200 bg-white text-slate-700 hover:border-sky-300' }}">
+                                    <button type="button" @if ($option === 'audiocut' && $format === 'audiocut') x-on:click="$dispatch('open-audio-cutter')" @else wire:click="selectFormat('{{ $option }}')" @endif aria-pressed="{{ $format === $option ? 'true' : 'false' }}" class="flex items-center justify-between gap-3 rounded-xl border-2 p-4 text-left transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-700 {{ $format === $option ? 'border-sky-700 bg-sky-50 text-[#0A2E5D]' : 'border-slate-200 bg-white text-slate-700 hover:border-sky-300' }}">
                                         <span class="flex items-center gap-3"><i class="fa-solid {{ $optionTool->config['icon'] }} text-xl text-sky-700" aria-hidden="true"></i><span class="font-semibold">{{ $optionTool->label() }}</span></span>
                                         @if ($area === 'frontoffice')<span class="shrink-0 text-xs font-medium text-slate-500">{{ $remainingByFormat[$option] }} de {{ config('conversions.public_limit') }}</span>@endif
                                     </button>
@@ -52,7 +52,7 @@
                 </div>
 
                 <form wire:submit="convert" class="grid gap-5">
-                    @if ($area === 'frontoffice')
+                    @if ($area === 'frontoffice' && $format !== 'audiocut')
                         <div>
                             <label for="actor-name" class="mb-1.5 block text-sm font-semibold text-slate-800">Nombre de quien realiza la conversión</label>
                             <input id="actor-name" type="text" wire:model="actorName" required maxlength="120" autocomplete="name" placeholder="Escribe tu nombre" class="w-full rounded-lg border-slate-300 bg-slate-50 text-sm focus:border-sky-700 focus:ring-sky-700">
@@ -112,7 +112,7 @@
                                 </ol>
                             @endif
                         </div>
-                    @else
+                    @elseif ($format !== 'audiocut')
                         {{-- Checked in the capture phase so an oversized file never starts an upload the server would drop. --}}
                         <div wire:key="upload-single-{{ $format }}" x-data="{ tooLarge: false }" x-on:change.capture="tooLarge = ($event.target.files[0]?.size ?? 0) > {{ $maxUploadBytes }}; if (tooLarge) { $event.stopPropagation(); $event.target.value = ''; }">
                             <label for="conversion-file" class="mb-1.5 block text-sm font-semibold text-slate-800">Archivo {{ $types }}</label>
@@ -120,7 +120,6 @@
                             <p class="mt-2 text-xs text-slate-600">{{ match ($format) {
                                 'pdf' => 'PDF con texto seleccionable · máximo '.$maxUpload.'. El Word reconstruye párrafos, tablas, encabezados y pies; revísalo antes de usarlo.',
                                 'm4a' => 'Audio M4A · máximo '.$maxUpload.'.',
-                                'audiocut' => 'Audio · máximo '.$maxUpload.' y '.App\Services\AudioInspector::limit(config('conversions.audio_max_seconds')).' de duración.',
                                 'word2pdf' => $types.' · máximo '.$maxUpload.'. Si el servidor no tiene las fuentes del documento, la paginación puede cambiar.',
                                 'ocr' => 'PDF escaneado de hasta '.number_format(config('conversions.ocr_max_pages'), 0, ',', '.').' páginas · máximo '.$maxUpload.'. Un PDF grande puede tardar varios minutos.',
                                 default => 'Un PDF · máximo '.$maxUpload.'.',
@@ -136,6 +135,7 @@
 
                     @includeIf('livewire.partials.conversion-tools.'.$format)
 
+                    @if ($format !== 'audiocut')
                     <div class="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-5">
                         <p class="text-sm text-slate-600">{{ $area === 'frontoffice' ? 'Te quedan '.($remainingByFormat[$format] ?? 0).' usos de esta herramienta en esta sesión.' : 'Sin límite de uso para tu cuenta.' }}</p>
                         <button type="submit" wire:loading.attr="disabled" wire:target="convert,file,incomingFile" @disabled($area === 'frontoffice' && ($remainingByFormat[$format] ?? 0) === 0) class="rounded-lg {{ $area === 'frontoffice' ? 'bg-blue-700 hover:bg-blue-800' : 'bg-[#0A2E5D] hover:bg-sky-800' }} px-6 py-3 text-sm font-semibold text-white transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-700 disabled:cursor-not-allowed disabled:opacity-50">
@@ -143,6 +143,7 @@
                             <span wire:loading wire:target="convert,file,incomingFile">Subiendo archivo…</span>
                         </button>
                     </div>
+                    @endif
                 </form>
             </div>
         </section>
@@ -160,7 +161,7 @@
                             @endif
                         </div>
                         @if ($job->status === 'ready' && $job->expires_at?->isFuture())
-                            <a href="{{ route('conversions.download', $job) }}" class="rounded-lg {{ $area === 'frontoffice' ? 'bg-blue-700 hover:bg-blue-800' : 'bg-sky-700 hover:bg-sky-800' }} px-4 py-2 text-sm font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-700">Descargar {{ ['docx' => 'Word', 'mp3' => 'MP3', 'pdf' => 'PDF', 'zip' => 'ZIP'][pathinfo($job->result_name, PATHINFO_EXTENSION)] ?? 'archivo' }}</a>
+                            <a href="{{ route('conversions.download', $job) }}" class="rounded-lg {{ $area === 'frontoffice' ? 'bg-blue-700 hover:bg-blue-800' : 'bg-sky-700 hover:bg-sky-800' }} px-4 py-2 text-sm font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-700">Descargar {{ App\Conversions\ConversionTool::downloadLabel(pathinfo($job->result_name, PATHINFO_EXTENSION)) }}</a>
                         @elseif ($job->status === 'failed')
                             <span class="text-sm text-red-700">{{ $job->error_message }}</span>
                         @elseif ($job->status === 'ready')
@@ -175,4 +176,8 @@
             </div>
         </section>
     </div>
+
+    @if ($format === 'audiocut')
+        @include('livewire.partials.audio-cutter-modal')
+    @endif
 </div>

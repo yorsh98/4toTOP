@@ -55,32 +55,32 @@ class AudioCutTool extends ConversionTool
     public static function spans(array $regions, string $mode, float $duration): array
     {
         if (! array_is_list($regions)) {
-            throw new \InvalidArgumentException('Las regiones no son válidas. Vuelve a marcarlas.');
+            throw new \InvalidArgumentException('Los fragmentos no son válidos. Vuelve a marcarlos.');
         }
         foreach ($regions as $index => &$region) {
             if (! is_array($region) || ! array_is_list($region) || count($region) !== 2
                 || ! is_numeric($region[0]) || ! is_numeric($region[1])
                 || is_string($region[0]) || is_string($region[1])
                 || ! is_finite((float) $region[0]) || ! is_finite((float) $region[1])) {
-                throw new \InvalidArgumentException('Las regiones no son válidas. Vuelve a marcarlas.');
+                throw new \InvalidArgumentException('Los fragmentos no son válidos. Vuelve a marcarlos.');
             }
             [$start, $end] = array_map(fn ($time) => round($time, 3), $region);
             $number = $index + 1;
             if ($start < -0.05 || $end > $duration + 0.05) {
-                throw new \InvalidArgumentException('La región '.$number.' ('.AudioInspector::clock($start).'–'.AudioInspector::clock($end).') está fuera del audio, que dura '.AudioInspector::clock($duration).'.');
+                throw new \InvalidArgumentException('El fragmento '.$number.' ('.AudioInspector::clock($start).'–'.AudioInspector::clock($end).') está fuera del audio, que dura '.AudioInspector::clock($duration).'.');
             }
             $region = [max(0.0, $start), min($duration, $end)];
             if (0.05 - 0.0000001 > $region[1] - $region[0]) {
-                throw new \InvalidArgumentException('La región '.$number.' es demasiado corta.');
+                throw new \InvalidArgumentException('El fragmento '.$number.' es demasiado corto.');
             }
         }
         unset($region);
         if ($regions === []) {
-            throw new \InvalidArgumentException('Marca al menos una región en la onda.');
+            throw new \InvalidArgumentException('Marca al menos un fragmento en la onda.');
         }
         $limit = config('conversions.audio_cut_max_segments');
         if (count($regions) > $limit) {
-            throw new \InvalidArgumentException('Puedes marcar hasta '.$limit.' regiones.');
+            throw new \InvalidArgumentException('Puedes marcar hasta '.$limit.' fragmentos.');
         }
         usort($regions, fn ($a, $b) => $a[0] <=> $b[0]);
         $merged = [];
@@ -123,7 +123,7 @@ class AudioCutTool extends ConversionTool
         $regions = json_decode($options['segments'], true, 4);
         try {
             if (! is_array($regions) || ! array_is_list($regions)) {
-                throw new \InvalidArgumentException('Las regiones no son válidas. Vuelve a marcarlas.');
+                throw new \InvalidArgumentException('Los fragmentos no son válidos. Vuelve a marcarlos.');
             }
             $spans = self::spans($regions, $options['mode'], $duration);
         } catch (\InvalidArgumentException $exception) {
@@ -134,7 +134,7 @@ class AudioCutTool extends ConversionTool
         if ($options['mode'] !== 'silence' && ($separate || count($spans) > 1) && $fade > 0) {
             foreach ($spans as $index => [$start, $end]) {
                 if ($end - $start < 2 * $fade / 1000) {
-                    throw ValidationException::withMessages(['options.fade_ms' => 'El fundido es más largo que el tramo '.($index + 1).'; elige uno más corto.']);
+                    throw ValidationException::withMessages(['options.fade_ms' => 'El fundido es más largo que el fragmento '.($index + 1).'; elige uno más corto.']);
                 }
             }
         }
@@ -187,7 +187,7 @@ class AudioCutTool extends ConversionTool
             $expression = implode('+', array_map(fn ($span) => 'between(t,'.self::decimal($span[0]).','.self::decimal($span[1]).')', $spans));
             $filters = ['-map', '0:a:0', '-vn', '-af', "volume=enable='{$expression}':volume=0".$normalize];
             $expected = $o['duration'];
-            $notice = 'Se silenciaron '.$count.' regiones; la duración no cambia.';
+            $notice = 'Se silenciaron '.$count.' '.($count === 1 ? 'fragmento' : 'fragmentos').'; la duración no cambia.';
         } else {
             $graph = [];
             foreach ($spans as $index => [$start, $end]) {
@@ -207,7 +207,7 @@ class AudioCutTool extends ConversionTool
             $filters = ['-filter_complex', implode(';', $graph), '-map', '[out]'];
             $expected = self::total($spans) - ($count - 1) * $fade;
             $notice = $o['mode'] === 'keep'
-                ? 'Se conservaron '.$count.' regiones.'
+                ? 'Se conservaron '.$count.' '.($count === 1 ? 'fragmento' : 'fragmentos').'.'
                 : 'Se quitaron '.AudioInspector::clock($o['duration'] - self::total($spans)).' de audio.';
             $notice .= ' Duración final: '.AudioInspector::clock($expected).'.';
         }

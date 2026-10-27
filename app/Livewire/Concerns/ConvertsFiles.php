@@ -10,6 +10,7 @@ use App\Services\PdfInspector;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Validation\Rules\File;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Url;
 use Livewire\WithFileUploads;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -42,6 +43,10 @@ trait ConvertsFiles
 
     public ?float $audioDuration = null;
 
+    /** The audio cutter's latest conversion, followed in its last step until it can be downloaded. */
+    #[Locked]
+    public ?string $lastToken = null;
+
     public array $options = [];
 
     protected function area(): string
@@ -69,9 +74,23 @@ trait ConvertsFiles
         }
 
         $this->format = $format;
-        $this->reset('file', 'files', 'filePages', 'incomingFile', 'pageCount', 'audioDuration');
+        $this->reset('file', 'files', 'filePages', 'incomingFile', 'pageCount', 'audioDuration', 'lastToken');
         $this->options = $this->tool()->defaults();
         $this->resetValidation();
+    }
+
+    /** "Cortar otro audio": back to the cutter's first step. */
+    public function startOver(): void
+    {
+        $this->reset('file', 'audioDuration', 'lastToken');
+        $this->options = $this->tool()->defaults();
+        $this->resetValidation();
+    }
+
+    /** "Volver a marcar este audio": keeps the file and options to cut it again. */
+    public function editAgain(): void
+    {
+        $this->reset('lastToken');
     }
 
     /** @return list<mixed> */
@@ -164,7 +183,7 @@ trait ConvertsFiles
                 'files.*' => $this->fileRules(),
             ] : ['file' => ['required', ...$this->fileRules()]]),
             ...collect($tool->rules())->mapWithKeys(fn ($rules, $key) => ['options.'.$key => $rules])->all(),
-        ], ['files.min' => $min === 1 ? 'Agrega al menos un archivo.' : "Agrega al menos {$min} archivos."]);
+        ], ['files.min' => $min === 1 ? 'Agrega al menos un archivo.' : "Agrega al menos {$min} archivos."], ['actorName' => 'nombre']);
 
         $files = $tool->multiple() ? array_values($this->files) : [$this->file];
         if ($tool->multiple() && array_sum(array_map(fn ($file) => $file->getSize(), $files)) > $tool->config['max_total_kb'] * 1024) {
@@ -183,9 +202,14 @@ trait ConvertsFiles
             RateLimiter::hit($key, 3600);
         }
 
-        $service->create($files, $this->format, $this->area(), $this->area() === 'frontoffice' ? trim($this->actorName) : auth()->user()->name, $options);
-        $this->reset('file', 'files', 'filePages', 'pageCount', 'audioDuration');
-        $this->options = $tool->defaults();
+        $conversion = $service->create($files, $this->format, $this->area(), $this->area() === 'frontoffice' ? trim($this->actorName) : auth()->user()->name, $options);
+        if ($tool->needsAudioProbe()) {
+            // The cutter keeps the file and its marks so the user can download, cut again or start over.
+            $this->lastToken = $conversion->token;
+        } else {
+            $this->reset('file', 'files', 'filePages', 'pageCount', 'audioDuration');
+            $this->options = $tool->defaults();
+        }
         $this->dispatch('conversion-queued');
     }
 
@@ -210,15 +234,16 @@ trait ConvertsFiles
     {
         $this->authorizeConversion();
         $sessionHash = hash('sha256', session()->getId());
-        $jobs = FileConversion::query()
+        $mine = fn () => FileConversion::query()
             ->when($this->area() === 'frontoffice', fn ($query) => $query->where('area', 'frontoffice')->where('session_hash', $sessionHash))
-            ->when($this->area() === 'backoffice', fn ($query) => $query->where('area', 'backoffice')->where('user_id', auth()->id()))
-            ->latest()->limit(10)->get();
+            ->when($this->area() === 'backoffice', fn ($query) => $query->where('area', 'backoffice')->where('user_id', auth()->id()));
+        $jobs = $mine()->latest()->limit(10)->get();
         $tools = ConversionTool::available();
 
         return view('livewire.file-converter', [
             'area' => $this->area(),
             'jobs' => $jobs,
+            'lastJob' => $this->lastToken ? $mine()->where('token', $this->lastToken)->first() : null,
             'tools' => $tools,
             'tool' => $this->tool(),
             'maxUploadBytes' => $this->maxUploadBytes(),

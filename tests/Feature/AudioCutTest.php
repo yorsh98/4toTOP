@@ -10,6 +10,8 @@ use App\Services\FileConversionService;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Livewire\Features\SupportLockedProperties\CannotUpdateLockedPropertyException;
 use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
 
@@ -29,23 +31,23 @@ it('sorts merges clamps and complements regions', function ($regions, $mode, $ex
     [[[2, 4], [1, 3]], 'silence', [[1, 4]]],
 ]);
 
-it('rejects invalid or empty regions', function ($regions, $mode, $message) {
+it('rejects invalid or empty fragments', function ($regions, $mode, $message) {
     expect(fn () => AudioCutTool::spans($regions, $mode, 10.0))->toThrow(InvalidArgumentException::class, $message);
 })->with([
     [[], 'keep', 'Marca al menos'],
-    [[[2, 1]], 'keep', 'demasiado corta'],
-    [[[1, 1.049]], 'keep', 'demasiado corta'],
+    [[[2, 1]], 'keep', 'demasiado corto'],
+    [[[1, 1.049]], 'keep', 'demasiado corto'],
     [[[1, 1.05]], 'keep', 'quedaría vacío'],
     [[[0, 10]], 'remove', 'quedaría vacío'],
     [[[9, 10.2]], 'keep', 'fuera del audio'],
     [[[-0.051, 10]], 'keep', 'fuera del audio'],
-    [[['1', 2]], 'keep', 'no son válidas'],
-    [[[false, 2]], 'keep', 'no son válidas'],
-    [[[NAN, 2]], 'keep', 'no son válidas'],
-    [[[1, INF]], 'keep', 'no son válidas'],
-    [[['start' => 1, 'end' => 2]], 'keep', 'no son válidas'],
-    [[1], 'keep', 'no son válidas'],
-    [array_fill(0, 201, [1, 2]), 'keep', 'hasta 200'],
+    [[['1', 2]], 'keep', 'no son válidos'],
+    [[[false, 2]], 'keep', 'no son válidos'],
+    [[[NAN, 2]], 'keep', 'no son válidos'],
+    [[[1, INF]], 'keep', 'no son válidos'],
+    [[['start' => 1, 'end' => 2]], 'keep', 'no son válidos'],
+    [[1], 'keep', 'no son válidos'],
+    [array_fill(0, 201, [1, 2]), 'keep', 'hasta 200 fragmentos'],
 ]);
 
 it('formats time with milliseconds and carries rounding', function ($seconds, $expected) {
@@ -56,12 +58,28 @@ it('states the duration limit in words', function ($seconds, $expected) {
     expect(AudioInspector::limit($seconds))->toBe($expected);
 })->with([[14400, '4 horas'], [3600, '1 hora'], [90, '1:30.000']]);
 
-it('opens the audio tool from the URL', function () {
+it('opens the audio cutter dialog with its four steps from the URL', function () {
     expect(config('conversions.tools.audiocut.group'))->toBe('Editar');
-    Livewire::withQueryParams(['herramienta' => 'audiocut'])->test(PublicFileConverterPage::class)
-        ->assertSet('format', 'audiocut')->assertSee(['Cortar audio', 'Qué hacer con las regiones', 'FLAC, AAC, WMA o AMR', 'y 4 horas de duración'])
+    $page = Livewire::withQueryParams(['herramienta' => 'audiocut'])->test(PublicFileConverterPage::class)
+        ->assertSet('format', 'audiocut')
+        ->assertSeeHtml('id="audio-cutter"')
+        ->assertSee(['Sube el audio', 'Marca los fragmentos', 'Elige qué hacer', 'Corta y descarga', 'Abrir el cortador',
+            'Quedarme solo con lo marcado', 'Quitar lo marcado', 'Silenciar lo marcado', 'FLAC, AAC, WMA o AMR', 'y 4 horas'])
         ->assertDontSee(['OGA', 'ASF']);
+
+    // The file input lives only in the dialog: the general form does not render a second one.
+    expect(substr_count($page->html(), 'id="conversion-file"'))->toBe(1);
 });
+
+it('does not render the audio cutter for other tools', function () {
+    Livewire::test(PublicFileConverterPage::class)->call('selectFormat', 'pdf')
+        ->assertDontSeeHtml('id="audio-cutter"')
+        ->assertSeeHtml('id="conversion-file"');
+});
+
+it('names each result type on its download button', function ($extension, $label) {
+    expect(ConversionTool::downloadLabel($extension))->toBe($label);
+})->with([['wav', 'WAV'], ['m4a', 'M4A'], ['ogg', 'OGG'], ['FLAC', 'FLAC'], ['mp3', 'MP3'], ['zip', 'ZIP'], ['docx', 'Word'], ['xyz', 'archivo']]);
 
 function audioCutPage(string $extension = 'wav', float $duration = 10): Testable
 {
@@ -79,7 +97,9 @@ function runAudioCut(array $options = [], string $extension = 'wav'): FileConver
     foreach (['segments' => '[[1,3],[6,7.5]]', ...$options] as $key => $value) {
         $page->set('options.'.$key, $value);
     }
-    $page->call('convert')->assertHasNoErrors()->assertSet('audioDuration', null);
+    // The cutter keeps the file (to cut it again) and follows the new job in its last step.
+    $page->call('convert')->assertHasNoErrors()
+        ->assertSet('lastToken', fn ($token) => $token !== null)->assertSet('audioDuration', fn ($duration) => $duration > 0);
     $job = FileConversion::latest('id')->firstOrFail();
     (new ConvertFile($job->id))->handle();
     $job->refresh();
@@ -115,7 +135,7 @@ it('keeps or removes marked spans and verifies the delivered duration', function
     expect(abs(audioDuration(Storage::disk('local')->path($job->output_path)) - $duration))->toBeLessThanOrEqual(0.15)
         ->and($job->result_name)->toBe('tono_recortado.mp3')->and($job->notice)->toContain($notice);
 })->with([
-    ['keep', '[[1,3],[6,7.5]]', 3.5, 'Se conservaron 2 regiones'],
+    ['keep', '[[1,3],[6,7.5]]', 3.5, 'Se conservaron 2 fragmentos'],
     ['remove', '[[2,4]]', 8, 'Se quitaron'],
 ])->skip(fn () => ! ffmpegAvailable(), 'FFmpeg/ffprobe are not installed');
 
@@ -203,3 +223,43 @@ it('rejects manipulated segments duration and excess public usage', function () 
 it('budgets time for four hours of audio', function () {
     expect(ConversionTool::for('audiocut')->timeout(['duration' => 14400]))->toBe(1560);
 });
+
+it('follows the job in the last step and can start over or mark the same audio again', function () {
+    $page = audioCutPage()->set('options.segments', '[[1,3]]')->set('options.output', 'wav')
+        ->call('convert')->assertHasNoErrors()->assertSee('En espera');
+    $job = FileConversion::latest('id')->firstOrFail();
+    expect($page->get('lastToken'))->toBe($job->token);
+
+    (new ConvertFile($job->id))->handle();
+    $page->call('$refresh')->assertSee(['Listo', 'Descargar WAV', 'Volver a marcar este audio', 'Cortar otro audio']);
+
+    $page->call('editAgain')->assertSet('lastToken', null)->assertSet('options.segments', '[[1,3]]')
+        ->assertSet('audioDuration', fn ($duration) => $duration > 0)->assertDontSee('Volver a marcar este audio');
+
+    $page->call('startOver')->assertSet('lastToken', null)->assertSet('file', null)->assertSet('audioDuration', null)
+        ->assertSet('options.segments', '[]');
+})->skip(fn () => ! ffmpegAvailable(), 'FFmpeg/ffprobe are not installed');
+
+it('keeps another user\'s job out of the last step', function () {
+    $page = Livewire::test(PublicFileConverterPage::class)->call('selectFormat', 'audiocut');
+    $foreign = FileConversion::create([
+        'token' => (string) Str::uuid(), 'area' => 'frontoffice', 'format' => 'audiocut', 'status' => 'ready',
+        'original_name' => 'ajeno.mp3', 'result_name' => 'ajeno_recortado.mp3', 'input_path' => 'conversions/x/original.mp3',
+        'actor_name' => 'Otro', 'ip_address' => '10.0.0.9', 'session_hash' => hash('sha256', 'otra-sesion'), 'expires_at' => now()->addHour(),
+    ]);
+
+    expect(fn () => $page->set('lastToken', $foreign->token))->toThrow(CannotUpdateLockedPropertyException::class);
+    $page->assertDontSee('ajeno_recortado');
+});
+
+it('asks for the name in plain words and marks the error for the first step', function () {
+    $content = conversionAudio('wav', 3);
+    Livewire::test(PublicFileConverterPage::class)->call('selectFormat', 'audiocut')
+        ->set('file', UploadedFile::fake()->createWithContent('tono.wav', $content)->mimeType((new finfo(FILEINFO_MIME_TYPE))->buffer($content)))
+        ->set('options.segments', '[[0.5,1.5]]')
+        ->call('convert')
+        ->assertHasErrors('actorName')
+        ->assertSeeHtml('data-ac-error="1"')
+        ->assertSee('El campo nombre es obligatorio.')
+        ->assertDontSee('actor name');
+})->skip(fn () => ! ffmpegAvailable(), 'FFmpeg/ffprobe are not installed');

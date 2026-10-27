@@ -40,6 +40,12 @@ abstract class ConversionTool
         return true;
     }
 
+    /** Name of a result type on its download button: "Descargar WAV". */
+    public static function downloadLabel(string $extension): string
+    {
+        return ['docx' => 'Word', 'pdf' => 'PDF', 'zip' => 'ZIP', 'mp3' => 'MP3', 'm4a' => 'M4A', 'wav' => 'WAV', 'ogg' => 'OGG', 'flac' => 'FLAC'][strtolower($extension)] ?? 'archivo';
+    }
+
     public function label(): string
     {
         return $this->config['label'];
