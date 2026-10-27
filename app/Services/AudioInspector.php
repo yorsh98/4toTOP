@@ -2,13 +2,31 @@
 
 namespace App\Services;
 
+use Illuminate\Support\Facades\Log;
+use Symfony\Component\Process\ExecutableFinder;
 use Symfony\Component\Process\Process;
 
 class AudioInspector
 {
+    /** Without this, a missing ffprobe (exit 127) made every file look like "no readable audio". */
+    private function assertInstalled(string $program): void
+    {
+        $command = (string) config('conversions.'.$program);
+        $found = str_contains($command, '/') || str_contains($command, '\\')
+            ? is_file($command) && is_executable($command)
+            : (new ExecutableFinder)->find($command) !== null;
+
+        if (! $found) {
+            Log::error('Audio cutter: '.$program.' not found', ['configured' => $command]);
+
+            throw new \InvalidArgumentException('El cortador de audio no está disponible: el servidor no tiene FFmpeg instalado o configurado. Avisa al administrador del sistema.');
+        }
+    }
+
     /** @return array{duration: float, channels: int, sample_rate: int, codec: string} */
     public function probe(string $path): array
     {
+        $this->assertInstalled('ffprobe');
         $process = new Process([config('conversions.ffprobe'), '-v', 'error', '-select_streams', 'a:0', '-show_entries', 'stream=codec_name,channels,sample_rate,start_time:format=duration', '-of', 'json', $path]);
         $process->setTimeout(30);
         $process->run();
@@ -31,6 +49,7 @@ class AudioInspector
     /** @return array{per_second: int, peaks: string} One unsigned byte per peak, encoded as base64. */
     public function peaks(string $path, float $duration): array
     {
+        $this->assertInstalled('ffmpeg');
         $perSecond = max(1, min(50, intdiv(200_000, max(1, (int) ceil($duration)))));
         $bucketSize = intdiv(8000, $perSecond);
         $process = new Process([config('conversions.ffmpeg'), '-nostdin', '-v', 'error', '-i', $path, '-map', '0:a:0', '-vn', '-ac', '1', '-ar', '8000', '-f', 's16le', '-']);
