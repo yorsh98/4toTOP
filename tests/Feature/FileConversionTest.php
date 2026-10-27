@@ -8,6 +8,7 @@ use App\Models\FileConversion;
 use App\Models\User;
 use App\Services\FileConversionService;
 use App\Services\LibreOfficeDocxNormalizer;
+use App\Services\PdfPageTools;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Queue;
@@ -16,88 +17,6 @@ use Illuminate\Support\Number;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Role;
-use Symfony\Component\Process\Process;
-
-function conversionPdf(string $content, bool $styled = false): string
-{
-    return conversionPdfPages([$content === '' ? '' : ($styled
-        ? 'BT /F2 18 Tf 72 750 Td ('.$content.') Tj ET BT /F1 12 Tf 72 720 Td (Texto editable) Tj ET'
-        : 'BT /F1 12 Tf 72 720 Td ('.$content.') Tj ET')]);
-}
-
-/** One content stream per page; /F1 is Helvetica, /F2 Helvetica-Bold and /Im1 a grey image (scan stand-in). Pages are Letter unless $heights gives another height in points. */
-function conversionPdfPages(array $streams, array $heights = []): string
-{
-    $count = count($streams);
-    $objects = [
-        '<< /Type /Catalog /Pages 2 0 R >>',
-        '<< /Type /Pages /Kids ['.implode(' ', array_map(fn ($i) => (6 + 2 * $i).' 0 R', array_keys($streams))).'] /Count '.$count.' >>',
-        '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>',
-        '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>',
-        "<< /Type /XObject /Subtype /Image /Width 1 /Height 1 /ColorSpace /DeviceGray /BitsPerComponent 8 /Length 1 >>\nstream\n\x80\nendstream",
-    ];
-    foreach ($streams as $i => $stream) {
-        $objects[] = '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 '.($heights[$i] ?? 792).'] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> /XObject << /Im1 5 0 R >> >> /Contents '.(7 + 2 * $i).' 0 R >>';
-        $objects[] = '<< /Length '.strlen($stream).' >>'."\nstream\n{$stream}\nendstream";
-    }
-    $pdf = "%PDF-1.4\n";
-    $offsets = [0];
-
-    foreach ($objects as $index => $object) {
-        $offsets[] = strlen($pdf);
-        $pdf .= ($index + 1)." 0 obj\n{$object}\nendobj\n";
-    }
-
-    $start = strlen($pdf);
-    $pdf .= 'xref'."\n0 ".(count($objects) + 1)."\n0000000000 65535 f \n";
-    foreach (array_slice($offsets, 1) as $offset) {
-        $pdf .= sprintf('%010d 00000 n ', $offset)."\n";
-    }
-
-    return $pdf."trailer\n<< /Size ".(count($objects) + 1)." /Root 1 0 R >>\nstartxref\n{$start}\n%%EOF\n";
-}
-
-function queuedPdfConversion(string $pdf, string $name = 'acta'): FileConversion
-{
-    $token = (string) Str::uuid();
-    $job = FileConversion::create([
-        'token' => $token, 'area' => 'frontoffice', 'format' => 'pdf',
-        'status' => 'queued', 'original_name' => "{$name}.pdf", 'result_name' => "{$name}.docx",
-        'input_path' => "conversions/{$token}/original.pdf", 'actor_name' => 'Ana',
-        'ip_address' => '127.0.0.1', 'session_hash' => hash('sha256', 'test'),
-    ]);
-    Storage::disk('local')->put($job->input_path, $pdf);
-
-    return $job;
-}
-
-function docxPart(FileConversion $job, string $part): string|false
-{
-    $document = new ZipArchive;
-    $document->open(Storage::disk('local')->path($job->output_path));
-    $xml = $document->getFromName($part);
-    $document->close();
-
-    return $xml;
-}
-
-/** An executable shell script, for standing in for an external tool. */
-function fakeTool(string $body): string
-{
-    $path = tempnam(sys_get_temp_dir(), 'conversion-tool-');
-    file_put_contents($path, "#!/bin/sh\n{$body}\n");
-    chmod($path, 0755);
-
-    return $path;
-}
-
-function pdf2docxAvailable(): bool
-{
-    $process = new Process([config('conversions.python'), '-I', '-c', 'import pdf2docx']);
-    $process->run();
-
-    return $process->isSuccessful();
-}
 
 beforeEach(function () {
     Storage::fake('local');
@@ -268,23 +187,6 @@ it('keeps the page count when the letterhead is missing from the last page', fun
         ->and(array_filter($footers, fn ($xml) => ! str_contains($xml, 'Pedro Montt')))->toHaveCount(1);
 })->skip(fn () => ! pdf2docxAvailable(), 'pdf2docx is not installed for CONVERSIONS_PYTHON');
 
-/** All header and footer parts of a converted DOCX. */
-function docxHeaderFooterParts(FileConversion $job): array
-{
-    $document = new ZipArchive;
-    $document->open(Storage::disk('local')->path($job->output_path));
-    $parts = [];
-    for ($i = 0; $i < $document->numFiles; $i++) {
-        $name = $document->getNameIndex($i);
-        if (preg_match('#^word/(header|footer)\d+\.xml$#', $name)) {
-            $parts[$name] = $document->getFromName($name);
-        }
-    }
-    $document->close();
-
-    return $parts;
-}
-
 it('moves each footer of a merged PDF to its own pages', function () {
     config()->set('conversions.pdf_engine', 'pdf2docx');
     $page = fn (string $footer, int $n) => 'BT /F1 12 Tf 72 700 Td (Pagina '.$n.' del expediente unido.) Tj ET BT /F1 8 Tf 400 30 Td ('.$footer.') Tj ET';
@@ -420,7 +322,7 @@ it('explains password protected and damaged PDFs', function (string $stderr, str
 ]);
 
 it('shows the upload limit the server really accepts', function () {
-    config()->set('conversions.pdf_max_kb', 1024 * 1024);
+    config()->set('conversions.tools.pdf.max_kb', 1024 * 1024);
     $phpLimit = Symfony\Component\HttpFoundation\File\UploadedFile::getMaxFilesize();
 
     Livewire::test(PublicFileConverterPage::class)
@@ -494,3 +396,137 @@ it('cleans expired files but preserves the conversion audit', function () {
     $this->assertModelExists($job);
     expect($job->fresh()->files_deleted_at)->not->toBeNull();
 });
+
+it('groups pages like iLovePDF split modes', function (array $options, array $groups) {
+    expect(PdfPageTools::splitGroups($options, 7))->toBe($groups);
+})->with([
+    'custom ranges' => [['mode' => 'custom', 'ranges' => '1-3, 6', 'merge' => false], [[[1, 3]], [[6, 6]]]],
+    'custom ranges merged' => [['mode' => 'custom', 'ranges' => '5-6;1', 'merge' => true], [[[5, 6], [1, 1]]]],
+    'fixed every 3' => [['mode' => 'fixed', 'every' => 3], [[[1, 3]], [[4, 6]], [[7, 7]]]],
+    'extract all' => [['mode' => 'extract_all'], array_map(fn (int $page) => [[$page, $page]], range(1, 7))],
+    'extract selected merged' => [['mode' => 'extract_select', 'pages' => '2, 4-5', 'merge' => true], [[[2, 2], [4, 4], [5, 5]]]],
+    'extract selected apart' => [['mode' => 'extract_select', 'pages' => '2, 4-5', 'merge' => false], [[[2, 2]], [[4, 4]], [[5, 5]]]],
+]);
+
+it('rejects ranges that are malformed or outside the PDF', function (string $ranges, string $message) {
+    expect(fn () => PdfPageTools::parseRanges($ranges, 5))->toThrow(InvalidArgumentException::class, $message);
+})->with([
+    'past the end' => ['2-9', 'supera las 5 páginas'],
+    'reversed' => ['4-2', 'no es válido'],
+    'text' => ['primera', 'no es un rango válido'],
+    'empty' => [' , ', 'al menos una página'],
+]);
+
+it('merges PDFs in the order chosen in the page', function () {
+    $component = Livewire::test(PublicFileConverterPage::class)
+        ->call('selectFormat', 'merge')
+        ->set('actorName', 'Ana')
+        ->set('incomingFile', UploadedFile::fake()->createWithContent('a.pdf', numberedPdf('A', 2)))
+        ->set('incomingFile', UploadedFile::fake()->createWithContent('b.pdf', numberedPdf('B', 1)))
+        ->assertSet('filePages', [2, 1])
+        ->call('moveFile', 1, -1)
+        ->assertSet('filePages', [1, 2]);
+
+    $component->call('convert')->assertHasNoErrors();
+
+    $job = FileConversion::sole();
+    expect($job->format)->toBe('merge')
+        ->and($job->original_name)->toBe('b.pdf + 1 más')
+        ->and(array_column($job->options['inputs'], 'name'))->toBe(['b.pdf', 'a.pdf']);
+
+    (new ConvertFile($job->id))->handle();
+
+    $job->refresh();
+    expect($job->status)->toBe('ready')
+        ->and($job->result_name)->toBe('b_unido.pdf')
+        ->and($job->engine)->toBe('pymupdf')
+        ->and($job->notice)->toBeNull()
+        ->and(pdfPageTexts(Storage::disk('local')->path($job->output_path)))->toBe(['B1', 'A1', 'A2'])
+        ->and($job->fresh()->options['inputs'][0]['sha256'])->toHaveLength(64);
+})->skip(fn () => ! pymupdfAvailable(), 'PyMuPDF is not installed for CONVERSIONS_PYTHON');
+
+it('needs at least two PDFs to merge and names the protected one', function () {
+    Livewire::test(PublicFileConverterPage::class)
+        ->call('selectFormat', 'merge')
+        ->set('actorName', 'Ana')
+        ->set('incomingFile', UploadedFile::fake()->createWithContent('a.pdf', numberedPdf('A', 1)))
+        ->call('convert')
+        ->assertHasErrors(['files' => 'min']);
+
+    $job = queuedPdfToolJob('merge', [], ['a.pdf' => numberedPdf('A', 1), 'clave.pdf' => numberedPdf('C', 1)]);
+    config()->set('conversions.pdfinfo', fakeTool('case "$1" in *input-02*) echo "Command Line Error: Incorrect password" >&2; exit 1;; esac; echo "Pages: 1"'));
+
+    (new ConvertFile($job->id))->handle();
+
+    expect($job->fresh()->status)->toBe('failed')
+        ->and($job->fresh()->error_message)->toContain('«clave.pdf»')->toContain('protegido con contraseña');
+});
+
+it('checks split ranges against the uploaded PDF before queueing', function () {
+    Livewire::test(PublicFileConverterPage::class)
+        ->call('selectFormat', 'split')
+        ->set('actorName', 'Ana')
+        ->set('file', UploadedFile::fake()->createWithContent('acta.pdf', numberedPdf('P', 4)))
+        ->assertSet('pageCount', 4)
+        ->assertSee('El PDF tiene 4 páginas')
+        ->set('options.ranges', '1-2, 3-6')
+        ->call('convert')
+        ->assertHasErrors('options.ranges')
+        ->set('options.ranges', '1-2, 3-4')
+        ->call('convert')
+        ->assertHasNoErrors();
+
+    expect(FileConversion::sole()->options)->toBe(['mode' => 'custom', 'ranges' => '1-2, 3-4', 'merge' => false]);
+    Queue::assertPushed(ConvertFile::class, 1);
+});
+
+it('splits into a ZIP with one PDF per range', function () {
+    $job = queuedPdfToolJob('split', ['mode' => 'fixed', 'every' => 2], ['acta.pdf' => numberedPdf('P', 5)]);
+
+    (new ConvertFile($job->id))->handle();
+
+    $job->refresh();
+    expect($job->status)->toBe('ready')
+        ->and($job->result_name)->toBe('acta_dividido.zip')
+        ->and(zipPdfTexts($job))->toBe([
+            'acta_1-2.pdf' => ['P1', 'P2'],
+            'acta_3-4.pdf' => ['P3', 'P4'],
+            'acta_5.pdf' => ['P5'],
+        ]);
+})->skip(fn () => ! pymupdfAvailable(), 'PyMuPDF is not installed for CONVERSIONS_PYTHON');
+
+it('delivers a single PDF when the extracted pages are merged', function () {
+    $job = queuedPdfToolJob('split', ['mode' => 'extract_select', 'pages' => '4, 1-2', 'merge' => true], ['acta.pdf' => numberedPdf('P', 5)]);
+
+    (new ConvertFile($job->id))->handle();
+
+    $job->refresh();
+    expect($job->status)->toBe('ready')
+        ->and($job->result_name)->toBe('acta_dividido.pdf')
+        ->and($job->output_path)->toEndWith('/result.pdf')
+        ->and(pdfPageTexts(Storage::disk('local')->path($job->output_path)))->toBe(['P4', 'P1', 'P2'])
+        ->and(Storage::disk('local')->allFiles("conversions/{$job->token}"))->toEqualCanonicalizing([$job->input_path, $job->output_path]);
+})->skip(fn () => ! pymupdfAvailable(), 'PyMuPDF is not installed for CONVERSIONS_PYTHON');
+
+it('keeps signature boxes and links that live outside the page content when splitting and merging', function () {
+    // A form field stands in for the court's e-signature box (pdfseparate dropped it) and a mailto link for
+    // the prosecutor's addresses (pdfunite dropped them).
+    $signed = pdfWithFieldAndLink();
+
+    $split = queuedPdfToolJob('split', ['mode' => 'custom', 'ranges' => '2', 'merge' => false], ['firmado.pdf' => $signed]);
+    (new ConvertFile($split->id))->handle();
+    $split->refresh();
+
+    expect($split->status)->toBe('ready')
+        ->and(pdfPageTexts(Storage::disk('local')->path($split->output_path)))->toBe(['S2FirmaJuez'])
+        ->and(pdfLinks(Storage::disk('local')->path($split->output_path)))->toBe(['mailto:fiscal@example.cl'])
+        ->and($split->notice)->toContain('firmas electrónicas');
+
+    $merge = queuedPdfToolJob('merge', [], ['a.pdf' => numberedPdf('A', 1), 'firmado.pdf' => $signed]);
+    (new ConvertFile($merge->id))->handle();
+    $merge->refresh();
+
+    expect($merge->status)->toBe('ready')
+        ->and(pdfPageTexts(Storage::disk('local')->path($merge->output_path)))->toBe(['A1', 'S1', 'S2FirmaJuez'])
+        ->and(pdfLinks(Storage::disk('local')->path($merge->output_path)))->toBe(['mailto:fiscal@example.cl']);
+})->skip(fn () => ! pymupdfAvailable(), 'PyMuPDF is not installed for CONVERSIONS_PYTHON');

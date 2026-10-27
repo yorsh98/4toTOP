@@ -3,7 +3,7 @@
 <div class="mx-auto max-w-7xl space-y-5 px-4 py-8 sm:px-6 lg:px-8">
     <div class="grid gap-3 rounded-xl border border-slate-200 bg-white p-5 sm:grid-cols-4">
         <label class="text-sm font-medium text-slate-700">Área<select wire:model.live="area" class="mt-1 block w-full rounded-lg border-slate-300 text-sm"><option value="">Todas</option><option value="frontoffice">Frontoffice</option><option value="backoffice">Backoffice</option></select></label>
-        <label class="text-sm font-medium text-slate-700">Formato<select wire:model.live="format" class="mt-1 block w-full rounded-lg border-slate-300 text-sm"><option value="">Todos</option><option value="pdf">PDF → Word</option><option value="m4a">M4A → MP3</option></select></label>
+        <label class="text-sm font-medium text-slate-700">Herramienta<select wire:model.live="format" class="mt-1 block w-full rounded-lg border-slate-300 text-sm"><option value="">Todas</option>@foreach (config('conversions.tools') as $toolFormat => $toolConfig)<option value="{{ $toolFormat }}">{{ $toolConfig['label'] }}</option>@endforeach</select></label>
         <label class="text-sm font-medium text-slate-700">Estado<select wire:model.live="status" class="mt-1 block w-full rounded-lg border-slate-300 text-sm"><option value="">Todos</option><option value="queued">En espera</option><option value="processing">Convirtiendo</option><option value="ready">Listo</option><option value="failed">Fallido</option></select></label>
         <label class="text-sm font-medium text-slate-700">Fecha<input type="date" wire:model.live="date" class="mt-1 block w-full rounded-lg border-slate-300 text-sm"></label>
     </div>
