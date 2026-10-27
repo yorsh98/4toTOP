@@ -130,6 +130,17 @@ it('rejects disguised and overlong audio without consuming quota', function () {
     Queue::assertNothingPushed();
 })->skip(fn () => ! ffmpegAvailable(), 'FFmpeg/ffprobe are not installed');
 
+it('says the server lacks FFmpeg instead of calling the audio unreadable', function () {
+    config()->set('conversions.ffprobe', '/nonexistent/ffprobe');
+
+    Livewire::test(PublicFileConverterPage::class)->call('selectFormat', 'audiocut')->set('actorName', 'Ana')
+        ->set('file', UploadedFile::fake()->create('audiencia.mp3', 10, 'audio/mpeg'))
+        ->assertHasErrors(['file'])
+        ->assertSee('no tiene FFmpeg instalado')
+        ->assertDontSee('no contiene audio legible');
+    expect(FileConversion::count())->toBe(0);
+});
+
 it('keeps or removes marked spans and verifies the delivered duration', function ($mode, $segments, $duration, $notice) {
     $job = runAudioCut(['mode' => $mode, 'segments' => $segments]);
     expect(abs(audioDuration(Storage::disk('local')->path($job->output_path)) - $duration))->toBeLessThanOrEqual(0.15)
