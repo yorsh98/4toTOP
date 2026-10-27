@@ -33,7 +33,7 @@ class FileConversionHistoryPage extends Component
         return view('livewire.file-conversion-history-page', [
             'jobs' => FileConversion::query()
                 ->when(in_array($this->area, ['frontoffice', 'backoffice'], true), fn ($query) => $query->where('area', $this->area))
-                ->when(in_array($this->format, ['pdf', 'm4a'], true), fn ($query) => $query->where('format', $this->format))
+                ->when(array_key_exists($this->format, config('conversions.tools')), fn ($query) => $query->where('format', $this->format))
                 ->when(in_array($this->status, ['queued', 'processing', 'ready', 'failed'], true), fn ($query) => $query->where('status', $this->status))
                 ->when(preg_match('/^\d{4}-\d{2}-\d{2}$/', $this->date), fn ($query) => $query->whereDate('created_at', $this->date))
                 ->latest()->paginate(25),

@@ -15,24 +15,7 @@ class PdfInspector
     /** @return array{pages: int, pages_without_text: list<int>} */
     public function inspect(string $path): array
     {
-        $info = new Process([config('conversions.pdfinfo'), $path]);
-        $info->setTimeout(60);
-        $info->run();
-
-        if (! $info->isSuccessful()) {
-            throw new \InvalidArgumentException(str_contains($info->getErrorOutput(), 'Incorrect password')
-                ? 'El PDF está protegido con contraseña. Quita la protección e inténtalo de nuevo.'
-                : 'El PDF está dañado o no se puede leer.');
-        }
-
-        preg_match('/^Pages:\s+(\d+)/m', $info->getOutput(), $match);
-        $pages = (int) ($match[1] ?? 0);
-        if ($pages === 0) {
-            throw new \InvalidArgumentException('El PDF está dañado o no se puede leer.');
-        }
-        if ($pages > config('conversions.pdf_max_pages')) {
-            throw new \InvalidArgumentException('El PDF tiene '.$pages.' páginas; el máximo es '.config('conversions.pdf_max_pages').'.');
-        }
+        $pages = $this->pages($path);
 
         $text = new Process([config('conversions.pdftotext'), '-enc', 'UTF-8', $path, '-']);
         $text->setTimeout(120);
@@ -62,6 +45,31 @@ class PdfInspector
         }
 
         return ['pages' => $pages, 'pages_without_text' => $withoutText];
+    }
+
+    /** Rejects protected, damaged and over-limit PDFs, and returns the page count. */
+    public function pages(string $path): int
+    {
+        $info = new Process([config('conversions.pdfinfo'), $path]);
+        $info->setTimeout(60);
+        $info->run();
+
+        if (! $info->isSuccessful()) {
+            throw new \InvalidArgumentException(str_contains($info->getErrorOutput(), 'Incorrect password')
+                ? 'El PDF está protegido con contraseña. Quita la protección e inténtalo de nuevo.'
+                : 'El PDF está dañado o no se puede leer.');
+        }
+
+        preg_match('/^Pages:\s+(\d+)/m', $info->getOutput(), $match);
+        $pages = (int) ($match[1] ?? 0);
+        if ($pages === 0) {
+            throw new \InvalidArgumentException('El PDF está dañado o no se puede leer.');
+        }
+        if ($pages > config('conversions.pdf_max_pages')) {
+            throw new \InvalidArgumentException('El PDF tiene '.$pages.' páginas; el máximo es '.config('conversions.pdf_max_pages').'.');
+        }
+
+        return $pages;
     }
 
     /** @return array<int, true> */

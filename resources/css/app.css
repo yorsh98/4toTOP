@@ -1,4 +1,6 @@
 @import "bootstrap/dist/css/bootstrap.min.css";
+@import "./chat-motion.css";
+@import "./audio-cutter.css";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
