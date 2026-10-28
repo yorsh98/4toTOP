@@ -1,12 +1,11 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Monitor de audiencias</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <link rel="stylesheet" href="/css/app.css">
     <link rel="icon" href="{{ asset('favicon.webp') }}" type="image/webp" />
     <meta name="csrf-token" content="{{ csrf_token() }}" />
     <link
@@ -15,27 +14,24 @@
     @stack('styles')
   </head>
 
-  <body class="bg-gray-100 flex flex-col min-h-screen">
-    <x-headerSist />
-
-    <main class="flex flex-1 gap-2 p-2 pb-6">
-      <!-- Panel izquierdo (VIDEO + aviso fijo abajo) -->
-      <div
-        class="w-1/3 bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200"
-        wire:ignore>
-        <div class="h-full p-4 flex flex-col">
-          <!-- Título panel -->
-          <div class="text-center mb-4 bg-white rounded-xl shadow-md p-4 relative overflow-hidden">
-            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-green-500 to-purple-600"></div>
-            <h1 class="text-2xl font-bold text-gray-800 mb-2 flex items-center justify-center gap-3">
-              <i class="fas fa-hands-helping"></i>
-              ATENCIÓN DE PÚBLICO
-              <i class="fas fa-comments"></i>
-            </h1>
-          </div>
-
-          <!-- VIDEO ocupa todo el espacio disponible -->
-          <div class="flex-1 flex items-center justify-center w-full bg-black rounded-md">
+  <body class="fo fo-kiosk">
+    <div class="fo-backdrop" aria-hidden="true">
+      <img src="{{ asset('img/centro-justicia-2560.webp') }}" alt="" decoding="async">
+    </div>
+    <header class="fo-kiosk-header">
+      <div class="fo-kiosk-brand">
+        <img src="{{ asset('img/pjud_blanco.webp') }}" alt="Poder Judicial" width="100">
+        <span>4º Tribunal de Juicio Oral en lo Penal de Santiago</span>
+      </div>
+      <div class="fo-kiosk-clock" x-data="{ time: '', date: '', init() { const tick = () => { const now = new Date(); this.time = new Intl.DateTimeFormat('es-CL', { timeZone: 'America/Santiago', hour: '2-digit', minute: '2-digit', hour12: false }).format(now); const d = new Intl.DateTimeFormat('es-CL', { timeZone: 'America/Santiago', weekday: 'long', day: 'numeric', month: 'long' }).format(now); this.date = d.charAt(0).toUpperCase() + d.slice(1); }; tick(); setInterval(tick, 1000); } }">
+        <time x-text="time">{{ now()->format('H:i') }}</time>
+        <span x-text="date">{{ ucfirst(now('America/Santiago')->translatedFormat('l, j \d\e F')) }}</span>
+      </div>
+    </header>
+    <main class="fo-kiosk-main">
+      <section class="fo-kiosk-panel fo-kiosk-video-panel" wire:ignore aria-label="Atención al público">
+        <h1>Atención al Público</h1>
+        <div class="fo-kiosk-video">
             <video
               id="player"
               class="w-full h-full object-contain [transform:translateZ(0)] [will-change:transform] [contain:paint] [backface-visibility:hidden]"
@@ -48,49 +44,16 @@
               disablepictureinpicture>
               <source src="{{ asset('videos/VideoAtenciónPublico.mp4') }}" type="video/mp4"/>
             </video>
-          </div>
-
-          <!-- AVISO FIJO: ocupa el “footer” del panel izquierdo -->
-          <div
-            class="mt-3 bg-white/90 text-gray-800 font-semibold text-center rounded-xl shadow-2xl border-2 border-red-600 px-4 py-3" aria-live="polite" aria-atomic="true">
-            <div class="flex items-center justify-center gap-3 text-sm">
-              <i class="fas fa-bell text-red-600 text-lg"></i>
-              <span class="leading-tight">
-                ⚠️ <strong>Importante:</strong> Antes de ingresar a sala, debes
-                registrarte en el mesón de <span class="text-red-600 font-bold">Atención al Público</span>.
-              </span>
-            </div>
-          </div>
         </div>
-      </div>
-
-      <!-- Panel derecho -->
-      <div class="w-2/3 bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200">
-        <div class="h-full p-4 flex flex-col">
-          <div class="text-center mb-4 bg-white rounded-xl shadow-md p-4 relative overflow-hidden">
-            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-green-500 to-purple-600"></div>
-            <h1 class="text-2xl font-bold text-gray-800 mb-2 flex items-center justify-center gap-3">
-              <i class="fas fa-balance-scale"></i>
-              PROGRAMACIÓN DE AUDIENCIAS
-              <i class="far fa-calendar-alt"></i>
-            </h1>
-          </div>
-
-          <!-- Contenedor para Livewire -->
-          <div class="flex">
-            <livewire:monitor-audiencias />
-          </div>
+        <div class="fo-kiosk-notice">
+          <strong>Importante</strong>
+          <p>Antes de ingresar a sala, debes registrarte en el mesón de <strong>Atención al Público</strong>.</p>
         </div>
-      </div>
+      </section>
+      <section class="fo-kiosk-panel fo-kiosk-program" aria-label="Programación de audiencias">
+        <livewire:monitor-audiencias />
+      </section>
     </main>
-
-    <!-- Footer general del layout (sigue igual) -->
-    <footer class="footer-Monitor">
-      <a href="" class="footer-button-Monitor">
-        PROGRAMACIÓN DE AUDIENCIAS -
-        {{ strtoupper(\Carbon\Carbon::now()->isoFormat('dddd DD-MM-YYYY')) }}
-      </a>
-    </footer>
     @stack('scripts')
     <script>
       // Ping al servidor cada 5 minutos para mantener la sesión activa

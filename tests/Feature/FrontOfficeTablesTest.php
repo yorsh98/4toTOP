@@ -4,6 +4,7 @@ use App\Livewire\AusentismoCalendario;
 use App\Livewire\BitacoraPruebasPublicPage;
 use App\Livewire\BitacoraPruebasViewer;
 use App\Livewire\LibertadTabla;
+use App\Livewire\MonitorAudiencias;
 use App\Livewire\OficioTabla;
 use App\Livewire\PublicFileConverterPage;
 use App\Livewire\ServiciosMapaPublicPage;
@@ -272,4 +273,22 @@ test('programación diaria informa los grupos vacíos', function () {
         ->assertSee('Sin lecturas de sentencia programadas para este día.')
         ->assertSee('Sin audiencias cortas programadas para este día.')
         ->assertSee('No hay jueces ausentes registrados.');
+});
+
+test('monitor muestra el video y conserva el healthcheck', function () {
+    $this->get('/Monitor')->assertSuccessful()
+        ->assertSee('id="player"', false)
+        ->assertSee('HEALTHCHECK_URL', false)
+        ->assertSeeLivewire(MonitorAudiencias::class);
+});
+
+test('monitor muestra las audiencias de hoy del tipo actual', function () {
+    Audiencia::create([
+        'fecha' => today()->toDateString(), 'rit' => '123-2026', 'ruc' => '12345678-9',
+        'sala' => '801', 'hora_inicio' => '10:00', 'tipo_audiencia' => 'Juicio Oral',
+        'estado' => 'EN_CURSO', 'anfitrion' => 'Ana', 'encargado_causa' => 'Causa', 'acta' => 'Acta', 'JuezR' => 'Juez',
+        'acusados' => [['nombre_completo' => 'Persona', 'situacion' => 'Libre']],
+    ]);
+
+    Livewire::test(MonitorAudiencias::class)->assertSee('123-2026')->assertSee('En curso');
 });
