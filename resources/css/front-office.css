@@ -546,6 +546,26 @@
 .fo .fo-pager-btn[disabled] { opacity: .35; cursor: default; }
 .fo .fo-pager-gap { color: var(--fo-mut); padding: 0 4px; }
 
+/* TTyPP */
+.fo .fo-ttypp-date { display: flex; flex-wrap: wrap; gap: 8px; }
+.fo .fo-ttypp-date input, .fo .fo-ttypp-button {
+    min-height: 44px; padding: 8px 12px; border: 1px solid var(--fo-line-strong);
+    border-radius: 10px; background: var(--fo-bg); color: var(--fo-fg); font: inherit;
+}
+.fo .fo-ttypp-button { display: inline-flex; align-items: center; white-space: nowrap; text-decoration: none; cursor: pointer; }
+.fo .fo-ttypp-button:hover { border-color: var(--fo-signal); color: var(--fo-fg); }
+.fo .fo-ttypp-table td { overflow-wrap: anywhere; }
+@media (max-width: 760px) {
+    .fo .fo-ttypp-bar { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .fo .fo-ttypp-bar .fo-ttypp-date { grid-column: 1 / -1; grid-row: 1; display: grid; grid-template-columns: 1fr auto; }
+    .fo .fo-ttypp-bar > .fo-ttypp-button { justify-content: center; padding: 8px; font-size: 14px; }
+    .fo .fo-ttypp-table .fo-table-group > tr:first-child { grid-template-columns: repeat(2, minmax(0, 1fr)) auto; }
+    .fo .fo-ttypp-table .fo-table-group > tr:first-child > td[data-label] { grid-column: auto; }
+    .fo .fo-ttypp-table .fo-table-toggle { grid-column: 3; grid-row: 1 / span 4; }
+    .fo .fo-ttypp-table .fo-detail { grid-template-columns: minmax(0, 1fr); }
+    .fo .fo-ttypp-table .fo-icon-btn { width: 44px; height: 44px; }
+}
+
 /* Oficios y libertades */
 .fo .fo-oficios-grid { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(260px, 1fr); gap: 24px; align-items: start; }
 .fo .fo-panel { padding: clamp(20px, 3vw, 32px); border: 1px solid var(--fo-line); border-radius: 18px; background: var(--fo-glass); backdrop-filter: var(--fo-glass-blur); -webkit-backdrop-filter: var(--fo-glass-blur); box-shadow: inset 0 1px 0 var(--fo-glass-edge); }
