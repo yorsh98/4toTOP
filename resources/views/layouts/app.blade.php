@@ -5,27 +5,29 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'Sistema Oficio/libertades 4to TOP Stgo.') }}</title>
-        <link rel="icon" href="{{ asset('favicon.png') }}" type="image/png">
-
-        <!-- Fonts --> 
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
-       <!-- STILOS ICONOS --> 
-        <link href="https://fonts.bunny.net/css?family=red-hat-mono:500,600&display=swap" rel="stylesheet" />
+        <title>{{ isset($title) ? $title.' · 4toTOP' : '4toTOP · Backoffice' }}</title>
+        <link rel="icon" href="{{ asset('favicon.webp') }}" type="image/webp">
+        <script>
+            try {
+                document.documentElement.dataset.theme = localStorage.getItem('fo-theme') === 'dark' ? 'dark' : 'light';
+            } catch (_) {
+                document.documentElement.dataset.theme = 'light';
+            }
+        </script>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
         @livewireStyles
         @stack('styles')
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="font-sans antialiased bg-slate-100 text-slate-900">
-        <div class="min-h-screen bg-slate-100 lg:flex">
+    <body class="bo antialiased">
+        <div class="min-h-screen lg:flex">
             <livewire:layout.navigation />
 
             <div class="min-w-0 flex-1">
                 <!-- Page Heading -->
                 @if (isset($header))
-                    <header class="h-16 border-b border-slate-200/80 bg-white/90 shadow-sm backdrop-blur-sm">
+                    <header class="bo-header h-16">
                         <div class="flex h-full items-center">
                             {{ $header }}
                         </div>
@@ -43,14 +45,7 @@
 
         {{-- ===== Loader Global (visible en carga inicial y durante requests Livewire) ===== --}}
 
-<style>
-  [x-cloak]{display:none!important}
-  @keyframes progressbar {
-    0%   { transform: translateX(-100%); }
-    50%  { transform: translateX(-40%); }
-    100% { transform: translateX(0%); }
-  }
-</style>
+
 
 <!-- Overlay a pantalla completa -->
 <div
@@ -58,17 +53,17 @@
   x-show="$store.busy && $store.busy.visible"
   x-transition.opacity
   x-cloak
-  class="fixed inset-0 z-[9999] bg-slate-900/30 backdrop-blur-sm flex items-center justify-center"
+  class="bo-loader fixed inset-0 z-[9999] flex items-center justify-center"
   role="status" aria-live="polite" aria-busy="true"
 >
   <div class="flex flex-col items-center gap-3">
-    <div class="w-7 h-7 rounded-full border-2 border-blue-500 border-t-transparent animate-spin"></div>
-    <p class="text-sm text-slate-100">Cargando...</p>
+    <div class="bo-loader-spinner w-7 h-7 rounded-full border-2 animate-spin"></div>
+    <p class="text-sm">Cargando...</p>
   </div>
 
   <!-- Barra superior de progreso (decorativa) -->
   <div class="fixed top-0 left-0 right-0 h-0.5 overflow-hidden">
-    <div class="h-full w-2/3 bg-blue-500" style="animation: progressbar 1.1s ease-in-out infinite;"></div>
+    <div class="bo-loader-progress h-full w-2/3"></div>
   </div>
 </div>
 

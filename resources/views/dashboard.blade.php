@@ -4,24 +4,7 @@
     </x-slot>
 
     @php
-        $modules = [
-            ['name' => 'Funcionarios', 'description' => 'Administra el catálogo de funcionarios.', 'route' => 'addfuncionario.index', 'icon' => 'fa-users', 'permissions' => ['navbar.funcionarios.visible', 'navbar.funcionarios.editable'], 'accent' => '#0284c7'],
-            ['name' => 'Oficios / Libertades', 'description' => 'Gestiona solicitudes, oficios y libertades.', 'route' => 'oficiolibertad', 'icon' => 'fa-file-signature', 'permissions' => ['navbar.oficios_libertades.visible', 'navbar.oficios_libertades.editable'], 'accent' => '#2563eb'],
-            ['name' => 'Turnos', 'description' => 'Consulta y asigna turnos semanales.', 'route' => 'turno', 'icon' => 'fa-calendar-days', 'permissions' => ['navbar.turnos.visible', 'navbar.turnos.editable'], 'accent' => '#4f46e5'],
-            ['name' => 'Guías', 'description' => 'Mantén actualizada la guía telefónica.', 'route' => 'guias', 'icon' => 'fa-book', 'permissions' => ['navbar.guias.visible', 'navbar.guias.editable'], 'accent' => '#0891b2'],
-            ['name' => 'Audiencias', 'description' => 'Organiza la programación y gestión diaria.', 'route' => 'AdmAudv', 'icon' => 'fa-gavel', 'permissions' => ['navbar.audiencias.visible', 'navbar.audiencias.editable'], 'accent' => '#7c3aed'],
-            ['name' => 'TTYPP', 'description' => 'Registra y consulta causas TTYPP.', 'route' => 'ttypp.index', 'icon' => 'fa-user-shield', 'permissions' => ['navbar.ttypp.visible', 'navbar.ttypp.editable'], 'accent' => '#c026d3'],
-            ['name' => 'Bitácora de Pruebas', 'description' => 'Documenta y revisa controles operativos.', 'route' => 'bitacora-pruebas.index', 'icon' => 'fa-clipboard-list', 'permissions' => ['navbar.bitacora_pruebas.visible', 'navbar.bitacora_pruebas.editable'], 'accent' => '#059669'],
-            ['name' => 'Ausencias', 'description' => 'Registra y consulta ausentismo del personal.', 'route' => 'ausentismo', 'icon' => 'fa-user-clock', 'permissions' => ['navbar.ausencias.visible', 'navbar.ausencias.editable'], 'accent' => '#d97706'],
-            ['name' => 'Documentos', 'description' => 'Gestiona documentos y procedimientos.', 'route' => 'backoffice.documentos.index', 'icon' => 'fa-folder-open', 'permissions' => ['navbar.documentos.visible', 'navbar.documentos.editable'], 'accent' => '#ea580c'],
-            ['name' => 'Convertir archivos', 'description' => 'Convierte PDF a Word y M4A a MP3.', 'route' => 'conversions.backoffice', 'icon' => 'fa-arrow-right-arrow-left', 'permissions' => ['navbar.conversiones.visible'], 'accent' => '#0284c7'],
-            ['name' => 'Audios de Salas', 'description' => 'Consulta y administra audios de salas.', 'route' => 'audios-salas.index', 'icon' => 'fa-headphones', 'permissions' => ['audios_salas.ver'], 'accent' => '#e11d48'],
-            ['name' => 'Visita Carcel', 'description' => 'Centraliza la gestion de visitas a recinto penitenciario.', 'route' => 'visita-carcel.index', 'icon' => 'fa-building-shield', 'permissions' => ['navbar.visita_carcel.visible', 'visita_carcel.ver'], 'accent' => '#be123c'],
-            ['name' => 'Servicios', 'description' => 'Administra el inventario de servicios.', 'route' => 'backoffice.servicios.inventario', 'icon' => 'fa-boxes-stacked', 'permissions' => ['servicios.ver'], 'accent' => '#0d9488'],
-            ['name' => 'Mapa de Servicios', 'description' => 'Explora la cobertura de servicios.', 'route' => 'backoffice.servicios.mapa', 'icon' => 'fa-map-location-dot', 'permissions' => ['servicios.ver'], 'accent' => '#65a30d'],
-            ['name' => 'Insumos', 'description' => 'Solicita y consulta los insumos disponibles.', 'route' => 'insumos.solicitudes', 'icon' => 'fa-box-open', 'permissions' => ['navbar.insumos.visible', 'navbar.insumos.editable', 'insumos.solicitar'], 'accent' => '#0891b2'],
-            ['name' => 'Seguridad', 'description' => 'Administra roles, usuarios y auditoría.', 'route' => 'seguridad.roles.index', 'icon' => 'fa-shield-halved', 'permissions' => ['navbar.seguridad.visible', 'navbar.seguridad.editable'], 'accent' => '#475569'],
-        ];
+        $modules = app(\App\Services\BackofficeModules::class)->items();
 
         $availableModules = collect($modules)->filter(fn (array $module) => auth()->user()->canAny($module['permissions']));
         $today = now()->locale('es')->isoFormat('dddd, D [de] MMMM');
@@ -58,7 +41,7 @@
                                 <div class="absolute inset-y-0 left-0 w-1 bg-[var(--module-accent)]"></div>
                                 <div class="flex items-start gap-4 pl-2">
                                     <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-[var(--module-tint)] text-[var(--module-accent)] transition group-hover:bg-[var(--module-accent)] group-hover:text-white">
-                                        <i class="fa-solid {{ $module['icon'] }} text-lg" aria-hidden="true"></i>
+                                        <i class="{{ $module['icon'] }} text-lg" aria-hidden="true"></i>
                                     </span>
                                     <div class="min-w-0 flex-1">
                                         <h3 class="font-semibold text-slate-900">{{ $module['name'] }}</h3>
