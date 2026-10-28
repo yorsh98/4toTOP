@@ -1,6 +1,7 @@
 <?php
 
 use App\Livewire\AusentismoCalendario;
+use App\Livewire\PublicFileConverterPage;
 use App\Livewire\TablaGuias;
 use App\Models\Ausentismo;
 use App\Models\Guias;
@@ -8,6 +9,7 @@ use App\Models\TtyppRegistro;
 use App\Models\User;
 use Carbon\Carbon;
 use Database\Seeders\RolesAndPermissionsSeeder;
+use Illuminate\Http\UploadedFile;
 use Livewire\Livewire;
 
 test('ttypp muestra los datos y el detalle de la fecha seleccionada', function () {
@@ -123,4 +125,21 @@ test('ausencias informa cuando no hay personas ausentes en el día', function ()
     Livewire::test(AusentismoCalendario::class)
         ->call('openDay', now()->toDateString())
         ->assertSee('Nadie ausente este día.');
+});
+
+test('convertir archivos muestra la cabecera y el historial de la sesión', function () {
+    $this->get(route('conversions.public'))->assertSuccessful();
+    $this->get(route('conversions.public'))
+        ->assertSuccessful()
+        ->assertSee('class="fo-page-title"', false)
+        ->assertSee('Convertir archivos')
+        ->assertSee('class="fo-table-wrap fo-table-wrap--glass fo-conv-table', false);
+
+    Livewire::test(PublicFileConverterPage::class)
+        ->set('actorName', 'Ana')
+        ->set('file', UploadedFile::fake()->create('acta.pdf', 10, 'application/pdf'))
+        ->call('convert')
+        ->assertHasNoErrors()
+        ->assertSee('acta.pdf')
+        ->assertSee('data-label="Estado"', false);
 });

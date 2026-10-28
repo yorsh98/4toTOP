@@ -10,28 +10,17 @@
     </x-slot:header>
 @endif
 
-<div class="{{ $area === 'frontoffice' ? 'pb-6' : 'py-6 sm:py-8' }}" wire:poll.5s>
-    <div class="mx-auto space-y-6 {{ $area === 'frontoffice' ? 'w-full lg:space-y-8' : 'max-w-5xl px-4 sm:px-6 lg:px-8' }}">
+<div class="{{ $area === 'frontoffice' ? 'pb-6 fo-conv' : 'py-6 sm:py-8' }}" wire:poll.5s>
+    <div class="mx-auto space-y-6 {{ $area === 'frontoffice' ? 'w-full lg:space-y-8 fo-conv-main' : 'max-w-5xl px-4 sm:px-6 lg:px-8' }}">
         @if ($area === 'frontoffice')
-            <div class="relative grid gap-6 pt-5 animate__animated animate__fadeInLeft motion-reduce:animate-none lg:gap-8">
-                <a href="{{ url('/') }}" class="absolute left-4 top-4 z-10 inline-flex items-center gap-1 rounded-md bg-white px-3 py-1 text-sm font-semibold text-black shadow-md transition hover:bg-blue-700 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700">
-                    <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m15 19-7-7 7-7" /></svg>
-                    INICIO
-                </a>
-                <div class="flex items-start justify-center gap-4 rounded-lg bg-white px-6 pb-6 pt-12 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] sm:p-6 lg:pb-10">
-                    <span class="flex size-12 shrink-0 items-center justify-center rounded-full sm:size-16"><i class="fa-solid fa-arrow-right-arrow-left text-2xl text-[#0A2E5D]" aria-hidden="true"></i></span>
-                    <div class="min-w-0 pt-3 sm:pt-5">
-                        <h1 class="text-xl font-semibold text-black">CONVERTIR ARCHIVOS</h1>
-                    </div>
-                </div>
-            </div>
+            <x-public.page-head title="Convertir archivos" lead="Convierte, organiza y edita tus archivos en línea." />
         @endif
 
-        <section class="overflow-hidden bg-white {{ $area === 'frontoffice' ? 'rounded-lg p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] animate__animated animate__fadeInUp motion-reduce:animate-none lg:p-10' : 'rounded-2xl border border-slate-200 shadow-lg shadow-blue-950/10' }}" aria-labelledby="conversion-title">
-            <div class="{{ $area === 'frontoffice' ? 'border-b border-slate-200 pb-5 text-slate-900' : 'border-b border-slate-200 bg-[#0A2E5D] px-6 py-6 text-white sm:px-8' }}">
-                <p class="text-xs font-semibold uppercase tracking-wide {{ $area === 'frontoffice' ? 'text-[#0A2E5D]' : 'font-mono text-sky-200' }}">Convertir · Organizar · Optimizar · Editar</p>
+        <section class="overflow-hidden bg-white {{ $area === 'frontoffice' ? 'fo-panel' : 'rounded-2xl border border-slate-200 shadow-lg shadow-blue-950/10' }}" aria-labelledby="conversion-title">
+            <div class="{{ $area === 'frontoffice' ? 'fo-conv-heading pb-5' : 'border-b border-slate-200 bg-[#0A2E5D] px-6 py-6 text-white sm:px-8' }}">
+                <p class="text-xs font-semibold uppercase tracking-wide {{ $area === 'frontoffice' ? 'fo-conv-eyebrow' : 'font-mono text-sky-200' }}">Convertir · Organizar · Optimizar · Editar</p>
                 <h2 id="conversion-title" class="mt-2 text-xl font-semibold">Elige qué quieres hacer con tus archivos</h2>
-                <p class="mt-1 text-sm {{ $area === 'frontoffice' ? 'text-slate-600' : 'text-blue-100' }}">Tus archivos se eliminan automáticamente después del plazo de descarga.</p>
+                <p class="mt-1 text-sm {{ $area === 'frontoffice' ? 'fo-hint' : 'text-blue-100' }}">Tus archivos se eliminan automáticamente después del plazo de descarga.</p>
             </div>
 
             <div class="space-y-7 {{ $area === 'frontoffice' ? 'pt-6' : 'p-5 sm:p-8' }}">
@@ -148,8 +137,27 @@
             </div>
         </section>
 
-        <section class="bg-white p-5 {{ $area === 'frontoffice' ? 'rounded-lg shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] animate__animated animate__fadeInUp motion-reduce:animate-none sm:p-6 lg:p-10' : 'rounded-2xl border border-slate-200 shadow-sm sm:p-8' }}" aria-labelledby="jobs-title">
+        <section class="bg-white p-5 {{ $area === 'frontoffice' ? 'fo-panel' : 'rounded-2xl border border-slate-200 shadow-sm sm:p-8' }}" aria-labelledby="jobs-title">
             <h2 id="jobs-title" class="text-lg font-semibold text-slate-900">Archivos de {{ $area === 'frontoffice' ? 'esta sesión' : 'tu cuenta' }}</h2>
+            @if ($area === 'frontoffice')
+                <div class="fo-table-wrap fo-table-wrap--glass fo-conv-table mt-4" aria-live="polite">
+                    <table class="fo-table">
+                        <caption class="sr-only">Archivos de esta sesión</caption>
+                        <thead><tr><th scope="col">Archivo</th><th scope="col">Herramienta</th><th scope="col">Estado</th><th scope="col">Fecha</th><th scope="col">Acción</th></tr></thead>
+                        @forelse ($jobs as $job)
+                            <tbody class="fo-table-group" wire:key="conversion-{{ $job->id }}"><tr>
+                                <td data-label="Archivo"><strong>{{ $job->original_name }}</strong>@if ($job->status === 'ready' && $job->notice)<p class="fo-hint">{{ $job->notice }}</p>@endif</td>
+                                <td data-label="Herramienta">{{ config('conversions.tools.'.$job->format.'.label', strtoupper($job->format)) }}</td>
+                                <td data-label="Estado"><span class="fo-badge">@if ($job->status === 'failed'){{ $job->error_message }}@elseif ($job->status === 'ready' && ! $job->expires_at?->isFuture())Descarga vencida@elseif ($job->status === 'ready')Listo@else{{ $job->status === 'queued' ? 'En espera' : 'Procesando…' }}@endif</span></td>
+                                <td data-label="Fecha"><span class="fo-num">{{ $job->created_at->format('d/m/Y H:i') }}</span></td>
+                                <td data-label="Acción">@if ($job->status === 'ready' && $job->expires_at?->isFuture())<a class="fo-link" href="{{ route('conversions.download', $job) }}">Descargar {{ App\Conversions\ConversionTool::downloadLabel(pathinfo($job->result_name, PATHINFO_EXTENSION)) }}</a>@else<span class="fo-dash">—</span>@endif</td>
+                            </tr></tbody>
+                        @empty
+                            <tbody><tr><td colspan="5" class="fo-table-empty">Elige una herramienta y un archivo para empezar.</td></tr></tbody>
+                        @endforelse
+                    </table>
+                </div>
+            @else
             <div class="mt-4 grid gap-3" aria-live="polite">
                 @forelse ($jobs as $job)
                     <div wire:key="conversion-{{ $job->id }}" class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
@@ -174,6 +182,7 @@
                     <p class="rounded-xl border border-dashed border-slate-200 p-6 text-sm text-slate-600">Elige una herramienta y un archivo para empezar.</p>
                 @endforelse
             </div>
+            @endif
         </section>
     </div>
 

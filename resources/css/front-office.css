@@ -618,6 +618,36 @@
     .fo .fo-cal-events { display: none; }
 }
 
+/* Convertir archivos */
+/* Las reglas van acotadas a .fo-conv-main: el cortador de audio (su propio diseño) es hermano de ese bloque */
+.fo .fo-conv-main { color: var(--fo-fg); }
+/* Bootstrap define .bg-white con !important y la vista es compartida con el backoffice: hay que ganarle igual */
+.fo .fo-conv-main .bg-white, .fo .fo-conv-main .bg-slate-50, .fo .fo-conv-main .bg-sky-50 { background: var(--fo-glass) !important; }
+.fo .fo-conv-main .fo-panel { background: var(--fo-glass); }
+.fo .fo-conv-heading { border-bottom: 1px solid var(--fo-line); }
+.fo .fo-conv-main h2, .fo .fo-conv-main h3 { color: var(--fo-fg); }
+.fo .fo-conv-main h2 { font-family: var(--fo-display); }
+.fo .fo-conv-eyebrow, .fo .fo-conv-main .text-sky-700 { color: var(--fo-signal-strong); }
+.fo .fo-conv-main .text-slate-900, .fo .fo-conv-main .text-slate-800, .fo .fo-conv-main .text-slate-700 { color: var(--fo-fg); }
+.fo .fo-conv-main .text-slate-600, .fo .fo-conv-main .text-slate-500 { color: var(--fo-mut); }
+.fo .fo-conv-main .text-red-700 { color: var(--fo-alarm); }
+.fo .fo-conv-main [role="group"] button { background: var(--fo-glass); border-color: var(--fo-line); color: var(--fo-fg); }
+.fo .fo-conv-main [role="group"] button[aria-pressed="true"] { border-color: var(--fo-signal); background: var(--fo-glass-strong); }
+.fo .fo-conv-main [role="group"] button:focus-visible { outline: 2px solid var(--fo-signal); outline-offset: 2px; }
+.fo .fo-conv-main label { color: var(--fo-fg); }
+.fo .fo-conv-main input:not([type="file"]), .fo .fo-conv-main select, .fo .fo-conv-main textarea { border-color: var(--fo-line-strong); background: var(--fo-glass-strong); color: var(--fo-fg); }
+.fo .fo-conv-main input[type="file"] { border-color: var(--fo-line-strong); background: var(--fo-glass); color: var(--fo-fg); }
+.fo .fo-conv-main input[type="file"]::file-selector-button { background: var(--fo-signal); color: var(--fo-on-signal); }
+.fo .fo-conv-main .border-slate-200, .fo .fo-conv-main .border-slate-100 { border-color: var(--fo-line); }
+.fo .fo-conv-main button[type="submit"] { background: var(--fo-signal); color: var(--fo-on-signal); }
+.fo .fo-conv-table td { overflow-wrap: anywhere; }
+.fo .fo-conv-table .fo-badge { white-space: normal; }
+@media (max-width: 767px) {
+    .fo .fo-conv-table .fo-table-group > tr:first-child { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .fo .fo-conv-table .fo-table-group > tr:first-child > td[data-label] { grid-column: auto; }
+    .fo .fo-conv-table .fo-table-group > tr:first-child > td:first-child { grid-column: 1 / -1; }
+}
+
 /* Oficios y libertades */
 .fo .fo-oficios-grid { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(260px, 1fr); gap: 24px; align-items: start; }
 .fo .fo-panel { padding: clamp(20px, 3vw, 32px); border: 1px solid var(--fo-line); border-radius: 18px; background: var(--fo-glass); backdrop-filter: var(--fo-glass-blur); -webkit-backdrop-filter: var(--fo-glass-blur); box-shadow: inset 0 1px 0 var(--fo-glass-edge); }
