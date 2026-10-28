@@ -124,3 +124,32 @@ body.bo { --bo-fg: var(--bo-text); --bo-danger: #b91c1c; --bo-on-solid: #fff; --
 .bo .swal2-container .swal2-cancel { background: var(--bo-surface-2); color: var(--bo-fg); }
 @media (min-width: 640px) { .bo .bo-main { padding: 2rem 1.5rem; } }
 @media (prefers-reduced-motion: reduce) { .bo *, .bo *::before, .bo *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; } }
+
+/* Acentos y superficies de los registros del backoffice. */
+.bo .bo-accent-sky { --bo-accent: #0369a1; }
+.bo .bo-accent-indigo { --bo-accent: #4338ca; }
+.bo .bo-accent-teal { --bo-accent: #0f766e; }
+.bo .bo-accent-violet { --bo-accent: #6d28d9; }
+.bo .bo-accent-amber { --bo-accent: #a16207; }
+.bo .bo-accent-cyan { --bo-accent: #0e7490; }
+.bo .bo-section-toggle { color: var(--bo-fg); }
+.bo .bo-section-toggle:hover, .bo .bo-row-selected, .bo .bo-panel-heading { background: var(--bo-surface-2); }
+.bo .bo-panel-heading { border-bottom: 1px solid var(--bo-line); }
+.bo .bo-table a { color: var(--bo-fg); }
+.bo .bo-table a:hover { color: var(--bo-signal); }
+.bo .bo-input::file-selector-button { background: var(--bo-surface-2); color: var(--bo-fg); border: 0; border-radius: .25rem; padding: .35rem .6rem; margin-right: .75rem; }
+.bo .bo-btn-icon { min-width: 2.5rem; min-height: 2.5rem; padding: .45rem; }
+.bo .bo-brand img { width: auto; height: 2.4rem; }
+
+/* El directorio decide su distribución según el ancho disponible, incluido el menú. */
+.bo .bo-main:has(.bo-funcionarios-container) { max-width: none; }
+.bo .bo-funcionarios-container { container-type: inline-size; }
+.bo .bo-funcionarios-layout { display: grid; gap: 1.5rem; }
+@container (min-width: 1280px) {
+    .bo .bo-funcionarios-layout { grid-template-columns: 320px minmax(0, 1fr); }
+}
+.bo .bo-funcionarios-table { min-width: 900px; }
+.bo .bo-funcionarios-table th:last-child { width: 112px; }
+.bo .bo-funcionarios-role { display: inline-block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; vertical-align: middle; }
+.bo .bo-input[type="file"] { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: .3rem; }
+.bo .bo-input[type="file"]::file-selector-button { background: var(--bo-surface-2); color: var(--bo-fg); border: 1px solid var(--bo-line); border-radius: .35rem; padding: .3rem .5rem; margin-right: .5rem; cursor: pointer; }
