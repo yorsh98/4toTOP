@@ -104,19 +104,19 @@
         </div>
     </div>
     @else
-<div class="bg-slate-100 py-6">
+<div class="py-6 bo-panel-subtle">
     <div class="mx-auto {{ $isPublic ? 'max-w-7xl space-y-4 px-0 sm:px-2' : 'max-w-[1540px] space-y-6 px-4 sm:px-6 lg:px-8' }}">
-        <section class="overflow-hidden border border-blue-900/20 bg-gradient-to-br from-blue-950 via-blue-800 to-cyan-700 text-white shadow-xl {{ $isPublic ? 'rounded-2xl' : 'rounded-[2rem]' }}">
+        <section class="overflow-hidden border border-blue-900/20 bo-panel bo-strong shadow-xl {{ $isPublic ? 'rounded-2xl' : 'rounded-[2rem]' }}">
             <div class="grid gap-4 {{ $isPublic ? 'p-4 sm:p-5' : 'p-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center lg:p-8' }}">
                 <div>
-                    <p class="text-xs font-bold uppercase tracking-[0.32em] text-cyan-100">Servicios institucionales</p>
+                    <p class="text-xs font-bold uppercase tracking-[0.32em]">Servicios institucionales</p>
                     <h3 class="font-black tracking-tight {{ $isPublic ? 'mt-2 text-2xl sm:text-3xl' : 'mt-3 text-3xl sm:text-4xl' }}">{{ $isPublic ? 'Mapa Servicios' : 'Mapa interactivo de activos' }}</h3>
-                    <p class="max-w-3xl text-sm leading-6 text-blue-50 {{ $isPublic ? 'mt-2' : 'mt-3 sm:text-base' }}">
-                        {{ $isPublic ? 'Plano de orientacion de las dependencias del tribunal, disponible sin autenticacion.' : 'Plano real del tribunal con hotspots por oficina, bodegas, salas y areas de servicio.' }}
+                    <p class="max-w-3xl text-sm leading-6 bo-muted {{ $isPublic ? 'mt-2' : 'mt-3 sm:text-base' }}">
+                        {{ $isPublic ? 'Plano de orientacion de las dependencias del tribunal, disponible sin autenticacion.' : 'Plano real del tribunal con hotspots por oficina, bodegas, salas y áreas de servicio.' }}
                     </p>
                 </div>
                 @unless ($isPublic)
-                    <a href="{{ route('backoffice.servicios.inventario') }}" wire:navigate class="inline-flex items-center justify-center rounded-2xl bg-white px-5 py-3 text-sm font-bold text-blue-900 shadow-lg transition hover:-translate-y-0.5 hover:bg-cyan-50">
+                    <a href="{{ route('backoffice.servicios.inventario') }}" wire:navigate class="inline-flex items-center justify-center rounded-2xl px-5 py-3 text-sm font-bold transition hover:-translate-y-0.5 hover:bg-cyan-50 bo-panel-subtle bo-text--info">
                         Ver inventario
                     </a>
                 @endunless
@@ -124,45 +124,45 @@
         </section>
 
         <section class="grid gap-3 {{ $isPublic ? 'grid-cols-2 lg:grid-cols-4' : 'sm:grid-cols-2 xl:grid-cols-4' }}">
-            <div class="rounded-2xl border border-slate-200 bg-white shadow-sm {{ $isPublic ? 'p-3 sm:p-4' : 'p-5' }}">
-                <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Planta</p>
-                <p class="mt-2 font-black text-slate-950 {{ $isPublic ? 'text-2xl' : 'text-3xl' }}">Piso {{ $piso }}</p>
+            <div class="bo-kpi p-5">
+                <p class="text-xs font-bold uppercase tracking-wider bo-muted">Planta</p>
+                <p class="mt-2 font-black bo-strong {{ $isPublic ? 'text-2xl' : 'text-3xl' }}">Piso {{ $piso }}</p>
             </div>
-            <div class="rounded-2xl border border-slate-200 bg-white shadow-sm {{ $isPublic ? 'p-3 sm:p-4' : 'p-5' }}">
-                <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Sectores registrados</p>
-                <p class="mt-2 font-black text-slate-950 {{ $isPublic ? 'text-2xl' : 'text-3xl' }}">{{ number_format($totalSectores) }}</p>
+            <div class="bo-kpi p-5">
+                <p class="text-xs font-bold uppercase tracking-wider bo-muted">Sectores registrados</p>
+                <p class="mt-2 font-black bo-strong {{ $isPublic ? 'text-2xl' : 'text-3xl' }}">{{ number_format($totalSectores) }}</p>
             </div>
-            <div class="rounded-2xl border border-slate-200 bg-white shadow-sm {{ $isPublic ? 'p-3 sm:p-4' : 'p-5' }}">
-                <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Activos registrados</p>
-                <p class="mt-2 font-black text-slate-950 {{ $isPublic ? 'text-2xl' : 'text-3xl' }}">{{ number_format($totalActivos) }}</p>
+            <div class="bo-kpi p-5">
+                <p class="text-xs font-bold uppercase tracking-wider bo-muted">Activos registrados</p>
+                <p class="mt-2 font-black bo-strong {{ $isPublic ? 'text-2xl' : 'text-3xl' }}">{{ number_format($totalActivos) }}</p>
             </div>
             @if ($isPublic)
-                <div class="rounded-2xl border border-slate-200 bg-white shadow-sm p-3 sm:p-4">
-                    <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Sector seleccionado</p>
-                    <p class="truncate mt-2 text-sm font-semibold text-slate-700">{{ $selectedSector?->nombre ?? $selectedHotspot['label'] ?? 'Sin seleccion' }}</p>
+                <div class="rounded-2xl border p-3 sm:p-4 bo-panel-subtle">
+                    <p class="text-xs font-bold uppercase tracking-wider bo-muted">Sector seleccionado</p>
+                    <p class="truncate mt-2 text-sm font-semibold bo-strong">{{ $selectedSector?->nombre ?? $selectedHotspot['label'] ?? 'Sin seleccion' }}</p>
                 </div>
             @else
-                <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-                    <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Stock en bodegas</p>
-                    <p class="mt-2 text-3xl font-black text-slate-950">{{ number_format($totalInsumos) }}</p>
+                <div class="rounded-2xl border p-5 bo-panel-subtle">
+                    <p class="text-xs font-bold uppercase tracking-wider bo-muted">Stock en bodegas</p>
+                    <p class="mt-2 text-3xl font-black bo-strong">{{ number_format($totalInsumos) }}</p>
                 </div>
             @endif
         </section>
 
-        <section class="border border-slate-200 bg-white shadow-sm {{ $isPublic ? 'rounded-2xl p-3 sm:p-4' : 'rounded-[2rem] p-4 sm:p-5' }}">
+        <section class="bo-card p-4 sm:p-5">
             <div class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
                 <div>
-                    <p class="text-xs font-bold uppercase tracking-[0.24em] text-blue-700">Plano real Piso {{ $piso }}</p>
-                    <h3 class="mt-2 text-2xl font-black text-slate-950">PLANTA: Piso {{ $piso }}</h3>
-                    <p class="mt-2 max-w-3xl text-sm text-slate-600">
-                        Haz click sobre un area para abrir el detalle. Los badges azules tienen activos registrados; los grises aun no tienen inventario cargado.
+                    <p class="text-xs font-bold uppercase tracking-[0.24em] bo-text--info">Plano real Piso {{ $piso }}</p>
+                    <h3 class="mt-2 text-2xl font-black bo-strong">PLANTA: Piso {{ $piso }}</h3>
+                    <p class="mt-2 max-w-3xl text-sm bo-muted">
+                        Haz clic sobre un área para abrir el detalle. Los badges azules tienen activos registrados; los grises aún no tienen inventario cargado.
                     </p>
                 </div>
 
                 <div class="grid gap-3 sm:grid-cols-[auto_minmax(16rem,24rem)] sm:items-center">
-                    <div class="flex rounded-2xl bg-slate-100 p-1">
+                    <div class="flex rounded-2xl p-1 bo-segmented">
                         @foreach ($availableFloors as $floor)
-                            <button type="button" wire:click="selectPiso({{ $floor }})" class="rounded-xl px-4 py-2 text-sm font-bold transition {{ $piso === $floor ? 'bg-blue-700 text-white shadow' : 'text-slate-600 hover:bg-white' }}">
+                            <button type="button" wire:click="selectPiso({{ $floor }})" class="bo-segmented-item rounded-xl px-4 py-2 text-sm font-bold transition {{ $piso === $floor ? 'is-active' : '' }}" @if ($piso === $floor) aria-current="true" @endif>
                                 Piso {{ $floor }}
                             </button>
                         @endforeach
@@ -170,9 +170,9 @@
 
                     <label class="block">
                         <span class="sr-only">Buscar en el mapa</span>
-                        <input type="search" wire:model.live.debounce.300ms="{{ $isPublic ? 'search' : 'mapSearch' }}" placeholder="{{ $isPublic ? 'Buscar activo o sector...' : 'Buscar activo, codigo, serie o sector en el mapa...' }}" class="w-full rounded-2xl border-slate-300 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        <input type="search" wire:model.live.debounce.300ms="{{ $isPublic ? 'search' : 'mapSearch' }}" placeholder="{{ $isPublic ? 'Buscar activo o sector...' : 'Buscar activo, código, serie o sector en el mapa...' }}" class="w-full bo-input text-sm">
                         @if (! $isPublic && $mapSearch !== '')
-                            <span class="mt-1 block text-xs font-semibold text-cyan-700">{{ $mapSearchResultCount }} {{ $mapSearchResultCount === 1 ? 'sector encontrado en el plano' : 'sectores encontrados en el plano' }}</span>
+                            <span class="mt-1 block text-xs font-semibold bo-text--info">{{ $mapSearchResultCount }} {{ $mapSearchResultCount === 1 ? 'sector encontrado en el plano' : 'sectores encontrados en el plano' }}</span>
                         @endif
                     </label>
                 </div>
@@ -180,7 +180,7 @@
 
             <div class="mt-5 border border-slate-300 bg-slate-950 shadow-inner {{ $isPublic ? 'rounded-2xl p-2' : 'rounded-3xl p-3' }}">
                 <div class="overflow-x-auto rounded-2xl bg-slate-900">
-                    <div class="relative h-[1080px] w-[1440px] overflow-hidden bg-white" aria-label="Plano interactivo del piso {{ $piso }}">
+                    <div class="relative h-[1080px] w-[1440px] overflow-hidden bo-panel-subtle" aria-label="Plano interactivo del piso {{ $piso }}">
                         <img src="{{ $imagePath }}" alt="Plano del piso {{ $piso }} del tribunal" class="absolute inset-0 h-full w-full object-cover">
 
                         @forelse ($hotspots as $hotspot)
@@ -199,15 +199,15 @@
                                 </span>
                             </button>
                         @empty
-                            <div class="absolute inset-x-8 top-8 rounded-2xl border border-blue-200 bg-blue-50 p-4 text-sm font-semibold text-blue-900 shadow">
-                                El plano del Piso {{ $piso }} esta disponible, pero sus hotspots aun no fueron cargados.
+                            <div class="absolute inset-x-8 top-8 rounded-2xl border p-4 text-sm font-semibold bo-panel-subtle bo-text--info">
+                                El plano del Piso {{ $piso }} está disponible, pero sus hotspots aún no fueron cargados.
                             </div>
                         @endforelse
                     </div>
                 </div>
             </div>
 
-            <div class="mt-4 flex flex-wrap items-center gap-3 text-xs font-semibold text-slate-600">
+            <div class="mt-4 flex flex-wrap items-center gap-3 text-xs font-semibold bo-muted">
                 <span class="inline-flex items-center gap-2"><span class="h-3 w-3 rounded-full bg-blue-600"></span>Con registros</span>
                 <span class="inline-flex items-center gap-2"><span class="h-3 w-3 rounded-full bg-blue-200"></span>Sin activos</span>
                 <span class="inline-flex items-center gap-2"><span class="h-3 w-3 rounded-full bg-blue-700"></span>Seleccionado</span>
@@ -215,19 +215,19 @@
 
         </section>
 
-        <section class="rounded-[2rem] border border-slate-200 bg-white shadow-sm">
-            <div class="flex flex-col gap-2 border-b border-slate-200 p-5 sm:flex-row sm:items-center sm:justify-between">
+        <section class="rounded-[2rem] border bo-panel-subtle">
+            <div class="flex flex-col gap-2 border-b p-5 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <h3 class="text-lg font-black text-slate-950">Inventario encontrado</h3>
-                    <p class="text-sm text-slate-600">{{ $activos->count() }} {{ $activos->count() === 1 ? 'registro' : 'registros' }} en Piso {{ $piso }}</p>
+                    <h3 class="text-lg font-black bo-strong">Inventario encontrado</h3>
+                    <p class="text-sm bo-muted">{{ $activos->count() }} {{ $activos->count() === 1 ? 'registro' : 'registros' }} en Piso {{ $piso }}</p>
                 </div>
                 <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
                     <label class="block sm:w-64">
                         <span class="sr-only">Buscar en inventario encontrado</span>
-                        <input type="search" wire:model.live.debounce.300ms="inventorySearch" placeholder="Buscar en inventario..." class="w-full rounded-xl border-slate-300 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        <input type="search" wire:model.live.debounce.300ms="inventorySearch" placeholder="Buscar en inventario..." class="w-full bo-input text-sm">
                     </label>
                     @if ($inventorySearch !== '')
-                        <button type="button" wire:click="$set('inventorySearch', '')" class="self-start rounded-xl border border-slate-300 px-3 py-2 text-xs font-bold text-slate-600 transition hover:bg-slate-50 sm:self-auto">
+                        <button type="button" wire:click="$set('inventorySearch', '')" class="self-start rounded-xl border px-3 py-2 text-xs font-bold transition sm:self-auto bo-panel-subtle bo-muted">
                             Limpiar busqueda
                         </button>
                     @endif
@@ -235,8 +235,8 @@
             </div>
 
             <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-slate-200 text-sm">
-                    <thead class="bg-slate-50 text-left text-xs font-bold uppercase tracking-wider text-slate-500">
+                <table class="bo-table min-w-full text-sm">
+                    <thead class="text-left text-xs font-bold uppercase tracking-wider bo-panel-subtle bo-muted">
                         <tr>
                             <th class="px-5 py-3">Activo</th>
                             @unless ($isPublic)
@@ -247,20 +247,20 @@
                             <th class="px-5 py-3">Estado</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-100 bg-white">
+                    <tbody class="divide-y divide-slate-100 bo-panel-subtle">
                         @forelse ($activos as $activo)
-                            <tr wire:key="activo-row-{{ $activo->id }}" class="hover:bg-blue-50/60">
-                                <td class="px-5 py-4 font-semibold text-slate-900">{{ $activo->nombre }}</td>
+                            <tr wire:key="activo-row-{{ $activo->id }}" class="bo-panel-subtle">
+                                <td class="px-5 py-4 font-semibold bo-strong">{{ $activo->nombre }}</td>
                                 @unless ($isPublic)
-                                    <td class="px-5 py-4 text-slate-600">{{ $activo->codigo_inventario ?: 'Sin codigo' }}</td>
-                                    <td class="px-5 py-4 text-slate-600">{{ $activo->numero_serie ?: 'Sin serie' }}</td>
+                                    <td class="px-5 py-4 bo-muted">{{ $activo->codigo_inventario ?: 'Sin codigo' }}</td>
+                                    <td class="px-5 py-4 bo-muted">{{ $activo->numero_serie ?: 'Sin serie' }}</td>
                                 @endunless
-                                <td class="px-5 py-4 text-slate-600">{{ $activo->sector?->nombre }}</td>
-                                <td class="px-5 py-4"><span class="rounded-full bg-slate-100 px-2 py-1 text-xs font-bold text-slate-700">{{ $activo->estado }}</span></td>
+                                <td class="px-5 py-4 bo-muted">{{ $activo->sector?->nombre }}</td>
+                                <td class="px-5 py-4"><span class="rounded-full px-2 py-1 text-xs font-bold bo-panel-subtle bo-strong">{{ $activo->estado }}</span></td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="{{ $isPublic ? 3 : 5 }}" class="px-5 py-8 text-center text-sm text-slate-500">No hay activos para los filtros actuales.</td>
+                                <td colspan="{{ $isPublic ? 3 : 5 }}" class="px-5 py-8 text-center text-sm bo-muted">No hay activos para los filtros actuales.</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -269,11 +269,11 @@
         </section>
 
         @if ($sectoresSinPosicion->isNotEmpty())
-            <section class="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-sm">
-                <h3 class="text-sm font-black uppercase tracking-wider text-slate-700">Sectores sin posicion en el plano</h3>
+            <section class="rounded-[2rem] border p-5 bo-panel-subtle">
+                <h3 class="text-sm font-black uppercase tracking-wider bo-strong">Sectores sin posicion en el plano</h3>
                 <div class="mt-4 flex flex-wrap gap-2">
                     @foreach ($sectoresSinPosicion as $sector)
-                        <button type="button" wire:key="sector-extra-{{ $sector->id }}" wire:click="selectSector({{ $sector->id }})" class="rounded-full border border-slate-200 px-3 py-1 text-xs font-bold text-slate-700 transition hover:bg-slate-50">
+                        <button type="button" wire:key="sector-extra-{{ $sector->id }}" wire:click="selectSector({{ $sector->id }})" class="rounded-full border px-3 py-1 text-xs font-bold transition bo-panel-subtle bo-strong">
                             {{ $sector->nombre }} ({{ $sector->activos_count }})
                         </button>
                     @endforeach
@@ -286,22 +286,22 @@
 
     @if ($selectedSector || $selectedHotspot)
         <div class="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/70 p-4 sm:items-center" role="dialog" aria-modal="true">
-            <div class="max-h-[90vh] w-full max-w-2xl overflow-hidden rounded-[2rem] bg-white shadow-2xl">
-                <div class="flex items-start justify-between gap-4 border-b border-slate-200 p-5">
+            <div class="{{ $isPublic ? 'max-h-[90vh] w-full max-w-2xl overflow-hidden rounded-[2rem] bg-white shadow-2xl' : 'max-h-[90vh] w-full max-w-2xl overflow-hidden bo-card' }}">
+                <div class="{{ $isPublic ? 'flex items-start justify-between gap-4 border-b border-slate-200 p-5' : 'flex items-start justify-between gap-4 border-b p-5' }}">
                     <div>
-                        <p class="text-xs font-bold uppercase tracking-[0.24em] text-blue-700">Detalle de sector</p>
-                        <h3 class="mt-2 text-2xl font-black text-slate-950">{{ $selectedSector?->nombre ?? $selectedHotspot['label'] }}</h3>
-                        <p class="mt-1 text-sm text-slate-600">Identificador: {{ $selectedSector?->identificador_mapa ?? $selectedHotspot['identificador'] }}</p>
+                        <p class="{{ $isPublic ? 'text-xs font-bold uppercase tracking-[0.24em] text-blue-700' : 'text-xs font-bold uppercase tracking-[0.24em] bo-text--info' }}">Detalle de sector</p>
+                        <h3 class="{{ $isPublic ? 'mt-2 text-2xl font-black text-slate-950' : 'mt-2 text-2xl font-black bo-strong' }}">{{ $selectedSector?->nombre ?? $selectedHotspot['label'] }}</h3>
+                        <p class="{{ $isPublic ? 'mt-1 text-sm text-slate-600' : 'mt-1 text-sm bo-muted' }}">Identificador: {{ $selectedSector?->identificador_mapa ?? $selectedHotspot['identificador'] }}</p>
                     </div>
                     <div class="flex gap-2">
                         @if ($selectedSector && ! $editingSectorId)
                             @can('servicios.editar')
-                                <button type="button" wire:click="editSector({{ $selectedSector->id }})" class="rounded-full bg-blue-700 px-3 py-1 text-sm font-bold text-white transition hover:bg-blue-800">
+                                <button type="button" wire:click="editSector({{ $selectedSector->id }})" class="{{ $isPublic ? 'rounded-full bg-blue-700 px-3 py-1 text-sm font-bold text-white transition hover:bg-blue-800' : 'rounded-full bg-blue-700 px-3 py-1 text-sm font-bold text-white transition' }}">
                                     Editar nombre
                                 </button>
                             @endcan
                         @endif
-                        <button type="button" wire:click="closeSectorDetail" class="rounded-full border border-slate-300 px-3 py-1 text-sm font-bold text-slate-600 transition hover:bg-slate-50">
+                        <button type="button" wire:click="closeSectorDetail" class="{{ $isPublic ? 'rounded-full border border-slate-300 px-3 py-1 text-sm font-bold text-slate-600 transition hover:bg-slate-50' : 'rounded-full border px-3 py-1 text-sm font-bold transition bo-panel-subtle bo-muted' }}">
                             Cerrar
                         </button>
                     </div>
@@ -311,30 +311,30 @@
                     <x-flash-notifications />
 
                     @if ($editingSectorId)
-                        <form wire:submit="saveSector" class="mb-4 rounded-2xl border border-blue-200 bg-blue-50 p-4">
-                            <label class="block text-sm font-bold text-blue-950" for="sector-nombre">Nombre del sector</label>
-                            <input id="sector-nombre" type="text" wire:model="sectorNombre" maxlength="255" class="mt-2 w-full rounded-xl border-blue-200 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                            @error('sectorNombre') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                        <form wire:submit="saveSector" class="{{ $isPublic ? 'mb-4 rounded-2xl border border-blue-200 bg-blue-50 p-4' : 'mb-4 rounded-2xl border p-4 bo-panel-subtle' }}">
+                            <label class="{{ $isPublic ? 'block text-sm font-bold text-blue-950' : 'block text-sm font-bold bo-text--info' }}" for="sector-nombre">Nombre del sector</label>
+                            <input id="sector-nombre" type="text" wire:model="sectorNombre" maxlength="255" class="{{ $isPublic ? 'mt-2 w-full rounded-xl border-blue-200 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500' : 'mt-2 w-full rounded-xl text-sm' }}">
+                            @error('sectorNombre') <p class="{{ $isPublic ? 'mt-1 text-xs text-red-600' : 'mt-1 text-xs bo-text--danger' }}">{{ $message }}</p> @enderror
                             <div class="mt-3 flex gap-2">
-                                <button type="submit" class="rounded-xl bg-blue-700 px-3 py-2 text-sm font-bold text-white hover:bg-blue-800">Guardar</button>
-                                <button type="button" wire:click="cancelSectorEdit" class="rounded-xl border border-slate-300 px-3 py-2 text-sm font-bold text-slate-600 hover:bg-white">Cancelar</button>
+                                <button type="submit" class="{{ $isPublic ? 'rounded-xl bg-blue-700 px-3 py-2 text-sm font-bold text-white hover:bg-blue-800' : 'rounded-xl bg-blue-700 px-3 py-2 text-sm font-bold text-white' }}">Guardar</button>
+                                <button type="button" wire:click="cancelSectorEdit" class="{{ $isPublic ? 'rounded-xl border border-slate-300 px-3 py-2 text-sm font-bold text-slate-600 hover:bg-white' : 'rounded-xl border px-3 py-2 text-sm font-bold bo-panel-subtle bo-muted' }}">Cancelar</button>
                             </div>
                         </form>
                     @endif
 
                     @if ($selectedSector)
-                        <div class="mb-4 rounded-2xl bg-blue-50 p-4 text-sm font-semibold text-blue-900">
+                        <div class="{{ $isPublic ? 'mb-4 rounded-2xl bg-blue-50 p-4 text-sm font-semibold text-blue-900' : 'mb-4 rounded-2xl p-4 text-sm font-semibold bo-panel-subtle bo-text--info' }}">
                             {{ $selectedSector->activos->count() }} {{ $selectedSector->activos->count() === 1 ? 'activo registrado' : 'activos registrados' }} en este sector.
                         </div>
 
                         @unless ($isPublic)
-                            <div class="mb-4 rounded-2xl bg-emerald-50 p-4">
-                                <p class="text-sm font-semibold text-emerald-950">{{ $selectedSector->insumo_existencias_sum_cantidad ?? 0 }} unidades de insumos en esta bodega.</p>
+                            <div class="{{ $isPublic ? 'mb-4 rounded-2xl bg-emerald-50 p-4' : 'mb-4 rounded-2xl p-4 bo-panel-subtle' }}">
+                                <p class="{{ $isPublic ? 'text-sm font-semibold text-emerald-950' : 'text-sm font-semibold' }}">{{ $selectedSector->insumo_existencias_sum_cantidad ?? 0 }} unidades de insumos en esta bodega.</p>
                                 <div class="mt-3 space-y-2">
                                     @forelse ($selectedSector->insumoExistencias as $existencia)
-                                        <p class="text-sm text-emerald-900">{{ $existencia->insumo->codigo }} · {{ $existencia->insumo->nombre }}: {{ $existencia->cantidad }} {{ $existencia->insumo->unidad_medida }}</p>
+                                        <p class="{{ $isPublic ? 'text-sm text-emerald-900' : 'text-sm' }}">{{ $existencia->insumo->codigo }} · {{ $existencia->insumo->nombre }}: {{ $existencia->cantidad }} {{ $existencia->insumo->unidad_medida }}</p>
                                     @empty
-                                        <p class="text-sm text-emerald-800">No hay insumos almacenados en este sector.</p>
+                                        <p class="{{ $isPublic ? 'text-sm text-emerald-800' : 'text-sm' }}">No hay insumos almacenados en este sector.</p>
                                     @endforelse
                                 </div>
                             </div>
@@ -342,17 +342,17 @@
 
                         <div class="space-y-3">
                             @forelse ($selectedSector->activos as $activo)
-                                <article wire:key="sector-activo-{{ $activo->id }}" class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                                <article wire:key="sector-activo-{{ $activo->id }}" class="{{ $isPublic ? 'rounded-2xl border border-slate-200 bg-slate-50 p-4' : 'rounded-2xl border p-4 bo-panel-subtle' }}">
                                     <div class="flex items-start justify-between gap-3">
                                         <div>
-                                            <p class="font-bold text-slate-950">{{ $activo->nombre }}</p>
-                                            <p class="mt-1 text-xs text-slate-600">{{ $activo->codigo_inventario ?: 'Sin codigo inventario' }}</p>
+                                            <p class="{{ $isPublic ? 'font-bold text-slate-950' : 'font-bold bo-strong' }}">{{ $activo->nombre }}</p>
+                                            <p class="{{ $isPublic ? 'mt-1 text-xs text-slate-600' : 'mt-1 text-xs bo-muted' }}">{{ $activo->codigo_inventario ?: 'Sin codigo inventario' }}</p>
                                         </div>
-                                        <span class="rounded-full bg-white px-2 py-1 text-xs font-bold text-slate-700 shadow-sm">{{ $activo->estado }}</span>
+                                        <span class="{{ $isPublic ? 'rounded-full bg-white px-2 py-1 text-xs font-bold text-slate-700 shadow-sm' : 'rounded-full px-2 py-1 text-xs font-bold bo-panel-subtle bo-strong' }}">{{ $activo->estado }}</span>
                                     </div>
 
                                     @if ($activo->numero_serie || (! $isPublic && $activo->observaciones))
-                                        <div class="mt-3 space-y-1 text-xs text-slate-600">
+                                        <div class="{{ $isPublic ? 'mt-3 space-y-1 text-xs text-slate-600' : 'mt-3 space-y-1 text-xs bo-muted' }}">
                                             @if ($activo->numero_serie)
                                                 <p>Serie: {{ $activo->numero_serie }}</p>
                                             @endif
@@ -363,13 +363,13 @@
                                     @endif
                                 </article>
                             @empty
-                                <div class="rounded-2xl border border-dashed border-slate-300 p-5 text-sm text-slate-500">
+                                <div class="{{ $isPublic ? 'rounded-2xl border border-dashed border-slate-300 p-5 text-sm text-slate-500' : 'rounded-2xl border border-dashed p-5 text-sm bo-muted' }}">
                                     Este sector no tiene activos registrados.
                                 </div>
                             @endforelse
                         </div>
                     @else
-                        <div class="rounded-2xl border border-dashed border-slate-300 p-5 text-sm text-slate-500">
+                        <div class="{{ $isPublic ? 'rounded-2xl border border-dashed border-slate-300 p-5 text-sm text-slate-500' : 'rounded-2xl border border-dashed p-5 text-sm bo-muted' }}">
                             Este hotspot existe en el plano, pero no tiene sector asociado en el inventario.
                         </div>
                     @endif
