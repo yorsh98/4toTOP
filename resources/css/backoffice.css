@@ -212,3 +212,11 @@ body.bo { --bo-solid-ok: #087443; --bo-solid-warn: #875000; --bo-muted-on-solid:
 .bo .bo-status--warn { color: var(--bo-warn); }
 .bo .bo-status--danger { color: var(--bo-alarm); }
 .bo .bo-status--ok { color: var(--bo-ok); }
+
+/* Navegación segmentada y casillas para formularios de selección. */
+.bo .bo-segmented { background: var(--bo-surface); border: 1px solid var(--bo-line); border-radius: var(--bo-radius); }
+.bo .bo-segmented-item { border-radius: .5rem; color: var(--bo-fg); text-decoration: none; }
+.bo .bo-segmented-item:hover { background: var(--bo-surface-2); color: var(--bo-fg); }
+.bo .bo-segmented-item.is-active { background: var(--bo-primary); color: var(--bo-on-solid); }
+.bo .bo-checkbox { border: 1px solid var(--bo-line); border-radius: .25rem; background-color: var(--bo-surface); color: var(--bo-primary); }
+.bo .bo-checkbox:checked { background-color: var(--bo-primary); border-color: var(--bo-primary); }

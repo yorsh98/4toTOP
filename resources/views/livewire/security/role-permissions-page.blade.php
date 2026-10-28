@@ -1,5 +1,5 @@
 <x-slot:header>
-    <x-page-heading eyebrow="Seguridad · Administracion" title="Permisos: {{ $role->name }}" />
+    <x-page-heading eyebrow="Seguridad · Administración" title="Permisos: {{ $role->name }}" />
 </x-slot:header>
 
 <div class="py-6 sm:py-8">
@@ -7,28 +7,28 @@
         @include('seguridad._tabs')
 
         <x-flash-notifications />
-        <div wire:offline class="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">Sin conexion. Los cambios no se han guardado.</div>
+        <div wire:offline class="bo-alert bo-alert--warn rounded-lg px-4 py-3 text-sm">Sin conexion. Los cambios no se han guardado.</div>
 
         <div class="flex items-center justify-between gap-4">
-            <a href="{{ route('seguridad.roles.index') }}" wire:navigate class="text-sm font-medium text-sky-700 hover:text-sky-900">&larr; Volver a roles</a>
-            @cannot('navbar.seguridad.editable')<span class="rounded-md bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-600">Solo lectura</span>@endcannot
+            <a href="{{ route('seguridad.roles.index') }}" wire:navigate class="text-sm font-medium bo-text--info ">&larr; Volver a roles</a>
+            @cannot('navbar.seguridad.editable')<span class="bo-chip text-xs font-medium">Solo lectura</span>@endcannot
         </div>
 
         @if ($role->name === 'SuperAdmin')
-            <div class="rounded-lg border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-900">SuperAdmin conserva todos los permisos del sistema y no requiere configuracion manual.</div>
+            <div class="bo-alert bo-alert--info rounded-lg px-4 py-3 text-sm">SuperAdmin conserva todos los permisos del sistema y no requiere configuración manual.</div>
         @endif
 
         <form wire:submit="save" class="space-y-4">
-            <section class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-                <div class="mb-5"><h3 class="text-lg font-semibold text-slate-900">Acceso a modulos</h3><p class="mt-1 text-sm text-slate-600"><strong>Ver</strong> muestra el modulo. <strong>Gestionar</strong> permite realizar cambios e incluye el acceso de visualizacion.</p></div>
-                <div class="divide-y divide-slate-100 rounded-lg border border-slate-200">
+            <section class="bo-card p-5">
+                <div class="mb-5"><h3 class="text-lg font-semibold bo-strong">Acceso a módulos</h3><p class="mt-1 text-sm bo-muted"><strong>Ver</strong> muestra el módulo. <strong>Gestionar</strong> permite realizar cambios e incluye el acceso de visualización.</p></div>
+                <div class=" rounded-lg border bo-border">
                     @foreach ($navbarPermissions as $group)
                         <div class="grid gap-3 px-4 py-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
-                            <p class="font-medium text-slate-900">{{ $group['label'] }}</p>
+                            <p class="font-medium bo-strong">{{ $group['label'] }}</p>
                             <div class="flex flex-wrap gap-x-5 gap-y-3">
                                 @foreach ($group['permissions'] as $permission)
-                                    <label class="inline-flex min-h-6 items-center gap-2 text-sm text-slate-700">
-                                        <input type="checkbox" wire:model="permissions" value="{{ $permission->name }}" class="rounded border-slate-300 text-sky-700 shadow-sm focus:ring-sky-600" @disabled($role->name === 'SuperAdmin' || ! auth()->user()->can('navbar.seguridad.editable'))>
+                                    <label class="inline-flex min-h-6 items-center gap-2 text-sm bo-strong">
+                                        <input type="checkbox" wire:model="permissions" value="{{ $permission->name }}" class="bo-checkbox" @disabled($role->name === 'SuperAdmin' || ! auth()->user()->can('navbar.seguridad.editable'))>
                                         <span>{{ str_ends_with($permission->name, '.editable') ? 'Gestionar' : 'Ver' }}</span>
                                     </label>
                                 @endforeach
@@ -38,23 +38,23 @@
                 </div>
             </section>
 
-            <details class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-                <summary class="cursor-pointer text-sm font-semibold text-slate-800">Permisos tecnicos y heredados</summary>
+            <details class="bo-card p-5">
+                <summary class="cursor-pointer text-sm font-semibold bo-strong">Permisos tecnicos y heredados</summary>
                 <div class="mt-5 space-y-4">
                     @foreach ($advancedPermissions as $module => $items)
-                        <section class="rounded-lg border border-slate-200 p-4"><h4 class="mb-3 font-medium text-slate-900">{{ ucfirst($module) }}</h4><div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                        <section class="rounded-lg border bo-border p-4"><h4 class="mb-3 font-medium bo-strong">{{ ucfirst($module) }}</h4><div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                             @foreach ($items as $permission)
-                                <label class="inline-flex min-h-6 items-center gap-2 text-sm text-slate-700"><input type="checkbox" wire:model="permissions" value="{{ $permission->name }}" class="rounded border-slate-300 text-sky-700 shadow-sm focus:ring-sky-600" @disabled($role->name === 'SuperAdmin' || ! auth()->user()->can('navbar.seguridad.editable'))><span>{{ $permission->name }}</span></label>
+                                <label class="inline-flex min-h-6 items-center gap-2 text-sm bo-strong"><input type="checkbox" wire:model="permissions" value="{{ $permission->name }}" class="bo-checkbox" @disabled($role->name === 'SuperAdmin' || ! auth()->user()->can('navbar.seguridad.editable'))><span>{{ $permission->name }}</span></label>
                             @endforeach
                         </div></section>
                     @endforeach
                 </div>
             </details>
 
-            @error('permissions.*')<p class="text-sm text-rose-700">{{ $message }}</p>@enderror
+            @error('permissions.*')<p class="text-sm bo-text--danger">{{ $message }}</p>@enderror
             @can('navbar.seguridad.editable')
                 @if ($role->name !== 'SuperAdmin')
-                    <button type="submit" class="rounded-md bg-sky-700 px-4 py-2 text-sm font-medium text-white hover:bg-sky-800 disabled:opacity-50" wire:loading.attr="disabled" wire:target="save"><span wire:loading.remove wire:target="save">Guardar permisos</span><span wire:loading wire:target="save">Guardando permisos...</span></button>
+                    <button type="submit" class="bo-btn bo-btn--primary text-sm" wire:loading.attr="disabled" wire:target="save"><span wire:loading.remove wire:target="save">Guardar permisos</span><span wire:loading wire:target="save">Guardando permisos...</span></button>
                 @endif
             @endcan
         </form>
