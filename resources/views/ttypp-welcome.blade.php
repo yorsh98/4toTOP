@@ -1,98 +1,79 @@
-<x-in-layout>
-@php
-    $tz = 'America/Santiago';
-    $hoyStr = \Carbon\Carbon::now($tz)->toDateString();
-    $prevStr = \Carbon\Carbon::parse($fecha, $tz)->subDay()->toDateString();
-    $nextStr = \Carbon\Carbon::parse($fecha, $tz)->addDay()->toDateString();
-@endphp
+<x-in-layout title="TTyPP">
+    @php
+        $hoyStr = \Carbon\Carbon::now('America/Santiago')->toDateString();
+        $prevStr = \Carbon\Carbon::parse($fecha, 'America/Santiago')->subDay()->toDateString();
+        $nextStr = \Carbon\Carbon::parse($fecha, 'America/Santiago')->addDay()->toDateString();
+        $columnas = [
+            'rit' => 'RIT', 'ruc' => 'RUC', 'tipo_audiencia' => 'Tipo audiencia',
+            'numero_dias' => 'Días', 'cantidad' => 'Cant.', 'modalidad' => 'Modalidad', 'sala' => 'Sala',
+        ];
+        $detalles = [
+            'encargada_ti_mp' => 'Encargada TI MP', 'encargada_ti_d' => 'Encargada TI D',
+            'encargada_zoom' => 'Encargada Zoom', 'acta' => 'Acta', 'jueces' => 'Jueces',
+        ];
+    @endphp
 
-<style>
-    .ttypp-view .toolbar .btn {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        background: #fff;
-        border: 1px solid #e5e7eb;
-        border-radius: 8px;
-        padding: 6px 10px;
-        font-weight: 600;
-        text-decoration: none;
-        color: #111827;
-    }
-    .ttypp-view .toolbar input[type="date"] {
-        border: 1px solid #e5e7eb;
-        border-radius: 8px;
-        padding: 6px 10px;
-        font-weight: 600;
-    }
-</style>
+    <x-public.page-head title="TTyPP" lead="Unidad de Testigos y Peritos" :meta="ucfirst($fechaHuman)" />
 
-<div class="grid gap-6 pt-5 mb-6 lg:grid-cols-1 lg:gap-8 animate__animated animate__backInUp animate__delay-0_3s ttypp-view">
-    <div class="absolute top-4 left-4">
-        <a href="{{ url('/') }}" class="bg-white text-black font-semibold py-1 px-3 rounded-md shadow-md flex items-center text-sm hover:bg-blue-700 hover:text-white transition">
-            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path></svg>
-            INICIO
-        </a>
+    <div class="fo-listbar fo-ttypp-bar">
+        <a class="fo-ttypp-button" href="{{ url()->current() }}?fecha={{ $prevStr }}">‹ Anterior</a>
+        <form method="GET" action="{{ url()->current() }}" class="fo-ttypp-date">
+            <label class="sr-only" for="ttypp-fecha">Fecha</label>
+            <input class="fo-num" id="ttypp-fecha" type="date" name="fecha" value="{{ $fecha }}">
+            <button class="fo-ttypp-button" type="submit">Ver</button>
+        </form>
+        <a class="fo-ttypp-button" href="{{ url()->current() }}?fecha={{ $hoyStr }}">Hoy</a>
+        <a class="fo-ttypp-button" href="{{ url()->current() }}?fecha={{ $nextStr }}">Siguiente ›</a>
     </div>
 
-    <div class="flex justify-center items-start gap-4 rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] transition duration-300 lg:pb-10">
-        <div class="pt-3 sm:pt-5 text-center">
-            <h2 class="text-xl font-semibold text-black">TTyPP</h2>
-            <p class="mt-2 text-sm text-slate-600">Unidad de Testigos y Peritos - {{ $fechaHuman }}</p>
-            <div class="toolbar mt-4 flex flex-wrap items-center justify-center gap-2">
-                <a class="btn" href="{{ url()->current() }}?fecha={{ $prevStr }}">Anterior</a>
-                <form method="GET" action="{{ url()->current() }}" class="inline-flex items-center gap-2">
-                    <input type="date" name="fecha" value="{{ $fecha }}">
-                    <button type="submit" class="btn">Ver</button>
-                </form>
-                <a class="btn" href="{{ url()->current() }}?fecha={{ $hoyStr }}">Hoy</a>
-                <a class="btn" href="{{ url()->current() }}?fecha={{ $nextStr }}">Siguiente</a>
-            </div>
-        </div>
-    </div>
-
-    <div class="rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] overflow-x-auto">
-        <h3 class="mb-4 text-lg font-semibold text-black">Listado TTYPP</h3>
-        <table class="min-w-full divide-y divide-slate-200 text-sm">
-            <thead class="bg-slate-50">
-                <tr>
-                    <th class="px-3 py-2 text-left font-semibold text-slate-700">RIT</th>
-                    <th class="px-3 py-2 text-left font-semibold text-slate-700">RUC</th>
-                    <th class="px-3 py-2 text-left font-semibold text-slate-700">Tipo AUD</th>
-                    <th class="px-3 py-2 text-left font-semibold text-slate-700">N Dias</th>
-                    <th class="px-3 py-2 text-left font-semibold text-slate-700">Cant.</th>
-                    <th class="px-3 py-2 text-left font-semibold text-slate-700">Modalidad</th>
-                    <th class="px-3 py-2 text-left font-semibold text-slate-700">Encargada TI MP</th>
-                    <th class="px-3 py-2 text-left font-semibold text-slate-700">Encargada TI D</th>
-                    <th class="px-3 py-2 text-left font-semibold text-slate-700">Encargada Zoom</th>
-                    <th class="px-3 py-2 text-left font-semibold text-slate-700">Acta</th>
-                    <th class="px-3 py-2 text-left font-semibold text-slate-700">Sala</th>
-                    <th class="px-3 py-2 text-left font-semibold text-slate-700">Jueces</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100 bg-white">
-                @forelse ($registros as $registro)
+    <div class="fo-table-wrap fo-table-wrap--glass fo-ttypp-table">
+        <table class="fo-table">
+            <caption class="sr-only">Listado TTyPP para {{ $fechaHuman }}</caption>
+            <thead><tr>
+                @foreach ($columnas as $etiqueta)
+                    <th scope="col">{{ $etiqueta }}</th>
+                @endforeach
+                <th scope="col"><span class="sr-only">Detalle</span></th>
+            </tr></thead>
+            @forelse ($registros as $registro)
+                <tbody class="fo-table-group" x-data="{ open: false }">
                     <tr>
-                        <td class="px-3 py-2 text-slate-700">{{ $registro->rit ?? '-' }}</td>
-                        <td class="px-3 py-2 text-slate-700">{{ $registro->ruc ?? '-' }}</td>
-                        <td class="px-3 py-2 text-slate-700">{{ $registro->tipo_audiencia ?? '-' }}</td>
-                        <td class="px-3 py-2 text-slate-700">{{ $registro->numero_dias ?? '-' }}</td>
-                        <td class="px-3 py-2 text-slate-700">{{ $registro->cantidad ?? '-' }}</td>
-                        <td class="px-3 py-2 text-slate-700">{{ $registro->modalidad ?? '-' }}</td>
-                        <td class="px-3 py-2 text-slate-700">{{ $registro->encargada_ti_mp ?? '-' }}</td>
-                        <td class="px-3 py-2 text-slate-700">{{ $registro->encargada_ti_d ?? '-' }}</td>
-                        <td class="px-3 py-2 text-slate-700">{{ $registro->encargada_zoom ?? '-' }}</td>
-                        <td class="px-3 py-2 text-slate-700">{{ $registro->acta ?? '-' }}</td>
-                        <td class="px-3 py-2 text-slate-700">{{ $registro->sala ?? '-' }}</td>
-                        <td class="px-3 py-2 text-slate-700">{{ $registro->jueces ?? '-' }}</td>
+                        @foreach ($columnas as $campo => $etiqueta)
+                            <td data-label="{{ $etiqueta }}">
+                                @if (filled($registro->$campo) && $registro->$campo !== '-')
+                                    <span @class(['fo-num' => in_array($campo, ['rit', 'ruc'])])>{{ $registro->$campo }}</span>
+                                @else
+                                    <span class="fo-dash">—</span>
+                                @endif
+                            </td>
+                        @endforeach
+                        <td class="fo-table-toggle">
+                            <button type="button" class="fo-icon-btn cm-press" x-on:click="open = ! open" x-bind:aria-expanded="open"
+                                    aria-expanded="false" aria-controls="ttypp-det-{{ $registro->id }}" aria-label="Ver detalle del registro {{ $registro->rit ?: $registro->id }}">
+                                <i class="fa-solid fa-chevron-down" x-bind:class="open && 'fa-rotate-180'" aria-hidden="true"></i>
+                            </button>
+                        </td>
                     </tr>
-                @empty
-                    <tr>
-                        <td colspan="12" class="px-3 py-8 text-center text-slate-500">No hay registros TTYPP para la fecha seleccionada.</td>
+                    <tr class="fo-table-detail" id="ttypp-det-{{ $registro->id }}" x-show="open" x-cloak>
+                        <td colspan="8"><dl class="fo-detail">
+                            @foreach ($detalles as $campo => $etiqueta)
+                                <div><dt>{{ $etiqueta }}</dt><dd>
+                                    @if (filled($registro->$campo) && $registro->$campo !== '-')
+                                        {{ $registro->$campo }}
+                                    @else
+                                        <span class="fo-dash">—</span>
+                                    @endif
+                                </dd></div>
+                            @endforeach
+                        </dl></td>
                     </tr>
-                @endforelse
-            </tbody>
+                </tbody>
+            @empty
+                <tbody><tr><td colspan="8" class="fo-table-empty">
+                    No hay registros TTyPP para {{ $fechaHuman }}. Prueba con otro día.
+                    <a class="fo-link" href="{{ url()->current() }}?fecha={{ $hoyStr }}">Hoy</a>
+                </td></tr></tbody>
+            @endforelse
         </table>
     </div>
-</div>
 </x-in-layout>
