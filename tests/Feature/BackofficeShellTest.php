@@ -34,3 +34,15 @@ test('dashboard hides modules that are not assigned to the user', function () {
         ->assertDontSee('Administra el catálogo de funcionarios.')
         ->assertDontSee('Organiza la programación y gestión diaria.');
 });
+
+test('dashboard provides public access, theme control and configured support without weather', function () {
+    config(['app.support_email' => 'soporte@example.test', 'services.weather.enabled' => false]);
+    $user = User::factory()->create(['email_verified_at' => now()]);
+
+    $this->actingAs($user)->get(route('dashboard'))
+        ->assertOk()
+        ->assertSee('Ver sitio público')
+        ->assertSee('Cambiar tema')
+        ->assertSee('soporte@example.test')
+        ->assertDontSee('bo-weather', false);
+});

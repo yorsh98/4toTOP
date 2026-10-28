@@ -26,7 +26,7 @@ window.confirmDestructiveAction = (title, text, confirmButtonText = 'Sí, elimin
     showCancelButton: true,
     confirmButtonText,
     cancelButtonText: 'Cancelar',
-    confirmButtonColor: '#dc2626',
+    confirmButtonColor: getComputedStyle(document.body).getPropertyValue('--bo-danger').trim() || '#dc2626',
 });
 
 const bindLivewireToastListeners = () => {

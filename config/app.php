@@ -15,6 +15,8 @@ return [
 
     'name' => env('APP_NAME', '4toTOP'),
 
+    'support_email' => env('SUPPORT_EMAIL', 'jtroncosor@pjud.cl'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Environment

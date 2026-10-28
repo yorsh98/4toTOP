@@ -28,172 +28,50 @@ new class extends Component
         ]], app(\App\Services\BackofficeModules::class)->items());
 @endphp
 
-<nav
-    x-data="{
-        open: false,
-        collapsed: sessionStorage.getItem('boSidebarCollapsed') === 'true',
-        toggleCollapsed() {
-            this.collapsed = !this.collapsed;
-            sessionStorage.setItem('boSidebarCollapsed', this.collapsed ? 'true' : 'false');
-        }
-    }"
-    :class="collapsed ? 'lg:w-20' : 'lg:w-72'"
-    class="w-full transition-all duration-300 ease-in-out lg:shrink-0"
->
-    <div class="flex h-16 items-center justify-between border-b border-blue-300/25 bg-[#0A2E5D]/90 px-4 lg:hidden">
-        <a href="{{ route('dashboard') }}" wire:navigate>
-            <x-application-logo class="block h-9 w-auto rounded-md bg-white/85 px-2 py-1" />
-        </a>
-
-        <div class="flex items-center gap-2">
-            <button @click="open = ! open" class="inline-flex items-center justify-center rounded-md p-2 text-slate-300 hover:bg-slate-800 hover:text-white focus:outline-none transition duration-150 ease-in-out">
-            <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                <path :class="{ 'hidden': open, 'inline-flex': !open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                <path :class="{ 'hidden': !open, 'inline-flex': open }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-            </button>
-        </div>
+<nav x-data="{
+    open: false,
+    collapsed: sessionStorage.getItem('boSidebarCollapsed') === 'true',
+    theme: document.documentElement.dataset.theme,
+    toggleCollapsed() { this.collapsed = !this.collapsed; sessionStorage.setItem('boSidebarCollapsed', this.collapsed); },
+    toggleTheme() { this.theme = this.theme === 'dark' ? 'light' : 'dark'; document.documentElement.dataset.theme = this.theme; try { localStorage.setItem('fo-theme', this.theme); } catch (_) {} }
+}" :class="collapsed ? 'lg:w-20' : 'lg:w-72'" class="bo-nav w-full lg:shrink-0">
+    <div class="bo-nav-mobile flex h-16 items-center justify-between px-4 lg:hidden">
+        <a href="{{ route('dashboard') }}" wire:navigate class="bo-brand"><img src="{{ asset('img/pjud_blanco.webp') }}" alt=""><span>4toTOP</span></a>
+        <button type="button" class="bo-nav-toggle" @click="open = !open" :aria-expanded="open" aria-label="Abrir menú"><i class="fa-solid fa-bars"></i></button>
     </div>
-
-    <aside class="hidden h-screen border-r border-blue-300/25 bg-[#0A2E5D]/90 text-slate-100 transition-all duration-300 ease-in-out lg:sticky lg:top-0 lg:flex lg:flex-col">
-        <div class="flex h-16 items-center border-b border-blue-300/25 px-3" :class="collapsed ? 'justify-end' : 'justify-between'">
-            <a
-                href="{{ route('dashboard') }}"
-                wire:navigate
-                class="inline-flex items-center justify-center"
-                title="{{ __('Inicio') }}"
-                x-show="!collapsed"
-                x-transition.opacity.duration.200ms
-                x-cloak
-            >
-                <x-application-logo
-                    x-bind:class="collapsed ? 'h-7 w-auto rounded-md bg-white/85 px-1.5 py-1 transition-all duration-300 ease-in-out' : 'h-9 w-auto rounded-md bg-white/85 px-2 py-1 transition-all duration-300 ease-in-out'"
-                />
-            </a>
-
-            <div class="flex items-center gap-1">
-                <button
-                    @click="toggleCollapsed"
-                    type="button"
-                    class="inline-flex h-9 w-9 items-center justify-center rounded-md text-slate-300 hover:bg-slate-800 hover:text-white"
-                    :title="collapsed ? 'Expandir menu' : 'Colapsar menu'"
-                >
-                    <i class="fa-solid transition-transform duration-300" :class="collapsed ? 'fa-angles-right' : 'fa-angles-left'"></i>
-                </button>
-            </div>
+    <aside class="bo-sidebar hidden h-screen lg:sticky lg:top-0 lg:flex lg:flex-col">
+        <div class="bo-nav-head flex h-16 items-center justify-between px-3">
+            <a href="{{ route('dashboard') }}" wire:navigate class="bo-brand" x-show="!collapsed"><img src="{{ asset('img/pjud_blanco.webp') }}" alt=""><span>4toTOP</span></a>
+            <button type="button" class="bo-nav-toggle" @click="toggleCollapsed" :title="collapsed ? 'Expandir menú' : 'Colapsar menú'" :aria-label="collapsed ? 'Expandir menú' : 'Colapsar menú'"><i class="fa-solid" :class="collapsed ? 'fa-angles-right' : 'fa-angles-left'"></i></button>
         </div>
-
-        <div class="flex-1 overflow-y-auto px-3 py-4">
-            <div class="space-y-1">
-                @foreach ($menuItems as $item)
-                    @canany($item['permissions'])
-                        @php $isActive = request()->routeIs($item['active']); @endphp
-                        <a
-                            href="{{ route($item['route']) }}"
-                            wire:navigate
-                            title="{{ $item['label'] }}"
-                            style="--module-accent: {{ $item['accent'] }}; --module-tint: color-mix(in srgb, {{ $item['accent'] }} 16%, transparent);"
-                            :class="collapsed ? 'justify-center' : ''"
-                            class="group flex items-center rounded-md px-3 py-2 text-sm font-medium transition {{ $isActive ? 'bg-[var(--module-tint)] text-white ring-1 ring-[var(--module-accent)]' : 'text-slate-200 hover:bg-slate-800/60 hover:text-white' }}"
-                        >
-                            <span class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-[var(--module-tint)] text-[var(--module-accent)] transition group-hover:bg-[var(--module-accent)] group-hover:text-white" :class="collapsed ? '' : 'mr-3'">
-                                <i class="{{ $item['icon'] }} text-sm"></i>
-                            </span>
-                            <span x-show="!collapsed" x-transition.opacity.duration.200ms x-cloak>{{ $item['label'] }}</span>
-                        </a>
-                    @endcanany
-                @endforeach
-            </div>
-        </div>
-
-        <div class="border-t border-blue-300/25 p-4">
-            <div class="mb-3" x-data="{{ json_encode(['name' => auth()->user()->name]) }}" x-show="!collapsed" x-cloak>
-                <p class="text-sm font-medium text-slate-100" x-text="name" x-on:profile-updated.window="name = $event.detail.name"></p>
-                <p class="text-xs text-slate-300">{{ auth()->user()->email }}</p>
-            </div>
-
-            <div class="space-y-1">
-                <a
-                    href="{{ route('insumos.notificaciones') }}"
-                    wire:navigate
-                    title="{{ __('Notificaciones de Insumos') }}"
-                    :class="collapsed ? 'justify-center' : ''"
-                    class="flex items-center rounded-md px-3 py-2 text-sm text-slate-200 hover:bg-slate-800/60 hover:text-white transition"
-                >
-                    <span class="relative"><i class="fa-solid fa-bell text-base" :class="collapsed ? '' : 'mr-3'"></i>@if ($unreadInsumosNotifications)<span class="absolute -right-2 -top-2 min-w-4 rounded-full bg-red-500 px-1 text-center text-[10px] font-bold text-white">{{ $unreadInsumosNotifications }}</span>@endif</span>
-                    <span x-show="!collapsed" x-transition.opacity.duration.200ms x-cloak>{{ __('Notificaciones') }}</span>
-                </a>
-                <a
-                    href="{{ route('profile') }}"
-                    wire:navigate
-                    title="{{ __('Perfil') }}"
-                    :class="collapsed ? 'justify-center' : ''"
-                    class="flex items-center rounded-md px-3 py-2 text-sm text-slate-200 hover:bg-slate-800/60 hover:text-white transition"
-                >
-                    <i class="fa-solid fa-user text-base" :class="collapsed ? '' : 'mr-3'"></i>
-                    <span x-show="!collapsed" x-transition.opacity.duration.200ms x-cloak>{{ __('Perfil') }}</span>
-                </a>
-
-                <button
-                    wire:click="logout"
-                    title="{{ __('Salir') }}"
-                    :class="collapsed ? 'justify-center' : ''"
-                    class="flex w-full items-center rounded-md px-3 py-2 text-left text-sm text-red-300 hover:bg-red-500/10 hover:text-red-200 transition"
-                >
-                    <i class="fa-solid fa-right-from-bracket text-base" :class="collapsed ? '' : 'mr-3'"></i>
-                    <span x-show="!collapsed" x-transition.opacity.duration.200ms x-cloak>{{ __('Salir') }}</span>
-                </button>
-            </div>
-        </div>
-    </aside>
-
-    <div
-        x-show="open"
-        x-transition:enter="transition ease-out duration-200"
-        x-transition:enter-start="opacity-0 -translate-y-1"
-        x-transition:enter-end="opacity-100 translate-y-0"
-        x-transition:leave="transition ease-in duration-150"
-        x-transition:leave-start="opacity-100 translate-y-0"
-        x-transition:leave-end="opacity-0 -translate-y-1"
-        x-cloak
-        class="border-b border-blue-300/25 bg-[#0A2E5D]/90 lg:hidden"
-    >
-        <div class="space-y-1 px-3 py-3">
+        <div class="flex-1 overflow-y-auto p-3">
             @foreach ($menuItems as $item)
                 @canany($item['permissions'])
-                    <x-responsive-nav-link :href="route($item['route'])" :active="request()->routeIs($item['active'])" wire:navigate>
-                        <span style="--module-accent: {{ $item['accent'] }}; --module-tint: color-mix(in srgb, {{ $item['accent'] }} 16%, transparent);" class="inline-flex items-center gap-2">
-                            <span class="inline-flex h-8 w-8 items-center justify-center rounded-md bg-[var(--module-tint)] text-[var(--module-accent)]">
-                                <i class="{{ $item['icon'] }} text-sm"></i>
-                            </span>
-                            <span>{{ $item['label'] }}</span>
-                        </span>
-                    </x-responsive-nav-link>
+                    <a href="{{ route($item['route']) }}" wire:navigate title="{{ $item['label'] }}" style="--bo-accent: {{ $item['accent'] }}" class="bo-nav-link {{ request()->routeIs($item['active']) ? 'is-active' : '' }}" :class="collapsed ? 'justify-center' : ''"><i class="{{ $item['icon'] }}" aria-hidden="true"></i><span x-show="!collapsed">{{ $item['label'] }}</span></a>
                 @endcanany
             @endforeach
         </div>
-
-        <div class="border-t border-blue-300/25 px-4 py-4">
-            <div class="mb-3" x-data="{{ json_encode(['name' => auth()->user()->name]) }}">
-                <p class="text-base font-medium text-slate-100" x-text="name" x-on:profile-updated.window="name = $event.detail.name"></p>
-                <p class="text-sm text-slate-300">{{ auth()->user()->email }}</p>
-            </div>
-
-            <div class="space-y-1">
-                <x-responsive-nav-link :href="route('profile')" wire:navigate>
-                    <span class="inline-flex items-center gap-2">
-                        <i class="fa-solid fa-user"></i>
-                        <span>{{ __('Perfil') }}</span>
-                    </span>
-                </x-responsive-nav-link>
-
-                <button wire:click="logout" class="block w-full rounded-md px-3 py-2 text-left text-base font-medium text-red-300 hover:bg-red-500/10 hover:text-red-200 transition">
-                    <span class="inline-flex items-center gap-2">
-                        <i class="fa-solid fa-right-from-bracket"></i>
-                        <span>{{ __('Salir') }}</span>
-                    </span>
-                </button>
-            </div>
+        <div class="bo-nav-footer p-3">
+            <div x-show="!collapsed" class="bo-nav-user" x-data="{{ json_encode(['name' => auth()->user()->name]) }}"><strong x-text="name" x-on:profile-updated.window="name = $event.detail.name"></strong><span>{{ auth()->user()->email }}</span></div>
+            <a href="{{ route('insumos.notificaciones') }}" wire:navigate class="bo-nav-link" :class="collapsed ? 'justify-center' : ''" title="Notificaciones"><i class="fa-solid fa-bell"></i><span x-show="!collapsed">Notificaciones</span>@if ($unreadInsumosNotifications)<span class="bo-badge">{{ $unreadInsumosNotifications }}</span>@endif</a>
+            <a href="{{ route('profile') }}" wire:navigate class="bo-nav-link" :class="collapsed ? 'justify-center' : ''" title="Perfil"><i class="fa-solid fa-user"></i><span x-show="!collapsed">Perfil</span></a>
+            <a href="{{ route('welcome') }}" class="bo-nav-link" :class="collapsed ? 'justify-center' : ''" title="Ver sitio público"><i class="fa-solid fa-arrow-up-right-from-square"></i><span x-show="!collapsed">Ver sitio público</span></a>
+            <button type="button" @click="toggleTheme" class="bo-nav-link w-full" :class="collapsed ? 'justify-center' : ''" title="Cambiar tema" aria-label="Cambiar tema"><i class="fa-solid" :class="theme === 'dark' ? 'fa-sun' : 'fa-moon'"></i><span x-show="!collapsed">Cambiar tema</span></button>
+            <button type="button" wire:click="logout" class="bo-nav-link w-full" :class="collapsed ? 'justify-center' : ''" title="Salir"><i class="fa-solid fa-right-from-bracket"></i><span x-show="!collapsed">Salir</span></button>
+        </div>
+    </aside>
+    <div x-show="open" x-cloak class="bo-sidebar p-3 lg:hidden">
+        @foreach ($menuItems as $item)
+            @canany($item['permissions'])
+                <a href="{{ route($item['route']) }}" wire:navigate style="--bo-accent: {{ $item['accent'] }}" class="bo-nav-link {{ request()->routeIs($item['active']) ? 'is-active' : '' }}"><i class="{{ $item['icon'] }}"></i><span>{{ $item['label'] }}</span></a>
+            @endcanany
+        @endforeach
+        <div class="bo-nav-footer pt-3">
+            <a href="{{ route('insumos.notificaciones') }}" wire:navigate class="bo-nav-link"><i class="fa-solid fa-bell"></i>Notificaciones @if ($unreadInsumosNotifications)<span class="bo-badge">{{ $unreadInsumosNotifications }}</span>@endif</a>
+            <a href="{{ route('profile') }}" wire:navigate class="bo-nav-link"><i class="fa-solid fa-user"></i>Perfil</a>
+            <a href="{{ route('welcome') }}" class="bo-nav-link"><i class="fa-solid fa-arrow-up-right-from-square"></i>Ver sitio público</a>
+            <button type="button" @click="toggleTheme" class="bo-nav-link w-full" aria-label="Cambiar tema"><i class="fa-solid" :class="theme === 'dark' ? 'fa-sun' : 'fa-moon'"></i>Cambiar tema</button>
+            <button type="button" wire:click="logout" class="bo-nav-link w-full"><i class="fa-solid fa-right-from-bracket"></i>Salir</button>
         </div>
     </div>
 </nav>

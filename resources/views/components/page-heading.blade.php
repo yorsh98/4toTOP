@@ -3,9 +3,9 @@
 <div {{ $attributes->merge(['class' => "mx-auto flex w-full {$width} items-center justify-between gap-4 px-4 sm:px-6 lg:px-8"]) }}>
     <div>
         @if ($eyebrow)
-            <p class="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-sky-700">{{ $eyebrow }}</p>
+            <p class="bo-eyebrow">{{ $eyebrow }}</p>
         @endif
-        <h2 @class(['text-xl font-semibold leading-tight text-slate-800', 'mt-0.5' => $eyebrow])>{{ $title }}</h2>
+        <h2 @class(['bo-heading-title', 'mt-0.5' => $eyebrow])>{{ $title }}</h2>
     </div>
 
     @if (isset($actions))
