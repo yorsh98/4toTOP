@@ -1,8 +1,7 @@
 <x-app-layout>
-    <link rel="stylesheet" href="{{ asset('css/audiencias.css') }}">
 
     <x-slot name="header">
-        <x-page-heading eyebrow="Audiencias · Administracion" title="Administracion BD Audiencias" />
+        <x-page-heading eyebrow="Audiencias · Administración" title="Administración BD Audiencias" />
     </x-slot>
 
     {{-- Evita FOUC de Alpine --}}
@@ -12,18 +11,18 @@
          x-on:audiencia-edicion-abierta.window="editandoDiaria = true"
          x-on:audiencia-edicion-cerrada.window="editandoDiaria = false">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
+            <div class="bo-card overflow-hidden">
+                <div class="p-6 bo-strong">
 
                     {{-- ====== BARRA DESPLEGABLE SUPERIOR: VISTA DIARIA ====== --}}
-                    <div class="mb-4 border rounded-lg overflow-hidden">
+                    <div class="mb-4 bo-card overflow-hidden">
                         <button type="button"
                                 @click="toggleDiarias()"
-                                class="w-full flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100">
+                                class="bo-btn bo-btn--secondary w-full flex items-center justify-between px-4 py-3 bo-panel-subtle ">
                             <div class="flex items-center gap-2">
-                                <span class="text-lg">📅</span>
+                                <i class="fa-regular fa-calendar" aria-hidden="true"></i>
                                 <span class="font-semibold">Vista diaria de audiencias</span>
-                                <span class="text-xs text-gray-500">(cambiar fecha, eliminar, etc.)</span>
+                                <span class="text-xs bo-muted">(cambiar fecha, eliminar, etc.)</span>
                             </div>
                             <svg x-bind:class="diariasAbierta ? 'rotate-180' : ''"
                                  class="w-4 h-4 transition-transform" viewBox="0 0 20 20" fill="currentColor">
@@ -36,7 +35,7 @@
                         {{-- Panel desplegable (ocupa la zona superior; empuja el resto hacia abajo) --}}
                         <div x-show="diariasAbierta"
                              x-transition.opacity
-                             class="p-4 bg-white border-t">
+                             class="p-4 bo-panel border-t">
                             <livewire:audiencias-diarias :wire:key="'aud-diarias'"/>
                         </div>
                     </div>
@@ -44,25 +43,25 @@
                     {{-- ====== MENÚ DE BOTONES (tus módulos) ====== --}}
                     <template x-if="modo === 'menu' && !editandoDiaria">
                         <div>
-                            <p class="text-sm text-gray-600 mb-3">Selecciona el módulo:</p>
+                            <p class="text-sm bo-muted mb-3">Selecciona el módulo:</p>
 
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <button type="button" @click="open('lecturas')"
-                                        class="w-full px-4 py-3 rounded-xl border hover:bg-gray-50 text-left">
+                                        class="bo-btn bo-btn--secondary w-full flex-col items-start px-4 py-3 rounded-xl border text-left">
                                     <div class="font-semibold">Lecturas de Sentencia</div>
-                                    <div class="text-xs text-gray-500">Carga el batch de lecturas.</div>
+                                    <div class="text-xs bo-muted">Carga el batch de lecturas.</div>
                                 </button>
 
                                 <button type="button" @click="open('cortas')"
-                                        class="w-full px-4 py-3 rounded-xl border hover:bg-gray-50 text-left">
+                                        class="bo-btn bo-btn--secondary w-full flex-col items-start px-4 py-3 rounded-xl border text-left">
                                     <div class="font-semibold">Audiencias Cortas</div>
-                                    <div class="text-xs text-gray-500">Carga el batch de cortas.</div>
+                                    <div class="text-xs bo-muted">Carga el batch de cortas.</div>
                                 </button>
 
                                 <button type="button" @click="open('form')"
-                                        class="w-full px-4 py-3 rounded-xl border hover:bg-gray-50 text-left">
-                                    <div class="font-semibold">Continuacion/ Juicio Oral</div>
-                                    <div class="text-xs text-gray-500">Formulario individual.</div>
+                                        class="bo-btn bo-btn--secondary w-full flex-col items-start px-4 py-3 rounded-xl border text-left">
+                                    <div class="font-semibold">Continuación / Juicio oral</div>
+                                    <div class="text-xs bo-muted">Formulario individual.</div>
                                 </button>
                             </div>
                         </div>
@@ -73,10 +72,10 @@
                             <div>
                                 <div class="flex items-center justify-between mb-4">
                                     <button type="button" @click="back()"
-                                            class="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border hover:bg-gray-50">
+                                            class="bo-btn bo-btn--secondary inline-flex items-center gap-2 px-3 py-1.5 rounded-md border ">
                                         <span>←</span> <span>Volver</span>
                                     </button>
-                                    <div class="text-sm text-gray-500" x-text="tituloActual()"></div>
+                                    <div class="text-sm bo-muted" x-text="tituloActual()"></div>
                                 </div>
 
                                 <template x-if="modo === 'lecturas'">
