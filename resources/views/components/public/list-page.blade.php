@@ -11,18 +11,7 @@
 
 {{-- Página de listado del front office. Emite tres bloques hermanos (cabecera, barra y
      lista) para que la transición "abrir app" los haga entrar escalonados. --}}
-<header class="fo-page-head fo-list-head">
-    <a href="{{ route('welcome') }}" class="fo-back" data-fo-link>
-        <i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Inicio
-    </a>
-    <h1 class="fo-page-title">{{ $title }}</h1>
-    @if ($lead)
-        <p class="fo-page-lead">{{ $lead }}</p>
-    @endif
-    @if ($meta)
-        <p class="fo-list-meta">{{ $meta }}</p>
-    @endif
-</header>
+<x-public.page-head :title="$title" :lead="$lead" :meta="$meta" />
 
 @if ($filter && $total > 0)
     <div class="fo-listbar" data-fo-filter-bar data-noun-one="{{ $noun[0] }}" data-noun-many="{{ $noun[1] }}">
