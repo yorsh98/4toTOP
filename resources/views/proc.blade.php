@@ -1,50 +1,11 @@
-<x-in-layout>
-
-                        <div class="grid gap-6 pt-5 mb-6 lg:grid-cols-1 lg:gap-8 animate__animated animate__zoomInDown animate__delay-0.5s">
-                            <div class="absolute top-4 left-4">
-                                <a href="{{ url('/') }}" class="bg-white text-black font-semibold py-1 px-3 rounded-md shadow-md flex items-center text-sm hover:bg-blue-700 hover:text-white transition">
-                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path>
-                                    </svg>
-                                    INICIO
-                                </a>
-                            </div>
-                            <div class="flex justify-center items-start gap-4 rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] transition duration-300 hover:text-black/70 hover:ring-black/20 focus:outline-none focus-visible:ring-[#FF2D20] lg:pb-10     ">
-                                <div class="flex size-12 shrink-0 items-center justify-center rounded-full sm:size-16">
-                                    <svg viewBox="0 0 1024 1024" class="icon" version="1.1" xmlns="http://www.w3.org/2000/svg" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M832 960H192s-64-2.133333-64-170.666667h768c0 168.533333-64 170.666667-64 170.666667z" fill="#42A5F5"></path><path d="M170.666667 64h682.666666v725.333333H170.666667z" fill="#90CAF9"></path><path d="M384 320h341.333333v42.666667H384zM384 405.333333h341.333333v42.666667H384zM384 490.666667h341.333333v42.666666H384zM384 576h341.333333v42.666667H384zM384 661.333333h341.333333v42.666667H384z" fill="#1976D2"></path><path d="M298.666667 320h42.666666v42.666667h-42.666666zM298.666667 405.333333h42.666666v42.666667h-42.666666zM298.666667 490.666667h42.666666v42.666666h-42.666666zM298.666667 576h42.666666v42.666667h-42.666666zM298.666667 661.333333h42.666666v42.666667h-42.666666z" fill="#1976D2"></path></g></svg>
-                                </div>
-                                <div class="pt-3 sm:pt-5">
-                                    <h2 class="text-xl font-semibold text-black ">SELECCIONE EL PROCEDIMIENTO A VISUALIZAR</h2>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="grid gap-6 lg:grid-cols-1 lg:gap-8 animate__animated animate__zoomInDown animate__delay-0.8s">
-                            <div class="grid gap-6 lg:grid-cols-1 lg:gap-8 animate__animated animate__zoomInDown animate__delay-0.8s">
-                                <div class="flex flex-col gap-6 overflow-hidden rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] lg:p-10 lg:pb-10  ">
-
-                                    @foreach($procedimientos as $proc)
-                                    <a
-                                        href="{{ $proc['url'] }}"
-                                        target="_blank"
-                                        class="group relative p-6 rounded-lg border border-gray-200 hover:border-blue-500 transition-all duration-300 shadow-sm hover:shadow-lg  "
-                                    >
-                                        <div class="flex justify-between items-center">
-                                            <div class="flex-1 min-w-0">
-                                                <h3 class="text-lg font-semibold text-gray-900 truncate ">
-                                                    {{ $proc['nombre'] }}
-                                                </h3>
-                                            </div>
-                                            <div class="ml-4 flex items-center">
-                                                <svg class="w-6 h-6 text-gray-400 group-hover:text-blue-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                                                </svg>
-                                            </div>
-                                        </div>
-                                        <div class="absolute inset-y-0 left-0 w-1 bg-blue-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-r"></div>
-                                    </a>
-                                    @endforeach
-
-                                </div>
-                            </div>
-                        </div>
+<x-in-layout title="Procedimientos del tribunal">
+    <x-public.list-page
+        title="Procedimientos del tribunal"
+        lead="Procedimientos internos para consultar. Se abren en otra pestaña."
+        :total="count($procedimientos)"
+        :noun="['procedimiento', 'procedimientos']"
+        placeholder="Filtrar procedimientos"
+        empty="Aún no hay procedimientos públicos. Se publican desde el backoffice, en Documentos.">
+        <x-public.document-list :items="$procedimientos" icon="fa-list-check" />
+    </x-public.list-page>
 </x-in-layout>

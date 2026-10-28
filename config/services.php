@@ -35,4 +35,11 @@ return [
         ],
     ],
 
+    // Clima de la portada (Open-Meteo). Por defecto, el Centro de Justicia de Santiago.
+    'weather' => [
+        'enabled' => env('WEATHER_ENABLED', true),
+        'latitude' => env('WEATHER_LATITUDE', -33.4669),
+        'longitude' => env('WEATHER_LONGITUDE', -70.6609),
+    ],
+
 ];

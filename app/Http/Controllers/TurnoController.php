@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Audiencia;
 use App\Models\TtyppRegistro;
 use App\Models\Turno;
 use App\Services\BackofficeDocumentosCatalog;
 use App\Services\FuncionarioCatalog;
+use App\Services\WeatherService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -36,15 +38,22 @@ class TurnoController extends Controller
 
     }
 
-    public function enviarTurno(BackofficeDocumentosCatalog $catalog)
+    public function enviarTurno(BackofficeDocumentosCatalog $catalog, WeatherService $weatherService)
     {
         // Obtener los turnos desde la base de datos
         $turno1 = Turno::find(1);
         $turno2 = Turno::find(2);
         $encargadosAudiencia = $catalog->encargadosAudiencia();
 
-        // Verifica si los turnos existen antes de pasarlos a la vista
-        return view('welcome', compact('turno1', 'turno2', 'encargadosAudiencia'));
+        // Conteo por estado de las audiencias de hoy para el resumen de la portada
+        $audienciasHoy = Audiencia::whereDate('fecha', Carbon::today())
+            ->selectRaw('estado, count(*) as total')
+            ->groupBy('estado')
+            ->pluck('total', 'estado');
+
+        $clima = $weatherService->today();
+
+        return view('welcome', compact('turno1', 'turno2', 'encargadosAudiencia', 'audienciasHoy', 'clima'));
     }
 
     public function update(Request $request, $id)

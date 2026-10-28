@@ -1,0 +1,65 @@
+<?php
+
+use App\Models\Audiencia;
+use App\Services\FrontOfficeCatalog;
+
+test('welcome lists every public access from the catalog', function () {
+    $response = $this->get(route('welcome'))->assertSuccessful();
+
+    foreach (app(FrontOfficeCatalog::class)->items() as $item) {
+        $response->assertSee($item['title']);
+
+        if ($item['href'] !== null) {
+            $response->assertSee($item['href'], false);
+        }
+    }
+});
+
+test('welcome summarizes today hearings by state', function () {
+    $base = [
+        'fecha' => today(),
+        'ruc' => '11111111-1',
+        'sala' => 'Sala 1',
+        'hora_inicio' => '09:00',
+        'tipo_audiencia' => 'Juicio Oral',
+        'encargado_causa' => 'Encargada',
+        'acta' => 'Acta',
+        'JuezR' => 'Juez',
+        'obs' => '',
+        'acusados' => [],
+    ];
+
+    Audiencia::create([...$base, 'rit' => '10-2026', 'estado' => 'EN_CURSO']);
+    Audiencia::create([...$base, 'rit' => '11-2026', 'estado' => 'FINALIZADA']);
+    Audiencia::create([...$base, 'rit' => '12-2026', 'estado' => 'FINALIZADA', 'fecha' => today()->subDay()]);
+
+    $this->get(route('welcome'))
+        ->assertSuccessful()
+        ->assertSee('2</b> programadas', false)
+        ->assertSee('1 en curso · 1 finalizadas');
+});
+
+test('oficios page shows the assigned number after a request', function () {
+    $this->withSession(['success' => 'ok', 'tipo' => 'libertad', 'NumEntregado' => 42, 'año' => 2026])
+        ->get(route('SistOficioLibertades.index'))
+        ->assertSuccessful()
+        ->assertSee('Número de libertad asignado')
+        ->assertSee('42-2026');
+});
+
+test('internal module cards open as apps and external ones do not', function () {
+    $html = $this->get(route('welcome'))->assertSuccessful()->getContent();
+
+    foreach (app(FrontOfficeCatalog::class)->items() as $item) {
+        if ($item['href'] === null) {
+            continue;
+        }
+
+        preg_match('/<a\s[^>]*href="'.preg_quote(e($item['href']), '/').'"[^>]*class="[^"]*fo-access[^>]*>/', $html, $card);
+
+        expect($card)->not->toBeEmpty();
+        empty($item['external'])
+            ? expect($card[0])->toContain('data-app-open')
+            : expect($card[0])->not->toContain('data-app-open');
+    }
+});

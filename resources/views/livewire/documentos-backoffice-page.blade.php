@@ -329,5 +329,93 @@
                 </form>
             </div>
         </section>
+
+        <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <button type="button" wire:click="toggleSection('accesos')" class="flex w-full cursor-pointer items-center justify-between border-l-4 border-cyan-700 px-5 py-5 text-left text-slate-900 transition hover:bg-cyan-50/50 sm:px-7">
+                <span>
+                    <span class="block text-xs font-bold uppercase tracking-[0.18em] text-cyan-700">Registro F</span>
+                    <h3 class="mt-1 text-xl font-semibold tracking-tight">Accesos directos</h3>
+                </span>
+                <svg class="size-5 text-slate-600 transition-transform {{ ($sectionsOpen['accesos'] ?? true) ? 'rotate-180' : '' }}" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                </svg>
+            </button>
+
+            @if ($sectionsOpen['accesos'] ?? true)
+            <div class="space-y-5 bg-[#fbfcfe] p-4 text-slate-900 sm:p-6">
+                <p class="text-sm text-slate-600">Enlaces de la página pública «Accesos directos». Los ocultos no se muestran al público. Los dominios <span class="font-mono">.pjud</span> se marcan solos como «Solo red PJUD».</p>
+
+                <form wire:submit="saveAcceso" class="grid grid-cols-1 gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm md:grid-cols-12 md:items-end sm:p-5">
+                    <div class="md:col-span-3">
+                        <label for="accesoGrupo" class="mb-1.5 block font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-slate-500">Grupo</label>
+                        <input id="accesoGrupo" type="text" wire:model="accesoGrupo" list="accesos-grupos" class="w-full rounded-lg border-slate-300 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-cyan-700 focus:ring-cyan-700" placeholder="Ej. Sistemas judiciales">
+                        <datalist id="accesos-grupos">
+                            @foreach ($accesos->pluck('grupo')->unique() as $grupo)
+                                <option value="{{ $grupo }}"></option>
+                            @endforeach
+                        </datalist>
+                        @error('accesoGrupo') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                    </div>
+                    <div class="md:col-span-3">
+                        <label for="accesoNombre" class="mb-1.5 block font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-slate-500">Nombre</label>
+                        <input id="accesoNombre" type="text" wire:model="accesoNombre" class="w-full rounded-lg border-slate-300 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-cyan-700 focus:ring-cyan-700" placeholder="Ej. Gestión Penal 1">
+                        @error('accesoNombre') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                    </div>
+                    <div class="md:col-span-4">
+                        <label for="accesoUrl" class="mb-1.5 block font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-slate-500">URL</label>
+                        <input id="accesoUrl" type="url" wire:model="accesoUrl" class="w-full rounded-lg border-slate-300 bg-slate-50 px-3 py-2.5 font-mono text-sm text-slate-900 placeholder:text-slate-400 focus:border-cyan-700 focus:ring-cyan-700" placeholder="https://…">
+                        @error('accesoUrl') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                    </div>
+                    <div class="flex gap-2 md:col-span-2 md:self-end">
+                        <button type="submit" class="w-full whitespace-nowrap rounded-lg bg-cyan-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-cyan-800 disabled:cursor-not-allowed disabled:opacity-60" wire:loading.attr="disabled" wire:target="saveAcceso">
+                            {{ $editingAccesoId ? 'Guardar' : 'Agregar' }}
+                        </button>
+                        @if ($editingAccesoId)
+                            <button type="button" wire:click="cancelAcceso" class="whitespace-nowrap rounded-lg border border-slate-300 px-3 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-100">Cancelar</button>
+                        @endif
+                    </div>
+                </form>
+
+                <div class="overflow-x-auto rounded-xl border border-slate-200 bg-white">
+                    <table class="min-w-full text-sm">
+                        <thead class="border-b border-slate-200 bg-slate-50">
+                            <tr>
+                                <th class="px-5 py-3 text-left font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">Acceso</th>
+                                <th class="px-5 py-3 text-left font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">Grupo</th>
+                                <th class="w-56 px-5 py-3 text-right font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">Gestion</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 bg-white">
+                            @forelse ($accesos as $acceso)
+                                <tr wire:key="acceso-{{ $acceso->id }}" @class(['bg-cyan-50/60' => $editingAccesoId === $acceso->id, 'opacity-60' => ! $acceso->activo])>
+                                    <td class="px-5 py-3.5">
+                                        <span class="block font-medium text-slate-800">{{ $acceso->nombre }}
+                                            @unless ($acceso->activo) <span class="ml-1 rounded bg-slate-200 px-1.5 py-0.5 text-[10px] font-bold uppercase text-slate-600">Oculto</span> @endunless
+                                            @if ($acceso->soloRedInterna()) <span class="ml-1 rounded bg-cyan-50 px-1.5 py-0.5 text-[10px] font-bold text-cyan-800">Solo red PJUD</span> @endif
+                                        </span>
+                                        <a href="{{ $acceso->url }}" target="_blank" rel="noopener" class="font-mono text-xs text-slate-500 hover:text-cyan-700">{{ $acceso->host() }}</a>
+                                    </td>
+                                    <td class="px-5 py-3.5 text-slate-600">{{ $acceso->grupo }}</td>
+                                    <td class="px-5 py-3.5">
+                                        <div class="flex justify-end gap-1.5">
+                                            <button type="button" wire:click="moveAcceso({{ $acceso->id }}, -1)" @disabled($loop->first) class="inline-flex size-8 items-center justify-center rounded-md border border-slate-200 text-slate-600 transition hover:bg-slate-100 disabled:opacity-30" title="Subir" aria-label="Subir {{ $acceso->nombre }}"><i class="fas fa-arrow-up"></i></button>
+                                            <button type="button" wire:click="moveAcceso({{ $acceso->id }}, 1)" @disabled($loop->last) class="inline-flex size-8 items-center justify-center rounded-md border border-slate-200 text-slate-600 transition hover:bg-slate-100 disabled:opacity-30" title="Bajar" aria-label="Bajar {{ $acceso->nombre }}"><i class="fas fa-arrow-down"></i></button>
+                                            <button type="button" wire:click="toggleAcceso({{ $acceso->id }})" class="inline-flex size-8 items-center justify-center rounded-md border border-slate-200 text-slate-600 transition hover:bg-slate-100" title="{{ $acceso->activo ? 'Ocultar' : 'Mostrar' }}" aria-label="{{ $acceso->activo ? 'Ocultar' : 'Mostrar' }} {{ $acceso->nombre }}"><i class="fas {{ $acceso->activo ? 'fa-eye-slash' : 'fa-eye' }}"></i></button>
+                                            <button type="button" wire:click="editAcceso({{ $acceso->id }})" class="inline-flex size-8 items-center justify-center rounded-md border border-cyan-100 text-cyan-700 transition hover:bg-cyan-700 hover:text-white" title="Editar" aria-label="Editar {{ $acceso->nombre }}"><i class="fas fa-pen"></i></button>
+                                            <button type="button" wire:click="removeAcceso({{ $acceso->id }})" wire:confirm="El acceso se eliminara. Continuar?" class="inline-flex size-8 items-center justify-center rounded-md border border-red-100 text-red-600 transition hover:bg-red-600 hover:text-white" title="Eliminar" aria-label="Eliminar {{ $acceso->nombre }}"><i class="fas fa-trash"></i></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="3" class="px-4 py-6 text-center text-gray-500">Sin accesos cargados. Agrega el primero con el formulario de arriba.</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            @endif
+        </section>
     </div>
 </div>

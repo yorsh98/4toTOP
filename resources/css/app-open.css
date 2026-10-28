@@ -1,0 +1,77 @@
+/* ==========================================================================
+   app-open.css — transición "abrir app" estilo iPhone (ver js/lib/app-open.js)
+   Usa los tokens de chat-motion.css (--cm-*). Importar después de él:
+     @import "./chat-motion.css";
+     @import "./app-open.css";
+   ========================================================================== */
+
+:root {
+  /* Curva tipo iOS: arranque rápido, frenado largo y suave */
+  --ao-ease: cubic-bezier(.32, .72, 0, 1);
+  --ao-t-open: 380ms;     /* tarjeta → pantalla completa */
+  --ao-t-close: 340ms;    /* pantalla completa → tarjeta */
+  --ao-t-reveal: 200ms;   /* fundido de la pantalla de carga */
+  --ao-t-rise: 300ms;     /* entrada de cada bloque de la vista nueva */
+  --ao-icon-scale: 1.5;   /* tamaño del ícono en la pantalla de carga */
+  --ao-surface: #f4f7fb;  /* color de la "ventana" si la tarjeta no trae data-app-color */
+  --ao-stagger: 40ms;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --ao-surface: #0f1622; }
+}
+:root[data-theme="dark"], .dark { --ao-surface: #0f1622; }
+
+/* Capa que se expande (vive en <html>, fuera del <body> que reemplaza Livewire) */
+.ao-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483000;
+  pointer-events: none;
+  will-change: clip-path, opacity;
+}
+/* Pantalla de llegada entre documentos: la pone el <head> antes del primer pintado */
+html.ao-cover::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 2147483000;
+  background: var(--ao-surface);
+  pointer-events: none;
+}
+/* Llegada al abrir: se funde sola desde el primer pintado, sin esperar al JS */
+html.ao-cover[data-ao-arrive="open"]::after {
+  animation: ao-fade-out var(--ao-t-reveal) ease-out both;
+}
+@keyframes ao-fade-out {
+  to { opacity: 0; }
+}
+.ao-icon {
+  position: fixed;
+  margin: 0;
+  display: grid;
+  place-items: center;
+  transform-origin: center;
+  will-change: transform;
+}
+
+/* El inicio se acerca y desvanece por detrás de la tarjeta */
+[data-app-shell] { will-change: auto; }
+
+/* Entrada escalonada del contenido de la vista nueva */
+[data-app-view].ao-enter > *,
+html[data-ao-arrive="open"] [data-app-view] > * {
+  animation: ao-rise var(--ao-t-rise) var(--cm-ease-out, cubic-bezier(.22, 1, .36, 1)) both;
+  animation-delay: calc(var(--ao-i, 0) * var(--ao-stagger) + 40ms);
+}
+html[data-ao-arrive="open"] [data-app-view] > :nth-child(2) { --ao-i: 1; }
+html[data-ao-arrive="open"] [data-app-view] > :nth-child(3) { --ao-i: 2; }
+html[data-ao-arrive="open"] [data-app-view] > :nth-child(4) { --ao-i: 3; }
+html[data-ao-arrive="open"] [data-app-view] > :nth-child(n + 5) { --ao-i: 4; }
+@keyframes ao-rise {
+  from { opacity: 0; transform: translateY(10px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-app-view].ao-enter > *,
+  html[data-ao-arrive="open"] [data-app-view] > * { animation: none; }
+}
