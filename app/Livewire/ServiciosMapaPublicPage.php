@@ -7,6 +7,11 @@ use Livewire\Attributes\Layout;
 #[Layout('layouts.in')]
 class ServiciosMapaPublicPage extends ServiciosMapaPage
 {
+    public function render()
+    {
+        return view('livewire.servicios-mapa-publica', parent::render()->getData());
+    }
+
     protected function queryString(): array
     {
         return [

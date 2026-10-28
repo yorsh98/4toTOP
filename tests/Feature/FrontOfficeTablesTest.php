@@ -6,6 +6,7 @@ use App\Livewire\BitacoraPruebasViewer;
 use App\Livewire\LibertadTabla;
 use App\Livewire\OficioTabla;
 use App\Livewire\PublicFileConverterPage;
+use App\Livewire\ServiciosMapaPublicPage;
 use App\Livewire\TablaGuias;
 use App\Models\Ausentismo;
 use App\Models\BitacoraPruebaDia;
@@ -223,4 +224,17 @@ test('bitácora pública muestra pruebas y conserva la vista del backoffice', fu
 
 test('bitácora pública informa cuando no hay juicios', function () {
     $this->get('/bitacora-pruebas')->assertSuccessful()->assertSee('No hay juicios que mostrar');
+});
+
+test('mapa público usa su envoltorio y conserva el plano y su estado vacío', function () {
+    $this->get('/servicios/mapa-publico')->assertSuccessful()
+        ->assertSee('class="fo-mapa"', false)
+        ->assertSee('Mapa de servicios')
+        ->assertSee('Plano interactivo del piso 8')
+        ->assertSee('No hay activos para los filtros actuales.');
+
+    Livewire::test(ServiciosMapaPublicPage::class)
+        ->assertViewIs('livewire.servicios-mapa-publica')
+        ->call('selectPiso', 7)
+        ->assertSee('Plano interactivo del piso 7');
 });

@@ -430,7 +430,9 @@
 .fo .fo-palette-count b { display: inline-block; font-family: var(--fo-mono); color: var(--fo-fg); }
 
 /* ---------- Páginas internas ---------- */
-.fo .fo-page { position: relative; max-width: var(--fo-max-padded); margin: 0 auto; padding: 56px var(--fo-gutter) 72px; animation: cm-rise var(--cm-t-slow) var(--fo-ease) both; }
+.fo .fo-page { position: relative; max-width: var(--fo-max-padded); margin: 0 auto; padding: 56px var(--fo-gutter) 72px; animation: cm-rise var(--cm-t-slow) var(--fo-ease) backwards; }
+/* backwards, no both: al terminar no deja transform aplicado, que convertiría a .fo-page en el
+   contenedor de los elementos position: fixed (modales, paneles) de las vistas internas */
 .fo .fo-page .fo-page { padding: 0; animation: none; }
 /* Botón «INICIO» propio de las páginas antiguas: alineado al borde del contenido */
 .fo .fo-page > * > .absolute.top-4.left-4 { top: 14px; left: var(--fo-gutter); }
@@ -691,6 +693,47 @@
     .fo .fo-bitacora-table tbody tr { display: grid; gap: 8px; padding: 12px 14px; }
     .fo .fo-bitacora-table td { display: grid; grid-template-columns: minmax(100px, 1fr) minmax(0, 2fr); gap: 12px; overflow-wrap: anywhere; }
     .fo .fo-bitacora-table td::before { content: attr(data-label); font-weight: 700; }
+}
+
+/* Mapa de servicios */
+.fo .fo-mapa { min-width: 0; }
+.fo .fo-mapa > div > .grid { padding-top: 0; animation: none; }
+.fo .fo-mapa > div > .grid > .absolute,
+.fo .fo-mapa > div > .grid > .flex.justify-center { display: none; }
+.fo .fo-mapa > div > .grid > .rounded-lg {
+    min-width: 0; border: 1px solid var(--fo-line); border-radius: var(--fo-radius);
+    /* Bootstrap declara bg-white con !important. */
+    background: var(--fo-glass) !important;
+    color: var(--fo-fg); backdrop-filter: var(--fo-glass-blur); -webkit-backdrop-filter: var(--fo-glass-blur);
+}
+.fo .fo-mapa .text-slate-700, .fo .fo-mapa .text-slate-950 { color: var(--fo-fg); }
+/* Bootstrap también declara .text-black con !important */
+.fo .fo-mapa .text-black { color: var(--fo-fg) !important; }
+.fo .fo-mapa .text-slate-600, .fo .fo-mapa .text-slate-500, .fo .fo-mapa .text-cyan-700 { color: var(--fo-mut); }
+.fo .fo-mapa .grid > .flex.rounded-lg { background: var(--fo-glass-strong); border: 1px solid var(--fo-line); gap: 4px; }
+.fo .fo-mapa .grid > .flex.rounded-lg button { min-height: 44px; border-radius: var(--fo-radius-sm); color: var(--fo-fg); }
+.fo .fo-mapa .grid > .flex.rounded-lg button:hover { background: var(--fo-glass-hover); }
+.fo .fo-mapa .grid > .flex.rounded-lg button.bg-blue-700 { background: var(--fo-signal); color: var(--fo-on-signal); }
+.fo .fo-mapa input[type="search"] { min-height: 44px; border: 1px solid var(--fo-line-strong); border-radius: var(--fo-radius-sm); background: var(--fo-glass-strong); color: var(--fo-fg); }
+.fo .fo-mapa input[type="search"]::placeholder { color: var(--fo-mut); }
+.fo .fo-mapa input[type="search"]:focus { border-color: var(--fo-signal); box-shadow: 0 0 0 4px var(--cm-accent-soft); }
+.fo .fo-mapa .overflow-x-auto:has(table) { max-width: 100%; max-height: 70vh; overflow: auto; background: var(--fo-glass); border-color: var(--fo-line); }
+.fo .fo-mapa table thead th { z-index: 1; }
+.fo .fo-mapa table { border-collapse: collapse; color: var(--fo-fg); }
+.fo .fo-mapa table thead th { position: sticky; top: 0; background: var(--fo-glass-strong); color: var(--fo-mut); border-bottom: 1px solid var(--fo-line-strong); backdrop-filter: var(--fo-glass-blur); }
+.fo .fo-mapa table tbody { background: transparent !important; }
+.fo .fo-mapa table td { border-bottom: 1px solid var(--fo-line); }
+.fo .fo-mapa table tbody tr:hover td { background: var(--fo-glass-hover); }
+.fo .fo-mapa [role="dialog"] > div { background: var(--fo-glass-strong) !important; color: var(--fo-fg); backdrop-filter: var(--fo-glass-blur); }
+.fo .fo-mapa [role="dialog"] article { background: var(--fo-glass); border-color: var(--fo-line); }
+.fo .fo-mapa [role="dialog"] article span.bg-white { background: var(--fo-glass-strong) !important; }
+.fo .fo-mapa [role="dialog"] .border-slate-200, .fo .fo-mapa [role="dialog"] .border-slate-300 { border-color: var(--fo-line); }
+.fo .fo-mapa [aria-label^="Plano interactivo"] .text-slate-950 { color: revert; }
+@media (max-width: 640px) {
+    .fo .fo-mapa > div > .grid > .rounded-lg { padding: 1rem; }
+    .fo .fo-mapa table { min-width: 36rem; }
+    .fo .fo-mapa table th:first-child, .fo .fo-mapa table td:first-child { position: sticky; left: 0; z-index: 1; background: var(--fo-glass-strong); }
+    .fo .fo-mapa table th:first-child { z-index: 2; }
 }
 
 /* Oficios y libertades */
