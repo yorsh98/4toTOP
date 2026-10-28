@@ -50,13 +50,14 @@ test('tables show the last date between created and updated as FECHA UTILIZACIÓ
         'UserDirigido' => 'Motivo fecha',
     ]);
 
-    $creado = $registro->created_at->format('Y-m-d H:i');
+    // La vista pública muestra la fecha más reciente entre creación y actualización, en formato d-m-Y H:i
+    $creado = $registro->created_at->format('d-m-Y H:i');
     $actualizado = now()->addDay();
     $registro->forceFill(['updated_at' => $actualizado])->saveQuietly();
 
     Livewire::test($component, ['modo' => 'vista'])
-        ->assertSee('FECHA UTILIZACIÓN')
-        ->assertSee($actualizado->format('Y-m-d H:i'))
+        ->assertSee('Fecha utilización')
+        ->assertSee($actualizado->format('d-m-Y H:i'))
         ->assertDontSee($creado);
 })->with([
     'oficios' => [OficioTabla::class, Oficio::class],

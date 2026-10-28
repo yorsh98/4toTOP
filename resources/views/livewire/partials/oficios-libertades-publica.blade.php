@@ -39,7 +39,7 @@
                     @foreach (['CausaAsig' => 'Causa asignada', 'UserSolicitante' => 'Solicitante', 'UserDirigido' => 'Motivo / dirigido'] as $campo => $etiqueta)
                         <td data-label="{{ $etiqueta }}">@if (filled($registro->$campo) && $registro->$campo !== '-'){{ $registro->$campo }}@else<span class="fo-dash">—</span>@endif</td>
                     @endforeach
-                    <td data-label="Fecha utilización">@if ($registro->updated_at ?? $registro->created_at)<span class="fo-num">{{ ($registro->updated_at ?? $registro->created_at)->format('d-m-Y H:i') }}</span>@else<span class="fo-dash">—</span>@endif</td>
+                    <td data-label="Fecha utilización">@php($usada = collect([$registro->created_at, $registro->updated_at])->filter()->max())@if ($usada)<span class="fo-num">{{ $usada->format('d-m-Y H:i') }}</span>@else<span class="fo-dash">—</span>@endif</td>
                 </tr></tbody>
             @empty
                 <tbody><tr><td colspan="6" class="fo-table-empty">No se encontraron registros. Prueba con otra búsqueda o cambia el año.</td></tr></tbody>
