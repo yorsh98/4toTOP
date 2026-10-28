@@ -1,10 +1,14 @@
 <?php
 
 use App\Livewire\AusentismoCalendario;
+use App\Livewire\LibertadTabla;
+use App\Livewire\OficioTabla;
 use App\Livewire\PublicFileConverterPage;
 use App\Livewire\TablaGuias;
 use App\Models\Ausentismo;
 use App\Models\Guias;
+use App\Models\Libertad;
+use App\Models\Oficio;
 use App\Models\TtyppRegistro;
 use App\Models\User;
 use Carbon\Carbon;
@@ -143,3 +147,37 @@ test('convertir archivos muestra la cabecera y el historial de la sesión', func
         ->assertSee('acta.pdf')
         ->assertSee('data-label="Estado"', false);
 });
+
+test('últimos oficios y libertades muestran registros públicos y permiten buscar', function (string $model, string $component, string $url) {
+    $model::create(['Numentregado' => 123, 'año' => now()->year, 'CausaAsig' => 'C-123', 'UserSolicitante' => 'Ana', 'UserDirigido' => 'Prueba']);
+    $eliminado = $model::create(['Numentregado' => 124, 'año' => now()->year, 'CausaAsig' => 'Eliminada', 'UserSolicitante' => 'Ana', 'UserDirigido' => 'Prueba']);
+    $eliminado->delete();
+
+    $this->get($url)->assertSuccessful()
+        ->assertSee('123-'.now()->year)
+        ->assertSee('C-123')
+        ->assertDontSee('Eliminada')
+        ->assertDontSee('wire:click="toggleEliminados"', false)
+        ->assertSee('aria-sort=', false);
+
+    Livewire::test($component, ['modo' => 'vista'])
+        ->set('search', 'No existe')
+        ->assertSee('No se encontraron registros')
+        ->set('search', 'C-123')
+        ->assertSee('C-123');
+})->with([
+    [Oficio::class, OficioTabla::class, '/tablas'],
+    [Libertad::class, LibertadTabla::class, '/tabla2'],
+]);
+
+test('oficios y libertades en modo full conservan sus vistas', function (string $component, string $permission, string $view) {
+    $this->seed(RolesAndPermissionsSeeder::class);
+    $user = User::factory()->create();
+    $user->givePermissionTo($permission);
+    $this->actingAs($user);
+
+    Livewire::test($component, ['modo' => 'full'])->assertViewIs($view);
+})->with([
+    [OficioTabla::class, 'oficios.ver', 'livewire.oficio-tabla'],
+    [LibertadTabla::class, 'libertades.ver', 'livewire.libertad-tabla'],
+]);

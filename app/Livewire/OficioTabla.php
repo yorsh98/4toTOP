@@ -347,7 +347,7 @@ class OficioTabla extends Component
             ->pluck('año')
             ->toArray();
 
-        return view('livewire.oficio-tabla', [
+        return view($this->isVista() ? 'livewire.oficio-tabla-publica' : 'livewire.oficio-tabla', [
             'oficios' => $Oficios,
             'anios' => $anios,
         ]);
