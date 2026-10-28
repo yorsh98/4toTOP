@@ -669,6 +669,30 @@
 .fo .fo-auth-link:hover { color: var(--fo-signal); }
 .fo .fo-auth-form .fo-hint { margin-bottom: 0; }
 
+/* Bitácora de pruebas */
+.fo .fo-bitacora-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 2fr); gap: 16px; }
+.fo .fo-bitacora-panel { min-width: 0; padding: 18px; border: 1px solid var(--fo-line); border-radius: var(--fo-radius); background: var(--fo-glass-strong); backdrop-filter: var(--fo-glass-blur); }
+.fo .fo-bitacora-panel h2 { margin: 0 0 14px; font-family: var(--fo-display); font-size: 19px; color: var(--fo-fg); }
+.fo .fo-bitacora-panel .fo-listbar-field { width: 100%; }
+.fo .fo-bitacora-list { display: grid; gap: 8px; margin-top: 14px; }
+.fo .fo-bitacora-row { display: flex; gap: 8px; min-width: 0; }
+.fo .fo-bitacora-choice, .fo .fo-bitacora-link { border: 1px solid var(--fo-line); border-radius: var(--fo-radius-sm); background: var(--fo-glass); color: var(--fo-fg); padding: 10px 12px; }
+.fo .fo-bitacora-choice { display: flex; flex: 1; justify-content: space-between; align-items: center; gap: 8px; min-width: 0; text-align: left; overflow-wrap: anywhere; }
+.fo .fo-bitacora-choice:hover, .fo .fo-bitacora-link:hover { background: var(--fo-glass-hover); border-color: var(--fo-signal); }
+.fo .fo-bitacora-choice[aria-current="true"] { border-color: var(--fo-signal); box-shadow: inset 3px 0 var(--fo-signal); }
+.fo .fo-bitacora-link { white-space: nowrap; text-decoration: none; }
+.fo .fo-bitacora-empty, .fo .fo-bitacora-date { margin: 14px 0; color: var(--fo-fg); }
+.fo .fo-bitacora-table th { padding: 12px 14px; }
+@media (max-width: 760px) {
+    .fo .fo-bitacora-grid { grid-template-columns: minmax(0, 1fr); }
+    .fo .fo-bitacora-table thead { display: none; }
+    .fo .fo-bitacora-table tbody, .fo .fo-bitacora-table tr, .fo .fo-bitacora-table td { display: block; }
+    .fo .fo-bitacora-table tr + tr { border-top: 1px solid var(--fo-line-strong); }
+    .fo .fo-bitacora-table tbody tr { display: grid; gap: 8px; padding: 12px 14px; }
+    .fo .fo-bitacora-table td { display: grid; grid-template-columns: minmax(100px, 1fr) minmax(0, 2fr); gap: 12px; overflow-wrap: anywhere; }
+    .fo .fo-bitacora-table td::before { content: attr(data-label); font-weight: 700; }
+}
+
 /* Oficios y libertades */
 .fo .fo-oficios-grid { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(260px, 1fr); gap: 24px; align-items: start; }
 .fo .fo-panel { padding: clamp(20px, 3vw, 32px); border: 1px solid var(--fo-line); border-radius: 18px; background: var(--fo-glass); backdrop-filter: var(--fo-glass-blur); -webkit-backdrop-filter: var(--fo-glass-blur); box-shadow: inset 0 1px 0 var(--fo-glass-edge); }

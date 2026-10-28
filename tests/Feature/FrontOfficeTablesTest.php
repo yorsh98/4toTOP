@@ -1,11 +1,15 @@
 <?php
 
 use App\Livewire\AusentismoCalendario;
+use App\Livewire\BitacoraPruebasPublicPage;
+use App\Livewire\BitacoraPruebasViewer;
 use App\Livewire\LibertadTabla;
 use App\Livewire\OficioTabla;
 use App\Livewire\PublicFileConverterPage;
 use App\Livewire\TablaGuias;
 use App\Models\Ausentismo;
+use App\Models\BitacoraPruebaDia;
+use App\Models\BitacoraPruebaItem;
 use App\Models\Guias;
 use App\Models\Libertad;
 use App\Models\Oficio;
@@ -194,3 +198,29 @@ test('las pantallas de autenticación usan el marco público y campos accesibles
     ['/forgot-password', 'Recuperar contraseña'],
     ['/reset-password/token', 'Restablecer contraseña'],
 ]);
+
+test('bitácora pública muestra pruebas y conserva la vista del backoffice', function () {
+    $user = User::factory()->create(['name' => 'Ana']);
+    $dia = BitacoraPruebaDia::create([
+        'rit' => '100-2026', 'numero_dia' => 1, 'fecha_dia' => '2026-04-20', 'enlace_acta' => 'https://example.test/acta',
+    ]);
+    BitacoraPruebaItem::create([
+        'bitacora_pruebas_dia_id' => $dia->id, 'nombre_prueba' => 'Declaración',
+        'institucion_exhibe' => 'Fiscalía', 'ingresado_por_user_id' => $user->id,
+    ]);
+
+    $this->get('/bitacora-pruebas')->assertSuccessful()
+        ->assertSee('Bitácora de pruebas')->assertSee('100-2026')->assertSee('Declaración')
+        ->assertSee('Fiscalía')->assertSee('Ana')->assertSee('https://example.test/acta')
+        ->assertSee('fo-table-wrap--glass', false);
+
+    Livewire::test(BitacoraPruebasPublicPage::class)
+        ->set('searchDetalle', 'Declaración')->assertSee('Declaración')
+        ->set('searchDetalle', 'inexistente')->assertSee('No hay días que mostrar');
+    Livewire::test(BitacoraPruebasViewer::class, ['showHero' => false])
+        ->assertViewIs('livewire.bitacora-pruebas-viewer');
+});
+
+test('bitácora pública informa cuando no hay juicios', function () {
+    $this->get('/bitacora-pruebas')->assertSuccessful()->assertSee('No hay juicios que mostrar');
+});
