@@ -2,6 +2,7 @@
 @import "./chat-motion.css";
 @import "./app-open.css";
 @import "./front-office.css";
+@import "./backoffice.css";
 @import "./audio-cutter.css";
 @tailwind base;
 @tailwind components;
