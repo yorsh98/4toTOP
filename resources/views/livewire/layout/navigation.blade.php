@@ -36,12 +36,12 @@ new class extends Component
     toggleTheme() { this.theme = this.theme === 'dark' ? 'light' : 'dark'; document.documentElement.dataset.theme = this.theme; try { localStorage.setItem('fo-theme', this.theme); } catch (_) {} }
 }" :class="collapsed ? 'lg:w-20' : 'lg:w-72'" class="bo-nav w-full lg:shrink-0">
     <div class="bo-nav-mobile flex h-16 items-center justify-between px-4 lg:hidden">
-        <a href="{{ route('dashboard') }}" wire:navigate class="bo-brand"><img src="{{ asset('img/pjud_blanco.webp') }}" alt=""><span>4toTOP</span></a>
+        <a href="{{ route('dashboard') }}" wire:navigate class="bo-brand"><img src="{{ asset('img/pjud_blanco.webp') }}" alt="Poder Judicial de Chile"><span>4toTOP</span></a>
         <button type="button" class="bo-nav-toggle" @click="open = !open" :aria-expanded="open" aria-label="Abrir menú"><i class="fa-solid fa-bars"></i></button>
     </div>
     <aside class="bo-sidebar hidden h-screen lg:sticky lg:top-0 lg:flex lg:flex-col">
         <div class="bo-nav-head flex h-16 items-center justify-between px-3">
-            <a href="{{ route('dashboard') }}" wire:navigate class="bo-brand" x-show="!collapsed"><img src="{{ asset('img/pjud_blanco.webp') }}" alt=""><span>4toTOP</span></a>
+            <a href="{{ route('dashboard') }}" wire:navigate class="bo-brand" x-show="!collapsed"><img src="{{ asset('img/pjud_blanco.webp') }}" alt="Poder Judicial de Chile"><span>4toTOP</span></a>
             <button type="button" class="bo-nav-toggle" @click="toggleCollapsed" :title="collapsed ? 'Expandir menú' : 'Colapsar menú'" :aria-label="collapsed ? 'Expandir menú' : 'Colapsar menú'"><i class="fa-solid" :class="collapsed ? 'fa-angles-right' : 'fa-angles-left'"></i></button>
         </div>
         <div class="flex-1 overflow-y-auto p-3">
