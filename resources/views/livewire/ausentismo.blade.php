@@ -28,15 +28,15 @@
     {{-- Encabezado --}}
     <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-3">
         <div>
-            <h1 class="text-xl font-semibold text-gray-800">Ausentismo del Tribunal</h1>
-            <p class="text-gray-500 text-sm">Registra y gestiona ausencias por rango de fechas, con motivo/observación.</p>
+            <h1 class="text-xl font-semibold bo-strong">Ausentismo del Tribunal</h1>
+            <p class="bo-muted text-sm">Registra y gestiona ausencias por rango de fechas, con motivo/observación.</p>
         </div>
        
     </div>
 
     {{-- Formulario --}}
-    <div id="ausentismo-form" class="bg-white rounded-2xl shadow p-4 md:p-6">
-        <h2 class="text-base font-medium text-gray-800 mb-3">
+    <div id="ausentismo-form" class="bo-section p-4 md:p-6">
+        <h2 class="text-base font-medium bo-strong mb-3">
             {{ $this->editingId ? 'Editar ausentismo' : 'Nuevo ausentismo' }}
         </h2>
 
@@ -45,81 +45,81 @@
 
         {{-- Nombre (4) --}}
         <div class="md:col-span-4">
-            <label class="block text-sm text-gray-600 mb-1">Nombre del funcionario</label>
+            <label class="block text-sm bo-muted mb-1">Nombre del funcionario</label>
             <input type="text" wire:model.defer="funcionario_nombre" required minlength="3" maxlength="150" list="funcionariosCatalogo"
-                class="w-full h-10 px-3 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('funcionario_nombre') ring-2 ring-red-500 @enderror">
+                class="bo-input w-full">
             <datalist id="funcionariosCatalogo">
                 @foreach($funcionarios_sugeridos as $nombre)
                     <option value="{{ $nombre }}">
                 @endforeach
             </datalist>
-            @error('funcionario_nombre') <p class="text-red-600 text-xs mt-1">{{ $message }}</p> @enderror
+            @error('funcionario_nombre') <p class="bo-text--danger text-xs mt-1">{{ $message }}</p> @enderror
         </div>
 
         {{-- Tipo de permiso (2) --}}
         <div class="md:col-span-2">
-            <label class="block text-sm text-gray-600 mb-1">Tipo de permiso</label>
+            <label class="block text-sm bo-muted mb-1">Tipo de permiso</label>
             <select wire:model.defer="tipo_permiso" required
-                    class="w-full h-10 px-3 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('tipo_permiso') ring-2 ring-red-500 @enderror">
+                    class="bo-select w-full">
                 <option value="">— Selecciona —</option>
                 @foreach($tipos_ausencia as $a)
                     <option value="{{ $a }}">{{ $a }}</option>
                 @endforeach
             </select>
-            @error('tipo_permiso') <p class="text-red-600 text-xs mt-1">{{ $message }}</p> @enderror
+            @error('tipo_permiso') <p class="bo-text--danger text-xs mt-1">{{ $message }}</p> @enderror
         </div>
 
         {{-- Cargo (ahora 2, antes 3) --}}
         <div class="md:col-span-2">
-            <label class="block text-sm text-gray-600 mb-1">Cargo</label>
+            <label class="block text-sm bo-muted mb-1">Cargo</label>
             <select wire:model.defer="cargo" required
-                    class="w-full h-10 px-3 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('cargo') ring-2 ring-red-500 @enderror">
+                    class="bo-select w-full">
                 <option value="">— Selecciona —</option>
                 @foreach($cargos as $c)
                     <option value="{{ $c }}">{{ $c }}</option>
                 @endforeach
             </select>
-            @error('cargo') <p class="text-red-600 text-xs mt-1">{{ $message }}</p> @enderror
+            @error('cargo') <p class="bo-text--danger text-xs mt-1">{{ $message }}</p> @enderror
         </div>
 
         {{-- Fecha inicio (2) --}}
         <div class="md:col-span-2">
-            <label class="block text-sm text-gray-600 mb-1">Fecha inicio</label>
+            <label class="block text-sm bo-muted mb-1">Fecha inicio</label>
             <input type="date" wire:model.defer="fecha_inicio" required
-                class="w-full h-10 px-3 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('fecha_inicio') ring-2 ring-red-500 @enderror">
-            @error('fecha_inicio') <p class="text-red-600 text-xs mt-1">{{ $message }}</p> @enderror
+                class="bo-input w-full">
+            @error('fecha_inicio') <p class="bo-text--danger text-xs mt-1">{{ $message }}</p> @enderror
         </div>
 
         {{-- Fecha término (2) --}}
         <div class="md:col-span-2">
-            <label class="block text-sm text-gray-600 mb-1">Fecha término</label>
+            <label class="block text-sm bo-muted mb-1">Fecha término</label>
             <input type="date" wire:model.defer="fecha_termino" required
-                class="w-full h-10 px-3 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('fecha_termino') ring-2 ring-red-500 @enderror">
-            @error('fecha_termino') <p class="text-red-600 text-xs mt-1">{{ $message }}</p> @enderror
+                class="bo-input w-full">
+            @error('fecha_termino') <p class="bo-text--danger text-xs mt-1">{{ $message }}</p> @enderror
         </div>
 
         {{-- Observación (12, segunda fila completa) --}}
         <div class="md:col-span-12">
-            <label class="block text-sm text-gray-600 mb-1">Observación (tipo de permiso / motivo)</label>
+            <label class="block text-sm bo-muted mb-1">Observación (tipo de permiso / motivo)</label>
             <textarea wire:model.defer="observacion" rows="3" placeholder="Licencia médica, feriado legal, permiso administrativo, comisión de servicio, etc."
-                    class="w-full px-3 py-2 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('observacion') ring-2 ring-red-500 @enderror"></textarea>
-            @error('observacion') <p class="text-red-600 text-xs mt-1">{{ $message }}</p> @enderror
+                    class="bo-input w-full"></textarea>
+            @error('observacion') <p class="bo-text--danger text-xs mt-1">{{ $message }}</p> @enderror
         </div>
 
         {{-- Botones --}}
         <div class="md:col-span-12 flex items-center gap-2 pt-2">
             @if($this->editingId)
                 <button type="submit"
-                        class="px-4 py-2 bg-blue-600 text-white rounded-xl shadow hover:bg-blue-700">
+                        class="bo-btn bo-btn--primary">
                     Actualizar
                 </button>
                 <button type="button" wire:click="resetForm"
-                        class="px-4 py-2 bg-gray-200 text-gray-800 rounded-xl hover:bg-gray-300">
+                        class="bo-btn bo-btn--secondary">
                     Cancelar
                 </button>
             @else
                 <button type="submit"
-                        class="px-4 py-2 bg-green-600 text-white rounded-xl shadow hover:bg-green-700">
+                        class="bo-btn bo-btn--primary">
                     Guardar
                 </button>
             @endif
@@ -129,10 +129,10 @@
     </div>
 
     {{-- Tabla --}}
-    <div class="bg-white rounded-2xl shadow">
+    <div class="bo-card overflow-hidden">
         <div class="overflow-x-auto">
-            <table class="min-w-full text-sm">
-                <thead class="bg-gray-100 text-gray-700">
+            <table class="bo-table min-w-full text-sm">
+                <thead class="">
                     <tr>
                         <th class="text-left px-4 py-2">Funcionario</th>
                         <th class="text-left px-4 py-2">Cargo</th>
@@ -143,9 +143,9 @@
                         <th class="text-right px-4 py-2">Acciones</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y">
+                <tbody class="">
                     @forelse($items as $row)
-                        <tr class="hover:bg-gray-50">
+                        <tr class="">
                             <td class="px-4 py-2">{{ $row->funcionario_nombre }}</td>
                             <td class="px-4 py-2">{{ $row->cargo }}</td>
                             <td class="px-4 py-2">{{ $row->tipo_permiso }}</td>
@@ -156,12 +156,12 @@
                             </td>
                             <td class="px-4 py-2">
                                 <div class="flex items-center justify-end gap-2">
-                                    <button wire:click="edit({{ $row->id }})"
-                                            class="px-3 py-1 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100">
+                                    <button aria-label="Editar registro" wire:click="edit({{ $row->id }})"
+                                            class="bo-btn-icon">
                                         <i class="fas fa-edit"></i>
                                     </button>
                                     <button type="button" x-on:click="confirmDelete({{ $row->id }})"
-                                            class="px-3 py-1 rounded-lg bg-red-50 text-red-700 hover:bg-red-100"
+                                            class="bo-btn-icon bo-text--danger"
                                             aria-label="Eliminar registro">
                                         <i class="fas fa-trash"></i>
                                     </button>
@@ -170,7 +170,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-4 py-6 text-center text-gray-500">
+                            <td colspan="7" class="px-4 py-6 text-center bo-muted">
                                 No hay registros.
                             </td>
                         </tr>

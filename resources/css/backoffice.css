@@ -223,3 +223,6 @@ body.bo { --bo-solid-ok: #087443; --bo-solid-warn: #875000; --bo-muted-on-solid:
 
 /* Las tablas de audiencias conservan espacio para sus columnas y desplazan su propio contenido. */
 .bo .bo-audiencias-table { min-width: 48rem; }
+
+/* Acento para secciones con acciones destructivas. */
+.bo .bo-section--danger { --bo-accent: var(--bo-alarm); }

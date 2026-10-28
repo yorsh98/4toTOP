@@ -56,10 +56,10 @@ new class extends Component
 
 <section>
     <header>
-        <h2 class="text-lg font-medium text-gray-900">
+        <h2 class="text-lg font-medium bo-strong">
             {{ __('auth.profile_information') }}
         </h2>
-        <p class="mt-1 text-sm text-gray-600">
+        <p class="mt-1 text-sm bo-muted">
             {{ __('auth.update_profile_description') }}
         </p>
     </header>
@@ -78,15 +78,15 @@ new class extends Component
 
             @if (auth()->user() instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! auth()->user()->hasVerifiedEmail())
                 <div>
-                    <p class="text-sm mt-2 text-gray-800">
+                    <p class="text-sm mt-2 bo-strong">
                         {{ __('auth.unverified_email') }}
-                        <button wire:click.prevent="sendVerification" class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        <button wire:click.prevent="sendVerification" class="bo-btn bo-btn--secondary text-sm">
                             {{ __('auth.resend_verification_email') }}
                         </button>
                     </p>
 
                     @if (session('status') === 'verification-link-sent')
-                        <p class="mt-2 font-medium text-sm text-green-600">
+                        <p class="mt-2 font-medium text-sm bo-text--ok">
                             {{ __('auth.verification_link_sent') }}
                         </p>
                     @endif
