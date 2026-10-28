@@ -81,7 +81,7 @@ new #[Layout('layouts.guest')] class extends Component
             <input class="fo-input" wire:model="password_confirmation" id="password_confirmation" type="password" name="password_confirmation" required autocomplete="new-password" aria-invalid="{{ $errors->has('password_confirmation') ? 'true' : 'false' }}" @error('password_confirmation') aria-describedby="password_confirmation-error" @enderror>
             @error('password_confirmation') <p class="fo-hint fo-hint--warn" id="password_confirmation-error">{{ $message }}</p> @enderror
         </div>
-        <a class="fo-auth-link" href="{{ route('login') }}" wire:navigate>{{ __('auth.already_registered') }}</a>
         <button class="fo-btn fo-btn--primary" type="submit">{{ __('auth.register') }}</button>
+        <p>¿Ya tienes cuenta? <a class="fo-auth-link" href="{{ route('login') }}" wire:navigate>Ingresar</a></p>
     </form>
 </div>

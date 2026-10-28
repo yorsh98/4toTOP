@@ -215,6 +215,7 @@ test('bitácora pública muestra pruebas y conserva la vista del backoffice', fu
     $this->get('/bitacora-pruebas')->assertSuccessful()
         ->assertSee('Bitácora de pruebas')->assertSee('100-2026')->assertSee('Declaración')
         ->assertSee('Fiscalía')->assertSee('Ana')->assertSee('https://example.test/acta')
+        ->assertSee('Ver pruebas')->assertSee('Abrir las pruebas del juicio 100-2026 en una pestaña nueva')
         ->assertSee('fo-table-wrap--glass', false);
 
     Livewire::test(BitacoraPruebasPublicPage::class)
@@ -291,4 +292,21 @@ test('monitor muestra las audiencias de hoy del tipo actual', function () {
     ]);
 
     Livewire::test(MonitorAudiencias::class)->assertSee('123-2026')->assertSee('En curso');
+});
+
+test('el registro está disponible en el encabezado para invitados', function () {
+    $this->get('/')->assertSuccessful()->assertSee('aria-label="Registrarse"', false);
+    $this->actingAs(User::factory()->create())->get('/')
+        ->assertSuccessful()->assertDontSee('aria-label="Registrarse"', false);
+});
+
+test('las pantallas de acceso enlazan entre sí', function () {
+    $this->get('/login')->assertSuccessful()->assertSee('Crear una cuenta')->assertSee(route('register'), false);
+    $this->get('/register')->assertSuccessful()->assertSee('¿Ya tienes cuenta?')->assertSee(route('login'), false);
+});
+
+test('la página de error muestra el fondo y el registro de navegación', function () {
+    expect(view('errors.404')->render())
+        ->toContain('centro-justicia-2560.webp')
+        ->toContain('Registro de navegación');
 });

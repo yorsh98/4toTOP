@@ -44,5 +44,8 @@ new #[Layout('layouts.guest')] class extends Component
             <a class="fo-auth-link" href="{{ route('password.request') }}" wire:navigate>{{ __('auth.forgot_password') }}</a>
         @endif
         <button class="fo-btn fo-btn--primary" type="submit">{{ __('auth.login') }}</button>
+        @if (Route::has('register'))
+            <p>¿No tienes cuenta? <a class="fo-auth-link" href="{{ route('register') }}" wire:navigate>Crear una cuenta</a></p>
+        @endif
     </form>
 </div>

@@ -13,7 +13,7 @@
                     <div class="fo-bitacora-row" wire:key="rit-{{ $rit }}">
                         <button type="button" class="fo-bitacora-choice fo-num" wire:click="selectRit(@js($rit))" @if (trim($selectedRit) === trim($rit)) aria-current="true" @endif>{{ $rit }}</button>
                         @if (!empty($enlacesPorRit[$rit]))
-                            <a class="fo-bitacora-link" href="{{ $enlacesPorRit[$rit] }}" target="_blank" rel="noopener noreferrer" aria-label="Abrir acta de {{ $rit }} en una pestaña nueva">Acta <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a>
+                            <a class="fo-bitacora-link" href="{{ $enlacesPorRit[$rit] }}" target="_blank" rel="noopener noreferrer" aria-label="Abrir las pruebas del juicio {{ $rit }} en una pestaña nueva"><i class="fa-solid fa-folder-open" aria-hidden="true"></i> Ver pruebas <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a>
                         @endif
                     </div>
                 @empty
