@@ -566,6 +566,17 @@
     .fo .fo-ttypp-table .fo-icon-btn { width: 44px; height: 44px; }
 }
 
+/* Guías telefónicas */
+.fo .fo-guias-filters { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+.fo .fo-guias-table td { overflow-wrap: anywhere; }
+.fo .fo-guias-table a { color: var(--fo-fg); }
+.fo .fo-guias-rut { color: var(--fo-mut); }
+@media (max-width: 760px) {
+    .fo .fo-guias-table .fo-table-group > tr:first-child { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .fo .fo-guias-table .fo-table-group > tr:first-child > td[data-label] { grid-column: auto; }
+    .fo .fo-guias-table .fo-table-group > tr:first-child > td:first-child { grid-column: 1 / -1; }
+}
+
 /* Oficios y libertades */
 .fo .fo-oficios-grid { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(260px, 1fr); gap: 24px; align-items: start; }
 .fo .fo-panel { padding: clamp(20px, 3vw, 32px); border: 1px solid var(--fo-line); border-radius: 18px; background: var(--fo-glass); backdrop-filter: var(--fo-glass-blur); -webkit-backdrop-filter: var(--fo-glass-blur); box-shadow: inset 0 1px 0 var(--fo-glass-edge); }
