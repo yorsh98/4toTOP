@@ -1,22 +1,22 @@
 <div>
     <div class="flex flex-col gap-3 mb-4 md:flex-row md:items-end md:justify-between">
         <div>
-            <label class="block mb-1 text-sm text-gray-600">Fecha</label>
+            <label class="bo-label block mb-1 text-sm bo-muted">Fecha</label>
             <input type="date" wire:model.lazy="fecha"
-                class="px-3 py-2 border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                class="bo-input px-3 py-2 border bo-border rounded-md focus:outline-none focus:ring-2 ">
         </div>
 
-        <div class="flex items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2">
             <a href="{{ route('audiencias.export.diaria', ['fecha' => $fecha]) }}" target="_blank"
-                class="inline-flex items-center justify-center rounded-md px-3 py-2 transition-transform duration-200 ease-out motion-safe:hover:-translate-y-0.5 motion-safe:hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                class="inline-flex items-center justify-center rounded-md px-3 py-2 transition-transform duration-200 ease-out motion-safe:hover:-translate-y-0.5 motion-safe:hover:scale-105 focus:outline-none focus-visible:ring-2 "
                 title="Exportar Excel" aria-label="Exportar Excel">
-                <i class="fas fa-file-excel inline-block" style="color:#217346; font-size:32px;"></i>
+                <i class="fas fa-file-excel inline-block bo-text--ok text-2xl"></i>
             </a>
-            <button type="button" wire:click="diaAnterior" class="px-3 py-2 border rounded-md hover:bg-gray-50">← Día anterior</button>
-            <button type="button" wire:click="hoy" class="px-3 py-2 border rounded-md hover:bg-gray-50">Hoy</button>
-            <button type="button" wire:click="diaSiguiente" class="px-3 py-2 border rounded-md hover:bg-gray-50">Día siguiente →</button>
+            <button type="button" wire:click="diaAnterior" class="bo-btn bo-btn--secondary px-3 py-2 border rounded-md ">← Día anterior</button>
+            <button type="button" wire:click="hoy" class="bo-btn bo-btn--secondary px-3 py-2 border rounded-md ">Hoy</button>
+            <button type="button" wire:click="diaSiguiente" class="bo-btn bo-btn--secondary px-3 py-2 border rounded-md ">Día siguiente →</button>
             <button type="button" wire:click="openSend"
-                class="px-3 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                class="bo-btn bo-btn--primary px-3 py-2   rounded-md focus:outline-none focus:ring-2 ">
                 Enviar por correo
             </button>
         </div>
@@ -32,7 +32,7 @@
         <section class="mt-6 pt-6 border-t">
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-lg font-semibold">Editando audiencia</h2>
-                <button type="button" wire:click="closeEdit" class="px-3 py-2 border rounded-md hover:bg-gray-50">
+                <button type="button" wire:click="closeEdit" class="bo-btn bo-btn--secondary px-3 py-2 border rounded-md ">
                     ← Volver
                 </button>
             </div>

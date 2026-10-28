@@ -1,17 +1,10 @@
 <div>
-    <div class="max-w-6xl mx-auto p-6 bg-white">
-    <h2 class="text-2xl font-bold text-gray-800 mb-6">Audiencias Cortas</h2>
+    <div class="max-w-6xl mx-auto p-6 bo-panel">
+    <h2 class="text-2xl font-bold bo-strong mb-6">Audiencias Cortas</h2>
 
-    <div class="rounded border text-sm mb-4 text-center bg-amber-100 px-2 py-2">
+    <div class="rounded border text-sm mb-4 text-center bo-alert bo-alert--warn px-2 py-2">
         <span>Los datos <b>COMPARTIDOS</b> se aplican a todas las audiencias a registrar</span>
     </div>
-
-    @php
-        $baseInput = "w-full px-3 py-2 border rounded-md border-gray-300
-                      focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
-                      invalid:border-red-500 invalid:focus:border-red-500 invalid:focus:ring-red-300
-                      scroll-mt-24";
-    @endphp
 
     <form
         x-data
@@ -29,54 +22,54 @@
         class="space-y-8"
     >
         <!-- Datos compartidos -->
-        <div class="bg-lime-100 p-4 border rounded-lg">
-            <h3 class="text-lg font-medium text-gray-800 mb-4">Datos compartidos</h3>
-            <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <div class="bo-panel-subtle p-4 border rounded-lg">
+            <h3 class="text-lg font-medium bo-strong mb-4">Datos compartidos</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Fecha*</label>
-                    <input type="date" wire:model.defer="shared.fecha" required class="{{ $baseInput }}">
-                    @error('shared.fecha') <span data-error class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                    <label class="bo-label block text-sm font-medium bo-strong mb-1">Fecha*</label>
+                    <input type="date" wire:model.defer="shared.fecha" required class="bo-input w-full">
+                    @error('shared.fecha') <span data-error class="bo-text--danger text-xs">{{ $message }}</span> @enderror
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Hora inicio*</label>
-                    <input type="time" wire:model.defer="shared.hora_inicio" required class="{{ $baseInput }}">
-                    @error("shared.hora_inicio") <span data-error class="text-red-500 text-xs">{{ $message }}</span> @enderror
-                </div> 
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Juez Presidente*</label>
-                    <input type="text" wire:model.defer="shared.JuezP" required list="juecesSharedList" class="{{ $baseInput }}">
-                    @error('shared.JuezP') <span data-error class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                    <label class="bo-label block text-sm font-medium bo-strong mb-1">Hora inicio*</label>
+                    <input type="time" wire:model.defer="shared.hora_inicio" required class="bo-input w-full">
+                    @error("shared.hora_inicio") <span data-error class="bo-text--danger text-xs">{{ $message }}</span> @enderror
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Juez Redactor*</label>
-                    <input type="text" wire:model.defer="shared.JuezR" required list="juecesSharedList" class="{{ $baseInput }}">
-                    @error('shared.JuezR') <span data-error class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                    <label class="bo-label block text-sm font-medium bo-strong mb-1">Juez Presidente*</label>
+                    <input type="text" wire:model.defer="shared.JuezP" required list="juecesSharedList" class="bo-input w-full">
+                    @error('shared.JuezP') <span data-error class="bo-text--danger text-xs">{{ $message }}</span> @enderror
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Juez Integrante*</label>
-                    <input type="text" wire:model.defer="shared.JuezI" required list="juecesSharedList" class="{{ $baseInput }}">
-                    @error('shared.JuezI') <span data-error class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                    <label class="bo-label block text-sm font-medium bo-strong mb-1">Juez Redactor*</label>
+                    <input type="text" wire:model.defer="shared.JuezR" required list="juecesSharedList" class="bo-input w-full">
+                    @error('shared.JuezR') <span data-error class="bo-text--danger text-xs">{{ $message }}</span> @enderror
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Sala*</label>
-                    <input type="text" wire:model.defer="shared.sala" required class="{{ $baseInput }}">
-                    @error('shared.sala') <span data-error class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                    <label class="bo-label block text-sm font-medium bo-strong mb-1">Juez Integrante*</label>
+                    <input type="text" wire:model.defer="shared.JuezI" required list="juecesSharedList" class="bo-input w-full">
+                    @error('shared.JuezI') <span data-error class="bo-text--danger text-xs">{{ $message }}</span> @enderror
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Ubicación*</label>
-                    <input type="text" wire:model.defer="shared.ubicacion" required class="{{ $baseInput }}">
-                    @error("shared.ubicacion") <span data-error class="text-red-500 text-xs">{{ $message }}</span> @enderror
-                </div> 
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Anfitrión</label>
-                    <input type="text" wire:model.defer="shared.anfitrion" list="actaAnfitrionSharedList" class="{{ $baseInput }}">
-                    @error('shared.anfitrion') <span data-error class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                    <label class="bo-label block text-sm font-medium bo-strong mb-1">Sala*</label>
+                    <input type="text" wire:model.defer="shared.sala" required class="bo-input w-full">
+                    @error('shared.sala') <span data-error class="bo-text--danger text-xs">{{ $message }}</span> @enderror
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Cuenta Zoom</label>
-                    <input type="text" wire:model.defer="shared.cta_zoom" class="{{ $baseInput }}">
-                    @error('shared.cta_zoom') <span data-error class="text-red-500 text-xs">{{ $message }}</span> @enderror
-                </div>                                               
+                    <label class="bo-label block text-sm font-medium bo-strong mb-1">Ubicación*</label>
+                    <input type="text" wire:model.defer="shared.ubicacion" required class="bo-input w-full">
+                    @error("shared.ubicacion") <span data-error class="bo-text--danger text-xs">{{ $message }}</span> @enderror
+                </div>
+                <div>
+                    <label class="bo-label block text-sm font-medium bo-strong mb-1">Anfitrión</label>
+                    <input type="text" wire:model.defer="shared.anfitrion" list="actaAnfitrionSharedList" class="bo-input w-full">
+                    @error('shared.anfitrion') <span data-error class="bo-text--danger text-xs">{{ $message }}</span> @enderror
+                </div>
+                <div>
+                    <label class="bo-label block text-sm font-medium bo-strong mb-1">Cuenta Zoom</label>
+                    <input type="text" wire:model.defer="shared.cta_zoom" class="bo-input w-full">
+                    @error('shared.cta_zoom') <span data-error class="bo-text--danger text-xs">{{ $message }}</span> @enderror
+                </div>
                 <datalist id="juecesSharedList">
                     @foreach($juecesOptions as $nombre)
                         <option value="{{ $nombre }}">
@@ -92,44 +85,44 @@
         <hr>
         <!-- Acciones -->
         <div class="flex items-center justify-between">
-            <h3 class="text-lg font-medium text-gray-800">Audiencias a registrar</h3>
-            <button type="button" wire:click="addRow" class="bg-blue-100 text-black px-4 py-2 rounded-md hover:bg-blue-200">
+            <h3 class="text-lg font-medium bo-strong">Audiencias a registrar</h3>
+            <button type="button" wire:click="addRow" class="bo-btn bo-btn--secondary bo-panel-subtle bo-strong px-4 py-2 rounded-md ">
                 + Agregar fila
             </button>
         </div>
 
         <!-- Filas -->
         @forelse($items as $i => $row)
-            <div class="border rounded-lg bg-lime-50 p-4 space-y-4">
+            <div class="border rounded-lg bo-panel-subtle p-4 space-y-4">
                 <div class="flex justify-between items-center">
                     <span class="text-sm font-semibold">Fila #{{ $i + 1 }}</span>
-                    <button type="button" wire:click="removeRow({{ $i }})" class="text-red-600 transition-transform duration-150 ease-out
-                    hover:-translate-y-0.5 active:translate-y-0
-                    focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400/50 transform-gpu"><i class="fas fa-trash"></i></button>
+                    <button type="button" wire:click="removeRow({{ $i }})" class="bo-btn bo-btn--secondary bo-text--danger transition-transform duration-150 ease-out
+ hover:-translate-y-0.5 active:translate-y-0
+ focus:outline-none focus-visible:ring-2 transform-gpu"><i class="fas fa-trash"></i></button>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">RIT*</label>
-                        <input type="text" wire:model.defer="items.{{ $i }}.rit" wire:input.debounce.600ms="buscarPorRit({{ $i }})"  required class="{{ $baseInput }}" placeholder="Ej: 123-2025">
-                        @error("items.$i.rit") <span data-error class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                        <label class="bo-label block text-sm font-medium bo-strong mb-1">RIT*</label>
+                        <input type="text" wire:model.defer="items.{{ $i }}.rit" wire:input.debounce.600ms="buscarPorRit({{ $i }})"  required class="bo-input w-full" placeholder="Ej: 123-2025">
+                        @error("items.$i.rit") <span data-error class="bo-text--danger text-xs">{{ $message }}</span> @enderror
                     </div>
-                    
+
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">RUC*</label>
-                        <input type="text" wire:model.defer="items.{{ $i }}.ruc" required class="{{ $baseInput }}">
-                        @error("items.$i.ruc") <span data-error class="text-red-500 text-xs">{{ $message }}</span> @enderror
-                    </div>       
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Encargado de Causa*</label>
-                        <input type="text" wire:model.defer="items.{{ $i }}.encargado_causa" required list="encargadoCausaBatchList" class="{{ $baseInput }}">
-                        @error("items.$i.encargado_causa") <span data-error class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                        <label class="bo-label block text-sm font-medium bo-strong mb-1">RUC*</label>
+                        <input type="text" wire:model.defer="items.{{ $i }}.ruc" required class="bo-input w-full">
+                        @error("items.$i.ruc") <span data-error class="bo-text--danger text-xs">{{ $message }}</span> @enderror
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Acta*</label>
-                        <input type="text" wire:model.defer="items.{{ $i }}.acta" required list="actaBatchList" class="{{ $baseInput }}">
-                        @error("items.$i.acta") <span data-error class="text-red-500 text-xs">{{ $message }}</span> @enderror
-                    </div>   
+                        <label class="bo-label block text-sm font-medium bo-strong mb-1">Encargado de Causa*</label>
+                        <input type="text" wire:model.defer="items.{{ $i }}.encargado_causa" required list="encargadoCausaBatchList" class="bo-input w-full">
+                        @error("items.$i.encargado_causa") <span data-error class="bo-text--danger text-xs">{{ $message }}</span> @enderror
+                    </div>
+                    <div>
+                        <label class="bo-label block text-sm font-medium bo-strong mb-1">Acta*</label>
+                        <input type="text" wire:model.defer="items.{{ $i }}.acta" required list="actaBatchList" class="bo-input w-full">
+                        @error("items.$i.acta") <span data-error class="bo-text--danger text-xs">{{ $message }}</span> @enderror
+                    </div>
                     <datalist id="encargadoCausaBatchList">
                         @foreach($encargadoCausaOptions as $nombre)
                             <option value="{{ $nombre }}">
@@ -141,48 +134,48 @@
                         @endforeach
                     </datalist>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Observación</label>
-                        <input type="text" wire:model.defer="items.{{ $i }}.obs" class="{{ $baseInput }}">                        
-                    </div>                    
-                </div>                
+                        <label class="bo-label block text-sm font-medium bo-strong mb-1">Observación</label>
+                        <input type="text" wire:model.defer="items.{{ $i }}.obs" class="bo-input w-full">
+                    </div>
+                </div>
                 <!-- Acusados -->
                 <div class="border-t pt-4">
-                    <h4 class="text-sm font-semibold text-gray-800 mb-2">Acusados (mínimo 1 por fila)</h4>
-                    @error("items.$i.acusados") <span data-error class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                    <h4 class="text-sm font-semibold bo-strong mb-2">Acusados (mínimo 1 por fila)</h4>
+                    @error("items.$i.acusados") <span data-error class="bo-text--danger text-xs">{{ $message }}</span> @enderror
 
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-3 bg-gray-50 p-3 rounded border">
-                        <input type="text" placeholder="Nombre completo" class="{{ $baseInput }}" 
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-3 bo-panel-subtle p-3 rounded border">
+                        <input type="text" placeholder="Nombre completo" class="bo-input w-full"
                                wire:model.defer="items.{{ $i }}.nuevoAcusado.nombre_completo">
-                        <input type="text" placeholder="Situación" class="{{ $baseInput }}" list="situaciones"
+                        <input type="text" placeholder="Situación" class="bo-input w-full" list="situaciones"
                                wire:model.defer="items.{{ $i }}.nuevoAcusado.situacion">
-                        <input type="text" placeholder="Medida cautelar" class="{{ $baseInput }}"
+                        <input type="text" placeholder="Medida cautelar" class="bo-input w-full"
                                wire:model.defer="items.{{ $i }}.nuevoAcusado.medida_cautelar">
                         <div class="flex gap-2">
-                            <input type="text" placeholder="Forma notificación" class="{{ $baseInput }}"
+                            <input type="text" placeholder="Forma notificación" class="bo-input w-full"
                                    wire:model.defer="items.{{ $i }}.nuevoAcusado.forma_notificacion">
                             <button type="button" wire:click="addAcusado({{ $i }})"
-                                    class="shrink-0 bg-blue-100 text-black px-3 rounded-md hover:bg-blue-200">
+                                    class="bo-btn bo-btn--secondary shrink-0 bo-panel-subtle bo-strong px-3 rounded-md ">
                                 + Agregar
                             </button>
                         </div>
                     </div>
 
-                    @error("items.$i.nuevoAcusado.nombre_completo") <span data-error class="text-red-500 text-xs">{{ $message }}</span> @enderror
-                    @error("items.$i.nuevoAcusado.situacion") <span data-error class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                    @error("items.$i.nuevoAcusado.nombre_completo") <span data-error class="bo-text--danger text-xs">{{ $message }}</span> @enderror
+                    @error("items.$i.nuevoAcusado.situacion") <span data-error class="bo-text--danger text-xs">{{ $message }}</span> @enderror
 
                     @if(count($items[$i]['acusados']) > 0)
                         <div class="overflow-x-auto mb-3 border rounded">
-                            <table class="min-w-full divide-y divide-gray-200 text-sm">
-                                <thead class="bg-gray-50">
+                            <table class="bo-table bo-audiencias-table text-sm">
+                                <thead class="bo-panel-subtle">
                                     <tr>
-                                        <th class="px-3 py-2 text-left font-medium text-gray-600">Nombre</th>
-                                        <th class="px-3 py-2 text-left font-medium text-gray-600">Situación</th>
-                                        <th class="px-3 py-2 text-left font-medium text-gray-600">Medida</th>
-                                        <th class="px-3 py-2 text-left font-medium text-gray-600">Notificación</th>
+                                        <th class="px-3 py-2 text-left font-medium bo-muted">Nombre</th>
+                                        <th class="px-3 py-2 text-left font-medium bo-muted">Situación</th>
+                                        <th class="px-3 py-2 text-left font-medium bo-muted">Medida</th>
+                                        <th class="px-3 py-2 text-left font-medium bo-muted">Notificación</th>
                                         <th class="px-3 py-2"></th>
                                     </tr>
                                 </thead>
-                                <tbody class="bg-white divide-y divide-gray-100">
+                                <tbody class="bo-panel divide-y bo-border">
                                     @foreach($items[$i]['acusados'] as $k => $acus)
                                         <tr>
                                             <td class="px-3 py-2">{{ $acus['nombre_completo'] }}</td>
@@ -190,18 +183,18 @@
                                             <td class="px-3 py-2">{{ $acus['medida_cautelar'] }}</td>
                                             <td class="px-3 py-2">{{ $acus['forma_notificacion'] }}</td>
                                             <td class="px-3 py-2 text-right">
-                                                <button type="button" wire:click="removeAcusado({{ $i }}, {{ $k }})" class="text-red-600 hover:underline"><i class="fas fa-trash"></i></button>
+                                                <button type="button" wire:click="removeAcusado({{ $i }}, {{ $k }})" class="bo-btn bo-btn--secondary bo-text--danger hover:underline"><i class="fas fa-trash"></i></button>
                                             </td>
                                         </tr>
                                     @endforeach
                                 </tbody>
                             </table>
                         </div>
-                    @endif                    
+                    @endif
                 </div>
             </div>
         @empty
-            <p class="text-sm text-gray-500 italic">No hay filas. Agrega al menos una.</p>
+            <p class="text-sm bo-muted italic">No hay filas. Agrega al menos una.</p>
         @endforelse
 
         <datalist id="situaciones">
@@ -211,7 +204,7 @@
         </datalist>
 
         <div class="flex justify-end pt-2">
-            <button type="submit" class="bg-green-300 text-black px-6 py-2 rounded-md hover:bg-green-500">
+            <button type="submit" class="bo-btn bo-btn--primary  bo-strong px-6 py-2 rounded-md ">
                 Guardar Audiencias Corta
             </button>
         </div>

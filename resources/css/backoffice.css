@@ -55,7 +55,7 @@ body.bo {
 
 /* Primitivas comunes para superficies y acciones. */
 body.bo { --bo-fg: var(--bo-text); --bo-danger: #b91c1c; --bo-on-solid: #fff; --bo-nav: #0a2e5d; --bo-nav-text: #f1f5f9; --bo-nav-line: #526f96; --bo-primary: #0a2e5d; --bo-accent: var(--bo-signal); }
-:root[data-theme="dark"] .bo { --bo-nav: #08152b; --bo-primary: #174781; --bo-danger: #b91c1c; }
+:root[data-theme="dark"] .bo { --bo-nav: #08152b; --bo-primary: #174781; --bo-danger: #b91c1c; color-scheme: dark; }
 /* Contenedor principal. */
 .bo .bo-main { max-width: 80rem; margin: 0 auto; padding: 2rem 1rem; }
 /* Tarjeta de superficie sólida. */
@@ -220,3 +220,6 @@ body.bo { --bo-solid-ok: #087443; --bo-solid-warn: #875000; --bo-muted-on-solid:
 .bo .bo-segmented-item.is-active { background: var(--bo-primary); color: var(--bo-on-solid); }
 .bo .bo-checkbox { border: 1px solid var(--bo-line); border-radius: .25rem; background-color: var(--bo-surface); color: var(--bo-primary); }
 .bo .bo-checkbox:checked { background-color: var(--bo-primary); border-color: var(--bo-primary); }
+
+/* Las tablas de audiencias conservan espacio para sus columnas y desplazan su propio contenido. */
+.bo .bo-audiencias-table { min-width: 48rem; }
