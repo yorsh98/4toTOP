@@ -1,46 +1,11 @@
-<x-in-layout>
-
-                        <div class="grid gap-6 pt-5 mb-6 lg:grid-cols-1 lg:gap-8 animate__animated animate__flipInX animate__delay-0.5s">
-                            <div class="absolute top-4 left-4">
-                                <a href="{{ url('/') }}" class="bg-white text-black font-semibold py-1 px-3 rounded-md shadow-md flex items-center text-sm hover:bg-blue-700 hover:text-white transition">
-                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path>
-                                    </svg>
-                                    INICIO
-                                </a>
-                            </div>
-                            <div class="flex justify-center items-start gap-4 rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] transition duration-300 hover:text-black/70 hover:ring-black/20 focus:outline-none focus-visible:ring-[#FF2D20] lg:pb-10     ">
-                                <div class="flex size-12 shrink-0 items-center justify-center rounded-full sm:size-16">
-                                    <svg  version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512.001 512.001" xml:space="preserve" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path style="fill:#0084FF;" d="M332.803,10.449H95.726c-22.275,0-40.334,18.06-40.334,40.335v410.434 c0,22.276,18.059,40.334,40.334,40.334h320.546c22.275,0,40.334-18.059,40.334-40.334V134.253L332.803,10.449z"></path> <path style="fill:#10BAFC;" d="M373.139,134.253h83.467L332.806,10.451v83.47C332.803,116.195,350.861,134.253,373.139,134.253z"></path> <path d="M463.996,126.864L340.192,3.061C338.231,1.101,335.574,0,332.803,0H95.726C67.724,0,44.944,22.782,44.944,50.784v410.434 c0,28.001,22.781,50.783,50.783,50.783h320.546c28.002,0,50.783-22.781,50.783-50.783V134.253 C467.056,131.482,465.955,128.824,463.996,126.864z M343.255,35.679l88.127,88.126H373.14c-7.984,0-15.49-3.109-21.134-8.753 c-5.643-5.643-8.752-13.148-8.751-21.131L343.255,35.679L343.255,35.679z M416.274,491.102H95.726 c-16.479,0-29.885-13.406-29.885-29.885V50.784c0.001-16.479,13.407-29.886,29.885-29.886h226.631v73.021 c-0.002,13.565,5.28,26.318,14.871,35.909c9.592,9.592,22.345,14.874,35.911,14.874h73.018v316.515 C446.158,477.696,432.752,491.102,416.274,491.102z"></path> <path d="M275.092,351.492h-4.678c-5.77,0-10.449,4.678-10.449,10.449c0,5.771,4.679,10.449,10.449,10.449h4.678 c5.77,0,10.449-4.678,10.449-10.449C285.541,356.17,280.862,351.492,275.092,351.492z"></path> <path d="M236.61,351.492H135.118c-5.77,0-10.449,4.678-10.449,10.449c0,5.771,4.679,10.449,10.449,10.449H236.61 c5.77,0,10.449-4.678,10.449-10.449C247.059,356.17,242.381,351.492,236.61,351.492z"></path> <path d="M376.882,303.747H135.119c-5.77,0-10.449,4.678-10.449,10.449c0,5.771,4.679,10.449,10.449,10.449h241.763 c5.77,0,10.449-4.678,10.449-10.449C387.331,308.425,382.652,303.747,376.882,303.747z"></path> <path d="M376.882,256H135.119c-5.77,0-10.449,4.678-10.449,10.449s4.679,10.449,10.449,10.449h241.763 c5.77,0,10.449-4.678,10.449-10.449S382.652,256,376.882,256z"></path> <path d="M376.882,208.255H135.119c-5.77,0-10.449,4.678-10.449,10.449s4.679,10.449,10.449,10.449h241.763 c5.77,0,10.449-4.678,10.449-10.449C387.331,212.933,382.652,208.255,376.882,208.255z"></path> </g></svg>
-                                </div>
-                                <div class="pt-3 sm:pt-5">
-                                    <h2 class="text-xl font-semibold text-black ">SELECCIONE EL DOCUMENTO A DESCARGAR</h2>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="grid gap-6 lg:grid-cols-1 lg:gap-8 animate__animated animate__flipInX animate__delay-0.8s">
-                            <div class="flex flex-col gap-6 overflow-hidden rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] lg:p-10 lg:pb-10  ">
-                                    @foreach($doc as $item)
-                                        <a
-                                            href="{{ $item['url'] }}"
-                                            target="_blank"
-                                            class="group relative p-6 rounded-lg border border-gray-200 hover:border-blue-500 transition-all duration-300 shadow-sm hover:shadow-lg  "
-                                        >
-                                            <div class="flex justify-between items-center">
-                                                <div class="flex-1 min-w-0">
-                                                    <h3 class="text-lg font-semibold text-gray-900 truncate ">
-                                                        {{ $item['nombre'] }}
-                                                    </h3>
-                                                </div>
-                                                <div class="ml-4 flex items-center">
-                                                    <svg class="w-6 h-6 text-gray-400 group-hover:text-blue-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                                                    </svg>
-                                                </div>
-                                            </div>
-                                            <div class="absolute inset-y-0 left-0 w-1 bg-blue-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-r"></div>
-                                        </a>
-                                    @endforeach
-                            </div>
-                        </div>
+<x-in-layout title="Documentos">
+    <x-public.list-page
+        title="Documentos"
+        lead="Formularios y documentos para descargar. Se abren en otra pestaña."
+        :total="count($doc)"
+        :noun="['documento', 'documentos']"
+        placeholder="Filtrar documentos"
+        empty="Aún no hay documentos públicos. Se publican desde el backoffice, en Documentos.">
+        <x-public.document-list :items="$doc" icon="fa-file-lines" />
+    </x-public.list-page>
 </x-in-layout>

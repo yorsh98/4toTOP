@@ -4,6 +4,7 @@ window.$ = window.jQuery = $;
 import 'bootstrap';
 
 import Swal from 'sweetalert2';
+import { initFrontOffice } from './front-office.js';
 window.Swal = Swal;
 
 window.SwalToast = Swal.mixin({
@@ -313,3 +314,5 @@ window.audioCutter = (maxRegions, maxBytes) => ({
         this.go(+error.dataset.acError, true);
     },
 });
+
+initFrontOffice();

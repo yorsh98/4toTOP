@@ -1,235 +1,116 @@
-<x-sist-layout>
-  <style>
-    /* === Flip en la TARJETA AZUL === */
-    #blueCard {
-      perspective: 500px;
-      position: relative;        /* contexto para faces absolutas */
-      overflow: hidden;          /* oculta scroll si las caras exceden */
-    }
-    #blueCard .flip-inner {
-      position: relative;
-      width: 100%;
-      min-height: 460px;         /* alto mínimo del panel */
-      transition: transform .6s ease;
-      transform-style: preserve-3d;
-    }
-    #blueCard.flipped .flip-inner {
-      transform: rotateY(180deg);
-    }
+@php
+    $tipo = old('tipo', session('tipo', 'oficio')) === 'libertad' ? 'libertad' : 'oficio';
+    $numero = session('NumEntregado');
+    $anio = session('año');
+@endphp
 
-    #blueCard .face {
-      position: absolute; inset: 0;
-      -webkit-backface-visibility: hidden; backface-visibility: hidden;
-      padding: 1.25rem;
-      display: flex; flex-direction: column;
-    }
-    #blueCard .back { transform: rotateY(180deg); }
+<x-public.layout title="Oficios y libertades">
+    <div class="fo-page fo-oficios" data-app-view>
+        <header class="fo-page-head cm-welcome">
+            <a href="{{ route('welcome') }}" class="fo-back" data-fo-link style="--cm-i: 0">
+                <i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Inicio
+            </a>
+            <h1 class="fo-page-title" style="--cm-i: 1">Oficios y libertades</h1>
+            <p class="fo-page-lead" style="--cm-i: 2">Pide un número correlativo para una causa. No necesitas iniciar sesión.</p>
+        </header>
 
-    /* Si contenido crece, que scrollee dentro de la cara, no fuera del card */
-    #blueCard .face { overflow: auto; }
-  </style>
+        <div class="fo-oficios-grid">
+            <div class="fo-panel cm-rise">
+                @if (session('success') && $numero)
+                    <section class="fo-ticket" aria-live="polite" aria-labelledby="fo-ticket-title">
+                        <p class="fo-ticket-label" id="fo-ticket-title">
+                            {{ session('tipo') === 'libertad' ? 'Número de libertad asignado' : 'Número de oficio asignado' }}
+                        </p>
+                        <p class="fo-ticket-number fo-num cm-bump">{{ $numero }}<span>-{{ $anio }}</span></p>
+                        <p class="fo-ticket-note">Anótalo en el documento. Quedó registrado con la causa y el solicitante.</p>
+                        <button type="button" class="fo-btn fo-btn--ghost cm-press" data-fo-copy="{{ $numero }}-{{ $anio }}">
+                            <i class="fa-regular fa-copy" aria-hidden="true"></i> <span data-fo-copy-label>Copiar número</span>
+                        </button>
+                    </section>
+                @endif
 
-  <!-- Contenedor normal (NO gira) -->
-  <main class="max-w-[680px] w-full mx-auto px-4 py-5">
+                @if (session('error') || $errors->any())
+                    <div class="fo-alert" role="alert">
+                        <i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i>
+                        <div>
+                            <p>{{ session('error') ?? 'No se pudo pedir el número. Corrige los campos marcados.' }}</p>
+                            @if ($errors->any())
+                                <ul>
+                                    @foreach ($errors->all() as $message)
+                                        <li>{{ $message }}</li>
+                                    @endforeach
+                                </ul>
+                            @endif
+                        </div>
+                    </div>
+                @endif
 
-    <!-- TARJETA AZUL que gira -->
-    <div id="blueCard"
-         class="border-3 rounded-[15px] p-1 bg-[#95b9d3] max-w-[600px] w-full mx-auto text-center">
+                <form class="fo-form" action="{{ route('SistOficioLibertades.store') }}" method="POST" data-fo-oficios>
+                    @csrf
 
-      <div class="flip-inner">
-        <!-- Cara FRONTAL (botones) -->
-        <section class="face">
-          <div class="mb-3">
-            <h1 class="text-3xl fw-bold">SOLICITUD PARA NÚMEROS</h1>
-            <h1 class="text-3xl fw-bold">OFICIO / LIBERTAD</h1>
-          </div>
+                    <fieldset class="fo-seg cm-pill-track" data-fo-seg>
+                        <legend class="fo-label">Tipo de número</legend>
+                        <span class="cm-pill fo-seg-pill" aria-hidden="true"></span>
+                        @foreach (['oficio' => 'Oficio', 'libertad' => 'Libertad'] as $value => $label)
+                            <label class="fo-seg-option">
+                                <input type="radio" name="tipo" value="{{ $value }}" @checked($tipo === $value)>
+                                <span>{{ $label }}</span>
+                            </label>
+                        @endforeach
+                    </fieldset>
 
-          <!-- panel blanco interno solo para contraste visual -->
-          <div class=" rounded-3 p-2 mx-auto w-full">           
-            <div class="d-flex flex-wrap gap-3 justify-content-center">
-              <button type="button" class="button-Principal" onclick="selectForm('oficio')">OFICIO</button>
-              <button type="button" class="button-Principal" onclick="selectForm('libertad')">LIBERTAD</button>
-            </div>
-          </div>
-        </section>
+                    <div class="fo-field">
+                        <label class="fo-label" for="CausaAsig">Causa asignada</label>
+                        <input class="fo-input fo-num cm-focus-ring @error('CausaAsig') is-invalid @enderror" type="text" id="CausaAsig" name="CausaAsig"
+                               value="{{ old('CausaAsig') }}" required maxlength="10" pattern="[a-zA-Z0-9\s\-]{1,10}"
+                               autocomplete="off" aria-describedby="CausaAsig-hint" placeholder="Ej.: 123-2026">
+                        <p class="fo-hint" id="CausaAsig-hint">Hasta 10 caracteres: letras, números, espacios o guion.</p>
+                    </div>
 
-        <!-- Cara POSTERIOR (formularios) -->
-        <section class="face back text-start">
-          <div class="d-flex align-items-center justify-content-between mb-3">
-            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="flipBack()">← Volver</button>
-            <div class="text-end">
-              <span class="text-muted small">Módulo:</span>
-              <strong id="flipTitle" class="ms-1">—</strong>
-            </div>
-          </div>
+                    <div class="fo-field">
+                        <label class="fo-label" for="UserSolicitante">Solicitante</label>
+                        <select class="fo-select cm-focus-ring @error('UserSolicitante') is-invalid @enderror" id="UserSolicitante" name="UserSolicitante" required>
+                            <option value="" disabled @selected(! old('UserSolicitante'))>Elige quién lo pide</option>
+                            @foreach ($solicitantes as $solicitante)
+                                <option value="{{ $solicitante->nombre }}" @selected(old('UserSolicitante') === $solicitante->nombre)>{{ $solicitante->nombre }}</option>
+                            @endforeach
+                        </select>
+                        @if ($solicitantes->isEmpty())
+                            <p class="fo-hint fo-hint--warn">No hay solicitantes habilitados. Pide a un administrador que los active en el backoffice.</p>
+                        @endif
+                    </div>
 
-          <!-- Alertas -->
-          <div id="alert-message-form1" class="alert alert-danger d-none mb-3" role="alert">
-            <span id="alert-text-form1"></span>
-            <button type="button" class="btn-close float-end" aria-label="Cerrar" onclick="closeAlert('form1')"></button>
-          </div>
-          <div id="alert-message-form2" class="alert alert-danger d-none mb-3" role="alert">
-            <span id="alert-text-form2"></span>
-            <button type="button" class="btn-close float-end" aria-label="Cerrar" onclick="closeAlert('form2')"></button>
-          </div>
+                    <div class="fo-field">
+                        <label class="fo-label" for="UserDirigido">Motivo</label>
+                        <input class="fo-input cm-focus-ring @error('UserDirigido') is-invalid @enderror" type="text" id="UserDirigido" name="UserDirigido"
+                               value="{{ old('UserDirigido') }}" required pattern="[a-zA-Z0-9\s\-]+" autocomplete="off"
+                               aria-describedby="UserDirigido-hint">
+                        <p class="fo-hint" id="UserDirigido-hint">Solo letras, números, espacios o guion, sin tildes.</p>
+                    </div>
 
-          <!-- ===== FORM OFICIO ===== -->
-          <form id="form1"
-                class="needs-validation d-none"
-                action="{{ route('SistOficioLibertades.store') }}"
-                method="POST"
-                novalidate
-                onsubmit="return validateForm(this, 'form1')">
-            @csrf
-            <input type="hidden" name="tipo" value="oficio">
-
-            <h3 class="h5 fw-semibold mb-2">Solicitud para números de OFICIO</h3>
-            <hr class="mt-0 mb-3">
-
-            <div class="input-group input-group-lg mb-3">
-              <span class="input-group-text">CAUSA ASIGNADA</span>
-              <input type="text" class="form-control"
-                     id="CausaAsigOf" name="CausaAsig"
-                     required pattern="^[a-zA-Z0-9\s\-]{1,10}$" maxlength="10">
-              <div class="invalid-feedback">Máx 10, letras/números/espacios/guion (-).</div>
-            </div>
-
-            <div class="mb-3">
-              <select class="form-select form-select-lg"
-                      id="UserSolicitanteOf" name="UserSolicitante" required>
-                <option value="" disabled selected>SOLICITANTE</option>
-                @foreach($solicitantes as $solicitante)
-                  <option value="{{ $solicitante->nombre }}">{{ $solicitante->nombre }}</option>
-                @endforeach
-              </select>
-              <div class="invalid-feedback">Seleccione un solicitante válido.</div>
+                    <button type="submit" class="fo-btn fo-btn--primary cm-press" data-fo-submit>
+                        <span data-fo-submit-label>Pedir número de {{ $tipo }}</span>
+                    </button>
+                </form>
             </div>
 
-            <div class="input-group input-group-lg mb-3">
-              <span class="input-group-text">MOTIVO</span>
-              <input type="text" class="form-control"
-                     id="UserDirigidoOf" name="UserDirigido"
-                     required pattern="^[a-zA-Z0-9\s\-]+$">
-              <div class="invalid-feedback">Solo letras/números/espacios/guion (-).</div>
-            </div>
-
-            <div class="d-flex justify-content-center">
-              <button type="submit" class="button-73">ENVIAR SOLICITUD</button>
-            </div>
-          </form>
-
-          <!-- ===== FORM LIBERTAD ===== -->
-          <form id="form2"
-                class="needs-validation d-none"
-                action="{{ route('SistOficioLibertades.store') }}"
-                method="POST"
-                novalidate
-                onsubmit="return validateForm(this, 'form2')">
-            @csrf
-            <input type="hidden" name="tipo" value="libertad">
-
-            <h3 class="h5 fw-semibold mb-2">Solicitud para números de LIBERTAD</h3>
-            <hr class="mt-0 mb-3">
-
-            <div class="input-group input-group-lg mb-3">
-              <span class="input-group-text">CAUSA ASIGNADA</span>
-              <input type="text" class="form-control"
-                     id="CausaAsigLi" name="CausaAsig"
-                     required pattern="^[a-zA-Z0-9\s\-]{1,10}$" maxlength="10">
-              <div class="invalid-feedback">Máx 10, letras/números/espacios/guion (-).</div>
-            </div>
-
-            <div class="mb-3">
-              <select class="form-select form-select-lg"
-                      id="UserSolicitanteLi" name="UserSolicitante" required>
-                <option value="" disabled selected>SOLICITANTE</option>
-                @foreach($solicitantes as $solicitante)
-                  <option value="{{ $solicitante->nombre }}">{{ $solicitante->nombre }}</option>
-                @endforeach
-              </select>
-              <div class="invalid-feedback">Seleccione un solicitante válido.</div>
-            </div>
-
-            <div class="input-group input-group-lg mb-3">
-              <span class="input-group-text">MOTIVO</span>
-              <input type="text" class="form-control"
-                     id="UserDirigidoLi" name="UserDirigido"
-                     required pattern="^[a-zA-Z0-9\s\-]+$">
-              <div class="invalid-feedback">Solo letras/números/espacios/guion (-).</div>
-            </div>
-
-            <div class="d-flex justify-content-center">
-              <button type="submit" class="button-73">ENVIAR SOLICITUD</button>
-            </div>
-          </form>
-        </section>
-      </div>
+            <aside class="fo-oficios-aside cm-welcome" aria-label="Registros">
+                <h2 class="fo-aside-title" style="--cm-i: 0">Números ya entregados</h2>
+                <a href="{{ url('/tablas') }}" class="fo-access fo-access--row cm-lift cm-press" style="--cm-i: 1">
+                    <span class="fo-access-icon" aria-hidden="true"><i class="fa-solid fa-file-lines"></i></span>
+                    <span class="fo-access-text">
+                        <span class="fo-access-title">Últimos oficios</span>
+                        <span class="fo-access-desc">Registro de oficios del año.</span>
+                    </span>
+                </a>
+                <a href="{{ route('tabla2') }}" class="fo-access fo-access--row cm-lift cm-press" style="--cm-i: 2">
+                    <span class="fo-access-icon" aria-hidden="true"><i class="fa-solid fa-door-open"></i></span>
+                    <span class="fo-access-text">
+                        <span class="fo-access-title">Últimas libertades</span>
+                        <span class="fo-access-desc">Registro de libertades del año.</span>
+                    </span>
+                </a>
+            </aside>
+        </div>
     </div>
-
-  </main>
-
-  <script>
-    let currentForm = null; // 'oficio' | 'libertad'
-
-    function selectForm(tipo){
-      currentForm = tipo;
-
-      // Título módulo
-      document.getElementById('flipTitle').textContent = (tipo === 'oficio') ? 'OFICIO' : 'LIBERTAD';
-
-      // Mostrar solo el formulario elegido
-      document.getElementById('form1').classList.toggle('d-none', !(tipo === 'oficio'));
-      document.getElementById('form2').classList.toggle('d-none', !(tipo === 'libertad'));
-
-      // ✅ Voltear la TARJETA AZUL
-      document.getElementById('blueCard').classList.add('flipped');
-
-      // Limpiar alertas
-      closeAlert('form1'); closeAlert('form2');
-    }
-
-    function flipBack(){
-      document.getElementById('blueCard').classList.remove('flipped');
-      currentForm = null;
-    }
-
-    function validateForm(form, formId){
-      if (!form.checkValidity()) {
-        const alertBox = document.getElementById(`alert-message-${formId}`);
-        const alertTxt  = document.getElementById(`alert-text-${formId}`);
-        if (alertBox && alertTxt) {
-          alertTxt.textContent = 'Revisa los campos marcados en rojo. Respeta los formatos solicitados.';
-          alertBox.classList.remove('d-none');
-        }
-        form.classList.add('was-validated');
-        return false;
-      }
-      return true;
-    }
-
-    function closeAlert(formId){
-      const alertBox = document.getElementById(`alert-message-${formId}`);
-      if (alertBox) alertBox.classList.add('d-none');
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      const success = @json(session('success'));
-      const error   = @json(session('error'));
-      const tipo = @json(session('tipo'));
-      const numero = @json(session('NumEntregado'));
-      const ano = @json(session('año'));
-
-      if (success) {
-        Swal.fire({
-          icon: 'success',
-          title: tipo === 'oficio' ? 'Número de Oficio creado' : 'Número de Libertad creado',
-          html: numero && ano
-            ? `${success}<div style="margin-top: 1rem; font-size: 1.35rem; font-weight: 700;">${numero}-${ano}</div>`
-            : success,
-        });
-      }
-
-      if (error) Swal.fire({ icon: 'error', title: 'Error', text: error });
-    });
-  </script>
-</x-sist-layout>
+</x-public.layout>
