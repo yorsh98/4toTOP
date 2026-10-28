@@ -226,3 +226,6 @@ body.bo { --bo-solid-ok: #087443; --bo-solid-warn: #875000; --bo-muted-on-solid:
 
 /* Acento para secciones con acciones destructivas. */
 .bo .bo-section--danger { --bo-accent: var(--bo-alarm); }
+
+/* Selección de herramienta en el conversor. */
+.bo .bo-tool.is-active { border-color: var(--bo-signal); box-shadow: inset 0 0 0 1px var(--bo-signal); background: var(--bo-surface-2); }
