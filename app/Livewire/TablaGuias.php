@@ -242,7 +242,7 @@ class TablaGuias extends Component
 
             ->orderBy($this->sortField, $this->sortDirection);
 
-        return view('livewire.tabla-guias', [
+        return view($this->modo === 'lectura' ? 'livewire.tabla-guias-publica' : 'livewire.tabla-guias', [
             'guias' => $query->paginate($this->perPage),
             'modo' => $this->modo,
             'instituciones' => [
