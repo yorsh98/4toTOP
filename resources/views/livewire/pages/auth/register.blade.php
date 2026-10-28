@@ -59,49 +59,29 @@ new #[Layout('layouts.guest')] class extends Component
 };
 ?>
 
-<div>
-    <form wire:submit="register">
-        <!-- Name -->
+<div class="fo-auth-content">
+    <form class="fo-auth-form" wire:submit="register">
         <div>
-            <x-input-label for="name" :value="__('auth.name')" />
-            <x-text-input wire:model="name" id="name" class="block mt-1 w-full" type="text" name="name" required autofocus autocomplete="name" />
-            <x-input-error :messages="$errors->get('name')" class="mt-2" />
+            <label class="fo-label" for="name">{{ __('auth.name') }}</label>
+            <input class="fo-input" wire:model="name" id="name" type="text" name="name" required autofocus autocomplete="name" aria-invalid="{{ $errors->has('name') ? 'true' : 'false' }}" @error('name') aria-describedby="name-error" @enderror>
+            @error('name') <p class="fo-hint fo-hint--warn" id="name-error">{{ $message }}</p> @enderror
         </div>
-
-        <!-- Email Address -->
-        <div class="mt-4">
-            <x-input-label for="email" :value="__('auth.email')" />
-            <x-text-input wire:model="email" id="email" class="block mt-1 w-full" type="email" name="email" required autocomplete="username" />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
+        <div>
+            <label class="fo-label" for="email">{{ __('auth.email') }}</label>
+            <input class="fo-input" wire:model="email" id="email" type="email" name="email" required autocomplete="username" aria-invalid="{{ $errors->has('email') ? 'true' : 'false' }}" @error('email') aria-describedby="email-error" @enderror>
+            @error('email') <p class="fo-hint fo-hint--warn" id="email-error">{{ $message }}</p> @enderror
         </div>
-
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('auth.password')" />
-            <x-text-input wire:model="password" id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="new-password" />
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
+        <div>
+            <label class="fo-label" for="password">{{ __('auth.password') }}</label>
+            <input class="fo-input" wire:model="password" id="password" type="password" name="password" required autocomplete="new-password" aria-invalid="{{ $errors->has('password') ? 'true' : 'false' }}" @error('password') aria-describedby="password-error" @enderror>
+            @error('password') <p class="fo-hint fo-hint--warn" id="password-error">{{ $message }}</p> @enderror
         </div>
-
-        <!-- Confirm Password -->
-        <div class="mt-4">
-            <x-input-label for="password_confirmation" :value="__('auth.confirm_password')" />
-            <x-text-input wire:model="password_confirmation" id="password_confirmation" class="block mt-1 w-full"
-                            type="password"
-                            name="password_confirmation" required autocomplete="new-password" />
-            <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
+        <div>
+            <label class="fo-label" for="password_confirmation">{{ __('auth.confirm_password') }}</label>
+            <input class="fo-input" wire:model="password_confirmation" id="password_confirmation" type="password" name="password_confirmation" required autocomplete="new-password" aria-invalid="{{ $errors->has('password_confirmation') ? 'true' : 'false' }}" @error('password_confirmation') aria-describedby="password_confirmation-error" @enderror>
+            @error('password_confirmation') <p class="fo-hint fo-hint--warn" id="password_confirmation-error">{{ $message }}</p> @enderror
         </div>
-
-        <div class="flex items-center justify-end mt-4">
-            <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('login') }}" wire:navigate>
-                {{ __('auth.already_registered') }}
-            </a>
-
-            <x-primary-button class="ms-4">
-                {{ __('auth.register') }}
-            </x-primary-button>
-        </div>
+        <a class="fo-auth-link" href="{{ route('login') }}" wire:navigate>{{ __('auth.already_registered') }}</a>
+        <button class="fo-btn fo-btn--primary" type="submit">{{ __('auth.register') }}</button>
     </form>
 </div>

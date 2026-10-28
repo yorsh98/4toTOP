@@ -657,6 +657,18 @@
     .fo .fo-registros-table .fo-table-group > tr:first-child > td[data-label] { grid-column: auto; }
 }
 
+/* Autenticación */
+.fo .fo-auth-page { max-width: 440px; margin-inline: auto; }
+.fo .fo-auth-panel { background: var(--fo-glass-strong); }
+.fo .fo-auth-content, .fo .fo-auth-form { display: flex; flex-direction: column; gap: 18px; }
+.fo .fo-auth-copy { margin: 0; color: var(--fo-fg); }
+.fo .fo-auth-status { margin: 0; border-color: var(--fo-line-strong); background: var(--fo-glass); }
+.fo .fo-auth-remember { display: flex; align-items: center; gap: 10px; color: var(--fo-fg); cursor: pointer; }
+.fo .fo-auth-remember input { accent-color: var(--fo-signal); }
+.fo .fo-auth-link { align-self: flex-start; padding: 0; border: 0; background: none; color: var(--fo-fg); text-decoration: underline; cursor: pointer; }
+.fo .fo-auth-link:hover { color: var(--fo-signal); }
+.fo .fo-auth-form .fo-hint { margin-bottom: 0; }
+
 /* Oficios y libertades */
 .fo .fo-oficios-grid { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(260px, 1fr); gap: 24px; align-items: start; }
 .fo .fo-panel { padding: clamp(20px, 3vw, 32px); border: 1px solid var(--fo-line); border-radius: 18px; background: var(--fo-glass); backdrop-filter: var(--fo-glass-blur); -webkit-backdrop-filter: var(--fo-glass-blur); box-shadow: inset 0 1px 0 var(--fo-glass-edge); }
