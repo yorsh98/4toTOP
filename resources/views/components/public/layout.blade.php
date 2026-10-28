@@ -129,6 +129,12 @@
                             <span>Volver al backoffice</span>
                         </a>
                     @else
+                        @if (Route::has('register'))
+                            <a href="{{ route('register') }}" class="fo-cta fo-cta--register cm-press" aria-label="Registrarse">
+                                <i class="fa-solid fa-user-plus" aria-hidden="true"></i>
+                                <span>Registrarse</span>
+                            </a>
+                        @endif
                         <a href="{{ route('login') }}" class="fo-cta cm-press">
                             <i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i>
                             <span>Ingresar</span>
