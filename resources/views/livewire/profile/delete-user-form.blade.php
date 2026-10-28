@@ -24,10 +24,10 @@ new class extends Component
 
 <section class="space-y-6">
     <header>
-        <h2 class="text-lg font-medium text-gray-900">
+        <h2 class="text-lg font-medium bo-strong">
             {{ __('auth.delete_account') }}
         </h2>
-        <p class="mt-1 text-sm text-gray-600">
+        <p class="mt-1 text-sm bo-muted">
             {{ __('auth.delete_account_warning') }}
         </p>
     </header>
@@ -41,10 +41,10 @@ new class extends Component
 
     <x-modal name="confirm-user-deletion" :show="$errors->isNotEmpty()" focusable>
         <form wire:submit="deleteUser" class="p-6">
-            <h2 class="text-lg font-medium text-gray-900">
+            <h2 class="text-lg font-medium bo-strong">
                 {{ __('auth.confirm_delete_account') }}
             </h2>
-            <p class="mt-1 text-sm text-gray-600">
+            <p class="mt-1 text-sm bo-muted">
                 {{ __('auth.confirm_delete_account_details') }}
             </p>
 

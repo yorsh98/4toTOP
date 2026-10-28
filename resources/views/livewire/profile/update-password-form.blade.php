@@ -38,10 +38,10 @@ new class extends Component
 
 <section>
     <header>
-        <h2 class="text-lg font-medium text-gray-900">
+        <h2 class="text-lg font-medium bo-strong">
             {{ __('auth.update_password') }}
         </h2>
-        <p class="mt-1 text-sm text-gray-600">
+        <p class="mt-1 text-sm bo-muted">
             {{ __('auth.update_password_description') }}
         </p>
     </header>
