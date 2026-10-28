@@ -1,27 +1,27 @@
 <div>
     <!-- Barra de búsqueda y controles -->
-    <div class="d-flex justify-content-between mb-3">
-        <div class="input-group w-50">
+    <div class="flex flex-wrap items-center gap-3 mb-4">
+        <div class="flex-1 min-w-0">
             <input type="text" 
-                   class="form-control rounded" 
+                   class="bo-input w-full" 
                    placeholder="Buscar guías..." 
                    wire:model.live.debounce.100ms="search">
-            <span class="input-group-text">
+            <span class="bo-muted">
                 <div wire:loading wire:target="search">
-                    <span class="spinner-border spinner-border-sm"></span>
+                    <span class="bo-muted"></span>
                 </div>
             </span>
         </div>
        <div class="gap-2">
-            <select wire:model.live.debounce.50ms="filtroInstitucion" class="form-control">
+            <select wire:model.live.debounce.50ms="filtroInstitucion" class="bo-select">
                 <option value="">-- Todas --</option>
                 @foreach($instituciones as $id => $nombre)
                     <option value="{{ $id }}">{{ $nombre }}</option>
                 @endforeach
             </select>
         </div> 
-        <div class="d-flex gap-2">
-            <select class="form-select w-auto rounded" wire:model.live="perPage">
+        <div class="flex gap-2">
+            <select class="bo-select" wire:model.live="perPage">
                 <option value="10">10 por página</option>
                 <option value="25">25 por página</option>
                 <option value="50">50 por página</option>
@@ -29,7 +29,7 @@
             </select>
             
             @if($modo === 'full')
-                <button class="btn btn-primary" wire:click="$toggle('showCreateForm')">
+                <button class="bo-btn bo-btn--primary" wire:click="$toggle('showCreateForm')">
                     {{ $showCreateForm ? 'Cancelar' : 'Nueva Guía' }}
                 </button>
             @endif
@@ -42,45 +42,45 @@
         x-show="showForm && @js($modo === 'full')"
         style="display: none;" 
         x-transition.scale.origin.center
-        class="card mb-4">
-        <div class="card-header bg-primary text-white rounded">
+        class="bo-card mb-4">
+        <div class="bo-panel-heading p-4">
             <h5 class="mb-0">Crear Nueva Guía</h5>
         </div>
-        <div class="card-body">
+        <div class="p-4">
             <form wire:submit.prevent="create">
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <label class="form-label">Nombre</label>
-                        <input type="text" class="form-control rounded" wire:model="newNombre" required>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="min-w-0">
+                        <label class="bo-label mb-1">Nombre</label>
+                        <input type="text" class="bo-input w-full" wire:model="newNombre" required>
                     </div>
-                    <div class="col-md-6">
-                        <label class="form-label">RUT</label>
-                        <input type="text" class="form-control rounded" wire:model="newRut">
+                    <div class="min-w-0">
+                        <label class="bo-label mb-1">RUT</label>
+                        <input type="text" class="bo-input w-full" wire:model="newRut">
                     </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Email</label>
-                        <input type="email" class="form-control rounded" wire:model="newEmail">
+                    <div class="min-w-0">
+                        <label class="bo-label mb-1">Email</label>
+                        <input type="email" class="bo-input w-full" wire:model="newEmail">
                     </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Teléfono 1</label>
-                        <input type="text" class="form-control rounded" wire:model="newTelefono1">
+                    <div class="min-w-0">
+                        <label class="bo-label mb-1">Teléfono 1</label>
+                        <input type="text" class="bo-input w-full" wire:model="newTelefono1">
                     </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Teléfono 2</label>
-                        <input type="text" class="form-control rounded" wire:model="newTelefono2">
+                    <div class="min-w-0">
+                        <label class="bo-label mb-1">Teléfono 2</label>
+                        <input type="text" class="bo-input w-full" wire:model="newTelefono2">
                     </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Institución</label>
-                        <select class="form-select rounded" wire:model="newInstitucion" required>
+                    <div class="min-w-0">
+                        <label class="bo-label mb-1">Institución</label>
+                        <select class="bo-select w-full" wire:model="newInstitucion" required>
                             <option value="" selected>Seleccionar institución</option>
                             @foreach($instituciones as $id => $nombre)
                                 <option value="{{ $id }}">{{ $nombre }}</option>
                             @endforeach
                         </select>
                     </div>
-                    <div class="col-12">
-                        <button type="submit" class="btn btn-success">Guardar</button>
-                        <button type="button" class="btn btn-secondary" 
+                    <div class="flex flex-wrap gap-2">
+                        <button type="submit" class="bo-btn bo-btn--primary">Guardar</button>
+                        <button type="button" class="bo-btn bo-btn--secondary" 
                                 wire:click="resetCreateForm" 
                                 @click="showForm = false">
                             Cancelar
@@ -91,16 +91,16 @@
         </div>
     </div>
     <!-- Tabla de guías -->
-    <div class="table-responsive rounded border">
-        <table class="table table-striped table-hover">
-            <thead class="table-light">
+    <div class="overflow-x-auto bo-card">
+        <table class="bo-table min-w-max">
+            <thead class="">
                 <tr>
                     <th wire:click="sortBy('nombre_completo')">NOMBRE</th>
                     <th wire:click="sortBy('rut')">RUT</th>
                     <th wire:click="sortBy('email')">EMAIL</th>
-                    <th wire:click="sortBy('telefono1')">TELEFONO 1</th>
-                    <th wire:click="sortBy('telefono2')">TELEFONO 2</th>
-                    <th wire:click="sortBy('institucion')">INSTITUCION</th>
+                    <th wire:click="sortBy('telefono1')">TELÉFONO 1</th>
+                    <th wire:click="sortBy('telefono2')">TELÉFONO 2</th>
+                    <th wire:click="sortBy('institucion')">INSTITUCIÓN</th>
                     @if($modo === 'full')
                         <th>ACCIONES</th>
                     @endif
@@ -117,11 +117,11 @@
                         <td>{{ $instituciones[$guia->institucion] ?? 'Desconocido' }}</td>
                         @if($modo === 'full')
                             <td>
-                                <button wire:click="edit({{ $guia->id }})" class="btn btn-sm btn-primary">
+                                <button wire:click="edit({{ $guia->id }})" class="bo-btn-icon" aria-label="Editar">
                                     <i class="fas fa-edit"></i>
                                 </button>
                                 <button wire:click="confirmDelete({{ $guia->id }})" 
-                                        class="btn btn-sm btn-danger">
+                                        class="bo-btn-icon" aria-label="Eliminar">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </td>
@@ -129,7 +129,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="{{ $modo === 'full' ? 7 : 6 }}" class="text-center py-4">
+                        <td colspan="{{ $modo === 'full' ? 7 : 6 }}" class="text-center py-4 bo-muted">
                             No se encontraron guías telefónicas
                         </td>
                     </tr>
@@ -139,7 +139,7 @@
     </div>
 
     <!-- Paginación -->
-    <div class="d-flex justify-end align-items-center mt-3">       
+    <div class="mt-4">       
         {{ $guias->links() }}
     </div>
 
@@ -150,36 +150,36 @@
         x-on:close-edit-modal.window="open = false"
         class="relative z-50"
     >
-        <div x-show="open" class="fixed inset-0 bg-black bg-opacity-50" x-transition.opacity></div>
+        <div x-show="open" class="fixed inset-0 bo-scrim" x-transition.opacity></div>
 
         <div x-show="open" class="fixed inset-0 flex items-center justify-center p-4" x-transition>
-            <div class="bg-white rounded-lg shadow-lg w-full max-w-lg p-6">
+            <div class="bo-card w-full max-w-lg max-h-[90vh] overflow-y-auto p-6">
                 <h2 class="text-lg font-semibold mb-4">Editar Guía</h2>
 
                 <form wire:submit.prevent="update">
                     <div class="mb-4">
-                        <label class="block mb-1">Nombre Completo</label>
-                        <input type="text" wire:model.defer="editNombre" class="border p-2 w-full rounded">
+                        <label class="bo-label mb-1">Nombre Completo</label>
+                        <input type="text" wire:model.defer="editNombre" class="bo-input w-full">
                     </div>
                     <div class="mb-4">
-                        <label class="block mb-1">RUT</label>
-                        <input type="text" wire:model.defer="editRut" class="border p-2 w-full rounded">
+                        <label class="bo-label mb-1">RUT</label>
+                        <input type="text" wire:model.defer="editRut" class="bo-input w-full">
                     </div>
                     <div class="mb-4">
-                        <label class="block mb-1">Email</label>
-                        <input type="email" wire:model.defer="editEmail" class="border p-2 w-full rounded">
+                        <label class="bo-label mb-1">Email</label>
+                        <input type="email" wire:model.defer="editEmail" class="bo-input w-full">
                     </div>
                     <div class="mb-4">
-                        <label class="block mb-1">Telefono 1</label>
-                        <input type="number" wire:model.defer="editTelefono1" class="border p-2 w-full rounded">
+                        <label class="bo-label mb-1">Teléfono 1</label>
+                        <input type="number" wire:model.defer="editTelefono1" class="bo-input w-full">
                     </div>
                     <div class="mb-4">
-                        <label class="block mb-1">Telefono 2</label>
-                        <input type="number" wire:model.defer="editTelefono2" class="border p-2 w-full rounded">
+                        <label class="bo-label mb-1">Teléfono 2</label>
+                        <input type="number" wire:model.defer="editTelefono2" class="bo-input w-full">
                     </div>
                     <div class="mb-4">
-                        <label class="block mb-1">Institución</label>
-                        <select class="form-select rounded" wire:model.defer="editInstitucion" required>
+                        <label class="bo-label mb-1">Institución</label>
+                        <select class="bo-select w-full" wire:model.defer="editInstitucion" required>
                             <option value="" selected>Seleccionar institución</option>
                             @foreach($instituciones as $id => $nombre)
                                 <option value="{{ $id }}">{{ $nombre }}</option>
@@ -187,10 +187,10 @@
                         </select>
                     </div>
                     <div class="flex justify-end gap-2 mt-4">
-                        <button type="button" @click="open = false" class="px-4 py-2 bg-gray-300 rounded">
+                        <button type="button" @click="open = false" class="bo-btn bo-btn--secondary">
                             Cancelar
                         </button>
-                        <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded">
+                        <button type="submit" class="bo-btn bo-btn--primary">
                             Guardar
                         </button>
                     </div>

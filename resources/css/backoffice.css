@@ -199,13 +199,6 @@ body.bo { --bo-solid-ok: #087443; --bo-solid-warn: #875000; --bo-muted-on-solid:
 .bo .bo-chip--info, .bo .bo-chip--warn, .bo .bo-chip--danger, .bo .bo-chip--ok { background: var(--bo-surface-2); color: var(--bo-accent); }
 .bo .bo-alert { border: 1px solid var(--bo-line); border-left: 4px solid var(--bo-accent); background: var(--bo-surface-2); color: var(--bo-fg); }
 
-/* Paginación Bootstrap transitoria hasta su reemplazo en la fase 4. */
-.bo .pagination .page-link { background: var(--bo-surface); border-color: var(--bo-line); color: var(--bo-fg); }
-.bo .pagination .page-link:hover { background: var(--bo-surface-2); color: var(--bo-fg); }
-.bo .pagination .active > .page-link { background: var(--bo-primary); border-color: var(--bo-primary); color: var(--bo-on-solid); }
-.bo .pagination .disabled > .page-link { background: var(--bo-surface-2); border-color: var(--bo-line); color: var(--bo-mut); }
-.bo nav:has(.pagination) p.small.text-muted { color: var(--bo-mut) !important; }
-
 /* Estado tenue para acciones e iconos sin cambiar su distribución. */
 .bo .bo-status { background: var(--bo-surface-2); }
 .bo .bo-status--info { color: var(--bo-signal); }
@@ -229,3 +222,13 @@ body.bo { --bo-solid-ok: #087443; --bo-solid-warn: #875000; --bo-muted-on-solid:
 
 /* Selección de herramienta en el conversor. */
 .bo .bo-tool.is-active { border-color: var(--bo-signal); box-shadow: inset 0 0 0 1px var(--bo-signal); background: var(--bo-surface-2); }
+
+.bo .bo-pagination { display: flex; flex-wrap: wrap; gap: .75rem; align-items: center; justify-content: space-between; margin-top: 1rem; }
+.bo .bo-pagination-desktop { display: flex; flex: 1; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .75rem; }
+.bo .bo-pagination-mobile { display: none; }
+.bo .bo-pagination-list { display: flex; flex-wrap: wrap; gap: .25rem; padding: 0; margin: 0; list-style: none; }
+.bo .bo-pagination-link { display: inline-flex; align-items: center; justify-content: center; min-width: 2.25rem; min-height: 2.25rem; padding: .4rem; border: 1px solid var(--bo-line); border-radius: .4rem; background: var(--bo-surface); color: var(--bo-fg); }
+.bo button.bo-pagination-link:hover { background: var(--bo-surface-2); }
+.bo .bo-pagination-active .bo-pagination-link { background: var(--bo-primary); border-color: var(--bo-primary); color: var(--bo-on-solid); }
+.bo .bo-pagination-disabled .bo-pagination-link { background: var(--bo-surface-2); color: var(--bo-mut); }
+@media (max-width: 639px) { .bo .bo-pagination-mobile { display: block; } .bo .bo-pagination-desktop { display: none; } }

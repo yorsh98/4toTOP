@@ -1,36 +1,34 @@
 <x-app-layout>
-    <link rel="stylesheet" href="{{ asset('css/audiencias.css') }}"><!-- si ya la usas para estilos base -->
 
     <x-slot name="header">
-        <x-page-heading eyebrow="Oficios y libertades · Administracion" title="Panel administrativo" />
+        <x-page-heading eyebrow="Oficios y libertades · Administración" title="Panel administrativo" />
     </x-slot>
 
     {{-- Evita FOUC de Alpine --}}
-    <style>[x-cloak]{display:none!important}</style>
 
     <div class="py-2" x-data="ofilibUI()" x-init="init()" x-cloak>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
+            <div class="bo-card">
+                <div class="p-4 sm:p-6">
 
                     
 
                     {{-- ====== MENÚ DE BOTONES (selección de módulo) ====== --}}
                     <template x-if="modo === 'menu'">
                         <div>
-                            <p class="text-sm text-gray-600 mb-3">Selecciona el módulo:</p>
+                            <p class="text-sm bo-muted mb-3">Selecciona el módulo:</p>
 
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="bo-segmented grid grid-cols-1 md:grid-cols-2 gap-2 p-2">
                                 <button type="button" @click="open('oficios')"
-                                        class="w-full px-4 py-3 rounded-xl border hover:bg-gray-50 text-left">
+                                        class="bo-segmented-item w-full px-4 py-3 text-left">
                                     <div class="font-semibold">OFICIOS</div>
-                                    <div class="text-xs text-gray-500">PANEL ADMINISTRATIVO DE OFICIOS.</div>
+                                    <div class="text-xs bo-muted">PANEL ADMINISTRATIVO DE OFICIOS.</div>
                                 </button>
 
                                 <button type="button" @click="open('libertades')"
-                                        class="w-full px-4 py-3 rounded-xl border hover:bg-gray-50 text-left">
+                                        class="bo-segmented-item w-full px-4 py-3 text-left">
                                     <div class="font-semibold">LIBERTADES</div>
-                                    <div class="text-xs text-gray-500">PANEL ADMINISTRATIVO DE LIBERTADES.</div>
+                                    <div class="text-xs bo-muted">PANEL ADMINISTRATIVO DE LIBERTADES.</div>
                                 </button>
                             </div>
                         </div>
@@ -42,11 +40,16 @@
                             <!-- barra superior con botón Volver -->
                             <div class="flex items-center justify-between mb-4">
                                 <button type="button" @click="back()"
-                                        class="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border hover:bg-gray-50">
+                                        class="bo-btn bo-btn--secondary">
                                     <span>←</span> <span>Volver</span>
                                 </button>
-                                <div class="text-sm text-gray-500" x-text="tituloActual()"></div>
+                                <div class="text-sm bo-muted" x-text="tituloActual()"></div>
                             </div>
+
+                            <nav class="bo-segmented flex flex-wrap gap-2 p-2 mb-4" aria-label="Módulos">
+                                <button type="button" class="bo-segmented-item px-4 py-2" @click="open('oficios')" :class="{ 'is-active': modo === 'oficios' }" :aria-current="modo === 'oficios' ? 'page' : null">OFICIOS</button>
+                                <button type="button" class="bo-segmented-item px-4 py-2" @click="open('libertades')" :class="{ 'is-active': modo === 'libertades' }" :aria-current="modo === 'libertades' ? 'page' : null">LIBERTADES</button>
+                            </nav>
 
                             <!-- monta solo el componente activo -->
                             <div>
