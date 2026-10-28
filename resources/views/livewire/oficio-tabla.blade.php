@@ -5,28 +5,28 @@
     {{-- Barra de búsqueda y controles --}}
     @php($isFull = $modo === 'full')
 
-    <div class="d-flex justify-content-between mb-3">
-        <div class="input-group w-50">
+    <div class="flex flex-wrap items-center gap-3 mb-4">
+        <div class="flex-1 min-w-0">
             <input type="text"
-                class="form-control rounded"
+                class="bo-input w-full"
                 placeholder="Buscar (N°, Año, Causa, Solicitante, Motivo)..."
                 wire:model.live.debounce.200ms="search">
-            <span class="input-group-text">
+            <span class="bo-muted">
                 <div wire:loading wire:target="search">
-                    <span class="spinner-border spinner-border-sm"></span>
+                    <span class="bo-muted"></span>
                 </div>
             </span>
         </div>
 
-        <div class="d-flex gap-2">
-            <select wire:model.live.debounce.100ms="filtroAnio" class="form-control">
+        <div class="flex gap-2">
+            <select wire:model.live.debounce.100ms="filtroAnio" class="bo-select">
                 <option value="">— Todos los años —</option>
                 @foreach($anios as $anio)
                     <option value="{{ $anio }}">{{ $anio }}</option>
                 @endforeach
             </select>
 
-            <select class="form-select w-auto rounded" wire:model.live="perPage">
+            <select class="bo-select" wire:model.live="perPage">
                 <option value="10">10 por página</option>
                 <option value="25">25 por página</option>
                 <option value="50">50 por página</option>
@@ -34,13 +34,13 @@
             </select>
 
             {{-- AHORA SIEMPRE visible (full y vista) --}}
-            <button class="btn btn-outline-secondary" wire:click="toggleEliminados">
+            <button class="bo-btn bo-btn--secondary" wire:click="toggleEliminados">
                 {{ $verEliminados ? 'Ver Activos' : 'Eliminados' }}
             </button>
 
             {{-- SOLO en modo full --}}
             @if($isFull)
-                <button class="btn btn-primary" wire:click="$toggle('showCreateForm')">
+                <button class="bo-btn bo-btn--primary" wire:click="$toggle('showCreateForm')">
                     {{ $showCreateForm ? 'Cancelar' : 'Nuevo Oficio ' }}
                 </button>
             @endif
@@ -53,36 +53,36 @@
          x-show="showForm && @js($isFull)"
          style="display: none;"
          x-transition.scale.origin.center
-         class="card mb-3">
-        <div class="card-header bg-primary text-white rounded">
+         class="bo-card mb-4">
+        <div class="bo-panel-heading p-4">
             <h5 class="mb-0">Crear Oficio</h5>
         </div>
-        <div class="card-body">
+        <div class="p-4">
             <form wire:submit.prevent="create">
-                <div class="row g-3">
-                    <div class="col-md-3">
-                        <label class="form-label">Causa Asig (máx 10)</label>
-                        <input type="text" class="form-control rounded" wire:model="newCausaAsig" required @if(!$isFull) disabled @endif>
-                        @error('newCausaAsig') <div class="text-danger small">{{ $message }}</div> @enderror
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="min-w-0">
+                        <label class="bo-label mb-1">Causa Asig (máx 10)</label>
+                        <input type="text" class="bo-input w-full" wire:model="newCausaAsig" required @if(!$isFull) disabled @endif>
+                        @error('newCausaAsig') <div class="bo-error">{{ $message }}</div> @enderror
                     </div>
-                    <div class="col-md-3">
-                        <label class="form-label">Solicitante</label>
-                        <select class="form-select rounded" wire:model="newUserSolicitante" required @if(!$isFull) disabled @endif>
+                    <div class="min-w-0">
+                        <label class="bo-label mb-1">Solicitante</label>
+                        <select class="bo-select w-full" wire:model="newUserSolicitante" required @if(!$isFull) disabled @endif>
                             <option value="">Seleccione un solicitante</option>
                             @foreach($solicitantes as $solicitante)
                                 <option value="{{ $solicitante }}">{{ $solicitante }}</option>
                             @endforeach
                         </select>
-                        @error('newUserSolicitante') <div class="text-danger small">{{ $message }}</div> @enderror
+                        @error('newUserSolicitante') <div class="bo-error">{{ $message }}</div> @enderror
                     </div>
-                    <div class="col-md-4">
-                        <label class="form-label">Motivo / Dirigido</label>
-                        <input type="text" class="form-control rounded" wire:model="newUserDirigido" required @if(!$isFull) disabled @endif>
-                        @error('newUserDirigido') <div class="text-danger small">{{ $message }}</div> @enderror
+                    <div class="min-w-0">
+                        <label class="bo-label mb-1">Motivo / Dirigido</label>
+                        <input type="text" class="bo-input w-full" wire:model="newUserDirigido" required @if(!$isFull) disabled @endif>
+                        @error('newUserDirigido') <div class="bo-error">{{ $message }}</div> @enderror
                     </div>                    
-                    <div class="col-12">
-                        <button type="submit" class="btn btn-success" @if(!$isFull) disabled @endif>Guardar</button>
-                        <button type="button" class="btn btn-secondary"
+                    <div class="flex flex-wrap gap-2">
+                        <button type="submit" class="bo-btn bo-btn--primary" @if(!$isFull) disabled @endif>Guardar</button>
+                        <button type="button" class="bo-btn bo-btn--secondary"
                                 wire:click="resetCreateForm"
                                 @click="showForm = false">
                             Cancelar
@@ -94,9 +94,9 @@
     </div>
 
     {{-- Tabla --}}
-    <div class="table-responsive rounded border">
-        <table class="table table-striped table-hover">
-            <thead class="table-light">
+    <div class="overflow-x-auto bo-card">
+        <table class="bo-table min-w-max">
+            <thead class="">
                 <tr>
                     <th wire:click="sortBy('Numentregado')">N° ENTREGADO</th>
                     <th wire:click="sortBy('año')">AÑO</th>
@@ -120,18 +120,18 @@
                         <td>{{ ($l->updated_at ?? $l->created_at)?->format('Y-m-d H:i') }}</td>
 
                         @if($isFull)
-                            <td class="d-flex gap-2">
+                            <td class="flex gap-2">
                                 @if(!$l->deleted_at)
-                                    <button wire:click="edit({{ $l->id }})" class="btn btn-sm btn-primary">
+                                    <button wire:click="edit({{ $l->id }})" class="bo-btn-icon" aria-label="Editar">
                                         <i class="fas fa-edit"></i>
                                     </button>
                                     <button type="button"
                                         x-on:click="confirmDestructiveAction('¿Eliminar oficio?', 'Esta acción no se puede deshacer.').then(result => { if (result.isConfirmed) $wire.confirmDelete({{ $l->id }}) })"
-                                        class="btn btn-sm btn-danger">
+                                        class="bo-btn-icon" aria-label="Eliminar">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 @else
-                                    <button wire:click="restore({{ $l->id }})" class="btn btn-sm btn-success">
+                                    <button wire:click="restore({{ $l->id }})" class="bo-btn-icon" aria-label="Restaurar">
                                         <i class="fas fa-undo"></i>
                                     </button>
                                 @endif
@@ -140,7 +140,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="{{ $isFull ? 7 : 6 }}" class="text-center py-4">
+                        <td colspan="{{ $isFull ? 7 : 6 }}" class="text-center py-4 bo-muted">
                             No se encontraron registros
                         </td>
                     </tr>
@@ -150,7 +150,7 @@
     </div>
 
     {{-- Paginación --}}
-    <div class="d-flex justify-content-end align-items-center mt-3">
+    <div class="mt-4">
         {{ $oficios->links() }}
     </div>
 
@@ -163,35 +163,35 @@
     class="relative z-50">
 
     {{-- Backdrop --}}
-    <div x-show="open" class="fixed inset-0 bg-black bg-opacity-50" x-transition.opacity></div>
+    <div x-show="open" class="fixed inset-0 bo-scrim" x-transition.opacity></div>
 
     {{-- Dialog --}}
     <div x-show="open" class="fixed inset-0 flex items-center justify-center p-4" x-transition>
-        <div class="bg-white rounded-lg shadow-lg w-full max-w-lg p-6">
+        <div class="bo-card w-full max-w-lg max-h-[90vh] overflow-y-auto p-6">
             <h2 class="text-lg font-semibold mb-4">Editar Oficio</h2>
 
             <form wire:submit.prevent="update">                
                 <div class="mb-3">
-                    <label class="form-label">Causa Asig</label>
-                    <input type="text" wire:model.defer="editCausaAsig" class="form-control rounded" required>
-                    @error('editCausaAsig') <div class="text-danger small">{{ $message }}</div> @enderror
+                    <label class="bo-label mb-1">Causa Asig</label>
+                    <input type="text" wire:model.defer="editCausaAsig" class="bo-input w-full" required>
+                    @error('editCausaAsig') <div class="bo-error">{{ $message }}</div> @enderror
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Solicitante</label>
-                    <input type="text" wire:model.defer="editUserSolicitante" class="form-control rounded" required>
-                    @error('editUserSolicitante') <div class="text-danger small">{{ $message }}</div> @enderror
+                    <label class="bo-label mb-1">Solicitante</label>
+                    <input type="text" wire:model.defer="editUserSolicitante" class="bo-input w-full" required>
+                    @error('editUserSolicitante') <div class="bo-error">{{ $message }}</div> @enderror
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Motivo / Dirigido</label>
-                    <input type="text" wire:model.defer="editUserDirigido" class="form-control rounded" required>
-                    @error('editUserDirigido') <div class="text-danger small">{{ $message }}</div> @enderror
+                    <label class="bo-label mb-1">Motivo / Dirigido</label>
+                    <input type="text" wire:model.defer="editUserDirigido" class="bo-input w-full" required>
+                    @error('editUserDirigido') <div class="bo-error">{{ $message }}</div> @enderror
                 </div>
 
-                <div class="d-flex justify-content-end gap-2 mt-4">
-                    <button type="button" @click="open = false" class="btn btn-secondary">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Guardar</button>
+                <div class="flex justify-end gap-2 mt-4">
+                    <button type="button" @click="open = false" class="bo-btn bo-btn--secondary">Cancelar</button>
+                    <button type="submit" class="bo-btn bo-btn--primary">Guardar</button>
                 </div>
             </form>
         </div>

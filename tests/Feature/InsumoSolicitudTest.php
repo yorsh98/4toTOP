@@ -101,7 +101,7 @@ test('request page rejects decimal quantities', function () {
         ->assertHasErrors('cart');
 });
 
-test('catalog pagination uses Bootstrap and preserves the cart', function () {
+test('catalog pagination uses the backoffice paginator and preserves the cart', function () {
     $user = User::factory()->create();
     $user->givePermissionTo('insumos.solicitar');
 
@@ -120,7 +120,7 @@ test('catalog pagination uses Bootstrap and preserves the cart', function () {
         ->assertSee('Catalogo paginado 01')
         ->assertDontSee('Catalogo paginado 11')
         ->assertSee('Mostrando 1 a 10 de 11 insumos')
-        ->assertSeeHtml('class="pagination mb-0"')
+        ->assertSeeHtml('class="bo-pagination')
         ->call('agregar', $firstInsumoId)
         ->call('nextPage', 'catalogoPage')
         ->assertSee('Catalogo paginado 11')
