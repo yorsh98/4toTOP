@@ -437,6 +437,7 @@
 .fo .fo-page-head { margin-bottom: 32px; }
 .fo .fo-back { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 18px; color: var(--fo-mut) !important; font-size: 14px; font-weight: 600; }
 .fo .fo-back:hover { color: var(--fo-fg) !important; }
+.fo .fo-page-lead + .fo-back, .fo .fo-list-meta + .fo-back { margin: 14px 0 0; }
 .fo .fo-page-title { margin: 0; font: 800 clamp(36px, 5.4vw, 68px)/1 var(--fo-display); font-stretch: 115%; letter-spacing: -.035em; }
 .fo .fo-page-lead { margin: 12px 0 0; color: var(--fo-mut); font-size: 18px; }
 
@@ -646,6 +647,14 @@
     .fo .fo-conv-table .fo-table-group > tr:first-child { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .fo .fo-conv-table .fo-table-group > tr:first-child > td[data-label] { grid-column: auto; }
     .fo .fo-conv-table .fo-table-group > tr:first-child > td:first-child { grid-column: 1 / -1; }
+}
+
+/* Últimos oficios y últimas libertades */
+.fo .fo-registros-filtros { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.fo .fo-registros-table td { overflow-wrap: anywhere; }
+@media (max-width: 767px) {
+    .fo .fo-registros-table .fo-table-group > tr:first-child { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .fo .fo-registros-table .fo-table-group > tr:first-child > td[data-label] { grid-column: auto; }
 }
 
 /* Oficios y libertades */

@@ -347,7 +347,7 @@ class LibertadTabla extends Component
             ->pluck('año')
             ->toArray();
 
-        return view('livewire.libertad-tabla', [
+        return view($this->isVista() ? 'livewire.libertad-tabla-publica' : 'livewire.libertad-tabla', [
             'libertades' => $libertades,
             'anios' => $anios,
         ]);
