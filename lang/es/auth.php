@@ -40,7 +40,7 @@ return [
     'resend_verification_email' => 'Haz clic aquí para reenviar el correo de verificación.',
     'verification_link_sent' => 'Se ha enviado un nuevo enlace de verificación a tu dirección de correo electrónico.',
 
-    'throttle' => 'Autenticacion fallida',
-    'failed' => 'Autenticacion fallida',
+    'throttle' => 'Demasiados intentos. Espera :seconds segundos y vuelve a intentarlo.',
+    'failed' => 'El correo o la contraseña no son correctos.',
 
 ];

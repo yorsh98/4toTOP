@@ -32,28 +32,14 @@ new #[Layout('layouts.guest')] class extends Component
 };
 ?>
 
-<div>
-    <div class="mb-4 text-sm text-gray-600">
-        {{ __('auth.confirm_password_message') }} <!-- Usa la clave de traducción -->
-    </div>
-
-    <form wire:submit="confirmPassword">
-        <!-- Password -->
+<div class="fo-auth-content">
+    <p class="fo-auth-copy">{{ __('auth.confirm_password_message') }}</p>
+    <form class="fo-auth-form" wire:submit="confirmPassword">
         <div>
-            <x-input-label for="password" :value="__('auth.password')" /> <!-- Usa la clave de traducción -->
-            <x-text-input wire:model="password"
-                          id="password"
-                          class="block mt-1 w-full"
-                          type="password"
-                          name="password"
-                          required autocomplete="current-password" />
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
+            <label class="fo-label" for="password">{{ __('auth.password') }}</label>
+            <input class="fo-input" wire:model="password" id="password" type="password" name="password" required autocomplete="current-password" aria-invalid="{{ $errors->has('password') ? 'true' : 'false' }}" @error('password') aria-describedby="password-error" @enderror>
+            @error('password') <p class="fo-hint fo-hint--warn" id="password-error">{{ $message }}</p> @enderror
         </div>
-
-        <div class="flex justify-end mt-4">
-            <x-primary-button>
-                {{ __('auth.confirm') }} <!-- Usa la clave de traducción -->
-            </x-primary-button>
-        </div>
+        <button class="fo-btn fo-btn--primary" type="submit">{{ __('auth.confirm') }}</button>
     </form>
 </div>

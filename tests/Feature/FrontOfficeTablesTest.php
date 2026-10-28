@@ -181,3 +181,16 @@ test('oficios y libertades en modo full conservan sus vistas', function (string 
     [OficioTabla::class, 'oficios.ver', 'livewire.oficio-tabla'],
     [LibertadTabla::class, 'libertades.ver', 'livewire.libertad-tabla'],
 ]);
+
+test('las pantallas de autenticación usan el marco público y campos accesibles', function (string $url, string $title) {
+    $this->get($url)->assertSuccessful()
+        ->assertSee('data-app-view', false)
+        ->assertSee('fo-auth-panel', false)
+        ->assertSee($title)
+        ->assertSee('aria-invalid="false"', false);
+})->with([
+    ['/login', 'Ingresar'],
+    ['/register', 'Registro'],
+    ['/forgot-password', 'Recuperar contraseña'],
+    ['/reset-password/token', 'Restablecer contraseña'],
+]);

@@ -32,26 +32,17 @@ new #[Layout('layouts.guest')] class extends Component
 };
 ?>
 
-<div>
-    <div class="mb-4 text-sm text-gray-600">
-        {{ __('auth.forgot_password_message') }} <!-- Usa la clave de traducción -->
-    </div>
-
-    <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
-
-    <form wire:submit="sendPasswordResetLink">
-        <!-- Email Address -->
+<div class="fo-auth-content">
+    <p class="fo-auth-copy">{{ __('auth.forgot_password_message') }}</p>
+    @if (session('status'))
+        <div class="fo-alert fo-auth-status" role="status">{{ session('status') }}</div>
+    @endif
+    <form class="fo-auth-form" wire:submit="sendPasswordResetLink">
         <div>
-            <x-input-label for="email" :value="__('Email')" /> <!-- Usa la clave de traducción -->
-            <x-text-input wire:model="email" id="email" class="block mt-1 w-full" type="email" name="email" required autofocus />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
+            <label class="fo-label" for="email">{{ __('Email') }}</label>
+            <input class="fo-input" wire:model="email" id="email" type="email" name="email" required autofocus aria-invalid="{{ $errors->has('email') ? 'true' : 'false' }}" @error('email') aria-describedby="email-error" @enderror>
+            @error('email') <p class="fo-hint fo-hint--warn" id="email-error">{{ $message }}</p> @enderror
         </div>
-
-        <div class="flex items-center justify-end mt-4">
-            <x-primary-button>
-                {{ __('auth.email_password_reset_link') }} <!-- Usa la clave de traducción -->
-            </x-primary-button>
-        </div>
+        <button class="fo-btn fo-btn--primary" type="submit">{{ __('auth.email_password_reset_link') }}</button>
     </form>
 </div>

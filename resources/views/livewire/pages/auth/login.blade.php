@@ -21,49 +21,28 @@ new #[Layout('layouts.guest')] class extends Component
 };
 ?>
 
-<div>
-    <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
-
-    <link rel="icon" href="{{ asset('favicon.png') }}" type="image/png">
-
-
-    <form wire:submit="login">
-        <!-- Email Address -->
+<div class="fo-auth-content">
+    @if (session('status'))
+        <div class="fo-alert fo-auth-status" role="status">{{ session('status') }}</div>
+    @endif
+    <form class="fo-auth-form" wire:submit="login">
         <div>
-            <x-input-label for="email" :value="__('auth.email')" />
-            <x-text-input wire:model="form.email" id="email" class="block mt-1 w-full" type="email" name="email" required autofocus autocomplete="username" />
-            <x-input-error :messages="$errors->get('form.email')" class="mt-2" />
+            <label class="fo-label" for="email">{{ __('auth.email') }}</label>
+            <input class="fo-input" wire:model="form.email" id="email" type="email" name="email" required autofocus autocomplete="username" aria-invalid="{{ $errors->has('form.email') ? 'true' : 'false' }}" @error('form.email') aria-describedby="email-error" @enderror>
+            @error('form.email') <p class="fo-hint fo-hint--warn" id="email-error">{{ $message }}</p> @enderror
         </div>
-
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('auth.password')" />
-            <x-text-input wire:model="form.password" id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="current-password" />
-            <x-input-error :messages="$errors->get('form.password')" class="mt-2" />
+        <div>
+            <label class="fo-label" for="password">{{ __('auth.password') }}</label>
+            <input class="fo-input" wire:model="form.password" id="password" type="password" name="password" required autocomplete="current-password" aria-invalid="{{ $errors->has('form.password') ? 'true' : 'false' }}" @error('form.password') aria-describedby="password-error" @enderror>
+            @error('form.password') <p class="fo-hint fo-hint--warn" id="password-error">{{ $message }}</p> @enderror
         </div>
-
-        <!-- Remember Me -->
-        <div class="block mt-4">
-            <label for="remember" class="inline-flex items-center">
-                <input wire:model="form.remember" id="remember" type="checkbox" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" name="remember">
-                <span class="ms-2 text-sm text-gray-600">{{ __('auth.remember_me') }}</span>
-            </label>
-        </div>
-
-        <div class="flex items-center justify-end mt-4">
-            @if (Route::has('password.request'))
-                <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('password.request') }}" wire:navigate>
-                    {{ __('auth.forgot_password') }}
-                </a>
-            @endif
-
-            <x-primary-button class="ms-3">
-                {{ __('auth.login') }}
-            </x-primary-button>
-        </div>
+        <label class="fo-auth-remember" for="remember">
+            <input wire:model="form.remember" id="remember" type="checkbox" name="remember">
+            <span>{{ __('auth.remember_me') }}</span>
+        </label>
+        @if (Route::has('password.request'))
+            <a class="fo-auth-link" href="{{ route('password.request') }}" wire:navigate>{{ __('auth.forgot_password') }}</a>
+        @endif
+        <button class="fo-btn fo-btn--primary" type="submit">{{ __('auth.login') }}</button>
     </form>
 </div>

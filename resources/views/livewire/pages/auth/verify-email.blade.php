@@ -32,24 +32,13 @@ new #[Layout('layouts.guest')] class extends Component
 };
 ?>
 
-<div>
-    <div class="mb-4 text-sm text-gray-600">
-        {{ __('auth.verification_message') }} <!-- Usa la clave de traducción -->
-    </div>
-
+<div class="fo-auth-content">
+    <p class="fo-auth-copy">{{ __('auth.verification_message') }}</p>
     @if (session('status') == 'verification-link-sent')
-        <div class="mb-4 font-medium text-sm text-green-600">
-            {{ __('auth.verification_link_sent') }} <!-- Usa la clave de traducción -->
-        </div>
+        <div class="fo-alert fo-auth-status" role="status">{{ __('auth.verification_link_sent') }}</div>
     @endif
-
-    <div class="mt-4 flex items-center justify-between">
-        <x-primary-button wire:click="sendVerification">
-            {{ __('auth.resend_verification_email') }} <!-- Usa la clave de traducción -->
-        </x-primary-button>
-
-        <button wire:click="logout" type="submit" class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-            {{ __('auth.log_out') }} <!-- Usa la clave de traducción -->
-        </button>
+    <div class="fo-auth-form">
+        <button class="fo-btn fo-btn--primary" wire:click="sendVerification">{{ __('auth.resend_verification_email') }}</button>
+        <button wire:click="logout" type="submit" class="fo-auth-link">{{ __('auth.log_out') }}</button>
     </div>
 </div>
