@@ -1,6 +1,8 @@
 <?php
 
+use App\Livewire\AusentismoCalendario;
 use App\Livewire\TablaGuias;
+use App\Models\Ausentismo;
 use App\Models\Guias;
 use App\Models\TtyppRegistro;
 use App\Models\User;
@@ -92,4 +94,33 @@ test('guías en modo full conservan la vista del backoffice', function () {
 
     Livewire::test(TablaGuias::class, ['modo' => 'full'])
         ->assertViewIs('livewire.tabla-guias');
+});
+
+test('ausencias muestra el mes actual y permite abrir y cerrar un día', function () {
+    $hoy = now();
+    Ausentismo::create([
+        'funcionario_nombre' => 'María Pérez',
+        'cargo' => 'Administrativa',
+        'tipo_permiso' => 'Licencia médica',
+        'fecha_inicio' => $hoy->toDateString(),
+        'fecha_termino' => $hoy->toDateString(),
+    ]);
+
+    $this->get('/ausencias')
+        ->assertSuccessful()
+        ->assertSee(mb_convert_case($hoy->translatedFormat('F Y'), MB_CASE_TITLE, 'UTF-8'))
+        ->assertSee('María Pérez');
+
+    Livewire::test(AusentismoCalendario::class)
+        ->call('openDay', $hoy->toDateString())
+        ->assertSee('Ausencias del')
+        ->assertSee('Administrativa')
+        ->call('closeModal')
+        ->assertDontSee('Ausencias del');
+});
+
+test('ausencias informa cuando no hay personas ausentes en el día', function () {
+    Livewire::test(AusentismoCalendario::class)
+        ->call('openDay', now()->toDateString())
+        ->assertSee('Nadie ausente este día.');
 });
