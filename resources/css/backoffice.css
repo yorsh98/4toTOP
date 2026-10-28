@@ -153,3 +153,62 @@ body.bo { --bo-fg: var(--bo-text); --bo-danger: #b91c1c; --bo-on-solid: #fff; --
 .bo .bo-funcionarios-role { display: inline-block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; vertical-align: middle; }
 .bo .bo-input[type="file"] { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: .3rem; }
 .bo .bo-input[type="file"]::file-selector-button { background: var(--bo-surface-2); color: var(--bo-fg); border: 1px solid var(--bo-line); border-radius: .35rem; padding: .3rem .5rem; margin-right: .5rem; cursor: pointer; }
+
+/* Visita cárcel: superficies y estados compartidos por la vista y sus paneles. */
+body.bo { --bo-solid-ok: #087443; --bo-solid-warn: #875000; --bo-muted-on-solid: #e2e9f4; }
+.bo .bo-visita.bo-modal-overlay { background: var(--bo-overlay); }
+.bo .bo-visita .bo-accent-info { --bo-accent: var(--bo-signal); }
+.bo .bo-visita .bo-accent-danger { --bo-accent: var(--bo-alarm); }
+.bo .bo-visita .bo-accent-ok { --bo-accent: var(--bo-ok); }
+.bo .bo-visita .bo-accent-warn { --bo-accent: var(--bo-warn); }
+.bo .bo-visita .bo-mode-group { background: var(--bo-surface); border: 1px solid var(--bo-line); border-radius: var(--bo-radius); }
+.bo .bo-visita .bo-mode { border-radius: .5rem; color: var(--bo-fg); }
+.bo .bo-visita .bo-mode:hover { background: var(--bo-surface-2); }
+.bo .bo-visita .bo-mode.is-active { background: var(--bo-accent); color: var(--bo-surface); }
+.bo .bo-visita input:not([type="checkbox"]):not([type="radio"]), .bo .bo-visita select, .bo .bo-visita textarea { background: var(--bo-surface); color: var(--bo-fg); border-color: var(--bo-line); }
+.bo .bo-visita .bo-table { min-width: max-content; }
+.bo .bo-visita [aria-labelledby="ficha-causa-title"] table tbody td:last-child, .bo [aria-labelledby="ficha-causa-title"].bo-visita table tbody td:last-child { white-space: nowrap; }
+.bo .bo-visita .reporte-control-scroll { overscroll-behavior: contain; scrollbar-gutter: stable; }
+@media (min-width: 1024px) {
+    .bo .bo-visita .reporte-control-resumen { height: min(32rem, calc(100dvh - 22rem)); min-height: 20rem; }
+    .bo .bo-visita .reporte-control-columna { display: flex; min-height: 0; flex-direction: column; overflow: hidden; }
+    .bo .bo-visita .reporte-control-scroll { min-height: 0; max-height: none; flex: 1; overflow-y: auto; }
+}
+
+/* Superficies, estados y acciones reutilizables en el backoffice. */
+.bo .bo-panel { background: var(--bo-surface); color: var(--bo-fg); }
+.bo .bo-panel-subtle { background: var(--bo-surface-2); }
+.bo .bo-border { border-color: var(--bo-line); }
+.bo .bo-scrim { background: var(--bo-overlay); }
+.bo .bo-muted { color: var(--bo-mut); }
+.bo .bo-strong { color: var(--bo-fg); }
+.bo .bo-muted-on-solid { color: var(--bo-muted-on-solid); }
+.bo .bo-on-solid { color: var(--bo-on-solid); }
+.bo .bo-text--info { color: var(--bo-signal); }
+.bo .bo-text--warn { color: var(--bo-warn); }
+.bo .bo-text--danger { color: var(--bo-alarm); }
+.bo .bo-text--ok { color: var(--bo-ok); }
+.bo .bo-action-primary { background: var(--bo-primary); color: var(--bo-on-solid); }
+.bo .bo-action-warn { background: var(--bo-solid-warn); color: var(--bo-on-solid); }
+.bo .bo-action-danger { background: var(--bo-danger); color: var(--bo-on-solid); }
+.bo .bo-interactive:hover { filter: brightness(.9); }
+.bo .bo-chip--info, .bo .bo-alert--info { --bo-accent: var(--bo-signal); }
+.bo .bo-chip--warn, .bo .bo-alert--warn { --bo-accent: var(--bo-warn); }
+.bo .bo-chip--danger, .bo .bo-alert--danger { --bo-accent: var(--bo-alarm); }
+.bo .bo-chip--ok, .bo .bo-alert--ok { --bo-accent: var(--bo-ok); }
+.bo .bo-chip--info, .bo .bo-chip--warn, .bo .bo-chip--danger, .bo .bo-chip--ok { background: var(--bo-surface-2); color: var(--bo-accent); }
+.bo .bo-alert { border: 1px solid var(--bo-line); border-left: 4px solid var(--bo-accent); background: var(--bo-surface-2); color: var(--bo-fg); }
+
+/* Paginación Bootstrap transitoria hasta su reemplazo en la fase 4. */
+.bo .pagination .page-link { background: var(--bo-surface); border-color: var(--bo-line); color: var(--bo-fg); }
+.bo .pagination .page-link:hover { background: var(--bo-surface-2); color: var(--bo-fg); }
+.bo .pagination .active > .page-link { background: var(--bo-primary); border-color: var(--bo-primary); color: var(--bo-on-solid); }
+.bo .pagination .disabled > .page-link { background: var(--bo-surface-2); border-color: var(--bo-line); color: var(--bo-mut); }
+.bo nav:has(.pagination) p.small.text-muted { color: var(--bo-mut) !important; }
+
+/* Estado tenue para acciones e iconos sin cambiar su distribución. */
+.bo .bo-status { background: var(--bo-surface-2); }
+.bo .bo-status--info { color: var(--bo-signal); }
+.bo .bo-status--warn { color: var(--bo-warn); }
+.bo .bo-status--danger { color: var(--bo-alarm); }
+.bo .bo-status--ok { color: var(--bo-ok); }
