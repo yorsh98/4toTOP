@@ -8,6 +8,7 @@ use App\Livewire\OficioTabla;
 use App\Livewire\PublicFileConverterPage;
 use App\Livewire\ServiciosMapaPublicPage;
 use App\Livewire\TablaGuias;
+use App\Models\Audiencia;
 use App\Models\Ausentismo;
 use App\Models\BitacoraPruebaDia;
 use App\Models\BitacoraPruebaItem;
@@ -237,4 +238,38 @@ test('mapa público usa su envoltorio y conserva el plano y su estado vacío', f
         ->assertViewIs('livewire.servicios-mapa-publica')
         ->call('selectPiso', 7)
         ->assertSee('Plano interactivo del piso 7');
+});
+
+test('programación diaria muestra audiencias y exporta la fecha elegida', function () {
+    foreach (['Juicio Oral', 'Lectura de Sentencia', 'Audiencia Corta'] as $i => $tipo) {
+        Audiencia::create([
+            'fecha' => '2026-06-10', 'rit' => ($i + 101).'-2026', 'ruc' => '12345678-9',
+            'sala' => (string) (801 + $i), 'hora_inicio' => '10:00', 'tipo_audiencia' => $tipo,
+            'obs' => 'Observación de prueba', 'duracion' => '90 minutos', 'cta_zoom' => 'Zoom 123',
+            'estado' => 'POR_REALIZARSE', 'anfitrion' => 'Ana', 'encargado_causa' => 'Causa', 'acta' => 'Acta', 'JuezR' => 'Juez',
+            'acusados' => [['nombre_completo' => 'Persona Acusada', 'situacion' => 'Libre']],
+        ]);
+    }
+
+    $this->get('/progra?fecha=2026-06-10')->assertSuccessful()
+        ->assertSee('101-2026')->assertSee('102-2026')->assertSee('103-2026')
+        ->assertSee('Sala 801')->assertSee('Sala 802')->assertSee('Sala 803')
+        ->assertSee('Persona Acusada')->assertSee('Ana')
+        ->assertSee('10 de junio 2026')->assertDontSee('10 De Junio 2026')
+        ->assertSee('data-label="Hora"', false)->assertSee('data-label="Sala"', false)
+        ->assertSee('data-label="RIT"', false)->assertSee('data-label="RUC"', false)
+        ->assertSee('data-label="Tipo"', false)->assertSee('data-label="Anfitrión/a"', false)
+        ->assertSee('Zoom 123')->assertSee('Observación de prueba')->assertSee('90 minutos')
+        ->assertSee(route('audiencias.export.diaria'), false)
+        ->assertSee('name="fecha" value="2026-06-10"', false)
+        ->assertSee("document.querySelector('#progra-fecha').value", false)
+        ->assertSee('aria-expanded="false"', false);
+});
+
+test('programación diaria informa los grupos vacíos', function () {
+    $this->get('/progra?fecha=2026-06-10')->assertSuccessful()
+        ->assertSee('Sin juicios orales programados para este día.')
+        ->assertSee('Sin lecturas de sentencia programadas para este día.')
+        ->assertSee('Sin audiencias cortas programadas para este día.')
+        ->assertSee('No hay jueces ausentes registrados.');
 });

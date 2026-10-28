@@ -167,6 +167,13 @@ class PrograController extends Controller
 
             return [
                 'encabezado' => implode(' - ', $partes),
+                'hora' => $hora,
+                'sala' => $sala,
+                'tipo' => $tipo,
+                'rit' => $rit,
+                'ruc' => $ruc,
+                'duracion' => $duracion,
+                'obs' => $obs,
                 'num_testigos' => $asText($a->num_testigos),
                 'num_peritos' => $asText($a->num_peritos),
                 'delito' => $asText($a->delito),
@@ -212,6 +219,12 @@ class PrograController extends Controller
 
             return [
                 'encabezado' => implode(' - ', $partes),
+                'hora' => $hora,
+                'sala' => $sala,
+                'zoom' => $zoom,
+                'rit' => $asText($a->rit),
+                'ruc' => $asText($a->ruc),
+                'obs' => $asText($a->obs),
                 'encargado' => $asText($a->encargado_causa),
                 'juez_r' => $asText($a->JuezR),
                 'acta' => $asText($a->acta),
@@ -251,6 +264,11 @@ class PrograController extends Controller
 
             return [
                 'encabezado' => implode(' - ', $partes),
+                'hora' => $hora,
+                'sala' => $sala,
+                'rit' => $rit,
+                'ruc' => $ruc,
+                'obs' => $obs,
 
                 'anfitrion' => $asText($a->anfitrion),
                 'juez_p' => $asText($a->JuezP),
