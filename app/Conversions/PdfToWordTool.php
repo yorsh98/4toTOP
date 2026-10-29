@@ -16,10 +16,32 @@ class PdfToWordTool extends ConversionTool
         return 'docx';
     }
 
+    public function defaults(): array
+    {
+        return ['ocr' => null];
+    }
+
+    public function rules(): array
+    {
+        return ['ocr' => ['nullable', 'in:force']];
+    }
+
+    public function prepare(array $options, array $files, ?int $pageCount): array
+    {
+        return ($options['ocr'] ?? null) === 'force' ? ['ocr' => 'force'] : [];
+    }
+
+    public function timeout(array $options): int
+    {
+        return app(PdfOcr::class)->enabled() ? OcrPdfTool::ocrTimeout() : parent::timeout($options);
+    }
+
     public function process(FileConversion $conversion, string $directory): ToolResult
     {
         $input = $directory.'/'.basename($conversion->input_path);
         $output = $directory.'/result.docx';
+        $this->engine = config('conversions.pdf_engine');
+        $this->stage('Analizando el PDF', 5);
         $pdf = app(PdfInspector::class)->inspect($input);
         $scanned = $pdf['pages_without_text'];
         $ocrPath = $directory.'/ocr.pdf';
@@ -27,10 +49,16 @@ class PdfToWordTool extends ConversionTool
         $notice = null;
 
         try {
-            if ($scanned !== [] && app(PdfOcr::class)->enabled()) {
-                app(PdfOcr::class)->run($input, $ocrPath);
-                $input = $ocrPath;
-                $notice = 'Se reconoció texto (OCR) en '.self::pageList($scanned).'. Revisa el texto reconocido antes de usarlo.';
+            if (app(PdfOcr::class)->enabled()) {
+                $pages = $this->rebuild($input, $ocrPath, ($conversion->options['ocr'] ?? null) === 'force' ? 'all' : 'auto', $scanned);
+                if ($pages !== []) {
+                    $input = $ocrPath;
+                    $notice = 'Se transcribió con OCR el texto de '.self::pageList($pages).'. Las firmas, timbres e imágenes se conservaron como imagen. Revisa el texto reconocido antes de usarlo.';
+                }
+                $remaining = array_values(array_diff($scanned, $pages));
+                if ($remaining !== []) {
+                    $notice = trim(($notice ?? '').' No hay texto seleccionable en '.self::pageList($remaining).' (posiblemente escaneadas): se incluyen como imagen, sin texto editable.');
+                }
             } elseif (count($scanned) === $pdf['pages']) {
                 throw new \InvalidArgumentException('El PDF no contiene texto editable. Los PDF escaneados requieren OCR.');
             } elseif ($scanned !== []) {
@@ -38,6 +66,7 @@ class PdfToWordTool extends ConversionTool
             }
 
             // No silent fallback: a failure of the configured engine is reported as such.
+            $this->stage('Armando el documento Word', 85);
             $this->engine = config('conversions.pdf_engine');
             match ($this->engine) {
                 'pdf2docx' => $this->convertWithPdf2Docx($input, $converted),
@@ -45,6 +74,7 @@ class PdfToWordTool extends ConversionTool
                 default => throw new \RuntimeException('Motor de conversión PDF desconocido: '.$this->engine),
             };
 
+            $this->stage('Verificando el texto del Word', 95);
             $this->assertEditableText($converted);
 
             if (! rename($converted, $output)) {
@@ -59,6 +89,39 @@ class PdfToWordTool extends ConversionTool
         }
 
         return new ToolResult($output, $notice);
+    }
+
+    private function rebuild(string $input, string $output, string $pages, array $scanned): array
+    {
+        $process = new Process([config('conversions.python'), '-I', base_path('scripts/rebuild_scanned_pdf.py'), $input, $output, '--lang', config('conversions.ocr_languages'), '--pages', $pages, '--extra-pages', implode(',', $scanned), '--max-pages', (string) config('conversions.ocr_max_pages')]);
+        $process->setTimeout(config('conversions.ocr_timeout'));
+        $buffer = '';
+        $summary = [];
+        $process->run(function ($type, $chunk) use (&$buffer, &$summary) {
+            if ($type !== Process::OUT) {
+                return;
+            }
+            $buffer .= $chunk;
+            while (($end = strpos($buffer, "\n")) !== false) {
+                $line = substr($buffer, 0, $end);
+                $buffer = substr($buffer, $end + 1);
+                if (preg_match('/^PROGRESS (\d+) (\d+)$/', $line, $match)) {
+                    $this->stage("Transcribiendo con OCR: página {$match[1]} de {$match[2]}", 10 + (int) (65 * ((int) $match[1] - 1) / max(1, (int) $match[2])));
+                } elseif ($line === 'STAGE images') {
+                    $this->stage('Separando firmas, timbres e imágenes');
+                } elseif (str_starts_with($line, 'SUMMARY ')) {
+                    $summary = json_decode(substr($line, 8), true) ?? [];
+                }
+            }
+        });
+        if (! $process->isSuccessful() || ! is_file($output)) {
+            if ($process->getExitCode() === 3) {
+                throw new \InvalidArgumentException('El PDF está protegido con contraseña. Quita la protección e inténtalo de nuevo.');
+            }
+            throw new \RuntimeException('OCR: '.mb_substr($process->getErrorOutput(), -500));
+        }
+
+        return $summary['pages_rebuilt'] ?? [];
     }
 
     private function convertWithPdf2Docx(string $input, string $converted): void

@@ -7,7 +7,9 @@ use App\Models\FileConversion;
 use App\Services\AudioInspector;
 use App\Services\FileConversionService;
 use App\Services\PdfInspector;
+use App\Services\PdfOcr;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rules\File;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Locked;
@@ -194,13 +196,7 @@ trait ConvertsFiles
         }
         $options = $tool->prepare($this->options, $files, $this->pageCount);
 
-        if ($this->area() === 'frontoffice') {
-            $key = 'convert:'.request()->ip();
-            if (RateLimiter::tooManyAttempts($key, 10)) {
-                throw ValidationException::withMessages(['file' => 'Demasiadas solicitudes desde esta red. Vuelve a intentarlo más tarde.']);
-            }
-            RateLimiter::hit($key, 3600);
-        }
+        $this->limitConversion();
 
         $conversion = $service->create($files, $this->format, $this->area(), $this->area() === 'frontoffice' ? trim($this->actorName) : auth()->user()->name, $options);
         if ($tool->needsAudioProbe()) {
@@ -211,6 +207,43 @@ trait ConvertsFiles
             $this->options = $tool->defaults();
         }
         $this->dispatch('conversion-queued');
+    }
+
+    public function transcribeWithOcr(string $token, FileConversionService $service): void
+    {
+        $this->authorizeConversion();
+        $job = $this->mine()->where('token', $token)->first();
+        abort_unless($job, 404);
+        abort_unless(($job->format === 'pdf' && in_array($job->status, ['ready', 'failed'])) || ($job->format === 'ocr' && $job->status === 'ready'), 404);
+        $disk = Storage::disk(config('conversions.disk'));
+        if ($job->files_deleted_at || ! $disk->exists($job->input_path)) {
+            throw ValidationException::withMessages(['file' => 'El archivo original ya no está disponible; vuelve a subirlo.']);
+        }
+        if (! app(PdfOcr::class)->enabled()) {
+            throw ValidationException::withMessages(['file' => 'El OCR no está disponible.']);
+        }
+        $this->limitConversion();
+        $file = new \Illuminate\Http\UploadedFile($disk->path($job->input_path), $job->original_name, 'application/pdf', null, true);
+        $service->create([$file], 'pdf', $this->area(), $job->actor_name, ['ocr' => 'force']);
+        $this->dispatch('conversion-queued');
+    }
+
+    private function limitConversion(): void
+    {
+        if ($this->area() === 'frontoffice') {
+            $key = 'convert:'.request()->ip();
+            if (RateLimiter::tooManyAttempts($key, 10)) {
+                throw ValidationException::withMessages(['file' => 'Demasiadas solicitudes desde esta red. Vuelve a intentarlo más tarde.']);
+            }
+            RateLimiter::hit($key, 3600);
+        }
+    }
+
+    private function mine()
+    {
+        return FileConversion::query()
+            ->when($this->area() === 'frontoffice', fn ($query) => $query->where('area', 'frontoffice')->where('session_hash', hash('sha256', session()->getId())))
+            ->when($this->area() === 'backoffice', fn ($query) => $query->where('area', 'backoffice')->where('user_id', auth()->id()));
     }
 
     private function readPages($file, string $field): int
@@ -234,16 +267,16 @@ trait ConvertsFiles
     {
         $this->authorizeConversion();
         $sessionHash = hash('sha256', session()->getId());
-        $mine = fn () => FileConversion::query()
-            ->when($this->area() === 'frontoffice', fn ($query) => $query->where('area', 'frontoffice')->where('session_hash', $sessionHash))
-            ->when($this->area() === 'backoffice', fn ($query) => $query->where('area', 'backoffice')->where('user_id', auth()->id()));
-        $jobs = $mine()->latest()->limit(10)->get();
+        $jobs = $this->mine()->latest()->limit(10)->get();
+        $queuedIds = FileConversion::where('status', 'queued')->where('id', '<', $jobs->max('id') ?? 0)->orderBy('id')->pluck('id');
+        $queueBefore = $jobs->mapWithKeys(fn ($job) => [$job->id => $queuedIds->filter(fn ($id) => $id < $job->id)->count()]);
         $tools = ConversionTool::available();
 
         return view('livewire.file-converter', [
             'area' => $this->area(),
             'jobs' => $jobs,
-            'lastJob' => $this->lastToken ? $mine()->where('token', $this->lastToken)->first() : null,
+            'queueBefore' => $queueBefore,
+            'lastJob' => $this->lastToken ? $this->mine()->where('token', $this->lastToken)->first() : null,
             'tools' => $tools,
             'tool' => $this->tool(),
             'maxUploadBytes' => $this->maxUploadBytes(),
