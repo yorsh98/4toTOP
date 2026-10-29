@@ -20,6 +20,8 @@ class InsumosNotificacionesPage extends Component
             ->whereKey($notificationId)
             ->firstOrFail()
             ->markAsRead();
+
+        $this->dispatch('notificaciones-actualizadas');
     }
 
     public function marcarTodasLeidas(): void
@@ -28,6 +30,8 @@ class InsumosNotificacionesPage extends Component
             ->unreadNotifications()
             ->where('type', InsumosServiciosNotification::class)
             ->update(['read_at' => now()]);
+
+        $this->dispatch('notificaciones-actualizadas');
     }
 
     public function render()

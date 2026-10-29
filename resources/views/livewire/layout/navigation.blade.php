@@ -13,11 +13,6 @@ new class extends Component
 }; ?>
 
 @php
-    $unreadInsumosNotifications = auth()->user()
-        ->unreadNotifications()
-        ->where('type', \App\Notifications\InsumosServiciosNotification::class)
-        ->count();
-
     $menuItems = array_merge([[
             'label' => __('Inicio'),
             'route' => 'dashboard',
@@ -31,16 +26,10 @@ new class extends Component
 <nav x-data="{
     open: false,
     collapsed: sessionStorage.getItem('boSidebarCollapsed') === 'true',
-    theme: document.documentElement.dataset.theme,
     toggleCollapsed() {
         const apply = async () => { this.collapsed = !this.collapsed; sessionStorage.setItem('boSidebarCollapsed', this.collapsed); await this.$nextTick(); };
         window.boSidebar ? window.boSidebar.toggle(this.$root, apply) : apply();
     },
-    toggleTheme(event) {
-        this.theme = this.theme === 'dark' ? 'light' : 'dark'; document.documentElement.dataset.theme = this.theme; try { localStorage.setItem('fo-theme', this.theme); } catch (_) {}
-        const icon = event?.currentTarget?.querySelector('i');
-        this.$nextTick(() => window.boSidebar?.spin(icon));
-    }
 }" :class="collapsed ? 'lg:w-20' : 'lg:w-72'" class="bo-nav w-full lg:shrink-0">
     <div class="bo-nav-mobile flex h-16 items-center justify-between px-4 lg:hidden">
         <a href="{{ route('dashboard') }}" wire:navigate class="bo-brand"><img src="{{ asset('img/pjud_blanco.webp') }}" alt="Poder Judicial de Chile"><span>4toTOP</span></a>
@@ -61,10 +50,7 @@ new class extends Component
         </div>
         <div class="bo-nav-footer p-3">
             <div x-show="!collapsed" class="bo-nav-user" x-data="{{ json_encode(['name' => auth()->user()->name]) }}"><strong x-text="name" x-on:profile-updated.window="name = $event.detail.name"></strong><span>{{ auth()->user()->email }}</span></div>
-            <a href="{{ route('insumos.notificaciones') }}" wire:navigate class="bo-nav-link" :class="collapsed ? 'justify-center' : ''" title="Notificaciones"><i class="fa-solid fa-bell"></i><span x-show="!collapsed">Notificaciones</span>@if ($unreadInsumosNotifications)<span class="bo-badge">{{ $unreadInsumosNotifications }}</span>@endif</a>
             <a href="{{ route('profile') }}" wire:navigate class="bo-nav-link" :class="collapsed ? 'justify-center' : ''" title="Perfil"><i class="fa-solid fa-user"></i><span x-show="!collapsed">Perfil</span></a>
-            <a href="{{ route('welcome') }}" class="bo-nav-link" :class="collapsed ? 'justify-center' : ''" title="Ver sitio público"><i class="fa-solid fa-arrow-up-right-from-square"></i><span x-show="!collapsed">Ver sitio público</span></a>
-            <button type="button" @click="toggleTheme($event)" class="bo-nav-link w-full" :class="collapsed ? 'justify-center' : ''" title="Cambiar tema" aria-label="Cambiar tema"><i class="fa-solid" :class="theme === 'dark' ? 'fa-sun' : 'fa-moon'"></i><span x-show="!collapsed">Cambiar tema</span></button>
             <button type="button" wire:click="logout" class="bo-nav-link w-full" :class="collapsed ? 'justify-center' : ''" title="Salir"><i class="fa-solid fa-right-from-bracket"></i><span x-show="!collapsed">Salir</span></button>
         </div>
     </aside>
@@ -77,10 +63,7 @@ new class extends Component
             @endcanany
         @endforeach
         <div class="bo-nav-footer pt-3">
-            <a href="{{ route('insumos.notificaciones') }}" wire:navigate class="bo-nav-link"><i class="fa-solid fa-bell"></i>Notificaciones @if ($unreadInsumosNotifications)<span class="bo-badge">{{ $unreadInsumosNotifications }}</span>@endif</a>
             <a href="{{ route('profile') }}" wire:navigate class="bo-nav-link"><i class="fa-solid fa-user"></i>Perfil</a>
-            <a href="{{ route('welcome') }}" class="bo-nav-link"><i class="fa-solid fa-arrow-up-right-from-square"></i>Ver sitio público</a>
-            <button type="button" @click="toggleTheme($event)" class="bo-nav-link w-full" aria-label="Cambiar tema"><i class="fa-solid" :class="theme === 'dark' ? 'fa-sun' : 'fa-moon'"></i>Cambiar tema</button>
             <button type="button" wire:click="logout" class="bo-nav-link w-full"><i class="fa-solid fa-right-from-bracket"></i>Salir</button>
         </div>
     </div>
