@@ -6,6 +6,7 @@ import 'bootstrap';
 import Swal from 'sweetalert2';
 import { initFrontOffice } from './front-office.js';
 import { initBackofficeNav } from './backoffice-nav.js';
+import { initTheme } from './theme.js';
 window.Swal = Swal;
 
 window.SwalToast = Swal.mixin({
@@ -316,5 +317,6 @@ window.audioCutter = (maxRegions, maxBytes) => ({
     },
 });
 
+initTheme();
 initFrontOffice();
 initBackofficeNav();

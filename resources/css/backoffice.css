@@ -260,3 +260,9 @@ body.bo { --bo-solid-ok: #087443; --bo-solid-warn: #875000; --bo-muted-on-solid:
 .bo .bo-pagination-active .bo-pagination-link { background: var(--bo-primary); border-color: var(--bo-primary); color: var(--bo-on-solid); }
 .bo .bo-pagination-disabled .bo-pagination-link { background: var(--bo-surface-2); color: var(--bo-mut); }
 @media (max-width: 639px) { .bo .bo-pagination-mobile { display: block; } .bo .bo-pagination-desktop { display: none; } }
+
+.bo .bo-header-actions { display: flex; gap: .5rem; align-items: center; }
+.bo .bo-header-btn { position: relative; width: 38px; height: 38px; display: inline-grid; place-items: center; border-radius: .5rem; border: 1px solid var(--bo-line); color: var(--bo-fg); background: var(--bo-surface); }
+.bo .bo-header-btn:hover { border-color: var(--bo-signal); }
+.bo .bo-header-btn:focus-visible { outline: 2px solid var(--bo-signal); outline-offset: 2px; }
+.bo .bo-header-btn .bo-badge { position: absolute; top: -6px; right: -6px; min-width: 1.1rem; font-size: .7rem; line-height: 1.1rem; text-align: center; }

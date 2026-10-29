@@ -27,9 +27,11 @@
             <div class="min-w-0 flex-1">
                 <!-- Page Heading -->
                 @if (isset($header))
-                    <header class="bo-header h-16">
-                        <div class="flex h-full items-center">
-                            {{ $header }}
+                    {{-- Alto mínimo de 64 px: en pantallas chicas el título puede ocupar dos líneas junto a las acciones --}}
+                    <header class="bo-header flex min-h-16 items-center py-2">
+                        <div class="flex w-full items-center justify-between gap-2">
+                            <div class="min-w-0 flex-1">{{ $header }}</div>
+                            <div class="shrink-0 pr-4 sm:px-6 lg:px-8"><x-bo-header-actions /></div>
                         </div>
                     </header>
                 @endif
