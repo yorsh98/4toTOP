@@ -10,20 +10,29 @@
     </x-slot:header>
 @endif
 
-<div class="{{ $area === 'frontoffice' ? 'pb-6 fo-conv' : 'py-6 sm:py-8' }}" wire:poll.5s>
-    <div class="mx-auto space-y-6 {{ $area === 'frontoffice' ? 'w-full lg:space-y-8 fo-conv-main' : 'max-w-5xl px-4 sm:px-6 lg:px-8' }}">
+<div class="{{ $area === 'frontoffice' ? 'pb-6 fo-conv' : 'py-2' }}" wire:poll.5s>
+    <div class="{{ $area === 'frontoffice' ? 'mx-auto space-y-6 w-full lg:space-y-8 fo-conv-main' : 'max-w-7xl mx-auto space-y-4 px-4 sm:px-6 lg:px-8' }}">
+        @if ($area === 'backoffice')
+            <x-flash-notifications />
+        @endif
+
         @if ($area === 'frontoffice')
             <x-public.page-head title="Convertir archivos" lead="Convierte, organiza y edita tus archivos en línea." />
         @endif
 
-        <section class="{{ $area === 'frontoffice' ? 'overflow-hidden bg-white fo-panel' : 'overflow-hidden bo-card' }}" aria-labelledby="conversion-title">
+        <section class="{{ $area === 'frontoffice' ? 'overflow-hidden bg-white fo-panel' : 'bo-card bo-section p-6' }}" aria-labelledby="conversion-title">
+            @if ($area === 'frontoffice')
             <div class="{{ $area === 'frontoffice' ? 'fo-conv-heading pb-5' : 'bo-panel-heading px-6 py-6 sm:px-8' }}">
                 <p class="text-xs font-semibold uppercase tracking-wide {{ $area === 'frontoffice' ? 'fo-conv-eyebrow' : 'bo-eyebrow' }}">Convertir · Organizar · Optimizar · Editar</p>
                 <h2 id="conversion-title" class="mt-2 text-xl font-semibold">Elige qué quieres hacer con tus archivos</h2>
                 <p class="mt-1 text-sm {{ $area === 'frontoffice' ? 'fo-hint' : 'bo-muted' }}">Tus archivos se eliminan automáticamente después del plazo de descarga.</p>
             </div>
+            @else
+                <h3 id="conversion-title" class="text-lg font-semibold bo-strong">Elige qué quieres hacer con tus archivos</h3>
+                <p class="mt-1 text-sm bo-muted">Tus archivos se eliminan automáticamente después del plazo de descarga.</p>
+            @endif
 
-            <div class="space-y-7 {{ $area === 'frontoffice' ? 'pt-6' : 'p-5 sm:p-8' }}">
+            <div class="space-y-7 {{ $area === 'frontoffice' ? 'pt-6' : 'mt-5' }}">
                 <div class="grid gap-5" role="group" aria-label="Herramienta">
                     @foreach (collect($tools)->groupBy(fn ($tool) => $tool->config['group'], preserveKeys: true) as $group => $groupTools)
                         <div>
@@ -137,8 +146,12 @@
             </div>
         </section>
 
-        <section class="{{ $area === 'frontoffice' ? 'bg-white p-5 fo-panel' : 'bo-card p-5 sm:p-8' }}" aria-labelledby="jobs-title">
+        <section class="{{ $area === 'frontoffice' ? 'bg-white p-5 fo-panel' : 'bo-card bo-section p-6' }}" aria-labelledby="jobs-title">
+            @if ($area === 'frontoffice')
             <h2 id="jobs-title" class="{{ $area === 'frontoffice' ? 'text-lg font-semibold text-slate-900' : 'text-lg font-semibold bo-strong' }}">Archivos de {{ $area === 'frontoffice' ? 'esta sesión' : 'tu cuenta' }}</h2>
+            @else
+                <h3 id="jobs-title" class="text-lg font-semibold bo-strong">Archivos de tu cuenta</h3>
+            @endif
             @if ($area === 'frontoffice')
                 <div class="fo-table-wrap fo-table-wrap--glass fo-conv-table mt-4" aria-live="polite">
                     <table class="fo-table">
