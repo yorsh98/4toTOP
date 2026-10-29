@@ -166,16 +166,53 @@
 }
 
 /* ---------- Header ---------- */
-.fo .fo-header {
-    position: sticky; top: 0; z-index: 40;
+/* La barra conserva sus 64 px en el flujo (el contenido no salta al contraerse):
+   el fondo vive en ::before y se encoge con transform, igual que el contenido. */
+.fo .fo-header { position: sticky; top: 0; z-index: 40; pointer-events: none; }
+.fo .fo-header::before {
+    content: ""; position: absolute; inset: 0; z-index: -1;
     background: color-mix(in srgb, var(--fo-bg) 78%, transparent);
     backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
     border-bottom: 1px solid var(--fo-line);
+    transform-origin: top;
+    transition: transform var(--cm-t-slow) var(--cm-ease-out), background-color var(--cm-t-base) var(--cm-ease-out), box-shadow var(--cm-t-slow) var(--cm-ease-out);
 }
 .fo .fo-header-inner {
     max-width: var(--fo-max-padded); margin: 0 auto; height: 64px; padding: 0 var(--fo-gutter);
     display: flex; align-items: center; gap: 20px;
+    transition: transform var(--cm-t-slow) var(--cm-ease-out);
 }
+.fo .fo-header-inner > * { pointer-events: auto; }
+
+/* Contraída (al bajar): 64 → 52 px, más opaca y con sombra; la marca y las acciones se achican */
+.fo .fo-header.is-compact::before {
+    transform: scaleY(.8125);
+    background-color: color-mix(in srgb, var(--fo-bg) 92%, transparent);
+    box-shadow: 0 12px 28px -14px rgba(0, 0, 0, .55);
+}
+.fo .fo-header.is-compact .fo-header-inner { transform: translateY(-6px); }
+.fo .fo-brand, .fo .fo-nav, .fo .fo-header-actions { transition: transform var(--cm-t-slow) var(--cm-ease-out); }
+.fo .fo-brand { transform-origin: left center; }
+.fo .fo-header-actions { transform-origin: right center; }
+.fo .fo-header.is-compact .fo-brand { transform: scale(.86); }
+.fo .fo-header.is-compact .fo-nav { transform: scale(.95); }
+.fo .fo-header.is-compact .fo-header-actions { transform: scale(.9); }
+/* Al volver a su tamaño, la marca rebota apenas (resorte de chat-motion) */
+.fo .fo-header:not(.is-compact) .fo-brand { transition-timing-function: var(--cm-ease-spring); }
+
+/* Entrada escalonada (cm-rise) la primera vez de la sesión; tras el preloader si lo hay */
+.fo-head-in .fo .fo-brand,
+.fo-head-in .fo .fo-nav-link,
+.fo-head-in .fo .fo-header-actions > * {
+    animation: cm-rise var(--cm-t-slow) var(--cm-ease-out) backwards;
+    animation-delay: calc(var(--fo-start, 0s) + var(--cm-i, 0) * 45ms);
+}
+.fo-head-in .fo .fo-header::before { animation: fo-head-bar var(--cm-t-slow) var(--cm-ease-out) backwards; animation-delay: var(--fo-start, 0s); }
+@keyframes fo-head-bar { from { transform: scaleY(0); opacity: 0; } }
+
+/* Cambio de tema: el ícono entrante gira y rebota */
+.fo .fo-icon-btn.is-flipping i { animation: fo-theme-flip var(--cm-t-slow) var(--cm-ease-spring); }
+@keyframes fo-theme-flip { from { transform: rotate(-120deg) scale(.4); opacity: 0; } }
 .fo .fo-brand { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
 .fo .fo-brand-logo { width: 46px; height: auto; display: block; }
 .fo .fo-brand-name { font: 800 17px/1 var(--fo-display); font-stretch: 118%; letter-spacing: -.01em; }
@@ -183,7 +220,7 @@
 .fo .fo-nav { display: flex; align-items: center; gap: 2px; margin: 0 auto; padding: 4px; border-radius: 12px; }
 .fo .fo-nav-pill { right: auto; background: var(--fo-surface-2); border-radius: 9px; opacity: 0; transition-property: transform, width, height, opacity; transition-duration: var(--cm-t-slow); transition-timing-function: var(--fo-ease); }
 .fo .fo-nav-pill.is-on { opacity: 1; }
-.fo .fo-nav-link { padding: 7px 12px; border-radius: 9px; font-size: 14px; font-weight: 600; color: var(--fo-mut) !important; transition: color var(--cm-t-fast); white-space: nowrap; }
+.fo .fo-nav-link { padding: 7px 12px; border-radius: 9px; font-size: 14px; font-weight: 600; color: var(--fo-mut) !important; transition: color var(--cm-t-fast), transform var(--cm-t-fast) var(--cm-ease-out); white-space: nowrap; }
 .fo .fo-nav-link:hover, .fo .fo-nav-link[aria-current="true"] { color: var(--fo-fg) !important; }
 
 .fo .fo-header-actions { display: flex; align-items: center; gap: 8px; margin-left: auto; }
