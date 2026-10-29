@@ -21,7 +21,7 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="bo antialiased">
-        <div class="min-h-screen lg:flex">
+        <div class="bo-shell min-h-screen lg:flex">
             <livewire:layout.navigation />
 
             <div class="min-w-0 flex-1">
