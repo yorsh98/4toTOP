@@ -102,6 +102,30 @@ body.bo { --bo-fg: var(--bo-text); --bo-danger: #b91c1c; --bo-on-solid: #fff; --
 .bo .bo-nav-link i { width: 1.25rem; text-align: center; }
 .bo .bo-nav-link:hover, .bo .bo-nav-toggle:hover { background: var(--bo-primary); color: var(--bo-on-solid); }
 .bo .bo-nav-link.is-active { box-shadow: inset 3px 0 var(--bo-accent); background: var(--bo-primary); }
+/* ---------- Barra lateral: movimiento (chat-motion) ----------
+   Colapsar / expandir lo anima resources/js/backoffice-nav.js (FLIP con transform y clip-path). */
+.bo .bo-shell { overflow-x: clip; } /* el contenido se desliza al colapsar sin crear scroll horizontal */
+.bo .bo-nav-link, .bo .bo-nav-toggle {
+    transition: background-color var(--cm-t-fast) var(--cm-ease-out), color var(--cm-t-fast) var(--cm-ease-out),
+        transform var(--cm-t-fast) var(--cm-ease-out), box-shadow var(--cm-t-base) var(--cm-ease-out);
+}
+.bo .bo-nav-link:active, .bo .bo-nav-toggle:active { transform: scale(.96); }
+.bo .bo-nav-link > i:first-child { transition: transform var(--cm-t-base) var(--cm-ease-spring); }
+.bo .bo-nav-link:hover > i:first-child { transform: translateX(2px) scale(1.1); }
+/* Entrada escalonada una vez por carga completa (bo-nav-seen la apaga en wire:navigate) */
+html:not(.bo-nav-seen) .bo .bo-sidebar .bo-nav-link[style*="--cm-i"] {
+    animation: bo-nav-in var(--cm-t-slow) var(--cm-ease-out) backwards;
+    animation-delay: calc(var(--cm-i, 0) * 35ms + 60ms);
+}
+@keyframes bo-nav-in { from { opacity: 0; transform: translateX(-10px); } }
+/* Al cambiar de módulo, la barra de acento del activo crece con resorte */
+html.bo-nav-seen .bo .bo-nav-link.is-active { animation: bo-active-in var(--cm-t-slow) var(--cm-ease-spring); }
+@keyframes bo-active-in { from { box-shadow: inset 0 0 var(--bo-accent); } }
+/* Menú móvil: baja y aparece */
+.bo .bo-menu-t { transition: opacity var(--cm-t-base) var(--cm-ease-out), transform var(--cm-t-base) var(--cm-ease-out); }
+.bo .bo-menu-from { opacity: 0; transform: translateY(-8px); }
+html:not(.bo-nav-seen) .bo .bo-badge { animation: cm-pop var(--cm-t-slow) var(--cm-ease-spring) backwards; animation-delay: .4s; }
+
 .bo .bo-nav-user { display: grid; overflow-wrap: anywhere; padding: .5rem .7rem; font-size: .8rem; }
 .bo .bo-badge { background: var(--bo-danger); color: var(--bo-on-solid); border-radius: 999px; padding: 0 .4rem; }
 .bo .bo-hero { position: relative; overflow: hidden; background: var(--bo-toga); color: var(--bo-on-solid); border: 1px solid var(--bo-nav-line); border-radius: var(--bo-radius); padding: 2rem; }
