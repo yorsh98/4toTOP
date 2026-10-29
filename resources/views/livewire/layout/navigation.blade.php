@@ -51,10 +51,11 @@ new class extends Component
             <a href="{{ route('dashboard') }}" wire:navigate class="bo-brand" x-show="!collapsed"><img src="{{ asset('img/pjud_blanco.webp') }}" alt="Poder Judicial de Chile"><span>4toTOP</span></a>
             <button type="button" class="bo-nav-toggle" @click="toggleCollapsed" :title="collapsed ? 'Expandir menú' : 'Colapsar menú'" :aria-label="collapsed ? 'Expandir menú' : 'Colapsar menú'"><i class="fa-solid" :class="collapsed ? 'fa-angles-right' : 'fa-angles-left'"></i></button>
         </div>
-        <div class="flex-1 overflow-y-auto p-3">
+        <div class="cm-pill-track flex-1 overflow-y-auto p-3" data-bo-nav-track>
+            <span class="cm-pill bo-nav-pill" aria-hidden="true"></span>
             @foreach ($menuItems as $item)
                 @canany($item['permissions'])
-                    <a href="{{ route($item['route']) }}" wire:navigate title="{{ $item['label'] }}" style="--bo-accent: {{ $item['accent'] }}; --cm-i: {{ $loop->index }}" class="bo-nav-link cm-press {{ request()->routeIs($item['active']) ? 'is-active' : '' }}" :class="collapsed ? 'justify-center' : ''"><i class="{{ $item['icon'] }}" aria-hidden="true"></i><span x-show="!collapsed">{{ $item['label'] }}</span></a>
+                    <a href="{{ route($item['route']) }}" wire:navigate title="{{ $item['label'] }}" style="--bo-accent: {{ $item['accent'] }}" class="bo-nav-link cm-press {{ request()->routeIs($item['active']) ? 'is-active' : '' }}" :class="collapsed ? 'justify-center' : ''"><i class="{{ $item['icon'] }}" aria-hidden="true"></i><span x-show="!collapsed">{{ $item['label'] }}</span></a>
                 @endcanany
             @endforeach
         </div>
