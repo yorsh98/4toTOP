@@ -8,6 +8,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
+use Symfony\Component\Process\Process;
 
 beforeEach(function () {
     Storage::fake('local');
@@ -219,3 +220,65 @@ it('passes the server check when OCR and the queue are set up', function () {
         ->expectsOutputToContain('Todo listo')
         ->assertSuccessful();
 })->skip(fn () => ! ocrAvailable(), 'OCRmyPDF, Tesseract (spa) or PyMuPDF are not installed for CONVERSIONS_PYTHON');
+
+it('rebuilds a scanned page with visible text and an image', function () {
+    $input = tempnam(sys_get_temp_dir(), 'scan');
+    $output = $input.'.pdf';
+    $fixture = new Process([config('conversions.python'), '-I', '-c', <<<'PYCODE'
+from PIL import Image, ImageDraw, ImageFont
+import sys
+image = Image.new('RGB', (1700, 2200), 'white')
+draw = ImageDraw.Draw(image)
+font = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', 48)
+draw.text((180, 250), 'Documento del tribunal dicta sentencia firme sobre causa penal pública', font=font, fill='black')
+draw.line([(250, 1400), (400, 1300), (310, 1450), (540, 1320), (620, 1410)], fill='black', width=14)
+image.save(sys.argv[1], format='PDF', resolution=200)
+PYCODE, $input]);
+    $fixture->mustRun();
+    $process = new Process([config('conversions.python'), '-I', base_path('scripts/rebuild_scanned_pdf.py'), $input, $output, '--lang', 'spa']);
+    $process->setTimeout(120);
+    $process->run();
+    expect($process->isSuccessful())->toBeTrue($process->getErrorOutput())
+        ->and($process->getOutput())->toContain('SUMMARY ')
+        ->and(pdfPageTexts($output)[0])->toContain('tribunal');
+    $images = new Process([config('conversions.pdfimages'), '-list', $output]);
+    $images->run();
+    expect($images->getOutput())->toContain('image');
+    unlink($input);
+    unlink($output);
+})->skip(fn () => ! ocrAvailable(), 'OCR no disponible');
+
+it('queues a forced transcription using the original file and enforces ownership and limits', function () {
+    enableOcr();
+    $page = Livewire::test(PublicFileConverterPage::class)->set('actorName', 'Ana')
+        ->set('file', UploadedFile::fake()->createWithContent('acta.pdf', numberedPdf('Texto', 1)))
+        ->call('convert')->assertHasNoErrors();
+    $original = FileConversion::firstOrFail();
+    $original->update(['status' => 'failed']);
+    $page->call('transcribeWithOcr', $original->token)->assertHasNoErrors();
+    $copy = FileConversion::latest('id')->first();
+    expect($copy->options)->toBe(['ocr' => 'force'])
+        ->and(Storage::disk('local')->get($copy->input_path))->toBe(Storage::disk('local')->get($original->input_path));
+    $copy->update(['status' => 'ready']);
+    $original->update(['status' => 'ready']);
+    $page->call('transcribeWithOcr', $copy->token)->assertHasErrors('file');
+    Storage::disk('local')->delete($original->input_path);
+    $page->call('transcribeWithOcr', $original->token)->assertHasErrors('file');
+    $original->update(['session_hash' => hash('sha256', 'another')]);
+    $page->call('transcribeWithOcr', $original->token)->assertNotFound();
+});
+
+it('stores the forced OCR option and displays queue and processing progress', function () {
+    enableOcr();
+    $page = Livewire::test(PublicFileConverterPage::class)
+        ->set('actorName', 'Ana')
+        ->set('options.ocr', 'force')
+        ->set('file', UploadedFile::fake()->createWithContent('acta.pdf', numberedPdf('Texto', 1)))
+        ->call('convert')->assertHasNoErrors();
+    $first = FileConversion::firstOrFail();
+    expect($first->options)->toBe(['ocr' => 'force']);
+    $page->set('actorName', 'Ana')->set('file', UploadedFile::fake()->createWithContent('otra.pdf', numberedPdf('Texto', 1)))
+        ->call('convert')->assertHasNoErrors()->assertSee('archivo(s) antes');
+    $first->update(['status' => 'processing', 'stage' => 'Analizando el PDF', 'progress' => 5]);
+    $page->call('$refresh')->assertSee('Analizando el PDF')->assertSee('aria-valuenow="5"', false);
+});

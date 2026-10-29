@@ -294,19 +294,16 @@ it('warns which pages of a mixed PDF have no selectable text', function () {
 });
 
 it('recognises scanned pages with OCR when it is configured', function () {
-    config()->set('conversions.pdf_engine', 'libreoffice');
-    $recognised = tempnam(sys_get_temp_dir(), 'ocr-result-');
-    file_put_contents($recognised, conversionPdf('Texto reconocido por OCR'));
-    config()->set('conversions.ocrmypdf', fakeTool('for last; do :; done; cp '.escapeshellarg($recognised).' "$last"'));
-    $job = queuedPdfConversion(conversionPdf(''), 'escaneado');
+    config()->set('conversions.ocrmypdf', dirname(config('conversions.python')).'/ocrmypdf');
+    $job = queuedPdfConversion(scannedPdf(), 'escaneado');
 
     (new ConvertFile($job->id))->handle();
 
     expect($job->fresh()->status)->toBe('ready')
         ->and($job->fresh()->notice)->toContain('OCR')
-        ->and(docxPart($job->fresh(), 'word/document.xml'))->toContain('Texto reconocido por OCR');
+        ->and(mb_strtolower(docxPart($job->fresh(), 'word/document.xml')))->toContain('tribunal');
     Storage::disk('local')->assertMissing("conversions/{$job->token}/ocr.pdf");
-});
+})->skip(fn () => ! ocrAvailable(), 'OCR no disponible');
 
 it('explains password protected and damaged PDFs', function (string $stderr, string $message) {
     config()->set('conversions.pdfinfo', fakeTool('echo '.escapeshellarg($stderr).' >&2; exit 1'));

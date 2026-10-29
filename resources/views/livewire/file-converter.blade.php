@@ -10,7 +10,7 @@
     </x-slot:header>
 @endif
 
-<div class="{{ $area === 'frontoffice' ? 'pb-6 fo-conv' : 'py-2' }}" wire:poll.5s>
+<div class="{{ $area === 'frontoffice' ? 'pb-6 fo-conv' : 'py-2' }}" {{ $jobs->contains(fn ($job) => in_array($job->status, ['queued', 'processing'])) ? 'wire:poll.2s' : 'wire:poll.5s' }}>
     <div class="{{ $area === 'frontoffice' ? 'mx-auto space-y-6 w-full lg:space-y-8 fo-conv-main' : 'max-w-7xl mx-auto space-y-4 px-4 sm:px-6 lg:px-8' }}">
         @if ($area === 'backoffice')
             <x-flash-notifications />
@@ -147,6 +147,7 @@
         </section>
 
         <section class="{{ $area === 'frontoffice' ? 'bg-white p-5 fo-panel' : 'bo-card bo-section p-6' }}" aria-labelledby="jobs-title">
+            @error('file') <p role="alert" class="{{ $area === 'frontoffice' ? 'fo-hint fo-hint--warn' : 'text-sm font-medium bo-text--danger' }}">{{ $message }}</p> @enderror
             @if ($area === 'frontoffice')
             <h2 id="jobs-title" class="{{ $area === 'frontoffice' ? 'text-lg font-semibold text-slate-900' : 'text-lg font-semibold bo-strong' }}">Archivos de {{ $area === 'frontoffice' ? 'esta sesión' : 'tu cuenta' }}</h2>
             @else
@@ -161,9 +162,9 @@
                             <tbody class="fo-table-group" wire:key="conversion-{{ $job->id }}"><tr>
                                 <td data-label="Archivo"><strong>{{ $job->original_name }}</strong>@if ($job->status === 'ready' && $job->notice)<p class="fo-hint">{{ $job->notice }}</p>@endif</td>
                                 <td data-label="Herramienta">{{ config('conversions.tools.'.$job->format.'.label', strtoupper($job->format)) }}</td>
-                                <td data-label="Estado"><span class="fo-badge">@if ($job->status === 'failed'){{ $job->error_message }}@elseif ($job->status === 'ready' && ! $job->expires_at?->isFuture())Descarga vencida@elseif ($job->status === 'ready')Listo@else{{ $job->status === 'queued' ? 'En espera' : 'Procesando…' }}@endif</span></td>
+                                <td data-label="Estado">@if ($job->status === 'failed')<span class="fo-badge">{{ $job->error_message }}</span>@elseif ($job->status === 'ready' && ! $job->expires_at?->isFuture())<span class="fo-badge">Descarga vencida</span>@elseif ($job->status === 'ready')<span class="fo-badge">Listo</span>@else<span class="fo-conv-stage" aria-live="polite">@include('livewire.partials.conversion-status', ['prefix' => 'fo'])</span>@endif</td>
                                 <td data-label="Fecha"><span class="fo-num">{{ $job->created_at->format('d/m/Y H:i') }}</span></td>
-                                <td data-label="Acción">@if ($job->status === 'ready' && $job->expires_at?->isFuture())<a class="fo-link" href="{{ route('conversions.download', $job) }}">Descargar {{ App\Conversions\ConversionTool::downloadLabel(pathinfo($job->result_name, PATHINFO_EXTENSION)) }}</a>@else<span class="fo-dash">—</span>@endif</td>
+                                <td data-label="Acción">@if ($job->status === 'ready' && $job->expires_at?->isFuture())<a class="fo-link" href="{{ route('conversions.download', $job) }}">Descargar {{ App\Conversions\ConversionTool::downloadLabel(pathinfo($job->result_name, PATHINFO_EXTENSION)) }}</a>@endif @if (($job->format === 'pdf' && in_array($job->status, ['ready', 'failed'])) || ($job->format === 'ocr' && $job->status === 'ready')) <button type="button" class="fo-link" wire:click="transcribeWithOcr('{{ $job->token }}')" wire:loading.attr="disabled">Transcribir con OCR</button> @endif</td>
                             </tr></tbody>
                         @empty
                             <tbody><tr><td colspan="5" class="fo-table-empty">Elige una herramienta y un archivo para empezar.</td></tr></tbody>
@@ -188,7 +189,10 @@
                         @elseif ($job->status === 'ready')
                             <span class="{{ $area === 'frontoffice' ? 'text-sm text-slate-600' : 'text-sm bo-muted' }}">Descarga vencida</span>
                         @else
-                            <span class="{{ $area === 'frontoffice' ? 'text-sm font-medium text-sky-700' : 'text-sm font-medium bo-text--info' }}">{{ $job->status === 'queued' ? 'En espera' : 'Procesando…' }}</span>
+                            <span class="{{ $area === 'frontoffice' ? 'text-sm font-medium text-sky-700' : 'text-sm font-medium bo-text--info' }}">@include('livewire.partials.conversion-status', ['prefix' => $area === 'frontoffice' ? 'fo' : 'bo'])</span>
+                        @endif
+                        @if (($job->format === 'pdf' && in_array($job->status, ['ready', 'failed'])) || ($job->format === 'ocr' && $job->status === 'ready'))
+                            <button type="button" class="bo-btn bo-btn--secondary" wire:click="transcribeWithOcr('{{ $job->token }}')" wire:loading.attr="disabled">Transcribir con OCR</button>
                         @endif
                     </div>
                 @empty

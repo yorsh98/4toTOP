@@ -17,6 +17,22 @@ abstract class ConversionTool
     /** The program doing the work, recorded in the register even when it fails. */
     public ?string $engine = null;
 
+    private $stageCallback = null;
+
+    public function onStage(callable $callback): static
+    {
+        $this->stageCallback = $callback;
+
+        return $this;
+    }
+
+    protected function stage(string $label, ?int $progress = null): void
+    {
+        if ($this->stageCallback) {
+            ($this->stageCallback)($label, $progress);
+        }
+    }
+
     public function __construct(public readonly string $format, public readonly array $config) {}
 
     public static function for(string $format): self

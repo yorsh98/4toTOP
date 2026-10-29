@@ -967,3 +967,12 @@
     .fo-intro .fo-preloader { display: none; }
     .fo .fo-backdrop img { transform: translate3d(-30vw, 0, 0); }
 }
+
+/* La columna Estado no se angosta por un aviso largo en Archivo: cabe "Listo" y la barra */
+@media (min-width: 761px) { .fo .fo-conv-table td[data-label="Estado"] { min-width: 11rem; } }
+/* Etapa en curso de una conversión (columna Estado del conversor) */
+.fo .fo-conv-stage { display: block; color: var(--fo-fg); font-size: 13px; font-weight: 600; line-height: 1.35; }
+/* Barra de progreso de una conversión (columna Estado del conversor) */
+.fo .fo-progress { display: block; width: 10rem; max-width: 100%; height: .4rem; margin-top: .35rem; background: var(--fo-line-strong); border-radius: 1rem; overflow: hidden; }
+.fo .fo-progress > span:first-child { display: block; height: 100%; background: var(--fo-signal); transition: width var(--cm-t-slow) var(--fo-ease); }
+@media (prefers-reduced-motion: reduce) { .fo .fo-progress > span:first-child { transition: none; } }

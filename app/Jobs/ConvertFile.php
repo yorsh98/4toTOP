@@ -24,13 +24,23 @@ class ConvertFile implements ShouldQueue
     public function handle(): void
     {
         $conversion = FileConversion::findOrFail($this->conversionId);
-        $conversion->update(['status' => 'processing']);
+        $conversion->update(['status' => 'processing', 'stage' => 'Preparando el archivo', 'progress' => null]);
         $disk = Storage::disk(config('conversions.disk'));
         $directory = 'conversions/'.$conversion->token;
         $tool = null;
 
         try {
             $tool = ConversionTool::for($conversion->format);
+            $lastStage = null;
+            $lastUpdate = 0;
+            $tool->onStage(function (string $label, ?int $progress) use ($conversion, &$lastStage, &$lastUpdate) {
+                if ($label !== $lastStage || microtime(true) - $lastUpdate >= 1) {
+                    $conversion->update(['stage' => $label, 'progress' => $progress]);
+                    $lastStage = $label;
+                    $lastUpdate = microtime(true);
+                }
+            });
+            $conversion->update(['stage' => 'Procesando: '.$tool->label()]);
             $conversion->update(['input_sha256' => hash_file('sha256', $disk->path($conversion->input_path))]);
             $result = $tool->process($conversion, $disk->path($directory));
             $outputPath = $directory.'/'.basename($result->path);
@@ -43,6 +53,7 @@ class ConvertFile implements ShouldQueue
             $extension = pathinfo($result->path, PATHINFO_EXTENSION);
             $conversion->update([
                 'status' => 'ready',
+                'stage' => null, 'progress' => null,
                 'result_name' => pathinfo($conversion->result_name, PATHINFO_FILENAME).'.'.$extension,
                 'output_path' => $outputPath,
                 'engine' => $tool->engine,
@@ -53,7 +64,7 @@ class ConvertFile implements ShouldQueue
             ]);
         } catch (\Throwable $exception) {
             $disk->delete(array_filter($disk->files($directory), fn (string $path) => str_starts_with(basename($path), 'result.')));
-            $conversion->update(['status' => 'failed', 'engine' => $tool?->engine, 'error_message' => $exception instanceof \InvalidArgumentException ? $exception->getMessage() : 'No se pudo procesar el archivo. Comprueba que no esté dañado e inténtalo de nuevo.', 'finished_at' => now()]);
+            $conversion->update(['status' => 'failed', 'stage' => null, 'progress' => null, 'engine' => $tool?->engine, 'error_message' => $exception instanceof \InvalidArgumentException ? $exception->getMessage() : 'No se pudo procesar el archivo. Comprueba que no esté dañado e inténtalo de nuevo.', 'finished_at' => now()]);
             Log::warning('File conversion failed', ['conversion_id' => $conversion->id, 'engine' => $tool?->engine, 'error' => $exception->getMessage()]);
         }
     }
@@ -61,7 +72,7 @@ class ConvertFile implements ShouldQueue
     public function failed(?\Throwable $exception): void
     {
         FileConversion::whereKey($this->conversionId)->whereIn('status', ['queued', 'processing'])->update([
-            'status' => 'failed', 'error_message' => 'La conversión no pudo completarse. Inténtalo de nuevo.', 'finished_at' => now(),
+            'status' => 'failed', 'stage' => null, 'progress' => null, 'error_message' => 'La conversión no pudo completarse. Inténtalo de nuevo.', 'finished_at' => now(),
         ]);
     }
 }

@@ -266,3 +266,8 @@ body.bo { --bo-solid-ok: #087443; --bo-solid-warn: #875000; --bo-muted-on-solid:
 .bo .bo-header-btn:hover { border-color: var(--bo-signal); }
 .bo .bo-header-btn:focus-visible { outline: 2px solid var(--bo-signal); outline-offset: 2px; }
 .bo .bo-header-btn .bo-badge { position: absolute; top: -6px; right: -6px; min-width: 1.1rem; font-size: .7rem; line-height: 1.1rem; text-align: center; }
+
+/* Barra de progreso de una conversión (lista del conversor) */
+.bo .bo-progress { display: block; width: 10rem; max-width: 100%; height: .4rem; margin-top: .35rem; background: var(--bo-line); border-radius: 1rem; overflow: hidden; }
+.bo .bo-progress > span:first-child { display: block; height: 100%; background: var(--bo-signal); transition: width var(--cm-t-slow) var(--cm-ease-out); }
+@media (prefers-reduced-motion: reduce) { .bo .bo-progress > span:first-child { transition: none; } }
