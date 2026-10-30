@@ -4,7 +4,9 @@
     init() {
         // Iniciar rotación automáticamente
         this.startRotation(@js($rotationInterval));
-        
+        this.fitRows();
+        window.addEventListener('resize', () => this.fitRows());
+
         // Escuchar eventos
         window.addEventListener('startRotationJS', (event) => {
             this.startRotation(event.detail.duration);
@@ -12,6 +14,13 @@
         window.addEventListener('stopRotationJS', () => {
             this.stopRotation();
         });
+    },
+    fitRows() {
+        const rows = [...this.$el.querySelectorAll('tbody tr')].filter((row) => !row.querySelector('.fo-kiosk-empty'));
+        const rowHeight = rows.length ? Math.max(...rows.map((row) => row.offsetHeight)) : 90;
+        const available = this.$el.clientHeight - this.$el.querySelector('.fo-kiosk-heading').offsetHeight - this.$el.querySelector('thead').offsetHeight - 2;
+        const fit = Math.max(1, Math.floor(available / rowHeight));
+        if (fit !== $wire.rowsPerView) $wire.set('rowsPerView', fit);
     },
     startRotation(duration) {
         this.stopRotation();
@@ -36,7 +45,7 @@
 }">
     <div class="fo-kiosk-heading">
         <p>Programación de audiencias</p>
-        <h2 class="fo-kiosk-type @if(in_array($currentType, ['Juicio Oral', 'Cont. Juicio Oral'])) fo-kiosk-type--juicio @elseif($currentType == 'Audiencia Corta') fo-kiosk-type--corta @else fo-kiosk-type--lectura @endif">{{ $currentType }}</h2>
+        <h2 class="fo-kiosk-type @if(in_array($currentType, ['Juicio Oral', 'Cont. Juicio Oral'])) fo-kiosk-type--juicio @elseif($currentType == 'Audiencia Corta') fo-kiosk-type--corta @else fo-kiosk-type--lectura @endif">{{ $currentType }}@if($views > 1) <small class="fo-kiosk-view">Vista {{ $currentView + 1 }} de {{ $views }}</small>@endif</h2>
         <div class="fo-kiosk-rotation" aria-label="Tipos de audiencia">
             @foreach($audienciaTypes as $type)
                 <span class="fo-kiosk-pill @if($currentType === $type) is-active @endif" @if($currentType === $type) aria-current="true" @endif>{{ $type }}</span>
@@ -51,8 +60,8 @@
             <caption class="sr-only">Audiencias de {{ $currentType }} para hoy</caption>
             <thead><tr><th scope="col">Hora</th><th scope="col">Sala</th><th scope="col">RIT</th><th scope="col">RUC</th><th scope="col">Estado</th></tr></thead>
             <tbody>
-            @forelse($audiencias->first() ?? [] as $audiencia)
-                <tr>
+            @forelse($audiencias as $audiencia)
+                <tr wire:key="audiencia-{{ $audiencia->id }}">
                     <td class="fo-kiosk-emphasis">{{ \Carbon\Carbon::parse($audiencia->hora_inicio)->format('H:i') }}</td>
                     <td class="fo-kiosk-emphasis">{{ $audiencia->sala }} <small>{{ $audiencia->ubicacion }}</small></td>
                     <td>{{ $audiencia->rit }}</td>
