@@ -2,7 +2,7 @@
 
 <div class="max-w-4xl mx-auto p-6 bo-panel rounded border">
     <x-flash-notifications />
-    <h2 class="text-2xl font-bold bo-strong mb-6">
+    <h2 class="text-2xl font-bold bo-strong mb-6 bo-cat-heading bo-cat-juicio">
         {{ $audienciaId ? 'Editar' : 'Registro de Nueva' }} Audiencia
     </h2>
     <form x-data

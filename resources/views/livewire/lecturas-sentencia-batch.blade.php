@@ -1,6 +1,6 @@
 <div>
     <div class="max-w-6xl mx-auto p-6 bo-panel">
-        <h2 class="text-2xl font-bold bo-strong mb-6">Lecturas de Sentencia</h2>
+        <h2 class="text-2xl font-bold bo-strong mb-6 bo-cat-heading bo-cat-lectura">Lecturas de Sentencia</h2>
 
         <form
             x-data
