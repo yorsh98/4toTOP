@@ -204,7 +204,7 @@
         </datalist>
 
         <div class="flex justify-end pt-2">
-            <button type="submit" class="bo-btn bo-btn--primary  bo-strong px-6 py-2 rounded-md ">
+            <button type="submit" class="bo-btn bo-btn--primary px-6 py-2 rounded-md">
                 Guardar Audiencias Corta
             </button>
         </div>

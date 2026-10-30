@@ -374,3 +374,16 @@ test('short hearings batch loads and updates its selected hearing', function () 
     expect(Audiencia::query()->where('rit', '800-2026')->count())->toBe(1);
     expect($audiencia->refresh()->obs)->toBe('Corta actualizada');
 });
+
+test('audiencias primary buttons do not use bo-strong', function () {
+    foreach (['audiencias-cortas-batch', 'audiencia-form', 'lecturas-sentencia-batch'] as $view) {
+        $content = file_get_contents(resource_path("views/livewire/{$view}.blade.php"));
+        preg_match_all('/<button\b[^>]*\bclass="([^"]*\bbo-btn--primary\b[^"]*)"[^>]*>/s', $content, $buttons);
+
+        expect($buttons[1])->not->toBeEmpty();
+
+        foreach ($buttons[1] as $classes) {
+            expect(preg_split('/\\s+/', trim($classes)))->not->toContain('bo-strong');
+        }
+    }
+});
