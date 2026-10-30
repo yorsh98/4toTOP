@@ -11,6 +11,7 @@ use App\Http\Controllers\AudienciasExportController;
 use App\Http\Controllers\ausenciasController;
 use App\Http\Controllers\ausentismoController;
 use App\Http\Controllers\buscadorsentenciasController;
+use App\Http\Controllers\CumpleanosController;
 use App\Http\Controllers\docController;
 use App\Http\Controllers\DownloadConversionController;
 use App\Http\Controllers\guiasController;
@@ -316,3 +317,5 @@ Route::prefix('seguridad')->name('seguridad.')->middleware(['auth'])->group(func
 |--------------------------------------------------------------------------
 */
 require __DIR__.'/auth.php';
+
+Route::get('/cumpleanos', [CumpleanosController::class, 'index'])->name('cumpleanos.index');

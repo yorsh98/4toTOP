@@ -153,41 +153,30 @@ class FuncionarioCatalog
 
     public function cumpleanerosDelDia(CarbonInterface|string|null $date = null): array
     {
-        $target = $date instanceof CarbonInterface ? $date : Carbon::parse($date ?? now());
+        $target = Carbon::parse($date ?? now('America/Santiago'), 'America/Santiago')->timezone('America/Santiago');
 
-        return Funcionario::query()
-            ->whereMonth('fecha_cumpleanos', $target->month)
-            ->whereDay('fecha_cumpleanos', $target->day)
-            ->orderBy('nombre')
-            ->get()
-            ->map(function (Funcionario $funcionario): array {
-                return [
-                    'nombre' => $funcionario->nombre,
-                    'email' => $funcionario->email,
-                    'rol' => $funcionario->rol,
-                    'rol_label' => $funcionario->rol_label,
-                    'fecha_cumpleanos' => optional($funcionario->fecha_cumpleanos)->format('Y-m-d'),
-                ];
-            })
-            ->all();
+        return collect($this->cumpleanerosDelMes($target->month))
+            ->filter(fn (array $person): bool => $this->fechaCelebracion($person['fecha_cumpleanos'], $target->year)->isSameDay($target))
+            ->sortBy('nombre')->values()->all();
     }
 
     public function cumpleanerosDelMes(int|string $month): array
     {
-        return Funcionario::query()
-            ->whereMonth('fecha_cumpleanos', (int) $month)
-            ->orderBy('fecha_cumpleanos')
-            ->orderBy('nombre')
-            ->get()
-            ->map(function (Funcionario $funcionario): array {
-                return [
-                    'nombre' => $funcionario->nombre,
-                    'email' => $funcionario->email,
-                    'rol' => $funcionario->rol,
-                    'rol_label' => $funcionario->rol_label,
-                    'fecha_cumpleanos' => optional($funcionario->fecha_cumpleanos)->format('Y-m-d'),
-                ];
-            })
-            ->all();
+        return Funcionario::query()->whereMonth('fecha_cumpleanos', (int) $month)
+            ->orderBy('fecha_cumpleanos')->orderBy('nombre')->get()->map(fn (Funcionario $person): array => [
+                'nombre' => $person->nombre,
+                'email' => $person->email,
+                'rol' => $person->rol,
+                'rol_label' => $person->rol_label,
+                'fecha_cumpleanos' => $person->fecha_cumpleanos->format('Y-m-d'),
+            ])->all();
+    }
+
+    public function fechaCelebracion(string $birthday, int $year): Carbon
+    {
+        $date = Carbon::parse($birthday);
+        $day = $date->month === 2 && $date->day === 29 && ! Carbon::create($year, 1, 1)->isLeapYear() ? 28 : $date->day;
+
+        return Carbon::create($year, $date->month, $day, 0, 0, 0, 'America/Santiago');
     }
 }
