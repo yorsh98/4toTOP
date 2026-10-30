@@ -249,23 +249,27 @@ test('programación diaria muestra audiencias y exporta la fecha elegida', funct
             'sala' => (string) (801 + $i), 'hora_inicio' => '10:00', 'tipo_audiencia' => $tipo,
             'obs' => 'Observación de prueba', 'duracion' => '90 minutos', 'cta_zoom' => 'Zoom 123',
             'estado' => 'POR_REALIZARSE', 'anfitrion' => 'Ana', 'encargado_causa' => 'Causa', 'acta' => 'Acta', 'JuezR' => 'Juez',
-            'acusados' => [['nombre_completo' => 'Persona Acusada', 'situacion' => 'Libre']],
+            'acusados' => [['nombre_completo' => 'Persona Acusada', 'situacion' => $tipo === 'Lectura de Sentencia' ? 'P.Prev.' : 'Libre']],
         ]);
     }
 
     $this->get('/progra?fecha=2026-06-10')->assertSuccessful()
         ->assertSee('101-2026')->assertSee('102-2026')->assertSee('103-2026')
         ->assertSee('Sala 801')->assertSee('Sala 802')->assertSee('Sala 803')
-        ->assertSee('Persona Acusada')->assertSee('Ana')
+        ->assertSee('Persona Acusada')->assertSee('P.Prev.')->assertSee('Ana')
         ->assertSee('10 de junio 2026')->assertDontSee('10 De Junio 2026')
-        ->assertSee('data-label="Hora"', false)->assertSee('data-label="Sala"', false)
-        ->assertSee('data-label="RIT"', false)->assertSee('data-label="RUC"', false)
-        ->assertSee('data-label="Tipo"', false)->assertSee('data-label="Anfitrión/a"', false)
+        ->assertSee('fo-progra-card-head', false)->assertSee('Delito')->assertSee('Juez Presidente')->assertSee('Encargados de TTyPP')
+        ->assertSee('Medidas Cautelares')->assertSee('Forma de Notificación')->assertSee('Situación de Libertad')
         ->assertSee('Zoom 123')->assertSee('Observación de prueba')->assertSee('90 minutos')
         ->assertSee(route('audiencias.export.diaria'), false)
         ->assertSee('name="fecha" value="2026-06-10"', false)
         ->assertSee("document.querySelector('#progra-fecha').value", false)
-        ->assertSee('aria-expanded="false"', false);
+        ->assertDontSee('aria-controls="progra-', false)->assertDontSee('fo-table-detail', false);
+
+    Audiencia::where('rit', '101-2026')->update(['acusados' => array_map(fn ($i) => ['nombre_completo' => 'Acusado '.$i, 'situacion' => 'Libre'], range(1, 5))]);
+    $this->get('/progra?fecha=2026-06-10')->assertSuccessful()
+        ->assertSee('Acusado 5')->assertDontSee('Medidas Cautelares')
+        ->assertSee('<th scope="col">Acusados</th><th scope="col">Situación</th>', false);
 });
 
 test('programación diaria informa los grupos vacíos', function () {
