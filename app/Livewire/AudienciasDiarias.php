@@ -81,8 +81,13 @@ class AudienciasDiarias extends Component
     }
 
     #[On('audiencia-guardada')]
-    public function closeEditAfterSave(): void
+    public function closeEditAfterSave(?string $fecha = null): void
     {
+        // La vista sigue a la fecha guardada: si no, lo recién agregado parece no existir.
+        if ($fecha !== null) {
+            $this->fecha = $fecha;
+        }
+
         if ($this->editId !== null) {
             $this->closeEdit();
         }

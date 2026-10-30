@@ -99,6 +99,19 @@ test('guías públicas permiten buscar y muestran estados vacíos', function () 
         ->assertSee('Aún no hay guías cargadas.');
 });
 
+test('guías públicas no muestran el RUT ni permiten buscar u ordenar por él', function () {
+    Guias::create(['nombre_completo' => 'María Pérez', 'institucion' => 2, 'rut' => '11.111.111-1']);
+
+    Livewire::test(TablaGuias::class, ['modo' => 'lectura'])
+        ->assertSee('María Pérez')
+        ->assertDontSee('RUT')
+        ->assertDontSee('11.111.111-1')
+        ->call('sortBy', 'rut')
+        ->assertNotSet('sortField', 'rut')
+        ->set('search', '11.111.111-1')
+        ->assertDontSee('María Pérez');
+});
+
 test('guías en modo full conservan la vista del backoffice', function () {
     $this->seed(RolesAndPermissionsSeeder::class);
     $user = User::factory()->create();
