@@ -165,6 +165,35 @@ test('daily hearings list defers secondary fields until its detail is opened', f
         ->assertDispatched('editar-audiencia');
 });
 
+test('daily hearings show the category for each hearing type', function () {
+    foreach ([
+        'Lectura de Sentencia' => 'bo-cat-lectura',
+        'Audiencia Corta' => 'bo-cat-corta',
+        'Juicio Oral' => 'bo-cat-juicio',
+        'Continuación' => 'bo-cat-juicio',
+        '' => 'bo-cat-juicio',
+    ] as $type => $category) {
+        $audiencia = Audiencia::create([
+            'fecha' => '2026-05-20',
+            'rit' => 'categoria-'.count(Audiencia::all()),
+            'tipo_audiencia' => $type,
+            'sala' => 'Sala 1',
+            'hora_inicio' => '10:00',
+            'ruc' => '12345678-9',
+            'estado' => 'POR_REALIZARSE',
+            'encargado_causa' => 'Encargada',
+            'acta' => 'Acta',
+            'acusados' => [],
+            'JuezR' => 'Juez',
+        ]);
+
+        Livewire::test(AudienciasDiariasTabla::class, ['fecha' => '2026-05-20'])
+            ->assertSeeHtml('class="bo-cat-badge '.$category.'">'.($type ?: 'vacío').'</span>')
+            ->call('toggleDetalle', $audiencia->id)
+            ->assertSeeHtml('bo-section '.$category);
+    }
+});
+
 test('daily hearings page opens the module matching the stored hearing type', function () {
     $lectura = Audiencia::create([
         'fecha' => '2026-05-20',

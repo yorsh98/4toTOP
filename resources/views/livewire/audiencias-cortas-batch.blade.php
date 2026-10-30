@@ -1,6 +1,6 @@
 <div>
     <div class="max-w-6xl mx-auto p-6 bo-panel">
-    <h2 class="text-2xl font-bold bo-strong mb-6">Audiencias Cortas</h2>
+    <h2 class="text-2xl font-bold bo-strong mb-6 bo-cat-heading bo-cat-corta">Audiencias Cortas</h2>
 
     <div class="rounded border text-sm mb-4 text-center bo-alert bo-alert--warn px-2 py-2">
         <span>Los datos <b>COMPARTIDOS</b> se aplican a todas las audiencias a registrar</span>
