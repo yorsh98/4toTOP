@@ -326,7 +326,7 @@
         </div>
         <!-- Botón de enviar -->
         <div class="flex justify-end pt-6">
-            <button type="submit" class="bo-btn bo-btn--primary  bo-strong px-6 py-2 rounded-md ">
+            <button type="submit" class="bo-btn bo-btn--primary px-6 py-2 rounded-md">
                 {{ $audienciaId ? 'Actualizar' : 'Guardar' }} Audiencia
             </button>
         </div>
