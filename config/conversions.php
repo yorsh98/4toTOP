@@ -26,6 +26,7 @@ return [
     // pdf2docx: paragraph/table reconstruction with header/footer, closest to Acrobat XI output.
     // libreoffice: visually faithful positioned text boxes, less comfortable to edit.
     'pdf_engine' => env('CONVERSIONS_PDF_ENGINE', 'pdf2docx'),
+    'tesseract' => env('CONVERSIONS_TESSERACT', 'tesseract'),
     'python' => env('CONVERSIONS_PYTHON', 'python3'),
     'libreoffice' => env('CONVERSIONS_LIBREOFFICE', 'libreoffice'),
     'ghostscript' => env('CONVERSIONS_GHOSTSCRIPT', 'gs'),

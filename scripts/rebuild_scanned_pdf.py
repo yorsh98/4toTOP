@@ -15,8 +15,55 @@ import numpy as np
 import pymupdf as fitz
 
 
+MIN_WORDS = 8
+MIN_PAPER_FRACTION = .70
+MAX_SATURATED_FRACTION = .15
+MIN_TEXT_DENSITY = .0005
+# Tinta propia mínima y cobertura de línea para distinguir figuras de residuos OCR.
+MIN_OWN_INK_DENSITY = .015
+LINE_CROP_COVERAGE = .5
+CROP_MARGIN = 4
+# Criterio de modo auto: ante la duda la imagen queda intacta; el botón "Transcribir con OCR" fuerza el resto.
+# Una página con más texto digital que esto (pies de verificación, timbres) no es un escaneo.
+MAX_FOOTER_CHARS = 400
+MIN_SCANNED_SHARE = .8
+# Tinta que no es texto reconocido a partir de la cual la imagen se considera figura.
+MAX_NON_TEXT_INK = .35
+LONG_LINE_FRACTION = .25
+SCAN_EDGE = .01
+MIN_FIGURE_RULES = 3
+MIN_RELIABLE_SHARE = .6
+# Lectura mínima para escribir como texto un trozo con alto de línea; bajo esto se conserva como imagen.
+MIN_RECOVERED_CONFIDENCE = 20
+MIN_RULE_WIDTH = .2
+
+
 def overlap(rect, other):
     return (rect & other).get_area() / rect.get_area() if rect.get_area() else 0
+
+
+def visible_chars(page):
+    return sum(len(s.get('chars') or ()) for s in page.get_texttrace() if s.get('type', 0) != 3)
+
+
+def has_long_lines(ink):
+    """Marcos, ejes y filas: una hoja escrita solo tiene, a lo sumo, algún subrayado horizontal suelto."""
+    height, width = ink.shape
+    # El borde de la imagen queda fuera: ahí están las sombras del escáner, no el contenido.
+    ink = ink[int(height * SCAN_EDGE):int(height * (1 - SCAN_EDGE)), int(width * SCAN_EDGE):int(width * (1 - SCAN_EDGE))]
+    horizontal = cv2.morphologyEx(ink, cv2.MORPH_OPEN, np.ones((1, max(1, int(width * LONG_LINE_FRACTION))), np.uint8))
+    vertical = cv2.morphologyEx(ink, cv2.MORPH_OPEN, np.ones((max(1, int(height * LONG_LINE_FRACTION)), 1), np.uint8))
+    return cv2.countNonZero(vertical) > 0 or cv2.connectedComponents(horizontal)[0] - 1 >= MIN_FIGURE_RULES
+
+
+def is_rotated(image, directory, tesseract):
+    """Un escaneo girado se lee como basura; si la detección falla, se asume derecho."""
+    png = str(Path(directory) / 'osd.png')
+    Path(png).write_bytes(cv2.imencode('.png', image)[1].tobytes())
+    result = subprocess.run([tesseract, png, 'stdout', '-l', 'osd', '--psm', '0'], capture_output=True, encoding='utf-8', errors='replace')
+    rotate = re.search(r'Rotate: (\d+)', result.stdout)
+    confidence = re.search(r'Orientation confidence: ([\d.]+)', result.stdout)
+    return bool(rotate and confidence) and int(rotate[1]) != 0 and float(confidence[1]) >= 2
 
 
 def candidates(page):
@@ -35,8 +82,8 @@ def ocr(image, directory, tesseract, language, psm):
     binary = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
     binary = cv2.copyMakeBorder(binary, 40, 40, 40, 40, cv2.BORDER_CONSTANT, value=255)
     png = str(Path(directory) / 'ocr.png')
-    cv2.imwrite(png, binary)
-    result = subprocess.run([tesseract, png, 'stdout', '-l', language, '--psm', str(psm), '--dpi', '600', 'tsv'], check=True, capture_output=True, text=True).stdout
+    Path(png).write_bytes(cv2.imencode('.png', binary)[1].tobytes())
+    result = subprocess.run([tesseract, png, 'stdout', '-l', language, '--psm', str(psm), '--dpi', '600', 'tsv'], check=True, capture_output=True, encoding="utf-8", errors="replace").stdout
     return list(csv.DictReader(io.StringIO(result), delimiter='\t'))
 
 
@@ -60,20 +107,39 @@ def rebuild(source, target, language, pages, tesseract, extra_pages, max_pages):
         raise ValueError('El PDF supera el máximo de páginas permitido para OCR')
     lines_count = regions_count = regions_ocr = 0
     rebuilt = []
+    auto = pages == 'auto'
+    page_chars = {i: visible_chars(doc[i]) for i in range(len(doc))} if auto else {}
+    scanned_document = auto and sum(chars <= MAX_FOOTER_CHARS for chars in page_chars.values()) >= len(doc) * MIN_SCANNED_SHARE
     with tempfile.TemporaryDirectory() as directory:
         for index, regions in plans.items():
             page = doc[index]
+            chars = page_chars.get(index, 0)
+            # En un PDF digital solo cuenta una página sin ningún texto; el resto del documento no se toca.
+            if auto and (chars > MAX_FOOTER_CHARS or (not scanned_document and chars > 0)):
+                continue
+            # Sin texto digital en todo un documento escaneado no hay con qué dudar: la página es el escaneo.
+            judge_figure = auto and not (scanned_document and chars == 0)
             print(f'PROGRESS {list(plans).index(index) + 1} {len(plans)}', flush=True)
             changed = False
             for xref, rect in regions:
                 pix = page.get_pixmap(clip=rect, dpi=300, alpha=False)
-                png = str(Path(directory) / 'region.png')
-                pix.save(png)
-                image = cv2.imread(png)
+                image = cv2.cvtColor(np.frombuffer(pix.samples, dtype=np.uint8).reshape(pix.height, pix.width, pix.n), cv2.COLOR_RGB2BGR)
+                if judge_figure:
+                    hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+                    paper = (hsv[:, :, 2] >= 180) & (hsv[:, :, 1] <= 55)
+                    if np.mean(paper) < MIN_PAPER_FRACTION or np.mean(hsv[:, :, 1] > 80) > MAX_SATURATED_FRACTION:
+                        continue
                 tsv = ocr(image, directory, tesseract, language, 3)
                 regions_ocr += 1
+                # La orientación falla en hojas derechas: solo se consulta si la lectura salió mala.
+                legible = [float(w['conf']) for w in tsv if float(w['conf']) >= 0 and any(c.isalnum() for c in w['text'])]
+                if legible and sum(conf >= 60 for conf in legible) / len(legible) < MIN_RELIABLE_SHARE and is_rotated(image, directory, tesseract):
+                    continue
                 gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
                 ink = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
+                if judge_figure and has_long_lines(ink):
+                    continue
+                total_ink = cv2.countNonZero(ink)
                 groups = defaultdict(list)
                 words = []
                 heights = []
@@ -92,18 +158,23 @@ def rebuild(source, target, language, pages, tesseract, extra_pages, max_pages):
                     if confidence >= 60:
                         groups[key].append(item)
                         cv2.rectangle(ink, (max(0, int(x-4)), max(0, int(y-4))), (int(x+w+4), int(y+h+4)), 0, -1)
-                if xref is not None and sum(map(len, groups.values())) < 3:
+                reliable = [word for line in groups.values() for word in line]
+                density = sum(w[2] * w[3] for w in reliable) / (pix.width * pix.height)
+                if len(reliable) < MIN_WORDS or (judge_figure and density < MIN_TEXT_DENSITY):
+                    continue
+                if judge_figure and total_ink and cv2.countNonZero(ink) / total_ink > MAX_NON_TEXT_INK:
                     continue
                 line_heights = [max(w[1]+w[3] for w in line) - min(w[1] for w in line) for line in groups.values()]
                 typical_height = median(line_heights or heights or [1])
                 scale_x, scale_y = rect.width / pix.width, rect.height / pix.height
                 print('STAGE images', flush=True)
                 joined = cv2.dilate(ink, np.ones((7, 25), np.uint8))
-                _, _, stats, _ = cv2.connectedComponentsWithStats(joined)
+                _, labels, stats, _ = cv2.connectedComponentsWithStats(joined)
                 image_boxes = []
-                for x, y, w, h, area in stats[1:]:
+                for component, (x, y, w, h, area) in enumerate(stats[1:], 1):
                     line_like = h <= 1.8 * typical_height
-                    if line_like:
+                    # Una tinta mucho más baja que el texto (regla, subrayado) no se intenta leer.
+                    if line_like and h >= .5 * typical_height:
                         x0, y0 = max(0, x-6), max(0, y-6)
                         x1, y1 = min(pix.width, x+w+6), min(pix.height, y+h+6)
                         recovered = []
@@ -115,9 +186,9 @@ def rebuild(source, target, language, pages, tesseract, extra_pages, max_pages):
                                 wy = y0 + (int(word['top']) - 40) / 2
                                 ww, wh = int(word['width']) / 2, int(word['height']) / 2
                                 recovered.append(((wx, wy, ww, wh, text), confidence))
-                        # Tinta con alto de línea: se escribe la mejor lectura aunque la confianza sea baja; si
-                        # Tesseract no lee nada, se conserva como imagen más abajo (nunca se descarta).
-                        if recovered:
+                        # Tinta con alto de línea: se escribe si se lee con confianza; si no, se conserva como
+                        # imagen más abajo (una firma fina o una regla nunca se descartan ni se vuelven caracteres).
+                        if recovered and sum(conf for _, conf in recovered) / len(recovered) >= MIN_RECOVERED_CONFIDENCE:
                             existing = [(key, item) for key, line in groups.items() for item in line]
                             for item, _ in recovered:
                                 box = fitz.Rect(item[0], item[1], item[0]+item[2], item[1]+item[3])
@@ -128,32 +199,27 @@ def rebuild(source, target, language, pages, tesseract, extra_pages, max_pages):
                                 key = min(same_line, key=lambda pair: abs(pair[1][0]-item[0]))[0] if same_line else ('retry', str(x), str(y))
                                 groups[key].append(item)
                             continue
-                    big_enough = line_like or area >= pix.width * pix.height * .002
-                    if big_enough and w >= 8 and h >= 8 and w <= h * 30 and h <= w * 30:
-                        image_boxes.append((max(0, x-4), max(0, y-4), min(pix.width, x+w+4), min(pix.height, y+h+4)))
-                line_boxes = [fitz.Rect(min(w[0] for w in line), min(w[1] for w in line),
-                                        max(w[0]+w[2] for w in line), max(w[1]+w[3] for w in line))
-                              for line in groups.values()]
+                    own = ink[y:y+h, x:x+w].copy()
+                    own[labels[y:y+h, x:x+w] != component] = 0
+                    for line in groups.values():
+                        lx0 = int(min(item[0] for item in line)) - 4 - x
+                        ly0 = int(min(item[1] for item in line)) - 4 - y
+                        lx1 = int(max(item[0]+item[2] for item in line)) + 4 - x
+                        ly1 = int(max(item[1]+item[3] for item in line)) + 4 - y
+                        cv2.rectangle(own, (lx0, ly0), (lx1, ly1), 0, -1)
+                    if cv2.countNonZero(own) == 0 or (not line_like and cv2.countNonZero(own) < w * h * MIN_OWN_INK_DENSITY):
+                        continue
+                    ox, oy, ow, oh = cv2.boundingRect(cv2.findNonZero(own))
+                    rule = w >= pix.width * MIN_RULE_WIDTH or h >= pix.height * MIN_RULE_WIDTH
+                    if (line_like or area >= pix.width * pix.height * .002) and w >= 8 and h >= 8 and (rule or (w <= h * 30 and h <= w * 30)):
+                        image_boxes.append((max(0, x+ox-CROP_MARGIN), max(0, y+oy-CROP_MARGIN), min(pix.width, x+ox+ow+CROP_MARGIN), min(pix.height, y+oy+oh+CROP_MARGIN)))
                 crops = []
                 for x0, y0, x1, y1 in image_boxes:
-                    parts = [fitz.Rect(x0, y0, x1, y1)]
-                    for line in line_boxes:
-                        remaining = []
-                        for part in parts:
-                            if overlap(line, part) < .3:
-                                remaining.append(part)
-                                continue
-                            intersection = part & line
-                            remaining.extend([fitz.Rect(part.x0, part.y0, part.x1, intersection.y0),
-                                              fitz.Rect(part.x0, intersection.y1, part.x1, part.y1)])
-                        parts = remaining
-                    for part in parts:
-                        x0, y0, x1, y1 = map(int, (part.x0, part.y0, part.x1, part.y1))
-                        if x1-x0 < 8 or y1-y0 < 8 or (x1-x0)*(y1-y0) < min(pix.width * pix.height * .002, typical_height * typical_height):
-                            continue
-                        ok, data = cv2.imencode('.png', image[y0:y1, x0:x1])
-                        if ok:
-                            crops.append((fitz.Rect(rect.x0+x0*scale_x, rect.y0+y0*scale_y, rect.x0+x1*scale_x, rect.y0+y1*scale_y), data.tobytes()))
+                    if x1-x0 < 8 or y1-y0 < 8 or (x1-x0)*(y1-y0) < min(pix.width * pix.height * .002, typical_height * typical_height):
+                        continue
+                    ok, data = cv2.imencode('.png', image[y0:y1, x0:x1])
+                    if ok:
+                        crops.append((fitz.Rect(rect.x0+x0*scale_x, rect.y0+y0*scale_y, rect.x0+x1*scale_x, rect.y0+y1*scale_y), data.tobytes()))
                 if xref is None:
                     page.clean_contents()
                     empty = doc.get_new_xref()
@@ -181,14 +247,20 @@ def rebuild(source, target, language, pages, tesseract, extra_pages, max_pages):
                     x = min(w[0] for w in words); y = min(w[1] for w in words)
                     x1 = max(w[0]+w[2] for w in words); y1 = max(w[1]+w[3] for w in words)
                     box = fitz.Rect(rect.x0+x*scale_x, rect.y0+y*scale_y, rect.x0+x1*scale_x, rect.y0+y1*scale_y)
-                    if any(overlap(box, crop) >= .5 for crop, _ in crops):
+                    if any(overlap(box, crop) >= LINE_CROP_COVERAGE for crop, _ in crops):
                         continue
                     line = ' '.join(w[4] for w in words)
                     line = re.sub(r'\bRIT 0-(?=\d)', 'RIT O-', line)
                     # Las líneas de alto normal usan el tamaño típico de la región (texto parejo en el Word);
                     # títulos y líneas atípicas conservan el suyo.
                     typical_size = typical_height * scale_y * .8
-                    size = typical_size if .6 <= box.height * .8 / typical_size <= 1.5 else box.height * .8
+                    atypical = not .6 <= box.height * .8 / typical_size <= 1.5
+                    # Solo una línea corta puede ser un título; en una larga, el alto anómalo es ruido del OCR.
+                    size = min(box.height * .8, typical_size * 1.5) if atypical and len(words) < 6 else typical_size
+                    # Una caja anómala no puede agrandar la línea más allá del ancho que ocupaba en el escaneo.
+                    width = fitz.get_text_length(line, fontname='helv', fontsize=size)
+                    if width > box.width > 0:
+                        size *= box.width / width
                     page.insert_text((box.x0, box.y1), line, fontsize=max(4, size), fontname='helv')
                     lines_count += 1
                 changed = True

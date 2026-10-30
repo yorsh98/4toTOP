@@ -60,6 +60,7 @@ Linux (`<RUTA>` = raíz del proyecto, por ejemplo `/var/www/4toTOP`):
 ```dotenv
 CONVERSIONS_PYTHON=<RUTA>/.venv-conversions/bin/python
 CONVERSIONS_OCRMYPDF=<RUTA>/.venv-conversions/bin/ocrmypdf
+CONVERSIONS_TESSERACT=tesseract
 CONVERSIONS_OCR_JOBS=4
 DB_QUEUE_RETRY_AFTER=2100
 ```
@@ -157,12 +158,15 @@ Prueba manual, en este orden:
    CONVERSIONS_LIBREOFFICE=C:/Program Files/LibreOffice/program/soffice.exe
    CONVERSIONS_FFMPEG=C:/ffmpeg/bin/ffmpeg.exe
    CONVERSIONS_FFPROBE=C:/ffmpeg/bin/ffprobe.exe
+   CONVERSIONS_TESSERACT="C:/Program Files/Tesseract-OCR/tesseract.exe"
    CONVERSIONS_OCR_JOBS=4
    DB_QUEUE_RETRY_AFTER=2100
    ```
    En Windows, `gs` no existe: `CONVERSIONS_GHOSTSCRIPT` debe apuntar a `gswin64c.exe`.
 7. `php.ini` de XAMPP: `upload_max_filesize = 64M` y `post_max_size = 64M` (en vez de los 25M de [documentos-xampp.md](documentos-xampp.md)), y reinicia Apache.
-8. El trabajador de la cola debe correr como servicio o tarea programada que **se inicie con Windows** (por ejemplo con NSSM: `nssm install 4toTOP-queue php.exe artisan queue:work --sleep=3 --tries=1`, con el directorio del proyecto como carpeta de inicio), y el programador como tarea cada minuto: `php artisan schedule:run`.
+8. En Windows, `--timeout` no sustituye los límites de los procesos: PHP no dispone de PCNTL. Mantén `DB_QUEUE_RETRY_AFTER` por encima de 1920 s y ajusta `--timeout` al máximo configurado para los trabajos.
+
+9. El trabajador de la cola debe correr como servicio o tarea programada que **se inicie con Windows** (por ejemplo con NSSM: `nssm install 4toTOP-queue php.exe artisan queue:work --sleep=3 --tries=1 --timeout=1920`, con el directorio del proyecto como carpeta de inicio), y el programador como tarea cada minuto: `php artisan schedule:run`.
 9. Sigue con los pasos 5 y 8 de arriba (`migrate`, `public/build`, `queue:restart`, `conversions:check`).
 
 La primera vez, `conversions:check` es la prueba de que PyMuPDF, OCRmyPDF y Tesseract funcionan en ese Windows; si la fila de OCR falla, el detalle dice el motivo.

@@ -7,6 +7,7 @@ use App\Services\LibreOffice;
 use App\Services\LibreOfficeDocxNormalizer;
 use App\Services\PdfInspector;
 use App\Services\PdfOcr;
+use Symfony\Component\Process\Exception\ProcessTimedOutException;
 use Symfony\Component\Process\Process;
 
 class PdfToWordTool extends ConversionTool
@@ -38,6 +39,7 @@ class PdfToWordTool extends ConversionTool
 
     public function process(FileConversion $conversion, string $directory): ToolResult
     {
+        $deadline = microtime(true) + $this->timeout($conversion->options ?? []) - 30;
         $input = $directory.'/'.basename($conversion->input_path);
         $output = $directory.'/result.docx';
         $this->engine = config('conversions.pdf_engine');
@@ -50,10 +52,10 @@ class PdfToWordTool extends ConversionTool
 
         try {
             if (app(PdfOcr::class)->enabled()) {
-                $pages = $this->rebuild($input, $ocrPath, ($conversion->options['ocr'] ?? null) === 'force' ? 'all' : 'auto', $scanned);
+                $pages = $this->rebuild($input, $ocrPath, ($conversion->options['ocr'] ?? null) === 'force' ? 'all' : 'auto', $scanned, $deadline);
                 if ($pages !== []) {
                     $input = $ocrPath;
-                    $notice = 'Se transcribió con OCR el texto de '.self::pageList($pages).'. Las firmas, timbres e imágenes se conservaron como imagen. Revisa el texto reconocido antes de usarlo.';
+                    $notice = 'Se transcribió con OCR el texto de '.self::pageList($pages).'. Revisa el texto reconocido antes de usarlo.';
                 }
                 $remaining = array_values(array_diff($scanned, $pages));
                 if ($remaining !== []) {
@@ -69,8 +71,8 @@ class PdfToWordTool extends ConversionTool
             $this->stage('Armando el documento Word', 85);
             $this->engine = config('conversions.pdf_engine');
             match ($this->engine) {
-                'pdf2docx' => $this->convertWithPdf2Docx($input, $converted),
-                'libreoffice' => $this->convertWithLibreOffice($input, $converted),
+                'pdf2docx' => $this->convertWithPdf2Docx($input, $converted, $deadline),
+                'libreoffice' => $this->convertWithLibreOffice($input, $converted, $deadline),
                 default => throw new \RuntimeException('Motor de conversión PDF desconocido: '.$this->engine),
             };
 
@@ -80,6 +82,8 @@ class PdfToWordTool extends ConversionTool
             if (! rename($converted, $output)) {
                 throw new \RuntimeException('No se pudo guardar el documento Word.');
             }
+        } catch (ProcessTimedOutException $exception) {
+            throw new \InvalidArgumentException('El documento es demasiado largo para convertirlo. Divídelo e inténtalo de nuevo.', previous: $exception);
         } finally {
             foreach ([$converted, $ocrPath] as $temporary) {
                 if (is_file($temporary)) {
@@ -91,10 +95,10 @@ class PdfToWordTool extends ConversionTool
         return new ToolResult($output, $notice);
     }
 
-    private function rebuild(string $input, string $output, string $pages, array $scanned): array
+    private function rebuild(string $input, string $output, string $pages, array $scanned, float $deadline): array
     {
-        $process = new Process([config('conversions.python'), '-I', base_path('scripts/rebuild_scanned_pdf.py'), $input, $output, '--lang', config('conversions.ocr_languages'), '--pages', $pages, '--extra-pages', implode(',', $scanned), '--max-pages', (string) config('conversions.ocr_max_pages')]);
-        $process->setTimeout(config('conversions.ocr_timeout'));
+        $process = new Process([config('conversions.python'), '-I', base_path('scripts/rebuild_scanned_pdf.py'), $input, $output, '--tesseract', config('conversions.tesseract'), '--lang', config('conversions.ocr_languages'), '--pages', $pages, '--extra-pages', implode(',', $scanned), '--max-pages', (string) config('conversions.ocr_max_pages')]);
+        $process->setTimeout(min(config('conversions.ocr_timeout'), $this->remaining($deadline)));
         $buffer = '';
         $summary = [];
         $process->run(function ($type, $chunk) use (&$buffer, &$summary) {
@@ -124,10 +128,10 @@ class PdfToWordTool extends ConversionTool
         return $summary['pages_rebuilt'] ?? [];
     }
 
-    private function convertWithPdf2Docx(string $input, string $converted): void
+    private function convertWithPdf2Docx(string $input, string $converted, float $deadline): void
     {
         $process = new Process([config('conversions.python'), '-I', base_path('scripts/pdf_to_docx.py'), $input, $converted]);
-        $process->setTimeout(300);
+        $process->setTimeout(min(300, $this->remaining($deadline)));
         $process->run();
 
         if (! $process->isSuccessful() || ! is_file($converted) || filesize($converted) === 0) {
@@ -138,9 +142,9 @@ class PdfToWordTool extends ConversionTool
         }
     }
 
-    private function convertWithLibreOffice(string $input, string $converted): void
+    private function convertWithLibreOffice(string $input, string $converted, float $deadline): void
     {
-        $output = app(LibreOffice::class)->convert($input, dirname($converted), 'docx:Office Open XML Text', 'docx', ['--infilter=writer_pdf_import']);
+        $output = app(LibreOffice::class)->convert($input, dirname($converted), 'docx:Office Open XML Text', 'docx', ['--infilter=writer_pdf_import'], min(300, $this->remaining($deadline)));
 
         try {
             app(LibreOfficeDocxNormalizer::class)->normalize($output);
@@ -153,6 +157,16 @@ class PdfToWordTool extends ConversionTool
                 unlink($output);
             }
         }
+    }
+
+    private function remaining(float $deadline): float
+    {
+        $remaining = $deadline - microtime(true);
+        if ($remaining <= 0) {
+            throw new \InvalidArgumentException('El documento es demasiado largo para convertirlo. Divídelo e inténtalo de nuevo.');
+        }
+
+        return $remaining;
     }
 
     private function assertEditableText(string $docx): void
