@@ -4,6 +4,8 @@ namespace App\Livewire;
 
 use App\Models\Audiencia;
 use App\Services\FuncionarioCatalog;
+use Carbon\Carbon;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
@@ -151,6 +153,11 @@ class AudienciasCortasBatch extends Component
 
     public function removeRow(int $index): void
     {
+        // En edición la primera fila es la audiencia abierta; se elimina desde la tabla.
+        if ($this->editId !== null && $index === 0) {
+            return;
+        }
+
         unset($this->items[$index]);
         $this->items = array_values($this->items);
     }
@@ -237,14 +244,8 @@ class AudienciasCortasBatch extends Component
             return;
         }
 
-        if ($this->editId !== null) {
-            $this->saveEditedRow($this->items[0]);
-            $this->items = [];
-            $this->addRow();
-            $this->dispatch('alerta-success');
-            $this->dispatch('audiencia-guardada');
-
-            return;
+        if (count($this->items) > ($this->editId === null ? 0 : 1)) {
+            Gate::authorize('audiencias.crear');
         }
 
         // Unicidad contra BD: rit + fecha(compartida) + tipo_audiencia = 'Audiencia Corta'
@@ -252,6 +253,7 @@ class AudienciasCortasBatch extends Component
             $exists = Audiencia::where('rit', $row['rit'])
                 ->whereDate('fecha', $this->shared['fecha'])
                 ->where('tipo_audiencia', self::TIPO)
+                ->when($this->editId !== null && $i === 0, fn ($q) => $q->whereKeyNot($this->editId))
                 ->exists();
 
             if ($exists) {
@@ -265,8 +267,13 @@ class AudienciasCortasBatch extends Component
         }
 
         DB::transaction(function () {
-            foreach ($this->items as $row) {
-                Audiencia::create($this->audienciaData($row));
+            foreach ($this->items as $i => $row) {
+                if ($this->editId !== null && $i === 0) {
+                    Gate::authorize('audiencias.editar');
+                    Audiencia::findOrFail($this->editId)->update(Arr::except($this->audienciaData($row), 'estado'));
+                } else {
+                    Audiencia::create($this->audienciaData($row));
+                }
             }
         });
 
@@ -274,27 +281,8 @@ class AudienciasCortasBatch extends Component
         $this->items = [];
         $this->addRow();
 
-        $this->dispatch('alerta-success');
-        $this->dispatch('audiencia-guardada');
-    }
-
-    private function saveEditedRow(array $row): void
-    {
-        $audiencia = Audiencia::query()
-            ->whereDate('fecha', $this->shared['fecha'])
-            ->where('rit', $row['rit'])
-            ->where('tipo_audiencia', self::TIPO)
-            ->first();
-
-        if ($audiencia) {
-            Gate::authorize('audiencias.editar');
-            $audiencia->update($this->audienciaData($row));
-
-            return;
-        }
-
-        Gate::authorize('audiencias.crear');
-        Audiencia::create($this->audienciaData($row));
+        $this->dispatch('alerta-success', fecha: Carbon::parse($this->shared['fecha'])->format('d-m-Y'));
+        $this->dispatch('audiencia-guardada', fecha: $this->shared['fecha']);
     }
 
     private function audienciaData(array $row): array

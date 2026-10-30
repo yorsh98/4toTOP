@@ -86,9 +86,11 @@
         <!-- Acciones -->
         <div class="flex items-center justify-between">
             <h3 class="text-lg font-medium bo-strong">Audiencias a registrar</h3>
+            @can('audiencias.crear')
             <button type="button" wire:click="addRow" class="bo-btn bo-btn--secondary bo-panel-subtle bo-strong px-4 py-2 rounded-md ">
                 + Agregar fila
             </button>
+            @endcan
         </div>
 
         <!-- Filas -->
@@ -96,9 +98,11 @@
             <div class="border rounded-lg bo-panel-subtle p-4 space-y-4">
                 <div class="flex justify-between items-center">
                     <span class="text-sm font-semibold">Fila #{{ $i + 1 }}</span>
+                    @unless ($editId !== null && $i === 0)
                     <button type="button" wire:click="removeRow({{ $i }})" class="bo-btn bo-btn--secondary bo-text--danger transition-transform duration-150 ease-out
  hover:-translate-y-0.5 active:translate-y-0
  focus:outline-none focus-visible:ring-2 transform-gpu"><i class="fas fa-trash"></i></button>
+                    @endunless
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
@@ -222,8 +226,8 @@
         }
     });
 
-    document.addEventListener('alerta-success', () => {
-        SwalToast.fire({ icon: 'success', title: 'Audiencias cortas registradas correctamente.' });
+    document.addEventListener('alerta-success', (event) => {
+        SwalToast.fire({ icon: 'success', title: `Audiencias cortas guardadas para el ${event.detail.fecha}.` });
     });
     </script>
     @endscript

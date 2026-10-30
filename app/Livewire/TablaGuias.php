@@ -95,6 +95,10 @@ class TablaGuias extends Component
 
     public function sortBy($campo)
     {
+        if ($this->modo === 'lectura' && $campo === 'rut') {
+            return;
+        }
+
         if ($this->sortField === $campo) {
             $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
         } else {
@@ -229,7 +233,7 @@ class TablaGuias extends Component
             ->when($this->search, function ($query) {
                 $query->where(function ($q) {
                     $q->where('nombre_completo', 'like', '%'.$this->search.'%')
-                        ->orWhere('rut', 'like', '%'.$this->search.'%')
+                        ->when($this->modo !== 'lectura', fn ($q) => $q->orWhere('rut', 'like', '%'.$this->search.'%'))
                         ->orWhere('email', 'like', '%'.$this->search.'%')
                         ->orWhere('telefono1', 'like', '%'.$this->search.'%')
                         ->orWhere('telefono2', 'like', '%'.$this->search.'%')
