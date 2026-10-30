@@ -298,6 +298,51 @@ test('monitor muestra las audiencias de hoy del tipo actual', function () {
     Livewire::test(MonitorAudiencias::class)->assertSee('123-2026')->assertSee('En curso');
 });
 
+test('monitor muestra el logo que corresponde a cada tema', function () {
+    $this->get('/Monitor')
+        ->assertSee('pjud_blanco.webp', false)
+        ->assertSee('pjud_transparenteazul.webp', false);
+});
+
+test('monitor reparte las audiencias que no caben en vistas sin ocultar ninguna', function () {
+    foreach (range(1, 8) as $i) {
+        Audiencia::create([
+            'fecha' => today()->toDateString(), 'rit' => "90{$i}-2026", 'ruc' => '12345678-9',
+            'sala' => '801', 'hora_inicio' => sprintf('%02d:00', 8 + $i), 'tipo_audiencia' => 'Audiencia Corta',
+            'estado' => 'POR_REALIZARSE', 'anfitrion' => 'Ana', 'encargado_causa' => 'Causa', 'acta' => 'Acta', 'JuezR' => 'Juez',
+            'acusados' => [['nombre_completo' => 'Persona', 'situacion' => 'Libre']],
+        ]);
+    }
+
+    Livewire::test(MonitorAudiencias::class)
+        ->set('currentTypeIndex', 2)
+        ->set('rowsPerView', 5)
+        ->assertSee('Vista 1 de 2')->assertSee('905-2026')->assertDontSee('906-2026')
+        ->call('rotate')
+        ->assertSet('currentTypeIndex', 2)
+        ->assertSee('Vista 2 de 2')->assertSee('906-2026')->assertSee('908-2026')->assertDontSee('905-2026')
+        ->call('rotate')
+        ->assertSet('currentTypeIndex', 3)
+        ->assertSet('currentView', 0)
+        ->assertDontSee('Vista 1 de');
+});
+
+test('monitor abre una tercera vista antes que ocultar audiencias', function () {
+    foreach (range(1, 7) as $i) {
+        Audiencia::create([
+            'fecha' => today()->toDateString(), 'rit' => "90{$i}-2026", 'ruc' => '12345678-9',
+            'sala' => '801', 'hora_inicio' => sprintf('%02d:00', 8 + $i), 'tipo_audiencia' => 'Audiencia Corta',
+            'estado' => 'POR_REALIZARSE', 'anfitrion' => 'Ana', 'encargado_causa' => 'Causa', 'acta' => 'Acta', 'JuezR' => 'Juez',
+            'acusados' => [['nombre_completo' => 'Persona', 'situacion' => 'Libre']],
+        ]);
+    }
+
+    Livewire::test(MonitorAudiencias::class)
+        ->set('currentTypeIndex', 2)
+        ->set('rowsPerView', 3)
+        ->assertSee('Vista 1 de 3');
+});
+
 test('el registro está disponible en el encabezado para invitados', function () {
     $this->get('/')->assertSuccessful()->assertSee('aria-label="Registrarse"', false);
     $this->actingAs(User::factory()->create())->get('/')

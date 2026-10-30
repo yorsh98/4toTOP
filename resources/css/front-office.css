@@ -843,6 +843,7 @@
 .fo-kiosk .fo-kiosk-audiencias { flex: 1; }
 .fo-kiosk .fo-kiosk-heading p { margin: 0 0 4px; color: var(--fo-mut); font-size: 22px; text-transform: uppercase; letter-spacing: .06em; }
 .fo-kiosk .fo-kiosk-type { margin: 0 0 14px; font: 700 clamp(36px, 3vw, 58px)/1.1 var(--fo-display); }
+.fo-kiosk .fo-kiosk-view { margin-left: 12px; color: var(--fo-mut); font: 600 clamp(20px, 1.5vw, 28px)/1 var(--fo-display); white-space: nowrap; }
 .fo-kiosk .fo-kiosk-type--juicio { color: var(--fo-cat-juicio); }
 .fo-kiosk .fo-kiosk-type--corta { color: var(--fo-cat-corta); }
 .fo-kiosk .fo-kiosk-type--lectura { color: var(--fo-cat-lectura); }
