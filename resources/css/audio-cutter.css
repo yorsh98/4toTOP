@@ -252,6 +252,38 @@
 .ac-foot > .ac-foot-step + .ac-primary { margin-left: 0; }
 .ac-foot-why { flex-basis: 100%; margin: 0; text-align: right; font-size: 0.8125rem; color: var(--ac-soft); }
 
+/* The cutter is shared with the front office; only the back-office dark theme overrides it. */
+.bo .ac-intro-border { border-width: 1px; border-style: solid; }
+:root[data-theme="dark"] .bo .ac-intro { background: var(--bo-surface-2); border-color: var(--bo-line); }
+:root[data-theme="dark"] .bo .ac-intro p:first-child { color: var(--bo-fg); }
+:root[data-theme="dark"] .bo .ac-intro p:nth-child(2) { color: var(--bo-mut); }
+:root[data-theme="dark"] .bo .ac-modal {
+    --ac-toga: var(--bo-signal);
+    --ac-papel: var(--bo-surface-2);
+    --ac-line: var(--bo-line);
+    --ac-ink: var(--bo-fg);
+    --ac-soft: var(--bo-mut);
+    --ac-quita: var(--bo-alarm);
+    --ac-conserva: var(--bo-ok);
+    --cm-accent-soft: var(--bo-surface-2);
+    background: var(--bo-surface);
+}
+:root[data-theme="dark"] .bo .ac-modal :is(.ac-close, .ac-dot, .ac-input, .ac-drop, .ac-filecard, .ac-result, .ac-frag, .ac-mode, .ac-advanced, .ac-summary, .ac-status, .ac-secondary, .ac-foot) { background: var(--bo-surface); border-color: var(--bo-line); }
+:root[data-theme="dark"] .bo .ac-modal :is(.ac-drop:hover, .ac-drop.is-over, .ac-secondary:hover) { background: var(--bo-surface-2); }
+:root[data-theme="dark"] .bo .ac-modal :is(.ac-drop-icon, .ac-rail-item[data-state="done"] .ac-dot) { background: var(--bo-surface-2); color: var(--bo-signal); }
+:root[data-theme="dark"] .bo .ac-modal :is(.ac-primary, .ac-h > .ac-num, .ac-count, .ac-rail-item[data-state="active"] .ac-dot) { background: var(--bo-primary); color: var(--bo-on-solid); }
+:root[data-theme="dark"] .bo .ac-modal .ac-primary:hover { background: var(--bo-surface-2); color: var(--bo-fg); }
+:root[data-theme="dark"] .bo .ac-modal :is(.ac-progress, .ac-indet, .ac-strip) { background: var(--bo-line); }
+:root[data-theme="dark"] .bo .ac-modal :is(.ac-input:focus, .ac-mode:has(input:checked)) { border-color: var(--bo-signal); box-shadow: 0 0 0 3px var(--bo-surface-2); }
+:root[data-theme="dark"] .bo .ac-modal .ac-frag.is-selected { border-color: var(--bo-signal); box-shadow: 0 0 0 3px var(--bo-surface-2); }
+:root[data-theme="dark"] .bo .ac-modal .ac-input[aria-invalid="true"] { border-color: var(--bo-alarm); }
+:root[data-theme="dark"] .bo .ac-modal .ac-rail-item[data-state="locked"] { opacity: 1; }
+:root[data-theme="dark"] .bo .ac-modal .ac-done { background: var(--bo-primary); color: var(--bo-on-solid); }
+:root[data-theme="dark"] .bo .ac-modal .ac-check input { background-color: var(--bo-surface); border-color: var(--bo-line); color: var(--bo-primary); }
+:root[data-theme="dark"] .bo .ac-modal .ac-check input:checked { background-color: var(--bo-primary); }
+:root[data-theme="dark"] .bo .ac-wave ::part(timeline-wrapper) { position: relative; z-index: 6; background: var(--ac-mesa); }
+:root[data-theme="dark"] .bo .ac-wave ::part(timeline-notch-secondary) { opacity: 1; }
+
 @media (max-width: 1023px) {
     .ac-modes { grid-template-columns: minmax(0, 1fr); }
     .ac-frag { grid-template-columns: auto minmax(0, 1fr) minmax(0, 1fr); }
