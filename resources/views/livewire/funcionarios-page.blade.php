@@ -115,11 +115,11 @@
                                     id="fecha_cumpleanos"
                                     name="fecha_cumpleanos"
                                     type="date"
-                                    wire:model="fechaCumpleaños"
+                                    wire:model="fechaCumpleanos"
                                     class="bo-input w-full text-sm"
                                     required
                                 >
-                                            @error('fechaCumpleaños')
+                                            @error('fechaCumpleanos')
                                                 <p class="bo-error mt-1 text-xs">{{ $message }}</p>
                                             @enderror
                                         </div>
