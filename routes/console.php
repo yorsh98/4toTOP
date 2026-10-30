@@ -33,3 +33,8 @@ ScheduleFacade::command('notificaciones:visita-carcel-revision-pp')
 //     ->weeklyOn((int) config('notifications_v2.schedule.weekly_turno1_day', 5), (string) config('notifications_v2.schedule.weekly_turno1_time', '15:00'))
 //     ->timezone((string) config('notifications_v2.schedule.timezone', 'America/Santiago'))
 //     ->withoutOverlapping();
+
+ScheduleFacade::command('notificaciones:cumpleanos')
+    ->dailyAt((string) config('notifications_v2.schedule.birthday_time', '08:00'))
+    ->timezone((string) config('notifications_v2.schedule.timezone', 'America/Santiago'))
+    ->withoutOverlapping();
