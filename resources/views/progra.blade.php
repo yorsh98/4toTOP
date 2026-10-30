@@ -43,49 +43,74 @@
     </div>
 
     <div class="fo-progra-groups">
-        @foreach ($grupos as $id => [$titulo, $audiencias, $vacio, $detalles])
+        @php
+            $anfitriones = collect($cortas)->pluck('anfitrion')->filter(fn ($nombre) => filled($nombre))->unique()->values();
+        @endphp
+        @foreach ($grupos as $id => [$titulo, $audiencias, $vacio])
             <section id="{{ $id }}" class="fo-progra-section fo-progra-{{ $id }}" aria-labelledby="titulo-{{ $id }}">
-                <h2 id="titulo-{{ $id }}" class="fo-progra-title">{{ $titulo }}</h2>
-                <div class="fo-table-wrap fo-table-wrap--glass fo-progra-table">
-                    <table class="fo-table">
-                        <caption class="sr-only">{{ $titulo }} para {{ $fechaHuman }}</caption>
-                        <thead><tr><th scope="col">Hora</th><th scope="col">Sala</th><th scope="col">RIT</th><th scope="col">RUC</th>@if ($id === 'juicios')<th scope="col">Tipo</th>@endif @if ($id === 'cortas')<th scope="col">Anfitrión/a</th>@endif<th scope="col"><span class="sr-only">Detalle</span></th></tr></thead>
-                        @forelse ($audiencias as $audiencia)
-                            <tbody class="fo-table-group" x-data="{ open: false }">
-                                <tr>
-                                    <td data-label="Hora" class="fo-num">{{ $audiencia['hora'] ?: '—' }}</td>
-                                    <td data-label="Sala">{{ $audiencia['sala'] ? 'Sala '.$audiencia['sala'] : '—' }}@if ($audiencia['zoom'] ?? null) · {{ $audiencia['zoom'] }}@endif</td>
-                                    <td data-label="RIT" class="fo-num">{{ $audiencia['rit'] ?: '—' }}</td>
-                                    <td data-label="RUC" class="fo-num">{{ $audiencia['ruc'] ?: '—' }}</td>
-                                    @if ($id === 'juicios')<td data-label="Tipo">{{ $audiencia['tipo'] ?: '—' }}</td>@endif
-                                    @if ($id === 'cortas')<td data-label="Anfitrión/a">{{ $audiencia['anfitrion'] ?: '—' }}</td>@endif
-                                    <td class="fo-table-toggle"><button type="button" class="fo-icon-btn cm-press" x-on:click="open = ! open" x-bind:aria-expanded="open" aria-expanded="false" aria-controls="progra-{{ $id }}-{{ $loop->index }}" aria-label="Ver detalle de {{ $audiencia['rit'] ?: $titulo }}"><i class="fa-solid fa-chevron-down" x-bind:class="open && 'fa-rotate-180'" aria-hidden="true"></i></button></td>
-                                </tr>
-                                <tr class="fo-table-detail" id="progra-{{ $id }}-{{ $loop->index }}" x-show="open" x-cloak><td colspan="{{ in_array($id, ['juicios', 'cortas']) ? 6 : 5 }}">
-                                    <dl class="fo-detail">
-                                        <div><dt>Observaciones</dt><dd>{{ $audiencia['obs'] ?: '—' }}</dd></div>
-                                        @if ($id === 'juicios')<div><dt>Duración</dt><dd>{{ $audiencia['duracion'] ?: '—' }}</dd></div>@endif
-                                        @foreach ($detalles as $campo => $etiqueta)
-                                            <div><dt>{{ $etiqueta }}</dt><dd>{{ $audiencia[$campo] ?? '—' }}</dd></div>
-                                        @endforeach
-                                        @if (!empty($audiencia['acusados']))
-                                            <div><dt>Acusados</dt><dd><ul class="fo-progra-acusados">
-                                                @foreach ($audiencia['acusados'] as $acusado)
-                                                    <li><strong>{{ $acusado['nombre'] ?? '—' }}</strong> · Situación: {{ $acusado['situacion'] ?? '—' }}@if ($id === 'juicios' && count($audiencia['acusados']) <= 4) · Medidas cautelares: {{ $acusado['medidas'] ?? '—' }} · Forma de notificación: {{ $acusado['notificacion'] ?? '—' }}@endif</li>
-                                                @endforeach
-                                            </ul></dd></div>
+                <h2 id="titulo-{{ $id }}" class="fo-progra-title">{{ $titulo }}
+                    @if ($id === 'cortas' && $anfitriones->isNotEmpty())
+                        <span class="fo-progra-host">Anfitrión/a{{ $anfitriones->count() > 1 ? 'es' : '' }}: {{ $anfitriones->take(3)->join(', ') }}@if ($anfitriones->count() > 3) +{{ $anfitriones->count() - 3 }}@endif</span>
+                    @endif
+                </h2>
+                @forelse ($audiencias as $audiencia)
+                    <article class="fo-table-wrap--glass fo-progra-card">
+                        <header class="fo-progra-card-head">{{ $audiencia['encabezado'] }}</header>
+                        <table class="fo-progra-fields">
+                            <caption class="sr-only">Datos de {{ $audiencia['encabezado'] }}</caption>
+                            <tbody>
+                                @if ($id === 'juicios')
+                                    <tr><th scope="row">Delito</th><td colspan="3">{{ $audiencia['delito'] ?? '—' }}</td></tr>
+                                    @php $filas = [['Testigos', 'num_testigos', 'Peritos', 'num_peritos'], ['Jueces Inhabilitados', 'inhabil', 'Encargado Causa', 'encargado'], ['Juez Presidente', 'juez_p', 'Acta de sala', 'acta'], ['Juez Redactor', 'juez_r', 'Encargados de TTyPP', 'ttpp'], ['Juez Integrante', 'juez_i', 'Encargado TTyPP (Zoom)', 'ttpp_zoom']]; @endphp
+                                @elseif ($id === 'lecturas')
+                                    @php $filas = [['Acta de Audiencia', 'acta', 'Encargado Causa', 'encargado'], ['Juez Redactor', 'juez_r', null, null]]; @endphp
+                                @else
+                                    @php $filas = [['Juez Presidente', 'juez_p', 'Acta de Audiencia', 'acta'], ['Juez Redactor', 'juez_r', 'Encargado Causa', 'encargado'], ['Juez Integrante', 'juez_i', null, null]]; @endphp
+                                @endif
+                                @foreach ($filas as [$etiqueta, $campo, $segundaEtiqueta, $segundoCampo])
+                                    <tr>
+                                        <th scope="row">{{ $etiqueta }}</th><td>{{ $audiencia[$campo] ?? '—' }}</td>
+                                        @if ($segundaEtiqueta)
+                                            <th scope="row">{{ $segundaEtiqueta }}</th><td>{{ $audiencia[$segundoCampo] ?? '—' }}</td>
+                                        @else
+                                            <td colspan="2"><a class="fo-ttypp-button" href="{{ $id === 'lecturas' ? 'https://zoom.us/j/96002644455?pwd=TVpxNG5td010ekRwV0RzZzdiRXVSQT09' : 'https://zoom.us/j/94505473191?pwd=ZWJYa0ZWSG1naXlNK3V3T2pZNjZVdz09' }}" target="_blank" rel="noopener noreferrer">Unirse a Zoom</a></td>
                                         @endif
-                                        @if ($id === 'lecturas' || $id === 'cortas')
-                                            <div><dt>Zoom</dt><dd><a class="fo-link" href="{{ $id === 'lecturas' ? 'https://zoom.us/j/96002644455?pwd=TVpxNG5td010ekRwV0RzZzdiRXVSQT09' : 'https://zoom.us/j/94505473191?pwd=ZWJYa0ZWSG1naXlNK3V3T2pZNjZVdz09' }}" target="_blank" rel="noopener noreferrer">Unirse a Zoom</a></dd></div>
-                                        @endif
-                                    </dl>
-                                </td></tr>
+                                    </tr>
+                                @endforeach
                             </tbody>
-                        @empty
-                            <tbody><tr><td colspan="{{ in_array($id, ['juicios', 'cortas']) ? 6 : 5 }}" class="fo-table-empty">{{ $vacio }}</td></tr></tbody>
-                        @endforelse
-                    </table>
-                </div>
+                        </table>
+                        @if (!empty($audiencia['acusados']))
+                            @php $acusados = array_values($audiencia['acusados']); $compacto = count($acusados) > 4; @endphp
+                            <div class="fo-progra-people">
+                                <h3>Acusados</h3>
+                                <table class="fo-progra-people-table">
+                                    <caption class="sr-only">Acusados de {{ $audiencia['encabezado'] }}</caption>
+                                    <thead><tr>
+                                        <th scope="col">{{ $id === 'juicios' && ! $compacto ? 'Acusado' : 'Acusados' }}</th><th scope="col">{{ $id === 'cortas' && ! $compacto ? 'Situación de Libertad' : 'Situación' }}</th>
+                                        @if ($compacto)<th scope="col">Acusados</th><th scope="col">Situación</th>@elseif ($id === 'juicios')<th scope="col">Medidas Cautelares</th><th scope="col">Forma de Notificación</th>@endif
+                                    </tr></thead>
+                                    <tbody>
+                                        @foreach (array_chunk($acusados, $compacto ? 2 : 1) as $par)
+                                            <tr>
+                                                @foreach ($par as $acusado)
+                                                    <td data-label="Acusados"><strong>{{ $acusado['nombre'] ?? '—' }}</strong></td>
+                                                    <td data-label="Situación">@if (!empty($acusado['situacion']))<span class="fo-progra-tag">{{ $acusado['situacion'] }}</span>@else — @endif</td>
+                                                    @if (! $compacto && $id === 'juicios')
+                                                        <td data-label="Medidas Cautelares">@if (!empty($acusado['medidas']))<span class="fo-progra-tag">{{ $acusado['medidas'] }}</span>@else — @endif</td>
+                                                        <td data-label="Forma de Notificación">@if (!empty($acusado['notificacion']))<span class="fo-progra-tag">{{ $acusado['notificacion'] }}</span>@else — @endif</td>
+                                                    @endif
+                                                @endforeach
+                                                @if ($compacto && count($par) === 1)<td data-label="Acusados">—</td><td data-label="Situación">—</td>@endif
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @endif
+                    </article>
+                @empty
+                    <p class="fo-progra-empty">{{ $vacio }}</p>
+                @endforelse
             </section>
         @endforeach
     </div>
