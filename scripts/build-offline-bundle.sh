@@ -2,7 +2,7 @@
 # Builds everything the conversion tools need on a server WITHOUT internet access (no pip, no apt, no npm).
 # Run it on a machine with internet; see docs/despliegue-herramientas-pdf.md for the installation steps.
 #
-#   scripts/build-offline-bundle.sh windows [python-version] [--full]               (default 3.13)
+#   scripts/build-offline-bundle.sh windows [python-version] [--full|--wheels-only]  (default 3.13)
 #       Python installer, wheels for win_amd64, Tesseract and Ghostscript installers, Poppler, and the Spanish
 #       and orientation (osd) language data. The bundled Python fixes the version, so the wheels always match.
 #
@@ -10,6 +10,9 @@
 #       Wheels for the server's python3 (`python3 --version`), and .deb packages (with dependencies) of
 #       Tesseract + Spanish, Ghostscript, Poppler and python3-venv, downloaded with Docker in a clean
 #       ubuntu:<version> container that has python3, as an Ubuntu Server does.
+#
+#   --wheels-only (Windows) builds only the Python packages, for a server that already has Python and the programs:
+#   use the server's `python.exe --version` (3.14.9 -> 3.14). Output: build/wheels-windows-py<version>.zip.
 #
 #   --full also adds LibreOffice (Word a PDF) and FFmpeg with FFprobe (M4A a MP3, Cortar audio), if the server lacks them.
 #
@@ -23,12 +26,16 @@ lock="$root/scripts/requirements.lock.txt"
 pip="${PIP:-pip}"
 
 full=false
-for argument in "$@"; do [ "$argument" = --full ] && full=true; done
+wheels_only=false
+for argument in "$@"; do
+    [ "$argument" = --full ] && full=true
+    [ "$argument" = --wheels-only ] && wheels_only=true
+done
 
 case "$platform" in
     windows)
         version="${2:-3.13}"
-        [ "$version" = --full ] && version=3.13
+        case "$version" in --*) version=3.13 ;; esac
         pip_platforms="--platform win_amd64"
         ;;
     linux)
@@ -51,6 +58,15 @@ echo "== Paquetes Python ($version, $platform)"
 # shellcheck disable=SC2086
 "$pip" download --quiet --dest "$out/wheels" --only-binary=:all: --python-version "$version" --implementation cp \
     --abi "cp$(echo "$version" | tr -d .)" --abi abi3 --abi none $pip_platforms --platform any -r "$lock"
+
+if [ "$wheels_only" = true ] && [ "$platform" = windows ]; then
+    echo "   $(ls "$out/wheels" | wc -l) paquetes"
+    (cd "$out" && sha256sum wheels/* > SHA256SUMS.txt)
+    rm -f "$root/build/wheels-windows-$tag.zip"
+    (cd "$root/build" && mv "$name" "wheels-windows-$tag" && zip -qr "wheels-windows-$tag.zip" "wheels-windows-$tag")
+    echo "$root/build/wheels-windows-$tag.zip"
+    exit 0
+fi
 
 github_asset() { # repository, pattern of the asset name: prints the download URL of the latest release's asset
     curl -fsSL "https://api.github.com/repos/$1/releases/latest" | grep -oE "\"browser_download_url\": *\"[^\"]*$2\"" | head -1 | sed 's/.*"\(https[^"]*\)"/\1/'

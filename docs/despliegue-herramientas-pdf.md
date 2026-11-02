@@ -23,6 +23,8 @@ scripts/build-offline-bundle.sh linux 3.12 24.04 --full
 
 `--full` agrega LibreOffice (Word a PDF) y FFmpeg con FFprobe (M4A a MP3, Cortar audio). Omítelo si el servidor ya los tiene: `conversions:check` lo dice.
 
+Si el servidor Windows ya tiene su propio Python (el entorno existente) y los programas instalados, y solo faltan paquetes Python, usa `--wheels-only` con la versión de **su** Python (`python.exe --version`; 3.14.9 es `3.14`): `scripts/build-offline-bundle.sh windows 3.14 --wheels-only` genera `build/wheels-windows-py314.zip` (unos 170 MB) con solo `wheels/` y `requirements.lock.txt`. Los paquetes de este tipo son específicos de la versión de Python: con otra versión, pip responde `No matching distribution found`.
+
 El resultado queda en `build/offline-<sistema>-py<versión>.zip` (Windows) o `.tar.gz` (Linux). Dentro hay `wheels/` con los 47 paquetes Python, `requirements.lock.txt`, `SHA256SUMS.txt` y, según el sistema, `installers/` y `tessdata/` o `debs/`. Copia ese archivo al servidor, junto con el repositorio ya actualizado y su `public/build` (ver el paso 5).
 
 ## 2. Qué se instala y para qué

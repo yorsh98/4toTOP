@@ -65,9 +65,11 @@ class CheckConversionTools extends Command
         } catch (\Throwable $exception) {
             return $this->row($name, false, $usedBy, $exception->getMessage());
         }
-        $output = trim($process->getOutput()."\n".$process->getErrorOutput());
+        $lines = array_values(array_filter(array_map('trim', preg_split('/\R/', $process->getOutput()."\n".$process->getErrorOutput()))));
 
-        return $this->row($name, $process->isSuccessful(), $usedBy, mb_substr(strtok($output, "\n") ?: $output, 0, 70));
+        // A program that works is identified by its first line (its version); one that fails, by its last (the
+        // error: warnings come first).
+        return $this->row($name, $process->isSuccessful(), $usedBy, $process->isSuccessful() ? ($lines[0] ?? 'OK') : ($lines[array_key_last($lines)] ?? 'Sin salida (código '.$process->getExitCode().').'));
     }
 
     /** Runs OCR on a generated scan: proves OCRmyPDF, Tesseract with Spanish and orientation data, and Ghostscript. */
@@ -149,6 +151,9 @@ PY, $directory.'/scan.pdf']);
     private function row(string $name, bool $ok, string $usedBy, string $detail): array
     {
         $this->failed = $this->failed || ! $ok;
+
+        // Windows programs end lines with \r\n, and a stray \r would move the cursor and overwrite the table row.
+        $detail = mb_substr(trim(preg_replace('/\s+/u', ' ', $detail)), 0, 100);
 
         return [$name, $ok ? '<info>OK</info>' : '<error>FALTA</error>', $usedBy, $detail];
     }

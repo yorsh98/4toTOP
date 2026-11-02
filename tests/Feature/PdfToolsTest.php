@@ -6,6 +6,7 @@ use App\Jobs\ConvertFile;
 use App\Livewire\PublicFileConverterPage;
 use App\Models\FileConversion;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
@@ -536,4 +537,18 @@ it('reports an exhausted conversion deadline and keeps the queue budget below re
     $remaining = new ReflectionMethod($tool, 'remaining');
     expect(fn () => $remaining->invoke($tool, microtime(true) - 1))
         ->toThrow(InvalidArgumentException::class, 'El documento es demasiado largo para convertirlo. Divídelo e inténtalo de nuevo.');
+});
+
+it('keeps the server check table intact with Windows line endings and shows the real error', function () {
+    config()->set('conversions.ocrmypdf', null);
+    config()->set('conversions.pdfinfo', fakeTool('printf "pdfinfo version 26.09.0\r\nCopyright\r\n"'));
+    config()->set('conversions.pdftotext', fakeTool('printf "Aviso: algo obsoleto\r\nModuleNotFoundError: No module named PIL\r\n" >&2; exit 1'));
+
+    Artisan::call('conversions:check');
+    $output = Artisan::output();
+
+    expect($output)->not->toContain("\r")
+        ->and($output)->toContain('pdfinfo version 26.09.0')
+        ->and($output)->toContain('ModuleNotFoundError: No module named PIL')
+        ->and($output)->not->toContain('Aviso: algo obsoleto');
 });
