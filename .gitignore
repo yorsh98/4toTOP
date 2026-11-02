@@ -26,3 +26,11 @@ yarn-error.log
 /.zed
 /.venv-conversions
 /build
+
+# BRAG outputs
+/brag-output*/
+/deepseekVideo/
+/opencodevideo/
+/screenshots-portafolio/
+/brag-output-2026-10-16-152145/
+/.playwright-mcp/
