@@ -152,6 +152,7 @@ export function initAppOpen({
   /* ---------- Abrir ---------- */
   async function open(link) {
     busy = true;
+    document.documentElement.classList.add('ao-opening');
     const t = timings();
     const url = link.href;
     const rect = link.getBoundingClientRect();
@@ -181,6 +182,7 @@ export function initAppOpen({
     const timer = setTimeout(() => {
       if (!opening) return;
       link.style.visibility = '';
+      document.documentElement.classList.remove('ao-opening');
       shell?.getAnimations().forEach((a) => a.cancel());
       fadeOut(opening.layer, t.reveal);
       opening = null;
@@ -201,6 +203,7 @@ export function initAppOpen({
     const { layer, timer } = opening;
     clearTimeout(timer);
     opening = null;
+    document.documentElement.classList.remove('ao-opening');
     revealView(layer, t);
   }
 
@@ -253,7 +256,7 @@ export function initAppOpen({
 
       await settle(anims);
       link.style.visibility = '';
-      await fadeOut(layer, 140);
+      layer.remove();
       busy = false;
     });
   }
@@ -329,6 +332,7 @@ export function initAppOpen({
     clearTimeout(timer);
     opening = null;
     store(LAST_KEY, null);
+    document.documentElement.classList.remove('ao-opening');
     document.querySelector(shellSelector)?.getAnimations().forEach((a) => a.cancel());
     busy = false;
     if (prefersReducedMotion()) {
