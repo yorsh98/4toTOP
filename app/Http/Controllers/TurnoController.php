@@ -41,8 +41,9 @@ class TurnoController extends Controller
     public function enviarTurno(BackofficeDocumentosCatalog $catalog, WeatherService $weatherService)
     {
         // Obtener los turnos desde la base de datos
-        $turno1 = Turno::find(1);
-        $turno2 = Turno::find(2);
+        $turnos = Turno::findMany([1, 2])->keyBy('id');
+        $turno1 = $turnos->get(1);
+        $turno2 = $turnos->get(2);
         $encargadosAudiencia = $catalog->encargadosAudiencia();
 
         // Conteo por estado de las audiencias de hoy para el resumen de la portada

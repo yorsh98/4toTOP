@@ -8,15 +8,12 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="icon" href="{{ asset('favicon.webp') }}" type="image/webp" />
     <meta name="csrf-token" content="{{ csrf_token() }}" />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
     @stack('styles')
   </head>
 
   <body class="fo fo-kiosk">
     <div class="fo-backdrop" aria-hidden="true">
-      <img src="{{ asset('img/centro-justicia-2560.webp') }}" alt="" decoding="async">
+      <img src="{{ asset('img/centro-justicia-2560.webp') }}" srcset="{{ asset('img/centro-justicia-1280.webp') }} 1280w, {{ asset('img/centro-justicia-2560.webp') }} 2560w" sizes="100vw" alt="" decoding="async">
     </div>
     <header class="fo-kiosk-header">
       <div class="fo-kiosk-brand">

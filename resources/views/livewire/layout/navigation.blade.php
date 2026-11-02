@@ -44,7 +44,7 @@ new class extends Component
             <span class="cm-pill bo-nav-pill" aria-hidden="true"></span>
             @foreach ($menuItems as $item)
                 @canany($item['permissions'])
-                    <a href="{{ route($item['route']) }}" wire:navigate title="{{ $item['label'] }}" style="--bo-accent: {{ $item['accent'] }}" class="bo-nav-link cm-press {{ request()->routeIs($item['active']) ? 'is-active' : '' }}" :class="collapsed ? 'justify-center' : ''"><i class="{{ $item['icon'] }}" aria-hidden="true"></i><span x-show="!collapsed">{{ $item['label'] }}</span></a>
+                    <a href="{{ route($item['route']) }}" wire:navigate.hover title="{{ $item['label'] }}" style="--bo-accent: {{ $item['accent'] }}" class="bo-nav-link cm-press {{ request()->routeIs($item['active']) ? 'is-active' : '' }}" :class="collapsed ? 'justify-center' : ''"><i class="{{ $item['icon'] }}" aria-hidden="true"></i><span x-show="!collapsed">{{ $item['label'] }}</span></a>
                 @endcanany
             @endforeach
         </div>
@@ -59,7 +59,7 @@ new class extends Component
          x-transition:leave="bo-menu-t" x-transition:leave-start="" x-transition:leave-end="bo-menu-from">
         @foreach ($menuItems as $item)
             @canany($item['permissions'])
-                <a href="{{ route($item['route']) }}" wire:navigate style="--bo-accent: {{ $item['accent'] }}" class="bo-nav-link {{ request()->routeIs($item['active']) ? 'is-active' : '' }}"><i class="{{ $item['icon'] }}"></i><span>{{ $item['label'] }}</span></a>
+                <a href="{{ route($item['route']) }}" wire:navigate.hover style="--bo-accent: {{ $item['accent'] }}" class="bo-nav-link {{ request()->routeIs($item['active']) ? 'is-active' : '' }}"><i class="{{ $item['icon'] }}"></i><span>{{ $item['label'] }}</span></a>
             @endcanany
         @endforeach
         <div class="bo-nav-footer pt-3">

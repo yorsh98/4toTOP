@@ -8,8 +8,7 @@ use Illuminate\Support\Facades\Log;
 use Throwable;
 
 /**
- * Clima del día en Santiago desde Open-Meteo (sin API key). Se guarda en caché
- * para que la portada no dependa de la API en cada visita; si falla, devuelve null.
+ * Clima del día en Santiago desde Open-Meteo (sin API key).
  */
 class WeatherService
 {
@@ -50,16 +49,23 @@ class WeatherService
         }
 
         $cached = Cache::get(self::CACHE_KEY);
-        if ($cached !== null) {
-            return $cached ?: null;
+
+        return is_array($cached) && ($cached['date'] ?? null) === now('America/Santiago')->toDateString()
+            ? $cached['weather'] : null;
+    }
+
+    public function refresh(): void
+    {
+        if (! config('services.weather.enabled')) {
+            return;
         }
 
-        $weather = $this->fetch();
-
-        // Un fallo se recuerda poco tiempo para no frenar cada carga de la portada
-        Cache::put(self::CACHE_KEY, $weather ?? false, $weather ? now()->addMinutes(30) : now()->addMinutes(5));
-
-        return $weather;
+        if ($weather = $this->fetch()) {
+            Cache::put(self::CACHE_KEY, [
+                'date' => now('America/Santiago')->toDateString(),
+                'weather' => $weather,
+            ], now()->addHours(2));
+        }
     }
 
     private function fetch(): ?array

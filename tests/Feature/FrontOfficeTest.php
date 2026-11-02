@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Audiencia;
+use App\Models\User;
 use App\Services\FrontOfficeCatalog;
 
 test('welcome lists every public access from the catalog', function () {
@@ -62,4 +63,16 @@ test('internal module cards open as apps and external ones do not', function () 
             ? expect($card[0])->toContain('data-app-open')
             : expect($card[0])->not->toContain('data-app-open');
     }
+});
+
+test('anonymous public pages allow back button caching', function () {
+    $response = $this->get(route('bitacora-pruebas.public'))->assertSuccessful();
+
+    expect($response->headers->get('Cache-Control'))->toContain('no-cache', 'private')->not->toContain('no-store');
+});
+
+test('authenticated public pages retain no-store', function () {
+    $response = $this->actingAs(User::factory()->create())->get(route('bitacora-pruebas.public'))->assertSuccessful();
+
+    expect($response->headers->get('Cache-Control'))->toContain('no-store');
 });
