@@ -19,3 +19,18 @@
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
 </IfModule>
+
+<IfModule mod_headers.c>
+    <If "%{REQUEST_URI} =~ m#/build/assets/#">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </If>
+    <ElseIf "%{REQUEST_URI} =~ m#\.(webp|jpe?g|png|svg|ico)$#">
+        Header set Cache-Control "public, max-age=604800"
+    </ElseIf>
+</IfModule>
+
+<IfModule mod_deflate.c>
+    <IfModule mod_filter.c>
+        AddOutputFilterByType DEFLATE text/html text/css text/javascript application/javascript application/json image/svg+xml
+    </IfModule>
+</IfModule>

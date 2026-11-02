@@ -9,17 +9,20 @@ const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
 // Búsqueda sin tildes ni mayúsculas: "garantia" encuentra "Garantía"
 const normalize = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 
-function initTheme() {
+// Delegado en document: wire:navigate reemplaza el botón y perdería un listener propio
+function initThemeButtons() {
     syncThemeButtons();
-    $$('[data-fo-theme]').forEach((btn) => {
-        btn.addEventListener('click', () => {
-            toggleTheme();
-            // Reinicia el giro del ícono aunque se haga clic seguido
-            btn.classList.remove('is-flipping');
-            void btn.offsetWidth;
-            btn.classList.add('is-flipping');
-        });
-        btn.addEventListener('animationend', () => btn.classList.remove('is-flipping'));
+    document.addEventListener('click', (event) => {
+        const btn = event.target.closest?.('[data-fo-theme]');
+        if (!btn) return;
+        toggleTheme();
+        // Reinicia el giro del ícono aunque se haga clic seguido
+        btn.classList.remove('is-flipping');
+        void btn.offsetWidth;
+        btn.classList.add('is-flipping');
+    });
+    document.addEventListener('animationend', (event) => {
+        event.target.closest?.('[data-fo-theme]')?.classList.remove('is-flipping');
     });
 }
 
@@ -393,8 +396,8 @@ function initOficios() {
 }
 
 export function initFrontOffice() {
+    initThemeButtons();
     if (!document.body.classList.contains('fo')) return;
-    initTheme();
     initClock();
     initBackdrop();
     initChrome();
