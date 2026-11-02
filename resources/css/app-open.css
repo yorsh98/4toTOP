@@ -8,18 +8,20 @@
 :root {
   /* Curva tipo iOS: arranque rápido, frenado largo y suave */
   --ao-ease: cubic-bezier(.32, .72, 0, 1);
-  --ao-t-open: 380ms;     /* tarjeta → pantalla completa */
-  --ao-t-close: 340ms;    /* pantalla completa → tarjeta */
-  --ao-t-reveal: 200ms;   /* fundido de la pantalla de carga */
-  --ao-t-rise: 300ms;     /* entrada de cada bloque de la vista nueva */
+  --ao-t-open: 130ms;     /* tarjeta → pantalla completa */
+  --ao-t-close: 200ms;    /* pantalla completa → tarjeta */
+  --ao-t-reveal: 100ms;   /* fundido de la pantalla de carga */
+  --ao-t-rise: 100ms;     /* entrada de cada bloque de la vista nueva */
   --ao-icon-scale: 1.5;   /* tamaño del ícono en la pantalla de carga */
   --ao-surface: #f4f7fb;  /* color de la "ventana" si la tarjeta no trae data-app-color */
-  --ao-stagger: 40ms;
+  --ao-stagger: 10ms;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) { --ao-surface: #0f1622; }
 }
 :root[data-theme="dark"], .dark { --ao-surface: #0f1622; }
+
+html.ao-opening .fo * { backdrop-filter: none !important; }
 
 /* Capa que se expande (vive en <html>, fuera del <body> que reemplaza Livewire) */
 .ao-layer {
@@ -61,7 +63,7 @@ html.ao-cover[data-ao-arrive="open"]::after {
 [data-app-view].ao-enter > *,
 html[data-ao-arrive="open"] [data-app-view] > * {
   animation: ao-rise var(--ao-t-rise) var(--cm-ease-out, cubic-bezier(.22, 1, .36, 1)) both;
-  animation-delay: calc(var(--ao-i, 0) * var(--ao-stagger) + 40ms);
+  animation-delay: calc(min(var(--ao-i, 0), 4) * var(--ao-stagger));
 }
 html[data-ao-arrive="open"] [data-app-view] > :nth-child(2) { --ao-i: 1; }
 html[data-ao-arrive="open"] [data-app-view] > :nth-child(3) { --ao-i: 2; }
