@@ -1,8 +1,6 @@
 import $ from 'jquery';
 window.$ = window.jQuery = $;
 
-import 'bootstrap';
-
 import Swal from 'sweetalert2';
 import { initFrontOffice } from './front-office.js';
 window.Swal = Swal;

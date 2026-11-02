@@ -10,7 +10,7 @@
 ## Application Map
 - HTTP routes are centralized in `routes/web.php`; feature modules use route prefixes and names such as `SistOficioLibertades.*` and `seguridad.*`. `/` is `TurnoController::enviarTurno`, not Laravel's default welcome route.
 - UI is mixed Blade, Livewire classes in `app/Livewire`, and Volt. Volt mounts both `resources/views/livewire` and `resources/views/pages`; auth routes point to `pages.auth.*`.
-- Vite builds only `resources/css/app.css` and `resources/js/app.js`. The JS entrypoint intentionally exposes global `jQuery`, `Swal`, and `SwalToast`; CSS imports Bootstrap before Tailwind layers.
+- Vite builds only `resources/css/app.css` and `resources/js/app.js`. The JS entrypoint intentionally exposes global `jQuery`, `Swal`, and `SwalToast`; CSS imports Bootstrap before Tailwind layers. Bootstrap JS is not loaded, but its CSS is still the base of public and backoffice layout: removing it changes page heights, so it stays until a replacement base layer exists.
 - Legacy controller file/class names are lowercase (for example `addfuncionarioController`). Do not rename them incidentally.
 
 ## Security And Operations
