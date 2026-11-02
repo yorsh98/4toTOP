@@ -1,11 +1,21 @@
 <!DOCTYPE html>
-<html lang="es" data-theme="dark">
+<html lang="es">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ $code }} | {{ config('app.name', '4toTOP') }}</title>
     <link rel="icon" href="{{ asset('favicon.webp') }}" type="image/webp">
-    <script>try { document.documentElement.dataset.theme = localStorage.getItem('fo-theme') === 'light' ? 'light' : 'dark'; } catch (e) {}</script>
+    @include('partials.theme-head')
+    {{-- Esta página no carga app.js: sigue aquí al sistema mientras no haya elección guardada --}}
+    <script>
+        try {
+            matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function (event) {
+                var saved = null;
+                try { saved = localStorage.getItem('fo-theme'); } catch (e) {}
+                if (saved !== 'light' && saved !== 'dark') document.documentElement.dataset.theme = event.matches ? 'dark' : 'light';
+            });
+        } catch (e) {}
+    </script>
     <style>
         :root {
 

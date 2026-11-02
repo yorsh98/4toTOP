@@ -76,3 +76,11 @@ test('authenticated public pages retain no-store', function () {
 
     expect($response->headers->get('Cache-Control'))->toContain('no-store');
 });
+
+test('server does not fix the theme on html so the head script decides', function () {
+    foreach ([$this->get('/'), $this->get(route('login')), $this->get(route('Monitor')), $this->get('/no-existe-esta-pagina')] as $response) {
+        expect($response->getContent())
+            ->not->toMatch('/<html[^>]*data-theme/')
+            ->toContain("matchMedia('(prefers-color-scheme: dark)')");
+    }
+});

@@ -7,7 +7,7 @@
 @endphp
 
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme="dark">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -15,12 +15,12 @@
         <title>{{ $title ? "{$title} · 4toTOP" : '4toTOP · 4º Tribunal de Juicio Oral en lo Penal de Santiago' }}</title>
         <link rel="icon" href="{{ asset('favicon.webp') }}" type="image/webp">
 
-        {{-- Tema e intro antes del primer pintado, para que no parpadee --}}
+        @include('partials.theme-head')
+        {{-- Intro antes del primer pintado, para que no parpadee --}}
         <script>
             (function () {
                 var root = document.documentElement;
                 root.classList.add('fo-js');
-                try { root.dataset.theme = localStorage.getItem('fo-theme') === 'light' ? 'light' : 'dark'; } catch (e) {}
                 {{-- Entrada escalonada del navbar: solo la primera página de la sesión --}}
                 try {
                     if (!sessionStorage.getItem('fo-head')) {

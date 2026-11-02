@@ -7,13 +7,7 @@
 
         <title>{{ isset($title) ? $title.' · 4toTOP' : '4toTOP · Backoffice' }}</title>
         <link rel="icon" href="{{ asset('favicon.webp') }}" type="image/webp">
-        <script>
-            try {
-                document.documentElement.dataset.theme = localStorage.getItem('fo-theme') === 'dark' ? 'dark' : 'light';
-            } catch (_) {
-                document.documentElement.dataset.theme = 'light';
-            }
-        </script>
+        @include('partials.theme-head')
         @livewireStyles
         @stack('styles')
         <!-- Scripts -->

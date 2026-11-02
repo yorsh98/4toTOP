@@ -2,6 +2,7 @@
 // por secciones, drawers, buscador Ctrl K, formulario de oficios y apertura de módulos.
 import { bump, movePill, prefersReducedMotion, withViewTransition } from './lib/chat-motion.js';
 import { initAppOpen } from './lib/app-open.js';
+import { syncThemeButtons, toggleTheme } from './theme.js';
 
 const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
@@ -9,14 +10,10 @@ const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
 const normalize = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 
 function initTheme() {
-    const root = document.documentElement;
+    syncThemeButtons();
     $$('[data-fo-theme]').forEach((btn) => {
-        const sync = () => btn.setAttribute('aria-label', root.dataset.theme === 'light' ? 'Cambiar a tema oscuro' : 'Cambiar a tema claro');
-        sync();
         btn.addEventListener('click', () => {
-            root.dataset.theme = root.dataset.theme === 'light' ? 'dark' : 'light';
-            try { localStorage.setItem('fo-theme', root.dataset.theme); } catch { /* sin almacenamiento */ }
-            sync();
+            toggleTheme();
             // Reinicia el giro del ícono aunque se haga clic seguido
             btn.classList.remove('is-flipping');
             void btn.offsetWidth;
