@@ -12,7 +12,9 @@ test('backoffice shell includes its theme and body class', function () {
         ->assertOk()
         ->assertSee('class="bo antialiased"', false)
         ->assertSee("localStorage.getItem('fo-theme')", false)
-        ->assertSee('document.documentElement.dataset.theme', false);
+        ->assertSee('document.documentElement.dataset.theme', false)
+        ->assertSee("matchMedia('(prefers-color-scheme: dark)')", false)
+        ->assertDontSee("localStorage.getItem('fo-theme') === 'dark' ? 'dark' : 'light'", false);
 });
 
 test('backoffice catalog contains sixteen existing routes', function () {
