@@ -16,6 +16,7 @@ use App\Services\InsumoSolicitudService;
 use Database\Seeders\ServiciosRoleSeeder;
 use Illuminate\Support\Facades\Queue;
 use Livewire\Livewire;
+use Ramsey\Uuid\Uuid;
 
 beforeEach(function () {
     $this->seed(ServiciosRoleSeeder::class);
@@ -107,4 +108,31 @@ test('services user can mark only their own insumos notifications as read', func
         ->call('marcarLeida', $notification->id);
 
     expect($notification->fresh()->read_at)->not->toBeNull();
+});
+
+test('servicios users without valid email receive database notifications but not mail', function () {
+    $servicios = User::factory()->create(['email' => 'correo-invalido']);
+    $servicios->assignRole('servicios');
+    $valid = User::factory()->create(['email' => 'servicios@example.cl']);
+    $valid->assignRole('servicios');
+    $insumo = createNotifiableInsumo('NOT-004');
+    $solicitud = app(InsumoSolicitudService::class)->crear([['insumo_id' => $insumo->id, 'cantidad' => 1]], User::factory()->create()->id);
+
+    expect($servicios->notifications()->count())->toBe(1)
+        ->and(NotificationRecipient::query()->where('email', 'correo-invalido')->count())->toBe(0)
+        ->and(NotificationRecipient::query()->where('email', 'servicios@example.cl')->count())->toBe(1);
+});
+
+test('a deterministic notification id prevents duplicate inserts after the existence check', function () {
+    $user = User::factory()->create();
+    $eventKey = 'insumo.test.carrera';
+    $id = Uuid::uuid5(Uuid::NAMESPACE_URL, "4totop:{$user->getKey()}|{$eventKey}")->toString();
+    $notification = new InsumosServiciosNotification('otro-evento', 'Aviso', 'Detalle', '/insumos/gestion');
+    $notification->id = $id;
+    $user->notify($notification);
+
+    $method = new ReflectionMethod(InsumosNotifier::class, 'notifyDatabase');
+    $method->invoke(app(InsumosNotifier::class), collect([$user]), $eventKey, 'Aviso', 'Detalle', '/insumos/gestion');
+
+    expect($user->notifications()->count())->toBe(1);
 });

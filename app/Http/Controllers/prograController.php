@@ -230,6 +230,7 @@ class PrograController extends Controller
                 'acta' => $asText($a->acta),
                 'acusados' => collect($a->acusados ?? [])->map(fn ($x) => [
                     'nombre' => $asText($x['nombre_completo'] ?? ''),
+                    'situacion' => $asText($x['situacion'] ?? null),
                 ])->values()->all(),
             ];
         };

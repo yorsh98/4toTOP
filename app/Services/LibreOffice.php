@@ -13,7 +13,7 @@ class LibreOffice
      *
      * @param  list<string>  $options  extra arguments placed before --convert-to, such as an import filter
      */
-    public function convert(string $input, string $directory, string $convertTo, string $extension, array $options = []): string
+    public function convert(string $input, string $directory, string $convertTo, string $extension, array $options = [], float $timeout = 300): string
     {
         $output = $directory.'/'.pathinfo($input, PATHINFO_FILENAME).'.'.$extension;
         $profilePath = $directory.'/lo-profile';
@@ -23,7 +23,7 @@ class LibreOffice
             config('conversions.libreoffice'), '-env:UserInstallation='.$profileUri, '--headless',
             ...$options, '--convert-to', $convertTo, '--outdir', $directory, $input,
         ]);
-        $process->setTimeout(300);
+        $process->setTimeout($timeout);
         $process->run();
 
         if (! $process->isSuccessful() || ! is_file($output) || filesize($output) === 0) {

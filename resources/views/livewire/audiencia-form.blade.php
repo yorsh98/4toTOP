@@ -2,7 +2,7 @@
 
 <div class="max-w-4xl mx-auto p-6 bo-panel rounded border">
     <x-flash-notifications />
-    <h2 class="text-2xl font-bold bo-strong mb-6">
+    <h2 class="text-2xl font-bold bo-strong mb-6 bo-cat-heading bo-cat-juicio">
         {{ $audienciaId ? 'Editar' : 'Registro de Nueva' }} Audiencia
     </h2>
     <form x-data
@@ -326,7 +326,7 @@
         </div>
         <!-- Botón de enviar -->
         <div class="flex justify-end pt-6">
-            <button type="submit" class="bo-btn bo-btn--primary  bo-strong px-6 py-2 rounded-md ">
+            <button type="submit" class="bo-btn bo-btn--primary px-6 py-2 rounded-md">
                 {{ $audienciaId ? 'Actualizar' : 'Guardar' }} Audiencia
             </button>
         </div>

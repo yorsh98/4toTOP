@@ -1,4 +1,4 @@
-<div class="flex flex-col gap-4 rounded-xl border border-slate-200 bg-slate-50 p-5 sm:flex-row sm:items-center sm:justify-between">
+<div class="ac-intro flex flex-col gap-4 rounded-xl {{ $area === 'frontoffice' ? 'border' : 'ac-intro-border' }} border-slate-200 bg-slate-50 p-5 sm:flex-row sm:items-center sm:justify-between">
     <div class="flex min-w-0 gap-4">
         <span class="flex size-11 shrink-0 items-center justify-center rounded-full bg-[#0A2E5D] text-white"><i class="fa-solid fa-scissors" aria-hidden="true"></i></span>
         <div class="min-w-0">

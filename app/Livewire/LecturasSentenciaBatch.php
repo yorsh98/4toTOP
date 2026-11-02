@@ -4,6 +4,8 @@ namespace App\Livewire;
 
 use App\Models\Audiencia;
 use App\Services\FuncionarioCatalog;
+use Carbon\Carbon;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
@@ -142,6 +144,11 @@ class LecturasSentenciaBatch extends Component
 
     public function removeRow(int $index): void
     {
+        // En edición la primera fila es la audiencia abierta; se elimina desde la tabla.
+        if ($this->editId !== null && $index === 0) {
+            return;
+        }
+
         unset($this->items[$index]);
         $this->items = array_values($this->items);
     }
@@ -220,14 +227,8 @@ class LecturasSentenciaBatch extends Component
             return;
         }
 
-        if ($this->editId !== null) {
-            $this->saveEditedRow($this->items[0]);
-            $this->items = [];
-            $this->addRow();
-            $this->dispatch('alerta-success');
-            $this->dispatch('audiencia-guardada');
-
-            return;
+        if (count($this->items) > ($this->editId === null ? 0 : 1)) {
+            Gate::authorize('audiencias.crear');
         }
 
         // Unicidad contra BD
@@ -235,6 +236,7 @@ class LecturasSentenciaBatch extends Component
             $exists = Audiencia::where('rit', $row['rit'])
                 ->whereDate('fecha', $row['fecha'])
                 ->where('tipo_audiencia', $row['tipo_audiencia'])
+                ->when($this->editId !== null && $i === 0, fn ($q) => $q->whereKeyNot($this->editId))
                 ->exists();
 
             if ($exists) {
@@ -248,36 +250,24 @@ class LecturasSentenciaBatch extends Component
         }
 
         DB::transaction(function () {
-            foreach ($this->items as $row) {
-                Audiencia::create($this->audienciaData($row));
+            foreach ($this->items as $i => $row) {
+                if ($this->editId !== null && $i === 0) {
+                    Gate::authorize('audiencias.editar');
+                    Audiencia::findOrFail($this->editId)->update(Arr::except($this->audienciaData($row), 'estado'));
+                } else {
+                    Audiencia::create($this->audienciaData($row));
+                }
             }
         });
+
+        $fechas = collect($this->items)->pluck('fecha')->unique()->values();
 
         // Reset: dejamos limpio y una fila nueva
         $this->items = [];
         $this->addRow();
 
-        $this->dispatch('alerta-success');
-        $this->dispatch('audiencia-guardada');
-    }
-
-    private function saveEditedRow(array $row): void
-    {
-        $audiencia = Audiencia::query()
-            ->whereDate('fecha', $row['fecha'])
-            ->where('rit', $row['rit'])
-            ->where('tipo_audiencia', $row['tipo_audiencia'])
-            ->first();
-
-        if ($audiencia) {
-            Gate::authorize('audiencias.editar');
-            $audiencia->update($this->audienciaData($row));
-
-            return;
-        }
-
-        Gate::authorize('audiencias.crear');
-        Audiencia::create($this->audienciaData($row));
+        $this->dispatch('alerta-success', fecha: $fechas->map(fn ($fecha) => Carbon::parse($fecha)->format('d-m-Y'))->join(', '));
+        $this->dispatch('audiencia-guardada', fecha: $fechas->first());
     }
 
     private function audienciaData(array $row): array

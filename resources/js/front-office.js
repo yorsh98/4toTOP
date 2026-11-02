@@ -17,7 +17,12 @@ function initTheme() {
             root.dataset.theme = root.dataset.theme === 'light' ? 'dark' : 'light';
             try { localStorage.setItem('fo-theme', root.dataset.theme); } catch { /* sin almacenamiento */ }
             sync();
+            // Reinicia el giro del ícono aunque se haga clic seguido
+            btn.classList.remove('is-flipping');
+            void btn.offsetWidth;
+            btn.classList.add('is-flipping');
         });
+        btn.addEventListener('animationend', () => btn.classList.remove('is-flipping'));
     });
 }
 
@@ -128,11 +133,30 @@ function initReveal() {
     items.forEach((el) => io.observe(el));
 }
 
-// Píldora deslizante bajo la sección visible
+// Navbar contraído al bajar y de vuelta a su tamaño cerca del inicio.
+// Dos umbrales (histéresis) para que no parpadee justo en el borde.
+function initHeader() {
+    const header = $('[data-fo-header]');
+    if (!header) return;
+    const SHRINK_AT = 72;
+    const EXPAND_AT = 24;
+    let compact = false;
+
+    // El evento de scroll ya llega una vez por frame; solo se toca la clase al cruzar un umbral
+    const update = () => {
+        const next = compact ? scrollY > EXPAND_AT : scrollY > SHRINK_AT;
+        if (next !== compact) header.classList.toggle('is-compact', (compact = next));
+    };
+
+    update();
+    addEventListener('scroll', update, { passive: true });
+}
+
+// Píldora deslizante bajo la sección visible; sigue al puntero mientras recorre el menú
 function initNav() {
     const nav = $('[data-fo-nav]');
     const sections = $$('[data-fo-section]');
-    if (!nav || !sections.length) return;
+    if (!nav) return;
     const pill = $('.cm-pill', nav);
     const links = new Map($$('[data-section]', nav).map((a) => [a.dataset.section, a]));
     let current = null;
@@ -154,6 +178,12 @@ function initNav() {
     if (hero) {
         new IntersectionObserver(([entry]) => entry.isIntersecting && activate(null), { rootMargin: '-45% 0px -50% 0px' }).observe(hero);
     }
+    links.forEach((a) => a.addEventListener('pointerenter', () => {
+        pill.classList.add('is-on');
+        movePill(pill, a);
+    }));
+    nav.addEventListener('pointerleave', () => activate(current?.dataset.section ?? null));
+
     addEventListener('resize', () => current && movePill(pill, current));
 }
 
@@ -372,6 +402,7 @@ export function initFrontOffice() {
     initBackdrop();
     initChrome();
     initReveal();
+    initHeader();
     initNav();
     initDrawers();
     initPalette();

@@ -47,19 +47,19 @@
 
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <button type="button" @click="open('lecturas')"
-                                        class="bo-btn bo-btn--secondary w-full flex-col items-start px-4 py-3 rounded-xl border text-left">
+                                        class="bo-btn bo-btn--secondary w-full flex-col items-start px-4 py-3 rounded-xl text-left bo-cat-card bo-cat-lectura">
                                     <div class="font-semibold">Lecturas de Sentencia</div>
                                     <div class="text-xs bo-muted">Carga el batch de lecturas.</div>
                                 </button>
 
                                 <button type="button" @click="open('cortas')"
-                                        class="bo-btn bo-btn--secondary w-full flex-col items-start px-4 py-3 rounded-xl border text-left">
+                                        class="bo-btn bo-btn--secondary w-full flex-col items-start px-4 py-3 rounded-xl text-left bo-cat-card bo-cat-corta">
                                     <div class="font-semibold">Audiencias Cortas</div>
                                     <div class="text-xs bo-muted">Carga el batch de cortas.</div>
                                 </button>
 
                                 <button type="button" @click="open('form')"
-                                        class="bo-btn bo-btn--secondary w-full flex-col items-start px-4 py-3 rounded-xl border text-left">
+                                        class="bo-btn bo-btn--secondary w-full flex-col items-start px-4 py-3 rounded-xl text-left bo-cat-card bo-cat-juicio">
                                     <div class="font-semibold">Continuación / Juicio oral</div>
                                     <div class="text-xs bo-muted">Formulario individual.</div>
                                 </button>
@@ -75,7 +75,7 @@
                                             class="bo-btn bo-btn--secondary inline-flex items-center gap-2 px-3 py-1.5 rounded-md border ">
                                         <span>←</span> <span>Volver</span>
                                     </button>
-                                    <div class="text-sm bo-muted" x-text="tituloActual()"></div>
+                                    <div class="text-sm bo-muted bo-cat-label" :class="modo === 'lecturas' ? 'bo-cat-lectura' : (modo === 'cortas' ? 'bo-cat-corta' : 'bo-cat-juicio')" x-text="tituloActual()"></div>
                                 </div>
 
                                 <template x-if="modo === 'lecturas'">

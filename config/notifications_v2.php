@@ -11,6 +11,7 @@ return [
     ],
 
     'schedule' => [
+        'birthday_time' => env('NOTIFICATIONS_V2_BIRTHDAY_TIME', '08:00'),
         'daily_ausentismo_time' => env('NOTIFICATIONS_V2_SCHEDULE_TIME', '08:03'),
         'weekly_turno1_day' => (int) env('NOTIFICATIONS_V2_TURNO1_DAY', 5),
         'weekly_turno1_time' => env('NOTIFICATIONS_V2_TURNO1_TIME', '15:00'),

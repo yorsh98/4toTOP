@@ -21,6 +21,13 @@
                 var root = document.documentElement;
                 root.classList.add('fo-js');
                 try { root.dataset.theme = localStorage.getItem('fo-theme') === 'light' ? 'light' : 'dark'; } catch (e) {}
+                {{-- Entrada escalonada del navbar: solo la primera página de la sesión --}}
+                try {
+                    if (!sessionStorage.getItem('fo-head')) {
+                        root.classList.add('fo-head-in');
+                        sessionStorage.setItem('fo-head', '1');
+                    }
+                } catch (e) {}
                 @if ($home)
                 try {
                     if (!sessionStorage.getItem('fo-intro') && location.hash.length < 2
@@ -98,9 +105,9 @@
             </div>
         @endif
 
-        <header class="fo-header">
+        <header class="fo-header" data-fo-header>
             <div class="fo-header-inner">
-                <a href="{{ route('welcome') }}" class="fo-brand" data-fo-link aria-label="4toTOP, ir al inicio">
+                <a href="{{ route('welcome') }}" class="fo-brand" data-fo-link aria-label="4toTOP, ir al inicio" style="--cm-i: 0">
                     <img src="{{ asset('img/pjud_blanco.webp') }}" alt="" class="fo-brand-logo fo-only-dark" width="54" height="29">
                     <img src="{{ asset('img/pjud_transparenteazul.webp') }}" alt="" class="fo-brand-logo fo-only-light" width="54" height="29">
                     <span class="fo-brand-name">4toTOP</span>
@@ -109,33 +116,33 @@
                 <nav class="fo-nav cm-pill-track" aria-label="Secciones" data-fo-nav>
                     <span class="cm-pill fo-nav-pill" aria-hidden="true"></span>
                     @foreach ($sections as $id => $section)
-                        <a href="{{ $sectionHref($id) }}" class="fo-nav-link" data-section="{{ $id }}" @unless ($home) data-fo-link @endunless>{{ $section['title'] }}</a>
+                        <a href="{{ $sectionHref($id) }}" class="fo-nav-link cm-press" data-section="{{ $id }}" style="--cm-i: {{ $loop->iteration }}" @unless ($home) data-fo-link @endunless>{{ $section['title'] }}</a>
                     @endforeach
                 </nav>
 
                 <div class="fo-header-actions">
-                    <button type="button" class="fo-search-btn cm-press" data-fo-palette aria-keyshortcuts="Control+K Meta+K">
+                    <button type="button" class="fo-search-btn cm-press" style="--cm-i: 6" data-fo-palette aria-keyshortcuts="Control+K Meta+K">
                         <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
                         <span class="fo-search-btn-label">Buscar</span>
                         <kbd class="fo-kbd">Ctrl K</kbd>
                     </button>
-                    <button type="button" class="fo-icon-btn cm-press" data-fo-theme aria-label="Cambiar a tema claro">
+                    <button type="button" class="fo-icon-btn cm-press" style="--cm-i: 7" data-fo-theme aria-label="Cambiar a tema claro">
                         <i class="fa-solid fa-sun fo-only-dark" aria-hidden="true"></i>
                         <i class="fa-solid fa-moon fo-only-light" aria-hidden="true"></i>
                     </button>
                     @auth
-                        <a href="{{ route('dashboard') }}" class="fo-cta cm-press">
+                        <a href="{{ route('dashboard') }}" class="fo-cta cm-press" style="--cm-i: 8">
                             <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
                             <span>Volver al backoffice</span>
                         </a>
                     @else
                         @if (Route::has('register'))
-                            <a href="{{ route('register') }}" class="fo-cta fo-cta--register cm-press" aria-label="Registrarse">
+                            <a href="{{ route('register') }}" class="fo-cta fo-cta--register cm-press" style="--cm-i: 8" aria-label="Registrarse">
                                 <i class="fa-solid fa-user-plus" aria-hidden="true"></i>
                                 <span>Registrarse</span>
                             </a>
                         @endif
-                        <a href="{{ route('login') }}" class="fo-cta cm-press">
+                        <a href="{{ route('login') }}" class="fo-cta cm-press" style="--cm-i: 9">
                             <i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i>
                             <span>Ingresar</span>
                         </a>

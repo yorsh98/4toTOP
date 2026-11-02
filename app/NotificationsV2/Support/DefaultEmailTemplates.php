@@ -4,6 +4,11 @@ namespace App\NotificationsV2\Support;
 
 class DefaultEmailTemplates
 {
+    public static function birthdayHtml(): string
+    {
+        return '{{ html }}';
+    }
+
     public static function turnoAsignadoHtml(): string
     {
         return <<<'HTML'

@@ -74,6 +74,7 @@ class OcrPdfTool extends ConversionTool
 
     public function process(FileConversion $conversion, string $directory): ToolResult
     {
+        $this->stage('Reconociendo texto con OCR');
         $this->engine = 'ocrmypdf';
         $input = $directory.'/'.basename($conversion->input_path);
         $options = $conversion->options;

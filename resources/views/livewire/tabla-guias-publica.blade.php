@@ -3,7 +3,7 @@
         $columnas = [
             'nombre_completo' => 'Nombre', 'institucion' => 'Institución',
             'telefono1' => 'Teléfono 1', 'telefono2' => 'Teléfono 2',
-            'email' => 'Email', 'rut' => 'RUT',
+            'email' => 'Email',
         ];
         $ariaSort = fn (string $campo) => $sortField === $campo ? ($sortDirection === 'asc' ? 'ascending' : 'descending') : 'none';
     @endphp
@@ -12,7 +12,7 @@
         <label class="fo-listbar-field fo-listbar-field--lg cm-focus-ring">
             <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
             <span class="sr-only">Buscar guías</span>
-            <input type="search" wire:model.live.debounce.100ms="search" placeholder="Nombre, teléfono o RUT" aria-controls="fo-guias-resultados">
+            <input type="search" wire:model.live.debounce.100ms="search" placeholder="Nombre, teléfono o email" aria-controls="fo-guias-resultados">
         </label>
         <div class="fo-guias-filters">
             <label class="fo-perpage">
@@ -69,16 +69,9 @@
                             <span class="fo-dash">—</span>
                         @endif
                     </td>
-                    <td data-label="RUT">
-                        @if (filled($guia->rut))
-                            <span class="fo-num fo-guias-rut">{{ $guia->rut }}</span>
-                        @else
-                            <span class="fo-dash">—</span>
-                        @endif
-                    </td>
                 </tr></tbody>
             @empty
-                <tbody><tr><td colspan="6" class="fo-table-empty">
+                <tbody><tr><td colspan="5" class="fo-table-empty">
                     @if ($search !== '' || $filtroInstitucion !== '')
                         Ningún contacto coincide con la búsqueda o el filtro. <button type="button" class="fo-link" x-on:click="$wire.set('search', ''); $wire.set('filtroInstitucion', '')">Limpiar filtros</button>.
                     @else

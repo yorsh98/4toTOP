@@ -32,6 +32,8 @@ class CheckConversionTools extends Command
             $this->check('FFmpeg', 'M4A a MP3, Cortar audio', [config('conversions.ffmpeg'), '-version']),
             $this->check('FFprobe', 'Cortar audio', [config('conversions.ffprobe'), '-version']),
             $this->audioEncoders(),
+            $this->check('Python (OpenCV, NumPy)', 'PDF a Word OCR', [$python, '-I', '-c', 'import cv2, numpy']),
+            $this->tesseract(),
             $this->ocr(),
             $this->queue(),
             $this->uploads(),
@@ -101,10 +103,23 @@ PY, $directory.'/scan.pdf']);
         }
     }
 
+    private function tesseract(): array
+    {
+        $process = new Process([config('conversions.tesseract'), '--list-langs']);
+        $process->setTimeout(60);
+        try {
+            $process->run();
+
+            return $this->row('Tesseract spa', $process->isSuccessful() && preg_match('/^spa\s*$/m', $process->getOutput()) === 1, 'PDF a Word OCR', 'Idioma español.');
+        } catch (\Throwable $exception) {
+            return $this->row('Tesseract spa', false, 'PDF a Word OCR', mb_substr($exception->getMessage(), 0, 120));
+        }
+    }
+
     private function queue(): array
     {
         $retryAfter = (int) config('queue.connections.'.config('queue.default').'.retry_after');
-        $needed = max(OcrPdfTool::ocrTimeout(), ConversionTool::for('audiocut')->timeout(['duration' => config('conversions.audio_max_seconds')]));
+        $needed = max(OcrPdfTool::ocrTimeout(), ConversionTool::for('pdf')->timeout([]), ConversionTool::for('audiocut')->timeout(['duration' => config('conversions.audio_max_seconds')]));
 
         return $this->row('Cola: retry_after', $retryAfter > $needed, 'OCR, Cortar audio', "retry_after = {$retryAfter} s; debe superar {$needed} s (DB_QUEUE_RETRY_AFTER).");
     }

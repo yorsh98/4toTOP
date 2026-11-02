@@ -6,6 +6,9 @@ body.bo {
     --bo-text: #172033;
     --bo-mut: #4c5a72;
     --bo-signal: #1f6fe0;
+    --bo-cat-juicio: #0A55C2;
+    --bo-cat-lectura: #9C27B0;
+    --bo-cat-corta: #34A853;
     --bo-toga: #0a2e5d;
     --bo-alarm: #b91c1c;
     --bo-ok: #087443;
@@ -31,6 +34,9 @@ body.bo {
     --bo-text: #f1f5f9;
     --bo-mut: #b8c5da;
     --bo-signal: #75b7ff;
+    --bo-cat-juicio: #5AA5FF;
+    --bo-cat-lectura: #D85FEA;
+    --bo-cat-corta: #4CD07A;
     --bo-alarm: #ff8a80;
     --bo-ok: #6ee7a8;
     --bo-warn: #fcd477;
@@ -102,6 +108,34 @@ body.bo { --bo-fg: var(--bo-text); --bo-danger: #b91c1c; --bo-on-solid: #fff; --
 .bo .bo-nav-link i { width: 1.25rem; text-align: center; }
 .bo .bo-nav-link:hover, .bo .bo-nav-toggle:hover { background: var(--bo-primary); color: var(--bo-on-solid); }
 .bo .bo-nav-link.is-active { box-shadow: inset 3px 0 var(--bo-accent); background: var(--bo-primary); }
+/* ---------- Barra lateral: movimiento (chat-motion) ----------
+   Colapsar / expandir lo anima resources/js/backoffice-nav.js (FLIP con transform y clip-path). */
+.bo .bo-shell { overflow-x: clip; } /* el contenido se desliza al colapsar sin crear scroll horizontal */
+.bo .bo-nav-link, .bo .bo-nav-toggle {
+    transition: background-color var(--cm-t-fast) var(--cm-ease-out), color var(--cm-t-fast) var(--cm-ease-out),
+        transform var(--cm-t-fast) var(--cm-ease-out), box-shadow var(--cm-t-base) var(--cm-ease-out);
+}
+.bo .bo-nav-link:active, .bo .bo-nav-toggle:active { transform: scale(.96); }
+.bo .bo-nav-link > i:first-child { transition: transform var(--cm-t-base) var(--cm-ease-spring); }
+.bo .bo-nav-link:hover > i:first-child { transform: translateX(2px) scale(1.1); }
+/* Píldora de sección (cm-pill): marca el módulo activo y viaja de ítem en ítem al navegar.
+   Con la píldora puesta (has-pill), el ítem activo deja de pintar su propio fondo. */
+.bo .bo-nav-pill {
+    left: .75rem; right: .75rem; border-radius: .5rem; opacity: 0;
+    background: color-mix(in srgb, var(--bo-nav-text) 12%, var(--bo-primary)); box-shadow: inset 3px 0 var(--bo-accent);
+    transition: transform var(--cm-t-slow) var(--cm-ease-spring), height var(--cm-t-slow) var(--cm-ease-spring),
+        box-shadow var(--cm-t-base) var(--cm-ease-out), opacity var(--cm-t-fast) var(--cm-ease-out);
+}
+.bo .bo-nav-pill.is-on { opacity: 1; }
+.bo .bo-nav-pill.is-instant { transition: none; }
+.bo .has-pill > .bo-nav-link.is-active { background: transparent; box-shadow: none; }
+.bo .has-pill > .bo-nav-link.is-active:hover { background: transparent; }
+/* Fondo que se recoge detrás de la barra al colapsar (lo crea backoffice-nav.js) */
+.bo .bo-nav-ghost { position: fixed; top: 0; left: 0; height: 100vh; background: var(--bo-nav); pointer-events: none; }
+/* Menú móvil: baja y aparece */
+.bo .bo-menu-t { transition: opacity var(--cm-t-base) var(--cm-ease-out), transform var(--cm-t-base) var(--cm-ease-out); }
+.bo .bo-menu-from { opacity: 0; transform: translateY(-8px); }
+
 .bo .bo-nav-user { display: grid; overflow-wrap: anywhere; padding: .5rem .7rem; font-size: .8rem; }
 .bo .bo-badge { background: var(--bo-danger); color: var(--bo-on-solid); border-radius: 999px; padding: 0 .4rem; }
 .bo .bo-hero { position: relative; overflow: hidden; background: var(--bo-toga); color: var(--bo-on-solid); border: 1px solid var(--bo-nav-line); border-radius: var(--bo-radius); padding: 2rem; }
@@ -232,3 +266,25 @@ body.bo { --bo-solid-ok: #087443; --bo-solid-warn: #875000; --bo-muted-on-solid:
 .bo .bo-pagination-active .bo-pagination-link { background: var(--bo-primary); border-color: var(--bo-primary); color: var(--bo-on-solid); }
 .bo .bo-pagination-disabled .bo-pagination-link { background: var(--bo-surface-2); color: var(--bo-mut); }
 @media (max-width: 639px) { .bo .bo-pagination-mobile { display: block; } .bo .bo-pagination-desktop { display: none; } }
+
+.bo .bo-header-actions { display: flex; gap: .5rem; align-items: center; }
+.bo .bo-header-btn { position: relative; width: 38px; height: 38px; display: inline-grid; place-items: center; border-radius: .5rem; border: 1px solid var(--bo-line); color: var(--bo-fg); background: var(--bo-surface); }
+.bo .bo-header-btn:hover { border-color: var(--bo-signal); }
+.bo .bo-header-btn:focus-visible { outline: 2px solid var(--bo-signal); outline-offset: 2px; }
+.bo .bo-header-btn .bo-badge { position: absolute; top: -6px; right: -6px; min-width: 1.1rem; font-size: .7rem; line-height: 1.1rem; text-align: center; }
+
+/* Barra de progreso de una conversión (lista del conversor) */
+.bo .bo-progress { display: block; width: 10rem; max-width: 100%; height: .4rem; margin-top: .35rem; background: var(--bo-line); border-radius: 1rem; overflow: hidden; }
+.bo .bo-progress > span:first-child { display: block; height: 100%; background: var(--bo-signal); transition: width var(--cm-t-slow) var(--cm-ease-out); }
+@media (prefers-reduced-motion: reduce) { .bo .bo-progress > span:first-child { transition: none; } }
+
+.bo .bo-cat-juicio { --bo-accent: var(--bo-cat-juicio); }
+.bo .bo-cat-lectura { --bo-accent: var(--bo-cat-lectura); }
+.bo .bo-cat-corta { --bo-accent: var(--bo-cat-corta); }
+.bo .bo-cat-card { border-left: 4px solid var(--bo-accent); background: color-mix(in srgb, var(--bo-accent) 10%, var(--bo-surface)); }
+.bo .bo-cat-card:hover { border-color: var(--bo-accent); }
+.bo .bo-cat-heading { border-left: 4px solid var(--bo-accent); padding-left: .75rem; }
+.bo .bo-cat-badge, .bo .bo-cat-label { display: inline-flex; align-items: center; gap: .4rem; }
+.bo .bo-cat-badge { padding: .2rem .5rem; border-radius: .375rem; background: color-mix(in srgb, var(--bo-accent) 12%, var(--bo-surface)); color: var(--bo-fg); }
+.bo .bo-cat-badge::before, .bo .bo-cat-label::before { content: ""; width: .5rem; height: .5rem; flex: none; border-radius: 50%; background: var(--bo-accent); }
+.bo .bo-cat-row > td:first-child { box-shadow: inset 4px 0 var(--bo-accent); }
