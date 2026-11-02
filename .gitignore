@@ -33,4 +33,9 @@ yarn-error.log
 /opencodevideo/
 /screenshots-portafolio/
 /brag-output-2026-10-16-152145/
+
+#Agents Outputs
 /.playwright-mcp/
+/.claude/
+/.agents/
+/.codex/
