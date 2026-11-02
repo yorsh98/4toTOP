@@ -80,7 +80,6 @@
         @livewireStyles
         @stack('styles')
         @vite(['resources/css/app.css', 'resources/js/app.js'])
-        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
     </head>
     <body class="fo {{ $home ? 'fo-is-home' : 'fo-is-page' }}">
         <a class="fo-skip" href="#fo-main">Saltar al contenido</a>

@@ -1,5 +1,6 @@
 <?php
 
+use App\Services\WeatherService;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule as ScheduleFacade;
@@ -38,3 +39,9 @@ ScheduleFacade::command('notificaciones:cumpleanos')
     ->dailyAt((string) config('notifications_v2.schedule.birthday_time', '08:00'))
     ->timezone((string) config('notifications_v2.schedule.timezone', 'America/Santiago'))
     ->withoutOverlapping();
+
+Artisan::command('weather:refresh', function (WeatherService $weather) {
+    $weather->refresh();
+})->purpose('Actualizar el clima de Santiago');
+
+ScheduleFacade::command('weather:refresh')->everyFifteenMinutes()->withoutOverlapping(5);

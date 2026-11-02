@@ -35,10 +35,6 @@ class CambiarEstadoAudiencia extends Component
 
     public function cargarAudiencias($forceRefresh = false)
     {
-        if ($forceRefresh) {
-            Audiencia::all()->each->refresh();
-        }
-
         // Si no hay filtro seleccionado, no mostrar audiencias
         if (! $this->filtro) {
             $this->audiencias = collect(); // colección vacía
@@ -52,8 +48,7 @@ class CambiarEstadoAudiencia extends Component
 
         $this->audiencias = $query
             ->orderBy('hora_inicio')
-            ->get()
-            ->fresh();
+            ->get();
 
         $this->ultimaActualizacion = now()->format('H:i:s');
     }
