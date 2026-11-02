@@ -24,7 +24,14 @@
                 </thead>
                 <tbody class="bo-panel divide-y bo-border">
                     @foreach ($audiencias as $aud)
-                        <tr wire:key="audiencia-{{ $aud->id }}">
+                        @php
+                            $category = match ($aud->tipo_audiencia) {
+                                'Lectura de Sentencia' => 'bo-cat-lectura',
+                                'Audiencia Corta' => 'bo-cat-corta',
+                                default => 'bo-cat-juicio',
+                            };
+                        @endphp
+                        <tr wire:key="audiencia-{{ $aud->id }}" class="bo-cat-row {{ $category }}">
                             <td class="px-3 py-2 text-right whitespace-nowrap">
                                 <button type="button" wire:click="toggleDetalle({{ $aud->id }})"
                                     aria-expanded="{{ $detalleId === $aud->id ? 'true' : 'false' }}"
@@ -58,7 +65,7 @@
                             <td class="px-3 py-2">{{ $aud->sala ?: 'vacío' }}</td>
                             <td class="px-3 py-2 font-medium">{{ $aud->rit ?: 'vacío' }}</td>
                             <td class="px-3 py-2">{{ $aud->ruc ?: 'vacío' }}</td>
-                            <td class="px-3 py-2">{{ $aud->tipo_audiencia ?: 'vacío' }}</td>
+                            <td class="px-3 py-2"><span class="bo-cat-badge {{ $category }}">{{ $aud->tipo_audiencia ?: 'vacío' }}</span></td>
                             <td class="px-3 py-2">{{ $aud->hora_inicio?->format('H:i') ?? 'vacío' }}</td>
                             <td class="px-3 py-2">{{ $aud->encargado_sala ?? $aud->encargado_causa ?: 'vacío' }}</td>
                         </tr>
@@ -67,9 +74,9 @@
                                 <td colspan="7" class="p-4">
                                     @php
                                         $typeStyle = match ($aud->tipo_audiencia) {
-                                            'Lectura de Sentencia' => 'bo-section',
-                                            'Audiencia Corta' => 'bo-section',
-                                            default => 'bo-section',
+                                            'Lectura de Sentencia' => 'bo-section bo-cat-lectura',
+                                            'Audiencia Corta' => 'bo-section bo-cat-corta',
+                                            default => 'bo-section bo-cat-juicio',
                                         };
                                         $statusStyle = match ($aud->estado) {
                                             'FINALIZADA' => 'bo-chip bo-chip--ok',
@@ -85,7 +92,7 @@
                                     @endphp
 
                                     <section id="audiencia-detalle-{{ $aud->id }}" aria-label="Detalle de audiencia {{ $aud->rit }}"
-                                        class="overflow-hidden border bo-border border-l-4 rounded-lg bo-panel shadow-sm {{ $typeStyle }}">
+                                        class="overflow-hidden rounded-lg bo-panel shadow-sm {{ $typeStyle }}">
                                         <header class="flex flex-col gap-3 px-4 py-3 border-b bo-border bo-panel sm:flex-row sm:items-center sm:justify-between">
                                             <div>
                                                 <p class="text-xs font-semibold tracking-wide bo-muted uppercase">Ficha de audiencia</p>

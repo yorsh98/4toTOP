@@ -20,7 +20,8 @@
     </div>
     <header class="fo-kiosk-header">
       <div class="fo-kiosk-brand">
-        <img src="{{ asset('img/pjud_blanco.webp') }}" alt="Poder Judicial" width="100">
+        <img src="{{ asset('img/pjud_blanco.webp') }}" alt="Poder Judicial" class="fo-only-dark" width="100">
+        <img src="{{ asset('img/pjud_transparenteazul.webp') }}" alt="Poder Judicial" class="fo-only-light" width="100">
         <span>4º Tribunal de Juicio Oral en lo Penal de Santiago</span>
       </div>
       <div class="fo-kiosk-clock" x-data="{ time: '', date: '', init() { const tick = () => { const now = new Date(); this.time = new Intl.DateTimeFormat('es-CL', { timeZone: 'America/Santiago', hour: '2-digit', minute: '2-digit', hour12: false }).format(now); const d = new Intl.DateTimeFormat('es-CL', { timeZone: 'America/Santiago', weekday: 'long', day: 'numeric', month: 'long' }).format(now); this.date = d.charAt(0).toUpperCase() + d.slice(1); }; tick(); setInterval(tick, 1000); } }">

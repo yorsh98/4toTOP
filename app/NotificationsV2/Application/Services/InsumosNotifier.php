@@ -13,7 +13,9 @@ use App\NotificationsV2\Application\Contracts\NotificationOrchestrator;
 use App\NotificationsV2\Domain\Models\NotificationTemplate;
 use App\NotificationsV2\Domain\Models\NotificationType;
 use App\NotificationsV2\Support\DefaultEmailTemplates;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Collection;
+use Ramsey\Uuid\Uuid;
 
 class InsumosNotifier
 {
@@ -32,7 +34,7 @@ class InsumosNotifier
         );
 
         $services = $this->serviciosUsers();
-        $this->dispatchMail('insumo.solicitado', $eventKey, $payload, $services);
+        $this->dispatchMail('insumo.solicitado', $eventKey, $payload, $this->withValidEmail($services));
         $this->notifyDatabase($services, $eventKey, 'Nueva solicitud de insumos', $payload['line'], '/insumos/gestion');
     }
 
@@ -98,7 +100,7 @@ class InsumosNotifier
         $payload = $this->payload('Stock bajo de insumos', 'Uno o mas insumos alcanzaron el stock minimo.', $items);
         $services = $this->serviciosUsers();
 
-        $this->dispatchMail('insumo.stock_bajo', $eventKey, $payload, $services);
+        $this->dispatchMail('insumo.stock_bajo', $eventKey, $payload, $this->withValidEmail($services));
         $this->notifyDatabase($services, $eventKey, 'Stock bajo de insumos', $payload['line'], '/insumos/inventario');
     }
 
@@ -110,9 +112,12 @@ class InsumosNotifier
             ->whereNotNull('approved_at')
             ->whereNull('rejected_at')
             ->whereNull('suspended_at')
-            ->get()
-            ->filter(fn (User $user): bool => filter_var($user->email, FILTER_VALIDATE_EMAIL) !== false)
-            ->values();
+            ->get();
+    }
+
+    private function withValidEmail(Collection $recipients): Collection
+    {
+        return $recipients->filter(fn (User $user): bool => filter_var($user->email, FILTER_VALIDATE_EMAIL) !== false)->values();
     }
 
     /** @param Collection<int, User|Funcionario> $recipients */
@@ -146,7 +151,14 @@ class InsumosNotifier
                 continue;
             }
 
-            $user->notify(new InsumosServiciosNotification($eventKey, $title, $message, $url));
+            $notification = new InsumosServiciosNotification($eventKey, $title, $message, $url);
+            $notification->id = Uuid::uuid5(Uuid::NAMESPACE_URL, "4totop:{$user->getKey()}|{$eventKey}")->toString();
+
+            try {
+                $user->notify($notification);
+            } catch (UniqueConstraintViolationException $exception) {
+                // La notificacion ya fue creada por otra solicitud.
+            }
         }
     }
 

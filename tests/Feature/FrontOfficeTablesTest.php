@@ -99,6 +99,19 @@ test('guías públicas permiten buscar y muestran estados vacíos', function () 
         ->assertSee('Aún no hay guías cargadas.');
 });
 
+test('guías públicas no muestran el RUT ni permiten buscar u ordenar por él', function () {
+    Guias::create(['nombre_completo' => 'María Pérez', 'institucion' => 2, 'rut' => '11.111.111-1']);
+
+    Livewire::test(TablaGuias::class, ['modo' => 'lectura'])
+        ->assertSee('María Pérez')
+        ->assertDontSee('RUT')
+        ->assertDontSee('11.111.111-1')
+        ->call('sortBy', 'rut')
+        ->assertNotSet('sortField', 'rut')
+        ->set('search', '11.111.111-1')
+        ->assertDontSee('María Pérez');
+});
+
 test('guías en modo full conservan la vista del backoffice', function () {
     $this->seed(RolesAndPermissionsSeeder::class);
     $user = User::factory()->create();
@@ -249,23 +262,27 @@ test('programación diaria muestra audiencias y exporta la fecha elegida', funct
             'sala' => (string) (801 + $i), 'hora_inicio' => '10:00', 'tipo_audiencia' => $tipo,
             'obs' => 'Observación de prueba', 'duracion' => '90 minutos', 'cta_zoom' => 'Zoom 123',
             'estado' => 'POR_REALIZARSE', 'anfitrion' => 'Ana', 'encargado_causa' => 'Causa', 'acta' => 'Acta', 'JuezR' => 'Juez',
-            'acusados' => [['nombre_completo' => 'Persona Acusada', 'situacion' => 'Libre']],
+            'acusados' => [['nombre_completo' => 'Persona Acusada', 'situacion' => $tipo === 'Lectura de Sentencia' ? 'P.Prev.' : 'Libre']],
         ]);
     }
 
     $this->get('/progra?fecha=2026-06-10')->assertSuccessful()
         ->assertSee('101-2026')->assertSee('102-2026')->assertSee('103-2026')
         ->assertSee('Sala 801')->assertSee('Sala 802')->assertSee('Sala 803')
-        ->assertSee('Persona Acusada')->assertSee('Ana')
+        ->assertSee('Persona Acusada')->assertSee('P.Prev.')->assertSee('Ana')
         ->assertSee('10 de junio 2026')->assertDontSee('10 De Junio 2026')
-        ->assertSee('data-label="Hora"', false)->assertSee('data-label="Sala"', false)
-        ->assertSee('data-label="RIT"', false)->assertSee('data-label="RUC"', false)
-        ->assertSee('data-label="Tipo"', false)->assertSee('data-label="Anfitrión/a"', false)
+        ->assertSee('fo-progra-card-head', false)->assertSee('Delito')->assertSee('Juez Presidente')->assertSee('Encargados de TTyPP')
+        ->assertSee('Medidas Cautelares')->assertSee('Forma de Notificación')->assertSee('Situación de Libertad')
         ->assertSee('Zoom 123')->assertSee('Observación de prueba')->assertSee('90 minutos')
         ->assertSee(route('audiencias.export.diaria'), false)
         ->assertSee('name="fecha" value="2026-06-10"', false)
         ->assertSee("document.querySelector('#progra-fecha').value", false)
-        ->assertSee('aria-expanded="false"', false);
+        ->assertDontSee('aria-controls="progra-', false)->assertDontSee('fo-table-detail', false);
+
+    Audiencia::where('rit', '101-2026')->update(['acusados' => array_map(fn ($i) => ['nombre_completo' => 'Acusado '.$i, 'situacion' => 'Libre'], range(1, 5))]);
+    $this->get('/progra?fecha=2026-06-10')->assertSuccessful()
+        ->assertSee('Acusado 5')->assertDontSee('Medidas Cautelares')
+        ->assertSee('<th scope="col">Acusados</th><th scope="col">Situación</th>', false);
 });
 
 test('programación diaria informa los grupos vacíos', function () {
@@ -292,6 +309,51 @@ test('monitor muestra las audiencias de hoy del tipo actual', function () {
     ]);
 
     Livewire::test(MonitorAudiencias::class)->assertSee('123-2026')->assertSee('En curso');
+});
+
+test('monitor muestra el logo que corresponde a cada tema', function () {
+    $this->get('/Monitor')
+        ->assertSee('pjud_blanco.webp', false)
+        ->assertSee('pjud_transparenteazul.webp', false);
+});
+
+test('monitor reparte las audiencias que no caben en vistas sin ocultar ninguna', function () {
+    foreach (range(1, 8) as $i) {
+        Audiencia::create([
+            'fecha' => today()->toDateString(), 'rit' => "90{$i}-2026", 'ruc' => '12345678-9',
+            'sala' => '801', 'hora_inicio' => sprintf('%02d:00', 8 + $i), 'tipo_audiencia' => 'Audiencia Corta',
+            'estado' => 'POR_REALIZARSE', 'anfitrion' => 'Ana', 'encargado_causa' => 'Causa', 'acta' => 'Acta', 'JuezR' => 'Juez',
+            'acusados' => [['nombre_completo' => 'Persona', 'situacion' => 'Libre']],
+        ]);
+    }
+
+    Livewire::test(MonitorAudiencias::class)
+        ->set('currentTypeIndex', 2)
+        ->set('rowsPerView', 5)
+        ->assertSee('Vista 1 de 2')->assertSee('905-2026')->assertDontSee('906-2026')
+        ->call('rotate')
+        ->assertSet('currentTypeIndex', 2)
+        ->assertSee('Vista 2 de 2')->assertSee('906-2026')->assertSee('908-2026')->assertDontSee('905-2026')
+        ->call('rotate')
+        ->assertSet('currentTypeIndex', 3)
+        ->assertSet('currentView', 0)
+        ->assertDontSee('Vista 1 de');
+});
+
+test('monitor abre una tercera vista antes que ocultar audiencias', function () {
+    foreach (range(1, 7) as $i) {
+        Audiencia::create([
+            'fecha' => today()->toDateString(), 'rit' => "90{$i}-2026", 'ruc' => '12345678-9',
+            'sala' => '801', 'hora_inicio' => sprintf('%02d:00', 8 + $i), 'tipo_audiencia' => 'Audiencia Corta',
+            'estado' => 'POR_REALIZARSE', 'anfitrion' => 'Ana', 'encargado_causa' => 'Causa', 'acta' => 'Acta', 'JuezR' => 'Juez',
+            'acusados' => [['nombre_completo' => 'Persona', 'situacion' => 'Libre']],
+        ]);
+    }
+
+    Livewire::test(MonitorAudiencias::class)
+        ->set('currentTypeIndex', 2)
+        ->set('rowsPerView', 3)
+        ->assertSee('Vista 1 de 3');
 });
 
 test('el registro está disponible en el encabezado para invitados', function () {

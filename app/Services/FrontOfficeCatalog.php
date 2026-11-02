@@ -30,7 +30,7 @@ class FrontOfficeCatalog
         return [
             ['key' => 'oficios', 'section' => 'sistemas', 'title' => 'Oficios y libertades', 'desc' => 'Pide un número de oficio o de libertad para una causa.', 'href' => route('SistOficioLibertades.index'), 'icon' => 'fa-file-signature', 'image' => 'img/S1.webp', 'keywords' => 'numero solicitud oficio libertad causa'],
             ['key' => 'audios', 'section' => 'sistemas', 'title' => 'Audios de salas', 'desc' => 'Audios de audiencias por sala y año.', 'href' => route('audios-salas.index'), 'icon' => 'fa-headphones', 'image' => 'img/S2.webp', 'keywords' => 'grabacion audio sala'],
-            ['key' => 'cumpleanos', 'section' => 'sistemas', 'title' => 'Cumpleaños', 'desc' => 'Cumpleaños del mes del personal.', 'href' => 'http://10.13.214.129:8080/cumpleanos/', 'icon' => 'fa-cake-candles', 'image' => 'img/S3.webp', 'external' => true, 'keywords' => 'cumpleanos funcionarios'],
+            ['key' => 'cumpleanos', 'section' => 'sistemas', 'title' => 'Cumpleaños', 'desc' => 'Cumpleaños del mes del personal.', 'href' => route('cumpleanos.index'), 'icon' => 'fa-cake-candles', 'image' => 'img/S3.webp', 'keywords' => 'cumpleanos funcionarios'],
 
             ['key' => 'progra', 'section' => 'audiencias', 'title' => 'Programación diaria', 'desc' => 'Audiencias del día con sala, hora y causa.', 'href' => route('progra.index'), 'icon' => 'fa-calendar-days', 'keywords' => 'programacion agenda audiencias dia rit'],
             ['key' => 'estado', 'section' => 'audiencias', 'title' => 'Estado de audiencias', 'desc' => 'Revisa si cada audiencia de hoy está en curso, en receso o finalizada.', 'href' => null, 'drawer' => 'estado', 'icon' => 'fa-signal', 'keywords' => 'estado en curso receso finalizada'],

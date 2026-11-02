@@ -23,6 +23,29 @@ class MailChannelSender implements ChannelSender
 
         $dispatch->loadMissing('recipients');
 
+        if ($dispatch->payload['birthday_mail'] ?? false) {
+            foreach ($dispatch->recipients as $recipient) {
+                if ($recipient->status === 'sent') {
+                    continue;
+                }
+                try {
+                    Mail::mailer($mailer)->send([], [], function (Message $message) use ($recipient, $subject, $html, $dispatch): void {
+                        $filename = str_contains($dispatch->event_key, 'saludo') ? 'cumpleanos.png' : 'Cumplere.png';
+                        $image = $message->embed(public_path('img/cumpleanos/'.$filename));
+                        $body = str_replace(asset('img/cumpleanos/'.$filename), $image, $html);
+                        $message->to($recipient->email, $recipient->name ?: null)->subject($subject)
+                            ->from(config('mail.from.address'), '4º Tribunal de Juicio Oral en lo Penal de Santiago')->html($body);
+                    });
+                    $recipient->update(['status' => 'sent', 'failure_reason' => null, 'sent_at' => now()]);
+                } catch (Throwable $exception) {
+                    $recipient->update(['status' => 'failed', 'failure_reason' => $this->failureReason($exception)]);
+                    Log::warning('No se pudo enviar un correo de cumpleaños.', ['dispatch_id' => $dispatch->id]);
+                }
+            }
+
+            return;
+        }
+
         $programacion = $dispatch->payload['programacion_diaria'] ?? null;
         $excel = is_array($programacion)
             ? (new ProgramacionDiariaExport(

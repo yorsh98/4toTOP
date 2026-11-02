@@ -1,6 +1,6 @@
 <div>
     <div class="max-w-6xl mx-auto p-6 bo-panel">
-    <h2 class="text-2xl font-bold bo-strong mb-6">Audiencias Cortas</h2>
+    <h2 class="text-2xl font-bold bo-strong mb-6 bo-cat-heading bo-cat-corta">Audiencias Cortas</h2>
 
     <div class="rounded border text-sm mb-4 text-center bo-alert bo-alert--warn px-2 py-2">
         <span>Los datos <b>COMPARTIDOS</b> se aplican a todas las audiencias a registrar</span>
@@ -86,9 +86,11 @@
         <!-- Acciones -->
         <div class="flex items-center justify-between">
             <h3 class="text-lg font-medium bo-strong">Audiencias a registrar</h3>
+            @can('audiencias.crear')
             <button type="button" wire:click="addRow" class="bo-btn bo-btn--secondary bo-panel-subtle bo-strong px-4 py-2 rounded-md ">
                 + Agregar fila
             </button>
+            @endcan
         </div>
 
         <!-- Filas -->
@@ -96,9 +98,11 @@
             <div class="border rounded-lg bo-panel-subtle p-4 space-y-4">
                 <div class="flex justify-between items-center">
                     <span class="text-sm font-semibold">Fila #{{ $i + 1 }}</span>
+                    @unless ($editId !== null && $i === 0)
                     <button type="button" wire:click="removeRow({{ $i }})" class="bo-btn bo-btn--secondary bo-text--danger transition-transform duration-150 ease-out
  hover:-translate-y-0.5 active:translate-y-0
  focus:outline-none focus-visible:ring-2 transform-gpu"><i class="fas fa-trash"></i></button>
+                    @endunless
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
@@ -204,7 +208,7 @@
         </datalist>
 
         <div class="flex justify-end pt-2">
-            <button type="submit" class="bo-btn bo-btn--primary  bo-strong px-6 py-2 rounded-md ">
+            <button type="submit" class="bo-btn bo-btn--primary px-6 py-2 rounded-md">
                 Guardar Audiencias Corta
             </button>
         </div>
@@ -222,8 +226,8 @@
         }
     });
 
-    document.addEventListener('alerta-success', () => {
-        SwalToast.fire({ icon: 'success', title: 'Audiencias cortas registradas correctamente.' });
+    document.addEventListener('alerta-success', (event) => {
+        SwalToast.fire({ icon: 'success', title: `Audiencias cortas guardadas para el ${event.detail.fecha}.` });
     });
     </script>
     @endscript

@@ -232,7 +232,9 @@ function scannedPdf(): string
 {
     return pythonFixture(<<<'PY'
 source = pymupdf.open()
-source.new_page().insert_text((72, 100), 'Acta del tribunal de garantia', fontsize=24)
+page = source.new_page()
+page.insert_text((72, 100), 'Acta del tribunal de garantia', fontsize=24)
+page.insert_text((72, 140), 'sobre la causa y su sentencia definitiva', fontsize=24)
 scan = pymupdf.open()
 page = scan.new_page()
 page.insert_image(page.rect, pixmap=source[0].get_pixmap(dpi=200))

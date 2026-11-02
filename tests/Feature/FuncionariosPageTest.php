@@ -14,6 +14,17 @@ beforeEach(function () {
     $this->actingAs($user);
 });
 
+test('the form binds and reports the birthday field the component validates', function () {
+    Livewire::test(FuncionariosPage::class)
+        ->assertSeeHtml('wire:model="fechaCumpleanos"')
+        ->set('nombre', 'Funcionario Sin Fecha')
+        ->set('rol', 'informatico')
+        ->set('email', 'sin-fecha@example.cl')
+        ->call('createFuncionario')
+        ->assertHasErrors(['fechaCumpleanos' => 'required'])
+        ->assertSeeHtml('bo-error');
+});
+
 test('it restores legacy soft deleted funcionario with same email on create', function () {
     $funcionario = Funcionario::create([
         'nombre' => 'Funcionario Antiguo',

@@ -15,6 +15,10 @@ class MonitorAudiencias extends Component
 
     public $rotationInterval = 7; // segundos
 
+    public $currentView = 0;
+
+    public $rowsPerView = 6; // el navegador lo ajusta a las filas que caben en su pantalla
+
     protected $listeners = ['startRotation', 'stopRotation', 'keepAlive'];
 
     public function keepAlive()
@@ -40,7 +44,26 @@ class MonitorAudiencias extends Component
 
     public function rotate()
     {
+        $this->currentView++;
+
+        if ($this->currentView < $this->viewsOf($this->todaysAudiencias()->count())) {
+            return;
+        }
+
+        $this->currentView = 0;
         $this->currentTypeIndex = ($this->currentTypeIndex + 1) % count($this->audienciaTypes);
+    }
+
+    private function todaysAudiencias()
+    {
+        return Audiencia::whereDate('fecha', Carbon::today())
+            ->where('tipo_audiencia', $this->getCurrentType())
+            ->orderBy('hora_inicio');
+    }
+
+    private function viewsOf(int $total): int
+    {
+        return max(1, (int) ceil($total / max(1, (int) $this->rowsPerView)));
     }
 
     public function getCurrentType()
@@ -50,16 +73,14 @@ class MonitorAudiencias extends Component
 
     public function render()
     {
-        $currentType = $this->getCurrentType();
-        $audiencias = Audiencia::whereDate('fecha', Carbon::today())
-            ->where('tipo_audiencia', $currentType)
-            ->orderBy('hora_inicio')
-            ->get()
-            ->groupBy('tipo_audiencia');
+        $audiencias = $this->todaysAudiencias()->get();
+        $views = $this->viewsOf($audiencias->count());
+        $this->currentView = min(max(0, (int) $this->currentView), $views - 1);
 
         return view('livewire.monitor-audiencias', [
-            'audiencias' => $audiencias,
-            'currentType' => $currentType,
+            'audiencias' => $audiencias->forPage($this->currentView + 1, max(1, (int) $this->rowsPerView)),
+            'currentType' => $this->getCurrentType(),
+            'views' => $views,
         ]);
     }
 

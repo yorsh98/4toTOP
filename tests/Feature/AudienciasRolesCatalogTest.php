@@ -165,6 +165,35 @@ test('daily hearings list defers secondary fields until its detail is opened', f
         ->assertDispatched('editar-audiencia');
 });
 
+test('daily hearings show the category for each hearing type', function () {
+    foreach ([
+        'Lectura de Sentencia' => 'bo-cat-lectura',
+        'Audiencia Corta' => 'bo-cat-corta',
+        'Juicio Oral' => 'bo-cat-juicio',
+        'Continuación' => 'bo-cat-juicio',
+        '' => 'bo-cat-juicio',
+    ] as $type => $category) {
+        $audiencia = Audiencia::create([
+            'fecha' => '2026-05-20',
+            'rit' => 'categoria-'.count(Audiencia::all()),
+            'tipo_audiencia' => $type,
+            'sala' => 'Sala 1',
+            'hora_inicio' => '10:00',
+            'ruc' => '12345678-9',
+            'estado' => 'POR_REALIZARSE',
+            'encargado_causa' => 'Encargada',
+            'acta' => 'Acta',
+            'acusados' => [],
+            'JuezR' => 'Juez',
+        ]);
+
+        Livewire::test(AudienciasDiariasTabla::class, ['fecha' => '2026-05-20'])
+            ->assertSeeHtml('class="bo-cat-badge '.$category.'">'.($type ?: 'vacío').'</span>')
+            ->call('toggleDetalle', $audiencia->id)
+            ->assertSeeHtml('bo-section '.$category);
+    }
+});
+
 test('daily hearings page opens the module matching the stored hearing type', function () {
     $lectura = Audiencia::create([
         'fecha' => '2026-05-20',
@@ -373,4 +402,69 @@ test('short hearings batch loads and updates its selected hearing', function () 
 
     expect(Audiencia::query()->where('rit', '800-2026')->count())->toBe(1);
     expect($audiencia->refresh()->obs)->toBe('Corta actualizada');
+});
+
+test('editing a short hearing also saves the rows added to it', function () {
+    $audiencia = Audiencia::create([
+        'fecha' => '2026-05-20', 'rit' => '810-2026', 'ruc' => '88888888-8', 'sala' => 'Sala 8', 'ubicacion' => 'Piso 8',
+        'hora_inicio' => '14:00', 'tipo_audiencia' => 'Audiencia Corta', 'encargado_causa' => 'Encargada', 'acta' => 'Acta',
+        'acusados' => [['nombre_completo' => 'Uno', 'situacion' => 'Libre', 'medida_cautelar' => '', 'forma_notificacion' => '']],
+        'estado' => 'EN_CURSO', 'JuezP' => 'P', 'JuezR' => 'R', 'JuezI' => 'I',
+    ]);
+
+    Livewire::test(AudienciasCortasBatch::class, ['edit' => $audiencia->id])
+        ->set('items.0.rit', '811-2026')
+        ->call('addRow')
+        ->set('items.1.rit', '812-2026')
+        ->set('items.1.ruc', '99999999-9')
+        ->set('items.1.encargado_causa', 'Encargada')
+        ->set('items.1.acta', 'Acta')
+        ->set('items.1.acusados', [['nombre_completo' => 'Dos', 'situacion' => 'Libre', 'medida_cautelar' => '', 'forma_notificacion' => '']])
+        ->call('removeRow', 0)
+        ->assertCount('items', 2)
+        ->call('guardar')
+        ->assertHasNoErrors()
+        ->assertDispatched('audiencia-guardada', fecha: '2026-05-20')
+        ->assertDispatched('alerta-success', fecha: '20-05-2026');
+
+    expect(Audiencia::whereDate('fecha', '2026-05-20')->orderBy('rit')->pluck('rit')->all())->toBe(['811-2026', '812-2026'])
+        ->and($audiencia->refresh()->rit)->toBe('811-2026')
+        ->and($audiencia->estado)->toBe('EN_CURSO');
+});
+
+test('editing a short hearing rejects a RIT already taken that day', function () {
+    $base = [
+        'fecha' => '2026-05-20', 'ruc' => '88888888-8', 'sala' => 'Sala 8', 'ubicacion' => 'Piso 8', 'hora_inicio' => '14:00',
+        'tipo_audiencia' => 'Audiencia Corta', 'encargado_causa' => 'Encargada', 'acta' => 'Acta', 'estado' => 'POR_REALIZARSE',
+        'acusados' => [['nombre_completo' => 'Uno', 'situacion' => 'Libre', 'medida_cautelar' => '', 'forma_notificacion' => '']],
+        'JuezP' => 'P', 'JuezR' => 'R', 'JuezI' => 'I',
+    ];
+    Audiencia::create($base + ['rit' => '820-2026']);
+    $audiencia = Audiencia::create($base + ['rit' => '821-2026']);
+
+    Livewire::test(AudienciasCortasBatch::class, ['edit' => $audiencia->id])
+        ->set('items.0.rit', '820-2026')
+        ->call('guardar')
+        ->assertHasErrors('items.0.rit');
+
+    expect($audiencia->refresh()->rit)->toBe('821-2026');
+});
+
+test('the daily view follows the date of what was saved', function () {
+    Livewire::test(AudienciasDiarias::class)
+        ->dispatch('audiencia-guardada', fecha: '2026-05-21')
+        ->assertSet('fecha', '2026-05-21');
+});
+
+test('audiencias primary buttons do not use bo-strong', function () {
+    foreach (['audiencias-cortas-batch', 'audiencia-form', 'lecturas-sentencia-batch'] as $view) {
+        $content = file_get_contents(resource_path("views/livewire/{$view}.blade.php"));
+        preg_match_all('/<button\b[^>]*\bclass="([^"]*\bbo-btn--primary\b[^"]*)"[^>]*>/s', $content, $buttons);
+
+        expect($buttons[1])->not->toBeEmpty();
+
+        foreach ($buttons[1] as $classes) {
+            expect(preg_split('/\\s+/', trim($classes)))->not->toContain('bo-strong');
+        }
+    }
 });
