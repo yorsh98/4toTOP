@@ -92,6 +92,10 @@
                             </div>
                         @endif
                     </div>
+                    <p class="fo-quote" data-quote data-frases='@json(\App\Support\FraseDelDia::todas())'>
+                        <span class="fo-quote-text" data-quote-text aria-live="polite">{{ \App\Support\FraseDelDia::hoy() }}</span>
+                        <button type="button" class="fo-quote-rotate" data-quote-rotate aria-label="Mostrar otra frase" title="Otra frase"><i class="fa-solid fa-rotate" aria-hidden="true"></i></button>
+                    </p>
                 </div>
 
                 <button type="button" class="fo-cell fo-cell--action" style="--cm-i: 1" data-fo-open="estado" aria-haspopup="dialog">

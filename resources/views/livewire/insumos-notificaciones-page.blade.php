@@ -8,7 +8,7 @@
         <button type="button" wire:click="marcarTodasLeidas" class="rounded-md border bo-border px-4 py-2 text-sm font-semibold bo-btn bo-btn--secondary">Marcar todas como leidas</button>
     </div>
 
-    <div class="space-y-3">
+    <div data-cm-paged class="space-y-3">
         @forelse ($notifications as $notification)
             <article class="rounded-xl border p-5 shadow-sm {{ $notification->read_at ? 'bo-panel' : 'bo-panel-subtle' }} bo-border">
                 <div class="flex flex-wrap items-start justify-between gap-3">

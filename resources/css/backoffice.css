@@ -142,6 +142,13 @@ body.bo { --bo-fg: var(--bo-text); --bo-danger: #b91c1c; --bo-on-solid: #fff; --
 .bo .bo-hero::before { content: ''; position: absolute; inset: 0 0 auto; height: 3px; background: linear-gradient(90deg, var(--bo-signal), transparent); }
 .bo .bo-hero h1 { font: 700 2rem var(--bo-display); margin: .75rem 0; }
 .bo .bo-hero-date { font: 700 .75rem var(--bo-mono); }
+.bo .bo-quote { display: flex; align-items: center; gap: .4rem; margin: .5rem 0 0; color: var(--bo-muted-on-solid); font-size: .875rem; line-height: 1.5; font-style: italic; }
+.bo .bo-quote-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bo .bo-quote-rotate { position: relative; flex-shrink: 0; display: grid; place-items: center; width: 1.25rem; height: 1.25rem; padding: 0; border: 0; border-radius: 50%; background: transparent; color: inherit; font-size: .75rem; opacity: .75; cursor: pointer; transition: opacity .16s; }
+.bo .bo-quote-rotate::before { content: ''; position: absolute; inset: -.6rem; }
+.bo .bo-quote-rotate i { transform: rotate(calc(var(--turns, 0) * 180deg)); transition: transform .42s cubic-bezier(.22, 1, .36, 1); }
+.bo .bo-quote-rotate:hover { opacity: 1; }
+.bo .bo-quote-rotate:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
 .bo .bo-weather { display: flex; align-items: center; gap: .5rem; margin-top: 1rem; }
 .bo .bo-weather svg { width: 2.5rem; height: 2.5rem; stroke: currentColor; }
 .bo .bo-section-heading { display: flex; justify-content: space-between; align-items: end; gap: 1rem; border-bottom: 1px solid var(--bo-line); padding-bottom: 1rem; color: var(--bo-mut); }

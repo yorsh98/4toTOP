@@ -10,7 +10,7 @@
             <label for="search" class="sr-only">Buscar insumo</label>
             <input id="search" type="search" wire:model.live.debounce.300ms="search" placeholder="Buscar por nombre" class="w-full rounded-md bo-border text-sm shadow-sm bo-input">
 
-            <div class="mt-4 divide-y divide-slate-100">
+            <div data-cm-paged class="mt-4 divide-y divide-slate-100">
                 @forelse ($catalogo as $insumo)
                     <div class="flex items-center justify-between gap-4 py-3" wire:key="catalogo-{{ $insumo->id }}">
                         <div>
@@ -57,7 +57,7 @@
 
     <div class="rounded-xl border bo-border bo-panel p-6 shadow-sm bo-card">
         <h2 class="text-lg font-semibold bo-strong">Mis solicitudes</h2>
-        <div class="mt-4 space-y-4">
+        <div data-cm-paged class="mt-4 space-y-4">
             @forelse ($solicitudes as $solicitud)
                 <article class="rounded-lg border bo-border p-4">
                     <div class="flex flex-wrap items-center justify-between gap-3">

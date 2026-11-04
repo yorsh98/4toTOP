@@ -13,6 +13,7 @@
             @if ($weather)
                 <div class="bo-weather"><x-public.weather-icon :kind="$weather['kind']" :day="$weather['is_day']" /><span>{{ $weather['temperature'] }} °C · {{ $weather['label'] }}</span></div>
             @endif
+            <p class="bo-quote" data-quote data-frases='@json(\App\Support\FraseDelDia::todas())'><span class="bo-quote-text" data-quote-text aria-live="polite">{{ \App\Support\FraseDelDia::hoy() }}</span><button type="button" class="bo-quote-rotate" data-quote-rotate aria-label="Mostrar otra frase" title="Otra frase"><i class="fa-solid fa-rotate" aria-hidden="true"></i></button></p>
         </section>
         <section class="mt-8" aria-labelledby="modules-title">
             <div class="bo-section-heading"><div><p class="bo-eyebrow">Accesos autorizados</p><h2 id="modules-title" class="bo-heading-title">Tus módulos</h2></div><span>{{ $availableModules->count() }} disponibles</span></div>
