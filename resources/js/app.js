@@ -1,3 +1,5 @@
+import './lib/page-motion.js';
+import './lib/quote-rotate.js';
 import $ from 'jquery';
 window.$ = window.jQuery = $;
 

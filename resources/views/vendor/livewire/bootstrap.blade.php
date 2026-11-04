@@ -12,7 +12,7 @@ $scrollIntoViewJsSnippet = ($scrollTo !== false)
 
 <div>
     @if ($paginator->hasPages())
-        <nav class="bo-pagination" aria-label="Paginación">
+        <nav data-cm-pager class="bo-pagination" aria-label="Paginación">
             <div class="bo-pagination-mobile">
                 <ul class="bo-pagination-list">
                     {{-- Previous Page Link --}}
@@ -22,14 +22,14 @@ $scrollIntoViewJsSnippet = ($scrollTo !== false)
                         </li>
                     @else
                         <li class="bo-pagination-item">
-                            <button type="button" dusk="previousPage{{ $paginator->getPageName() == 'page' ? '' : '.' . $paginator->getPageName() }}" class="bo-pagination-link" wire:click="previousPage('{{ $paginator->getPageName() }}')" x-on:click="{{ $scrollIntoViewJsSnippet }}" wire:loading.attr="disabled" aria-label="Página anterior">@lang('pagination.previous')</button>
+                            <button type="button" dusk="previousPage{{ $paginator->getPageName() == 'page' ? '' : '.' . $paginator->getPageName() }}" class="bo-pagination-link" data-cm-page="prev" wire:click="previousPage('{{ $paginator->getPageName() }}')" x-on:click="{{ $scrollIntoViewJsSnippet }}" wire:loading.attr="disabled" aria-label="Página anterior">@lang('pagination.previous')</button>
                         </li>
                     @endif
 
                     {{-- Next Page Link --}}
                     @if ($paginator->hasMorePages())
                         <li class="bo-pagination-item">
-                            <button type="button" dusk="nextPage{{ $paginator->getPageName() == 'page' ? '' : '.' . $paginator->getPageName() }}" class="bo-pagination-link" wire:click="nextPage('{{ $paginator->getPageName() }}')" x-on:click="{{ $scrollIntoViewJsSnippet }}" wire:loading.attr="disabled" aria-label="Página siguiente">@lang('pagination.next')</button>
+                            <button type="button" dusk="nextPage{{ $paginator->getPageName() == 'page' ? '' : '.' . $paginator->getPageName() }}" class="bo-pagination-link" data-cm-page="next" wire:click="nextPage('{{ $paginator->getPageName() }}')" x-on:click="{{ $scrollIntoViewJsSnippet }}" wire:loading.attr="disabled" aria-label="Página siguiente">@lang('pagination.next')</button>
                         </li>
                     @else
                         <li class="bo-pagination-disabled" aria-disabled="true">
@@ -61,7 +61,7 @@ $scrollIntoViewJsSnippet = ($scrollTo !== false)
                             </li>
                         @else
                             <li class="bo-pagination-item">
-                                <button type="button" dusk="previousPage{{ $paginator->getPageName() == 'page' ? '' : '.' . $paginator->getPageName() }}" class="bo-pagination-link" wire:click="previousPage('{{ $paginator->getPageName() }}')" x-on:click="{{ $scrollIntoViewJsSnippet }}" wire:loading.attr="disabled" aria-label="@lang('pagination.previous')">&lsaquo;</button>
+                                <button type="button" dusk="previousPage{{ $paginator->getPageName() == 'page' ? '' : '.' . $paginator->getPageName() }}" class="bo-pagination-link" data-cm-page="prev" wire:click="previousPage('{{ $paginator->getPageName() }}')" x-on:click="{{ $scrollIntoViewJsSnippet }}" wire:loading.attr="disabled" aria-label="@lang('pagination.previous')">&lsaquo;</button>
                             </li>
                         @endif
 
@@ -78,7 +78,7 @@ $scrollIntoViewJsSnippet = ($scrollTo !== false)
                                     @if ($page == $paginator->currentPage())
                                         <li class="bo-pagination-active" wire:key="paginator-{{ $paginator->getPageName() }}-page-{{ $page }}" aria-current="page"><span class="bo-pagination-link">{{ $page }}</span></li>
                                     @else
-                                        <li class="bo-pagination-item" wire:key="paginator-{{ $paginator->getPageName() }}-page-{{ $page }}"><button type="button" class="bo-pagination-link" wire:click="gotoPage({{ $page }}, '{{ $paginator->getPageName() }}')" x-on:click="{{ $scrollIntoViewJsSnippet }}">{{ $page }}</button></li>
+                                        <li class="bo-pagination-item" wire:key="paginator-{{ $paginator->getPageName() }}-page-{{ $page }}"><button type="button" class="bo-pagination-link" data-cm-page="{{ $page }}" wire:click="gotoPage({{ $page }}, '{{ $paginator->getPageName() }}')" x-on:click="{{ $scrollIntoViewJsSnippet }}">{{ $page }}</button></li>
                                     @endif
                                 @endforeach
                             @endif
@@ -87,7 +87,7 @@ $scrollIntoViewJsSnippet = ($scrollTo !== false)
                         {{-- Next Page Link --}}
                         @if ($paginator->hasMorePages())
                             <li class="bo-pagination-item">
-                                <button type="button" dusk="nextPage{{ $paginator->getPageName() == 'page' ? '' : '.' . $paginator->getPageName() }}" class="bo-pagination-link" wire:click="nextPage('{{ $paginator->getPageName() }}')" x-on:click="{{ $scrollIntoViewJsSnippet }}" wire:loading.attr="disabled" aria-label="@lang('pagination.next')">&rsaquo;</button>
+                                <button type="button" dusk="nextPage{{ $paginator->getPageName() == 'page' ? '' : '.' . $paginator->getPageName() }}" class="bo-pagination-link" data-cm-page="next" wire:click="nextPage('{{ $paginator->getPageName() }}')" x-on:click="{{ $scrollIntoViewJsSnippet }}" wire:loading.attr="disabled" aria-label="@lang('pagination.next')">&rsaquo;</button>
                             </li>
                         @else
                             <li class="bo-pagination-disabled" aria-disabled="true" aria-label="@lang('pagination.next')">

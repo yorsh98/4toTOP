@@ -1,6 +1,7 @@
 <?php
 
 use App\Services\WeatherService;
+use App\Support\FraseDelDia;
 use Illuminate\Support\Facades\Http;
 
 beforeEach(fn () => config(['services.weather.enabled' => true]));
@@ -75,4 +76,10 @@ test('weather is skipped when disabled', function () {
 
     expect(app(WeatherService::class)->today())->toBeNull();
     Http::assertNothingSent();
+});
+
+test('welcome shows the phrase of the day', function () {
+    $this->get(route('welcome'))
+        ->assertSuccessful()
+        ->assertSee(FraseDelDia::hoy());
 });

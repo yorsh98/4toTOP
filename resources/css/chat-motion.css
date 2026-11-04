@@ -209,3 +209,18 @@
     transition-duration: 1ms !important; transition-delay: 0ms !important;
   }
 }
+
+/* 12. Rotar frase: sale hacia arriba y la nueva entra desde abajo */
+[data-quote-text] { transition: opacity 140ms var(--cm-ease-out), transform 140ms var(--cm-ease-out); }
+[data-quote][data-rotating="out"] [data-quote-text] { opacity: 0; transform: translateY(-3px); }
+[data-quote][data-rotating="in"] [data-quote-text] { animation: cm-quote-in 260ms var(--cm-ease-out) both; }
+@keyframes cm-quote-in { from { opacity: 0; transform: translateY(4px); } }
+
+/* 11. Cambio de página en tablas */
+.cm-page-out { opacity: .35; transform: translateY(-4px); transition: opacity var(--cm-t-fast) var(--cm-ease-out), transform var(--cm-t-fast) var(--cm-ease-out); }
+.cm-page-in tbody:not(.fo-table-group) > tr, .cm-page-in > tbody.fo-table-group, .cm-page-in:not(table) > :not(thead):not(tbody) { animation: cm-page-row var(--cm-t-slow) var(--cm-ease-out) both; animation-delay: calc(var(--cm-i, 0) * 40ms); }
+.cm-page-in[data-cm-dir="-1"] { --cm-dx: -14px; }
+@keyframes cm-page-row { from { opacity: 0; transform: translateX(var(--cm-dx, 14px)); } }
+@media (prefers-reduced-motion: reduce) {
+    .cm-page-in tbody > tr, .cm-page-in > tbody.fo-table-group, .cm-page-in:not(table) > * { animation: none; }
+}
