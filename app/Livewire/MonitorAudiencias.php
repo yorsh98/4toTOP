@@ -5,16 +5,21 @@ namespace App\Livewire;
 use App\Models\Audiencia;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Gate;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 class MonitorAudiencias extends Component
 {
+    #[Locked]
     public $currentTypeIndex = 0;
 
+    #[Locked]
     public $audienciaTypes = ['Juicio Oral', 'Cont. Juicio Oral', 'Audiencia Corta', 'Lectura de Sentencia'];
 
+    #[Locked]
     public $rotationInterval = 7; // segundos
 
+    #[Locked]
     public $currentView = 0;
 
     public $rowsPerView = 6; // el navegador lo ajusta a las filas que caben en su pantalla
@@ -71,6 +76,11 @@ class MonitorAudiencias extends Component
         return $this->audienciaTypes[$this->currentTypeIndex];
     }
 
+    public function updatedRowsPerView(): void
+    {
+        $this->rowsPerView = max(1, min(50, (int) $this->rowsPerView));
+    }
+
     public function render()
     {
         $audiencias = $this->todaysAudiencias()->get();
@@ -88,6 +98,10 @@ class MonitorAudiencias extends Component
     public function actualizarEstadoAudienciasCortas($estado)
     {
         Gate::authorize('audiencias.estado.cambiar');
+
+        if (! in_array($estado, ['EN_CURSO', 'FINALIZADA'], true)) {
+            return;
+        }
 
         // Usa la zona horaria de la app (config/app.php => 'timezone' => 'America/Santiago')
         $hoy = Carbon::today(config('app.timezone'));

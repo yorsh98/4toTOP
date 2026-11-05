@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -31,6 +32,7 @@ class LibertadTabla extends Component
      *  - 'full'  => CRUD habilitado (crear, editar, eliminar, restaurar, ver eliminados)
      *  - 'vista' => solo lectura (sin mutaciones)
      */
+    #[Locked]
     public string $modo = 'full';
 
     public bool $showCreateForm = false;
@@ -44,9 +46,11 @@ class LibertadTabla extends Component
 
     public ?string $newAnio = null; // opcional
 
+    #[Locked]
     public array $solicitantes = [];
 
     // ===== Editar =====
+    #[Locked]
     public ?int $editingId = null;
 
     public string $editCausaAsig = '';
@@ -60,6 +64,7 @@ class LibertadTabla extends Component
     public string $editNumEntregado = '';
 
     // ===== Eliminados (soft) toggle =====
+    #[Locked]
     public bool $verEliminados = false;
 
     protected $paginationTheme = 'bootstrap';
@@ -118,7 +123,10 @@ class LibertadTabla extends Component
     // ------ Ordenamiento ------
     public function sortBy(string $field): void
     {
-        // Sorting sí se permite en ambos modos
+        if (! in_array($field, ['id', 'Numentregado', 'año', 'CausaAsig', 'UserSolicitante', 'UserDirigido', 'updated_at'], true)) {
+            return;
+        }
+
         if ($this->sortField === $field) {
             $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
         } else {
@@ -227,7 +235,7 @@ class LibertadTabla extends Component
 
         $this->validate([
             'editCausaAsig' => ['required', 'regex:/^[a-zA-Z0-9\s\-]{1,10}$/'],
-            'editUserSolicitante' => ['required', 'string', 'max:255'],
+            'editUserSolicitante' => ['required', 'string', 'max:255', Rule::in(array_values(array_unique(array_filter([...app(FuncionarioCatalog::class)->nombresByContext('oficios.solicitantes'), Libertad::withTrashed()->whereKey($this->editingId)->value('UserSolicitante')]))))],
             'editUserDirigido' => ['required', 'regex:/^[a-zA-Z0-9\s\-]+$/'],
             'editAnio' => ['required', 'digits:4'],
             'editNumEntregado' => ['required', 'integer', 'between:1,99999'],
@@ -316,7 +324,11 @@ class LibertadTabla extends Component
 
     public function toggleEliminados(): void
     {
-        // En vista también se permite ver/ocultar eliminados
+        if ($this->isVista()) {
+            return;
+        }
+
+        Gate::authorize('libertades.ver');
         $this->verEliminados = ! $this->verEliminados;
         $this->resetPage();
     }
@@ -326,6 +338,16 @@ class LibertadTabla extends Component
     {
         if ($this->isFull()) {
             Gate::authorize('libertades.ver');
+        }
+
+        $this->perPage = in_array($this->perPage, [10, 25, 50, 100], true) ? $this->perPage : 10;
+        $this->sortField = in_array($this->sortField, ['id', 'Numentregado', 'año', 'CausaAsig', 'UserSolicitante', 'UserDirigido', 'updated_at'], true) ? $this->sortField : 'id';
+        $this->sortDirection = in_array($this->sortDirection, ['asc', 'desc'], true) ? $this->sortDirection : 'desc';
+        $this->filtroAnio = $this->filtroAnio === '' || preg_match('/^\d{4}$/D', $this->filtroAnio) ? $this->filtroAnio : '';
+        $this->search = mb_substr($this->search, 0, 100);
+        if ($this->isVista()) {
+            $this->verEliminados = false;
+            $this->showCreateForm = false;
         }
 
         $q = $this->queryBase();
@@ -359,7 +381,7 @@ class LibertadTabla extends Component
             ->when(! $this->verEliminados, fn ($qq) => $qq->whereNull('deleted_at'))
             ->when($this->filtroAnio !== '', fn ($qq) => $qq->where('año', (int) $this->filtroAnio))
             ->when($this->search !== '', function ($qq) {
-                $s = trim($this->search);
+                $s = addcslashes(trim($this->search), '\\%_');
                 $qq->where(function ($w) use ($s) {
                     $w->where('CausaAsig', 'like', "%{$s}%")
                         ->orWhere('UserSolicitante', 'like', "%{$s}%")

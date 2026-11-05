@@ -77,6 +77,14 @@ class BuscadorSentenciasTabla extends Component
             ->pluck('instancia')
             ->values();
 
+        $this->perPage = in_array($this->perPage, [10, 25, 50, 100], true) ? $this->perPage : 10;
+        $this->sortField = in_array($this->sortField, ['ruc', 'rit', 'ano', 'nombre_partes', 'materia', 'fecha_decision', 'glosa_decision', 'juez', 'instancia'], true) ? $this->sortField : 'fecha_decision';
+        $this->sortDirection = in_array($this->sortDirection, ['asc', 'desc'], true) ? $this->sortDirection : 'desc';
+        $this->search = mb_substr($this->search, 0, 100);
+        if ($this->filtroInstancia !== '' && ! $instancias->containsStrict($this->filtroInstancia)) {
+            $this->filtroInstancia = '';
+        }
+
         $q = buscadorsentencias::query();
 
         if ($this->filtroInstancia !== '') {
@@ -96,7 +104,7 @@ class BuscadorSentenciasTabla extends Component
 
                 $q->where('rit', $rit)->where('ano', $ano);
             } else {
-                $s = $raw;
+                $s = addcslashes($raw, '\\%_');
 
                 $q->where(function ($sub) use ($s) {
                     $sub->where('ruc', 'like', "%{$s}%")

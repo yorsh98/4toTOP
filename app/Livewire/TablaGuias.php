@@ -65,14 +65,14 @@ class TablaGuias extends Component
         'editEmail' => 'nullable|email|max:100',
         'editTelefono1' => 'nullable|max:20',
         'editTelefono2' => 'nullable|max:20',
-        'editInstitucion' => 'required|numeric|between:1,11',
+        'editInstitucion' => 'required|integer|between:1,11',
 
         'newNombre' => 'required|min:3|max:100',
         'newRut' => 'nullable|max:20',
         'newEmail' => 'nullable|email|max:100',
         'newTelefono1' => 'nullable|max:20',
         'newTelefono2' => 'nullable|max:20',
-        'newInstitucion' => 'required|numeric|between:1,11',
+        'newInstitucion' => 'required|integer|between:1,11',
     ];
 
     protected $messages = [
@@ -152,7 +152,7 @@ class TablaGuias extends Component
         $this->resetPage();
     }
 
-    public function edit($id)
+    public function edit(int $id)
     {
         $this->authorizeWrite();
 
@@ -181,7 +181,7 @@ class TablaGuias extends Component
             'editEmail' => 'nullable|email|max:100',
             'editTelefono1' => 'nullable|max:20',
             'editTelefono2' => 'nullable|max:20',
-            'editInstitucion' => 'required|numeric|between:1,11',
+            'editInstitucion' => 'required|integer|between:1,11',
         ]);
 
         $guia = Guias::findOrFail($this->editId);
@@ -198,14 +198,14 @@ class TablaGuias extends Component
         $this->dispatch('alerta-exito');
     }
 
-    public function confirmDelete($id)
+    public function confirmDelete(int $id)
     {
         $this->authorizeWrite();
 
         $this->js("confirmDestructiveAction('¿Eliminar guía?', 'Esta acción no se puede deshacer.').then(result => { if (result.isConfirmed) \$wire.call('performDelete', $id) })");
     }
 
-    public function performDelete($id)
+    public function performDelete(int $id)
     {
         $this->authorizeWrite();
 
@@ -223,7 +223,7 @@ class TablaGuias extends Component
             'newEmail' => 'nullable|email|max:100',
             'newTelefono1' => 'nullable|max:20',
             'newTelefono2' => 'nullable|max:20',
-            'newInstitucion' => 'required|numeric|between:1,11',
+            'newInstitucion' => 'required|integer|between:1,11',
         ]);
 
         Guias::create([
@@ -256,17 +256,19 @@ class TablaGuias extends Component
         $sortField = in_array($this->sortField, $this->sortableFields(), true) ? $this->sortField : 'nombre_completo';
         $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
         $perPage = in_array((int) $this->perPage, self::PER_PAGE, true) ? (int) $this->perPage : 10;
-        $filtroInstitucion = in_array((int) $this->filtroInstitucion, range(1, 11), true) ? (int) $this->filtroInstitucion : null;
+        $filtroInstitucion = filter_var($this->filtroInstitucion, FILTER_VALIDATE_INT) !== false && in_array((int) $this->filtroInstitucion, range(1, 11), true) ? (int) $this->filtroInstitucion : null;
+
+        $search = addcslashes(mb_substr((string) $this->search, 0, 100), '\\%_');
 
         $query = Guias::query()
-            ->when($this->search, function ($query) {
-                $query->where(function ($q) {
-                    $q->where('nombre_completo', 'like', '%'.$this->search.'%')
-                        ->when($this->modo !== 'lectura', fn ($q) => $q->orWhere('rut', 'like', '%'.$this->search.'%'))
-                        ->orWhere('email', 'like', '%'.$this->search.'%')
-                        ->orWhere('telefono1', 'like', '%'.$this->search.'%')
-                        ->orWhere('telefono2', 'like', '%'.$this->search.'%')
-                        ->orWhere('institucion', 'like', '%'.$this->search.'%');
+            ->when($this->search, function ($query) use ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('nombre_completo', 'like', '%'.$search.'%')
+                        ->when($this->modo !== 'lectura', fn ($q) => $q->orWhere('rut', 'like', '%'.$search.'%'))
+                        ->orWhere('email', 'like', '%'.$search.'%')
+                        ->orWhere('telefono1', 'like', '%'.$search.'%')
+                        ->orWhere('telefono2', 'like', '%'.$search.'%')
+                        ->orWhere('institucion', 'like', '%'.$search.'%');
                 });
             })
             ->when($filtroInstitucion, function ($query) use ($filtroInstitucion) {

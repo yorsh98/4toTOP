@@ -4,15 +4,19 @@ namespace App\Livewire;
 
 use App\Models\Ausentismo;
 use Carbon\Carbon;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 class AusentismoCalendario extends Component
 {
+    #[Locked]
     public int $year;
 
+    #[Locked]
     public int $month; // 1..12
 
     /** Fechas (YYYY-MM-DD) de la grilla 7x6 */
+    #[Locked]
     public array $gridDays = [];
 
     /**
@@ -21,8 +25,10 @@ class AusentismoCalendario extends Component
      *   ...
      * ]
      */
+    #[Locked]
     public array $eventsByDate = [];
 
+    #[Locked]
     public ?string $modalDate = null;
 
     /** Paleta por tipo (normalizada a minúsculas sin tildes) */
@@ -155,7 +161,9 @@ class AusentismoCalendario extends Component
 
     public function openDay(string $date): void
     {
-        $this->modalDate = $date;
+        if (in_array($date, $this->gridDays, true) && ! validator(['date' => $date], ['date' => 'date_format:Y-m-d'])->fails()) {
+            $this->modalDate = $date;
+        }
     }
 
     public function closeModal(): void

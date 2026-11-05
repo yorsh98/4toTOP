@@ -18,8 +18,10 @@ class ServiciosMapaPage extends Component
 
     public int $piso = 8;
 
+    #[Locked]
     public ?int $selectedSectorId = null;
 
+    #[Locked]
     public ?string $selectedHotspotIdentifier = null;
 
     public string $search = '';
@@ -42,7 +44,7 @@ class ServiciosMapaPage extends Component
     {
         $this->authorizeBackoffice();
 
-        $sector = Sector::query()->findOrFail($sectorId);
+        $sector = Sector::query()->when($this->publicMode, fn ($query) => $query->where('piso', $this->floorLabel()))->findOrFail($sectorId);
 
         $this->selectedSectorId = $sector->id;
         $this->selectedHotspotIdentifier = $sector->identificador_mapa;
@@ -51,6 +53,10 @@ class ServiciosMapaPage extends Component
     public function selectHotspot(string $identifier): void
     {
         $this->authorizeBackoffice();
+
+        if (! in_array($identifier, array_column($this->hotspotLayout(), 'identificador'), true)) {
+            return;
+        }
 
         $this->selectedHotspotIdentifier = $identifier;
         $this->selectedSectorId = Sector::query()
@@ -114,6 +120,8 @@ class ServiciosMapaPage extends Component
 
     public function render()
     {
+        $this->piso = in_array($this->piso, [7, 8, 9], true) ? $this->piso : 8;
+        $this->search = mb_substr($this->search, 0, 100);
         $sectoresQuery = Sector::query()
             ->where('piso', $this->floorLabel())
             ->with(['activos' => fn ($query) => $query->latest('id')])
@@ -133,9 +141,9 @@ class ServiciosMapaPage extends Component
             : null;
 
         $inventorySearch = trim($this->inventorySearch);
-        $mapSearch = trim($this->publicMode ? $this->search : $this->mapSearch);
+        $mapSearch = addcslashes(trim($this->publicMode ? $this->search : $this->mapSearch), '\\%_');
 
-        $activos = Activo::query()
+        $activos = $this->publicMode ? collect() : Activo::query()
             ->with('sector')
             ->whereHas('sector', fn ($query) => $query->where('piso', $this->floorLabel()))
             ->when($inventorySearch !== '', function ($query) use ($inventorySearch) {
@@ -197,7 +205,7 @@ class ServiciosMapaPage extends Component
                 ->with('sector')
                 ->whereHas('sector', fn ($query) => $query->where('piso', $this->floorLabel()))
                 ->when($this->search !== '', function ($query) {
-                    $search = "%{$this->search}%";
+                    $search = '%'.addcslashes($this->search, '\\%_').'%';
 
                     $query->where(function ($query) use ($search) {
                         $query->where('nombre', 'like', $search)
