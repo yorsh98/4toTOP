@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -18,6 +19,7 @@ class FuncionariosPage extends Component
 
     protected $paginationTheme = 'bootstrap';
 
+    #[Locked]
     public ?int $editingId = null;
 
     public string $search = '';

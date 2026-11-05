@@ -7,6 +7,7 @@ use App\Models\Sector;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -15,6 +16,7 @@ class ServiciosInventarioPage extends Component
 {
     use WithPagination;
 
+    #[Locked]
     public ?int $editingId = null;
 
     public string $search = '';
@@ -156,6 +158,7 @@ class ServiciosInventarioPage extends Component
 
     public function render()
     {
+        Gate::authorize('servicios.ver');
         $search = trim($this->search);
 
         $activos = Activo::query()
@@ -171,10 +174,10 @@ class ServiciosInventarioPage extends Component
                         });
                 });
             })
-            ->when($this->estadoFiltro !== '', function ($query) {
+            ->when(in_array($this->estadoFiltro, $this->estados(), true), function ($query) {
                 $query->where('estado', $this->estadoFiltro);
             })
-            ->when($this->sectorFiltro !== '', function ($query) {
+            ->when(ctype_digit($this->sectorFiltro) && Sector::query()->whereKey((int) $this->sectorFiltro)->exists(), function ($query) {
                 $query->where('sector_id', $this->sectorFiltro);
             })
             ->latest('id')
@@ -191,7 +194,7 @@ class ServiciosInventarioPage extends Component
 
     private function floorLabel(): string
     {
-        return match ($this->piso) {
+        return match (in_array($this->piso, [0, 7, 8, 9], true) ? $this->piso : 8) {
             0 => 'SUBTERRANEO',
             7 => '7MO',
             9 => '9NO',

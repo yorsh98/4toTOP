@@ -53,20 +53,25 @@ class VisitaCarcelPage extends Component
 
     public bool $nuevoPenalEnSantiago = false;
 
+    #[Locked]
     public ?int $imputadoRevisionPpId = null;
 
     public string $ultimaRevisionPp = '';
 
+    #[Locked]
     public ?int $imputadoEditandoId = null;
 
     public array $imputadoEdicion = [];
 
+    #[Locked]
     public array $historialEdicion = [];
 
     public $archivoMovimientos;
 
+    #[Locked]
     public array $resultadoImportacion = [];
 
+    #[Locked]
     public array $coincidenciasCruce = [];
 
     #[Locked]
@@ -86,18 +91,22 @@ class VisitaCarcelPage extends Component
 
     public bool $revisionImputadosPendientesAbierta = false;
 
+    #[Locked]
     public array $causasPendientes = [];
 
     public array $causasPendientesSeleccionadas = [];
 
+    #[Locked]
     public array $imputadosPendientes = [];
 
     public array $imputadosPendientesSeleccionados = [];
 
     public array $archivosActualizacion = [];
 
+    #[Locked]
     public array $resultadoActualizacion = [];
 
+    #[Locked]
     public string $modo = 'comparacion';
 
     public string $nombre = '';
@@ -118,6 +127,7 @@ class VisitaCarcelPage extends Component
 
     public string $reporteHasta = '';
 
+    #[Locked]
     public ?int $causaSeleccionadaId = null;
 
     public function mount(): void
@@ -1057,8 +1067,16 @@ class VisitaCarcelPage extends Component
 
     private function reporteControl(): array
     {
-        $desde = Carbon::parse($this->reporteDesde ?: now('America/Santiago')->startOfMonth())->startOfDay();
-        $hasta = Carbon::parse($this->reporteHasta ?: now('America/Santiago'))->endOfDay();
+        $desdeValor = validator(['date' => $this->reporteDesde], ['date' => ['required', 'date_format:Y-m-d']])->passes()
+            ? $this->reporteDesde : now('America/Santiago')->startOfMonth()->toDateString();
+        $hastaValor = validator(['date' => $this->reporteHasta], ['date' => ['required', 'date_format:Y-m-d']])->passes()
+            ? $this->reporteHasta : now('America/Santiago')->toDateString();
+        if ($desdeValor > $hastaValor) {
+            $desdeValor = now('America/Santiago')->startOfMonth()->toDateString();
+            $hastaValor = now('America/Santiago')->toDateString();
+        }
+        $desde = Carbon::parse($desdeValor, 'America/Santiago')->startOfDay();
+        $hasta = Carbon::parse($hastaValor, 'America/Santiago')->endOfDay();
 
         $agregados = VisitaCarcelCausa::query()->withTrashed()->whereBetween('created_at', [$desde, $hasta])->get()
             ->map(fn (VisitaCarcelCausa $causa) => ['tipo' => 'Causa', 'descripcion' => "RUC {$causa->ruc} · RIT {$causa->rit}", 'fecha' => $causa->created_at])
@@ -1155,9 +1173,14 @@ class VisitaCarcelPage extends Component
                     continue;
                 }
 
-                stream_copy_to_stream($origen, $salida);
+                $bytesExtraidos = stream_copy_to_stream($origen, $salida, 20 * 1024 * 1024 + 1);
                 fclose($origen);
                 fclose($salida);
+                if ($bytesExtraidos === false || $bytesExtraidos > 20 * 1024 * 1024) {
+                    $resultados[] = $this->resultadoArchivoInvalido($entrada['nombre'], 'El ZIP contiene una planilla no permitida.');
+
+                    continue;
+                }
                 $resultados[] = $this->procesarArchivoActualizacion($reader, $destino, $entrada['nombre']);
             }
         } finally {
@@ -1244,6 +1267,8 @@ class VisitaCarcelPage extends Component
     {
         Gate::authorize('visita_carcel.gestionar');
 
+        $this->validate(['causasPendientesSeleccionadas' => ['array', 'max:5000'], 'causasPendientesSeleccionadas.*' => ['string', 'max:255']]);
+
         $seleccionadas = array_flip($this->causasPendientesSeleccionadas);
         $pendientes = collect(session('visita_carcel.causas_pendientes', $this->causasPendientes))
             ->filter(fn (array $causa) => isset($seleccionadas[$causa['ruc']]))
@@ -1323,6 +1348,8 @@ class VisitaCarcelPage extends Component
     public function crearImputadosPendientes(): void
     {
         Gate::authorize('visita_carcel.gestionar');
+
+        $this->validate(['imputadosPendientesSeleccionados' => ['array', 'max:5000'], 'imputadosPendientesSeleccionados.*' => ['string', 'max:255']]);
 
         $seleccionados = array_flip($this->imputadosPendientesSeleccionados);
         $pendientes = collect(session('visita_carcel.imputados_pendientes', $this->imputadosPendientes))

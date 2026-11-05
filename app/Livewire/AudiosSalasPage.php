@@ -6,6 +6,7 @@ use App\Models\AudioSalaEnlace;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 #[Layout('layouts.app')]
@@ -15,6 +16,7 @@ class AudiosSalasPage extends Component
 
     public string $anio = '';
 
+    #[Locked]
     public bool $configuracionAbierta = false;
 
     public array $enlaces = [];

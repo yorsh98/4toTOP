@@ -11,6 +11,7 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\File;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
@@ -47,8 +48,10 @@ class DocumentosBackofficePage extends Component
 
     public string $accesoUrl = '';
 
+    #[Locked]
     public ?int $editingAccesoId = null;
 
+    #[Locked]
     public array $sectionsOpen = [
         'procedimientos' => false,
         'documentos' => false,

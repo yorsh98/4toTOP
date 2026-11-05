@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rules\File;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\WithPagination;
@@ -23,10 +24,12 @@ class TtyppPage extends Component
     use WithFileUploads;
     use WithPagination;
 
+    #[Locked]
     public ?int $editingId = null;
 
     public string $search = '';
 
+    #[Locked]
     public array $selectedRegistroHistorial = [];
 
     public ?string $rit = null;
@@ -102,14 +105,14 @@ class TtyppPage extends Component
 
     public function previousDay(): void
     {
-        $date = Carbon::parse($this->selectedDate, 'America/Santiago')->subDay();
+        $date = Carbon::parse($this->safeSelectedDate(), 'America/Santiago')->subDay();
         $this->selectedDate = $date->toDateString();
         $this->resetPage();
     }
 
     public function nextDay(): void
     {
-        $date = Carbon::parse($this->selectedDate, 'America/Santiago')->addDay();
+        $date = Carbon::parse($this->safeSelectedDate(), 'America/Santiago')->addDay();
         $this->selectedDate = $date->toDateString();
         $this->resetPage();
     }
@@ -314,7 +317,7 @@ class TtyppPage extends Component
         Gate::authorize('ttypp.exportar');
 
         $this->redirectRoute('ttypp.export', [
-            'fecha' => $this->selectedDate,
+            'fecha' => $this->safeSelectedDate(),
             'search' => $this->search,
         ], navigate: false);
     }
@@ -324,7 +327,7 @@ class TtyppPage extends Component
         Gate::authorize('ttypp.mail.preview');
 
         return redirect()->route('preview.notifications-v2.ttypp-listado', [
-            'fecha' => $this->selectedDate,
+            'fecha' => $this->safeSelectedDate(),
         ]);
     }
 
@@ -333,7 +336,7 @@ class TtyppPage extends Component
         Gate::authorize('ttypp.mail.enviar');
 
         $notifier = app(TtyppListadoNotifier::class);
-        $registros = $notifier->recordsForDate($this->selectedDate);
+        $registros = $notifier->recordsForDate($this->safeSelectedDate());
 
         if ($registros->isEmpty()) {
             $this->dispatch('app-toast', icon: 'info', message: 'No hay registros TTyPP para la fecha seleccionada. No se envió correo.');
@@ -347,7 +350,7 @@ class TtyppPage extends Component
             return;
         }
 
-        $notifier->notifyForDate($this->selectedDate, Auth::user()?->name ?? 'Usuario del sistema');
+        $notifier->notifyForDate($this->safeSelectedDate(), Auth::user()?->name ?? 'Usuario del sistema');
 
         $this->dispatch('app-toast', message: 'Correo TTyPP encolado/enviado correctamente.');
     }
@@ -530,10 +533,18 @@ class TtyppPage extends Component
         return true;
     }
 
+    private function safeSelectedDate(): string
+    {
+        return validator(['date' => $this->selectedDate], ['date' => ['required', 'date_format:Y-m-d']])->passes()
+            ? $this->selectedDate
+            : $this->defaultFechaAsignacion();
+    }
+
     public function render()
     {
+        Gate::authorize('ttypp.ver');
         $search = trim($this->search);
-        $selectedDate = Carbon::parse($this->selectedDate, 'America/Santiago');
+        $selectedDate = Carbon::parse($this->safeSelectedDate(), 'America/Santiago');
         $start = $selectedDate->copy()->startOfDay()->setTimezone('UTC');
         $end = $selectedDate->copy()->endOfDay()->setTimezone('UTC');
 

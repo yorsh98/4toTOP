@@ -11,14 +11,17 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Throwable;
 
 #[Layout('layouts.app')]
 class BitacoraPruebasPage extends Component
 {
+    #[Locked]
     public bool $showViewer = false;
 
+    #[Locked]
     public bool $showNotificationForm = false;
 
     public string $rit = '';
@@ -47,7 +50,7 @@ class BitacoraPruebasPage extends Component
     {
         return [
             'rit' => ['required', 'string', 'max:255'],
-            'enlaceActa' => ['nullable', 'url', 'max:2048'],
+            'enlaceActa' => ['nullable', 'url:http,https', 'max:2048'],
             'numeroDia' => ['required', 'integer', 'min:1'],
             'fechaDia' => ['required', 'date'],
         ];
@@ -182,7 +185,7 @@ class BitacoraPruebasPage extends Component
             'destinatarioUno' => ['nullable', 'email', 'max:255'],
             'destinatarioDos' => ['nullable', 'email', 'max:255'],
             'destinatarioTres' => ['nullable', 'email', 'max:255'],
-            'enlaceActa' => ['nullable', 'url', 'max:2048'],
+            'enlaceActa' => ['nullable', 'url:http,https', 'max:2048'],
         ]);
 
         $destinatarios = collect([
