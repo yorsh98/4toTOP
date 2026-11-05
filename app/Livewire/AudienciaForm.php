@@ -5,10 +5,13 @@ namespace App\Livewire;
 use App\Models\Audiencia;
 use App\Services\FuncionarioCatalog;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\Rule;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 class AudienciaForm extends Component
 {
+    #[Locked]
     public $audienciaId;
 
     public $fecha;
@@ -56,6 +59,7 @@ class AudienciaForm extends Component
     public $obs;
 
     // campo para juez
+    #[Locked]
     public $jueces_inhabilitados = [];
 
     public $Nuevosjueces_inhabilitados = [
@@ -63,6 +67,7 @@ class AudienciaForm extends Component
     ];
 
     // Campos para acusados
+    #[Locked]
     public $acusados = [];
 
     public $nuevoAcusado = [
@@ -72,6 +77,7 @@ class AudienciaForm extends Component
         'forma_notificacion' => '',
     ];
 
+    #[Locked]
     public $tiposdelibertad = [
         'Libre',
         'P.Prev.',
@@ -79,6 +85,7 @@ class AudienciaForm extends Component
     ];
 
     // Tipos de audiencia sugeridos
+    #[Locked]
     public $tiposAudiencia = [
         'Juicio Oral',
         'Cont. Juicio Oral',
@@ -86,16 +93,21 @@ class AudienciaForm extends Component
         'Lectura de Sentencia',
     ];
 
+    #[Locked]
     public $tiposduracion = [
         '½',
     ];
 
+    #[Locked]
     public array $juecesOptions = [];
 
+    #[Locked]
     public array $actaAnfitrionOptions = [];
 
+    #[Locked]
     public array $ttyppOptions = [];
 
+    #[Locked]
     public array $encargadoCausaOptions = [];
 
     protected $listeners = ['editAudiencia'];
@@ -180,8 +192,10 @@ class AudienciaForm extends Component
     public function agregarAcusado()
     {
         $this->validate([
-            'nuevoAcusado.nombre_completo' => 'required',
-            'nuevoAcusado.situacion' => 'required',
+            'nuevoAcusado.nombre_completo' => 'required|string|max:255',
+            'nuevoAcusado.situacion' => ['required', 'string', 'max:255'],
+            'nuevoAcusado.medida_cautelar' => 'nullable|string|max:255',
+            'nuevoAcusado.forma_notificacion' => 'nullable|string|max:255',
 
         ]);
 
@@ -189,7 +203,7 @@ class AudienciaForm extends Component
         $this->reset('nuevoAcusado');
     }
 
-    public function eliminarAcusado($index)
+    public function eliminarAcusado(int $index)
     {
         unset($this->acusados[$index]);
         $this->acusados = array_values($this->acusados);
@@ -198,14 +212,14 @@ class AudienciaForm extends Component
     public function Agregarjueces_inhabilitados()
     {
         $this->validate([
-            'Nuevosjueces_inhabilitados.nombre_completo' => 'required',
+            'Nuevosjueces_inhabilitados.nombre_completo' => 'required|string|max:255',
         ]);
 
         $this->jueces_inhabilitados[] = $this->Nuevosjueces_inhabilitados;
         $this->reset('Nuevosjueces_inhabilitados');
     }
 
-    public function eliminarjueces_inhabilitados($index)
+    public function eliminarjueces_inhabilitados(int $index)
     {
         unset($this->jueces_inhabilitados[$index]);
         $this->jueces_inhabilitados = array_values($this->jueces_inhabilitados);
@@ -214,16 +228,29 @@ class AudienciaForm extends Component
     public function guardarAudiencia()
     {
         $this->validate([
-            'fecha' => 'required|date',
-            'rit' => 'required',
-            'hora_inicio' => 'required',
-            'sala' => 'required',
-            'ruc' => 'required',
-            'tipo_audiencia' => 'required',
-            'cta_zoom' => 'required',
+            'fecha' => 'required|date_format:Y-m-d',
+            'rit' => 'required|string|max:50',
+            'hora_inicio' => 'required|date_format:H:i',
+            'sala' => 'required|string|max:255',
+            'ruc' => 'required|string|max:255',
+            'tipo_audiencia' => ['required', Rule::in($this->tiposAudiencia)],
+            'cta_zoom' => 'required|string|max:255',
             'encargado_causa' => ['required', 'string', 'max:255'],
             'acta' => ['required', 'string', 'max:255'],
-            'acusados' => 'required|array|min:1',
+            'acusados' => 'required|array|min:1|max:100',
+            'acusados.*.nombre_completo' => 'required|string|max:255',
+            'acusados.*.situacion' => 'required|string|max:255',
+            'acusados.*.medida_cautelar' => 'nullable|string|max:255',
+            'acusados.*.forma_notificacion' => 'nullable|string|max:255',
+            'jueces_inhabilitados' => 'array|max:100',
+            'jueces_inhabilitados.*.nombre_completo' => 'required|string|max:255',
+            'estado' => ['required', Rule::in(['POR_REALIZARSE', 'EN_CURSO', 'RECESO', 'FINALIZADA'])],
+            'ubicacion' => 'nullable|string|max:255',
+            'num_testigos' => 'nullable|integer|min:0|max:999',
+            'num_peritos' => 'nullable|integer|min:0|max:999',
+            'duracion' => 'nullable|string|max:255',
+            'delito' => 'nullable|string|max:255',
+            'obs' => 'nullable|string|max:5000',
             'nuevoAcusado.nombre_completo' => 'required_if:acusados,[]',
             'JuezR' => ['required', 'string', 'max:255'],
             'JuezP' => ['nullable', 'string', 'max:255'],

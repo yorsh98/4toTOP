@@ -52,7 +52,8 @@ test('daily hearings page queues the program dispatch without waiting for SMTP',
     Queue::fake();
 
     Livewire::test(AudienciasDiariasCorreo::class, ['fecha' => '2026-08-10'])
-        ->set('recipients', ['receiver@example.cl'])
+        ->set('newEmail', 'receiver@example.cl')
+        ->call('addRecipient')
         ->call('enviarCorreoDifusion')
         ->assertHasNoErrors()
         ->assertSet('envioStatus', 'queued')

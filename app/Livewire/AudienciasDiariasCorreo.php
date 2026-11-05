@@ -8,6 +8,8 @@ use App\NotificationsV2\Application\Services\ProgramacionDiariaNotifier;
 use App\NotificationsV2\Domain\Models\NotificationDispatch;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\Rule;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Reactive;
 use Livewire\Component;
 
@@ -18,30 +20,41 @@ class AudienciasDiariasCorreo extends Component
 
     public string $newEmail = '';
 
+    #[Locked]
     public array $recipients = [];
 
+    #[Locked]
     public array $recipientsDb = [];
 
     public string $newEmailDb = '';
 
+    #[Locked]
     public array $signatures = [];
 
     public ?int $firmaId = null;
 
+    #[Locked]
     public string $firmaPreview = '';
 
+    #[Locked]
     public ?int $envioDispatchId = null;
 
+    #[Locked]
     public ?string $envioStatus = null;
 
+    #[Locked]
     public int $envioTotal = 0;
 
+    #[Locked]
     public int $envioEnviados = 0;
 
+    #[Locked]
     public int $envioFallidos = 0;
 
+    #[Locked]
     public array $envioFallidosDetalle = [];
 
+    #[Locked]
     public bool $envioNotificado = false;
 
     public bool $listModal = false;
@@ -78,7 +91,7 @@ class AudienciasDiariasCorreo extends Component
     public function addRecipient(): void
     {
         $email = trim($this->newEmail);
-        if (! filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        if (strlen($email) > 255 || ! filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $this->addError('newEmail', 'Correo inválido.');
 
             return;
@@ -122,7 +135,7 @@ class AudienciasDiariasCorreo extends Component
         Gate::authorize('progra.mail.enviar');
 
         $email = trim($this->newEmailDb);
-        if (! filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        if (strlen($email) > 255 || ! filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $this->addError('newEmailDb', 'Correo inválido.');
 
             return;
@@ -185,6 +198,8 @@ class AudienciasDiariasCorreo extends Component
     {
         Gate::authorize('progra.mail.enviar');
 
+        $this->validate(['fecha' => 'required|date_format:Y-m-d', 'firmaId' => ['nullable', Rule::in(array_column($this->signatures, 'id'))]]);
+
         $recipients = array_values(array_unique(array_filter(
             $this->recipients,
             fn ($email) => filter_var($email, FILTER_VALIDATE_EMAIL),
@@ -205,6 +220,7 @@ class AudienciasDiariasCorreo extends Component
 
     public function actualizarEstadoEnvio(): void
     {
+        Gate::authorize('progra.mail.enviar');
         if (! $this->envioDispatchId) {
             return;
         }

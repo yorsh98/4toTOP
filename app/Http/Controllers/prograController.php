@@ -18,7 +18,7 @@ class PrograController extends Controller
         $tz = 'America/Santiago';
         $hoy = Carbon::now($tz);
         $fecha = $request->query('fecha');
-        $fecha = $fecha ? Carbon::parse($fecha, $tz)->toDateString() : $hoy->toDateString();
+        $fecha = is_string($fecha) && validator(['fecha' => $fecha], ['fecha' => 'date_format:Y-m-d'])->passes() ? $fecha : $hoy->toDateString();
 
         // =========================
         // TURNOS (USAR TM1, TM2, TM3 DEL REGISTRO id = 2)

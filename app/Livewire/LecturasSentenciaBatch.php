@@ -9,22 +9,28 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 class LecturasSentenciaBatch extends Component
 {
+    #[Locked]
     public ?int $editId = null;
 
     /** Filas independientes */
     public array $items = [];
 
     /** Sugerencias */
+    #[Locked]
     public array $situaciones = ['Libre', 'P.Prev.', 'P.x OC.'];
 
+    #[Locked]
     public array $juecesOptions = [];
 
+    #[Locked]
     public array $actaOptions = [];
 
+    #[Locked]
     public array $encargadoCausaOptions = [];
 
     public function mount(?int $edit = null): void
@@ -83,6 +89,7 @@ class LecturasSentenciaBatch extends Component
     /** Prefill por RIT (opcional): trae últimos datos de esa causa */
     public function buscarPorRit(int $i): void
     {
+        Gate::authorize('audiencias.ver');
         $rit = $this->items[$i]['rit'] ?? null;
         if (! $rit) {
             return;
@@ -155,9 +162,15 @@ class LecturasSentenciaBatch extends Component
 
     public function addAcusado(int $i): void
     {
+        if (! isset($this->items[$i]['nuevoAcusado'])) {
+            return;
+        }
+
         $this->validate([
-            "items.$i.nuevoAcusado.nombre_completo" => 'required|string',
-            "items.$i.nuevoAcusado.situacion" => 'required|string',
+            "items.$i.nuevoAcusado.nombre_completo" => 'required|string|max:255',
+            "items.$i.nuevoAcusado.situacion" => 'required|string|max:255',
+            "items.$i.nuevoAcusado.medida_cautelar" => 'nullable|string|max:255',
+            "items.$i.nuevoAcusado.forma_notificacion" => 'nullable|string|max:255',
         ]);
 
         $this->items[$i]['acusados'][] = $this->items[$i]['nuevoAcusado'];
@@ -171,6 +184,10 @@ class LecturasSentenciaBatch extends Component
 
     public function removeAcusado(int $i, int $k): void
     {
+        if (! isset($this->items[$i]['acusados'][$k])) {
+            return;
+        }
+
         unset($this->items[$i]['acusados'][$k]);
         $this->items[$i]['acusados'] = array_values($this->items[$i]['acusados']);
     }
@@ -178,23 +195,22 @@ class LecturasSentenciaBatch extends Component
     protected function rules(): array
     {
         return [
-            'items' => 'required|array|min:1',
-            'items.*.fecha' => 'required|date',
+            'items' => 'required|array|min:1|max:5',
+            'items.*.fecha' => 'required|date_format:Y-m-d',
             'items.*.hora_inicio' => 'required|date_format:H:i',
             'items.*.JuezR' => ['required', 'string', 'max:255'],
-            'items.*.tipo_audiencia' => 'required|string',
-            'items.*.sala' => 'required|string',
-            'items.*.cta_zoom' => 'nullable|string',
-            'items.*.rit' => 'required|string',
-            'items.*.ruc' => 'required|string',
+            'items.*.sala' => 'required|string|max:255',
+            'items.*.cta_zoom' => 'nullable|string|max:255',
+            'items.*.rit' => 'required|string|max:255',
+            'items.*.ruc' => 'required|string|max:255',
             'items.*.encargado_sala' => ['required', 'string', 'max:255'],
             'items.*.acta' => ['required', 'string', 'max:255'],
-            'items.*.obs' => 'nullable|string',
-            'items.*.acusados' => 'required|array|min:1',
-            'items.*.acusados.*.nombre_completo' => 'required|string',
-            'items.*.acusados.*.situacion' => 'required|string',
-            'items.*.acusados.*.medida_cautelar' => 'nullable|string',
-            'items.*.acusados.*.forma_notificacion' => 'nullable|string',
+            'items.*.obs' => 'nullable|string|max:5000',
+            'items.*.acusados' => 'required|array|min:1|max:100',
+            'items.*.acusados.*.nombre_completo' => 'required|string|max:255',
+            'items.*.acusados.*.situacion' => 'required|string|max:255',
+            'items.*.acusados.*.medida_cautelar' => 'nullable|string|max:255',
+            'items.*.acusados.*.forma_notificacion' => 'nullable|string|max:255',
         ];
     }
 
@@ -214,7 +230,7 @@ class LecturasSentenciaBatch extends Component
         // Duplicados dentro del lote (RIT + fecha + tipo_audiencia)
         $seen = [];
         foreach ($this->items as $i => $row) {
-            $key = implode('|', [$row['rit'], $row['fecha'], $row['tipo_audiencia']]);
+            $key = implode('|', [$row['rit'], $row['fecha'], 'Lectura de Sentencia']);
             if (isset($seen[$key])) {
                 $this->addError("items.$i.rit", 'Duplicado con la fila '.($seen[$key] + 1).' (mismo RIT/fecha/tipo).');
             } else {
@@ -235,12 +251,12 @@ class LecturasSentenciaBatch extends Component
         foreach ($this->items as $i => $row) {
             $exists = Audiencia::where('rit', $row['rit'])
                 ->whereDate('fecha', $row['fecha'])
-                ->where('tipo_audiencia', $row['tipo_audiencia'])
+                ->where('tipo_audiencia', 'Lectura de Sentencia')
                 ->when($this->editId !== null && $i === 0, fn ($q) => $q->whereKeyNot($this->editId))
                 ->exists();
 
             if ($exists) {
-                $this->addError("items.$i.rit", "Ya existe una {$row['tipo_audiencia']} con este RIT en esa fecha.");
+                $this->addError("items.$i.rit", 'Ya existe una Lectura de Sentencia con este RIT en esa fecha.');
             }
         }
         if ($this->getErrorBag()->isNotEmpty()) {
@@ -253,7 +269,7 @@ class LecturasSentenciaBatch extends Component
             foreach ($this->items as $i => $row) {
                 if ($this->editId !== null && $i === 0) {
                     Gate::authorize('audiencias.editar');
-                    Audiencia::findOrFail($this->editId)->update(Arr::except($this->audienciaData($row), 'estado'));
+                    Audiencia::query()->where('tipo_audiencia', 'Lectura de Sentencia')->findOrFail($this->editId)->update(Arr::except($this->audienciaData($row), 'estado'));
                 } else {
                     Audiencia::create($this->audienciaData($row));
                 }
@@ -280,7 +296,7 @@ class LecturasSentenciaBatch extends Component
             'hora_inicio' => $row['hora_inicio'],
             'ruc' => $row['ruc'],
             'cta_zoom' => $row['cta_zoom'] ?: null,
-            'tipo_audiencia' => $row['tipo_audiencia'],
+            'tipo_audiencia' => 'Lectura de Sentencia',
             'num_testigos' => null,
             'num_peritos' => null,
             'duracion' => null,

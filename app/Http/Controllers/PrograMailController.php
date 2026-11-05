@@ -265,6 +265,7 @@ class PrograMailController extends Controller
     public function enviarProgramacionPorCorreo(string $fecha, ?string $singleTo = null)
     {
         Gate::authorize('progra.mail.enviar');
+        abort_if(validator(['fecha' => $fecha], ['fecha' => 'required|date_format:Y-m-d'])->fails(), 404);
 
         try {
             $data = $this->buildDataForMail($fecha);
@@ -420,7 +421,8 @@ class PrograMailController extends Controller
     /** ================== Vista previa navegador ================== */
     public function preview(?string $fecha = null)
     {
-        $fecha = $fecha ?: Carbon::now('America/Santiago')->toDateString();
+        $fecha = $fecha && validator(['fecha' => $fecha], ['fecha' => 'date_format:Y-m-d'])->passes()
+            ? $fecha : Carbon::now('America/Santiago')->toDateString();
         $data = $this->buildDataForMail($fecha);
 
         return response()->view('emails.programacion-diaria-html', [

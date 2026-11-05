@@ -62,7 +62,7 @@ class TurnoController extends Controller
         Gate::authorize('turnos.editar');
 
         $rules = [
-            'FECHA' => ['nullable', 'string'],
+            'FECHA' => ['nullable', 'string', 'max:255'],
         ];
 
         foreach (['TM1', 'TM2', 'TM3', 'ACDM1', 'ACDM2', 'ACDM3'] as $field) {
@@ -94,6 +94,10 @@ class TurnoController extends Controller
     {
         $tz = 'America/Santiago';
         $fecha = $request->query('fecha');
+
+        if (! is_string($fecha) || validator(['fecha' => $fecha], ['fecha' => 'date_format:Y-m-d'])->fails()) {
+            $fecha = null;
+        }
 
         try {
             $selectedDate = $fecha
