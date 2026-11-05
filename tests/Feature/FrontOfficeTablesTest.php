@@ -328,7 +328,8 @@ test('monitor reparte las audiencias que no caben en vistas sin ocultar ninguna'
     }
 
     Livewire::test(MonitorAudiencias::class)
-        ->set('currentTypeIndex', 2)
+        ->call('rotate')
+        ->call('rotate')
         ->set('rowsPerView', 5)
         ->assertSee('Vista 1 de 2')->assertSee('905-2026')->assertDontSee('906-2026')
         ->call('rotate')
@@ -351,7 +352,8 @@ test('monitor abre una tercera vista antes que ocultar audiencias', function () 
     }
 
     Livewire::test(MonitorAudiencias::class)
-        ->set('currentTypeIndex', 2)
+        ->call('rotate')
+        ->call('rotate')
         ->set('rowsPerView', 3)
         ->assertSee('Vista 1 de 3');
 });

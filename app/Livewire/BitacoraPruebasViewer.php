@@ -3,14 +3,18 @@
 namespace App\Livewire;
 
 use App\Models\BitacoraPruebaDia;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 class BitacoraPruebasViewer extends Component
 {
+    #[Locked]
     public bool $showHero = true;
 
+    #[Locked]
     public string $selectedRit = '';
 
+    #[Locked]
     public ?int $selectedDiaId = null;
 
     public string $searchRit = '';
@@ -39,7 +43,12 @@ class BitacoraPruebasViewer extends Component
 
     public function selectRit(string $rit): void
     {
-        $this->selectedRit = trim($rit);
+        $rit = trim($rit);
+        if (! BitacoraPruebaDia::query()->where('rit', $rit)->exists()) {
+            return;
+        }
+
+        $this->selectedRit = $rit;
 
         $this->selectedDiaId = BitacoraPruebaDia::query()
             ->where('rit', $rit)
@@ -54,6 +63,9 @@ class BitacoraPruebasViewer extends Component
 
     public function render()
     {
+        $this->searchRit = mb_substr($this->searchRit, 0, 100);
+        $this->searchDia = mb_substr($this->searchDia, 0, 100);
+        $this->searchDetalle = mb_substr($this->searchDetalle, 0, 100);
         $dias = collect();
         $matchesPorDia = [];
 
