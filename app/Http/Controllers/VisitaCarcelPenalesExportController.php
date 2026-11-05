@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Penal;
 use App\Models\VisitaCarcelImputado;
+use App\Support\SafeSpreadsheetValueBinder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -42,6 +43,7 @@ class VisitaCarcelPenalesExportController extends Controller
             try {
                 if ($santiago->isNotEmpty()) {
                     $spreadsheet = new Spreadsheet;
+                    $spreadsheet->setValueBinder(new SafeSpreadsheetValueBinder);
                     $spreadsheet->removeSheetByIndex(0);
 
                     foreach ($santiago as $penal) {
@@ -56,6 +58,7 @@ class VisitaCarcelPenalesExportController extends Controller
 
                 foreach ($individuales as $penal) {
                     $spreadsheet = new Spreadsheet;
+                    $spreadsheet->setValueBinder(new SafeSpreadsheetValueBinder);
                     $sheet = $spreadsheet->getActiveSheet();
                     $sheet->setTitle('Visita Carcel');
                     $this->completarHoja($sheet, $penal->nombre, $porPenal->get($penal->nombre));

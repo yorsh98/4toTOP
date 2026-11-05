@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\TtyppRegistro;
+use App\Support\SafeSpreadsheetValueBinder;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -17,8 +18,8 @@ class TtyppExportController extends Controller
         Gate::authorize('ttypp.exportar');
 
         $validated = $request->validate([
-            'fecha' => ['required', 'date'],
-            'search' => ['nullable', 'string'],
+            'fecha' => ['required', 'date_format:Y-m-d'],
+            'search' => ['nullable', 'string', 'max:100'],
         ]);
 
         $selectedDate = Carbon::parse($validated['fecha'], 'America/Santiago');
@@ -47,6 +48,7 @@ class TtyppExportController extends Controller
 
         return response()->streamDownload(function () use ($rows): void {
             $spreadsheet = new Spreadsheet;
+            $spreadsheet->setValueBinder(new SafeSpreadsheetValueBinder);
 
             try {
                 $sheet = $spreadsheet->getActiveSheet();

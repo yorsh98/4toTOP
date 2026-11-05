@@ -6,6 +6,7 @@ use App\NotificationsV2\Application\Services\TtyppListadoNotifier;
 use App\NotificationsV2\Application\Services\TurnoOneWeeklySummaryNotifier;
 use App\NotificationsV2\Application\Services\TurnoTwoAcdWeeklySummaryNotifier;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
 
 class NotificationsV2PreviewController extends Controller
@@ -13,7 +14,7 @@ class NotificationsV2PreviewController extends Controller
     public function turnoAsignado(Request $request, TurnoOneWeeklySummaryNotifier $notifier): View
     {
         $date = $request->query('date');
-        if (! is_string($date) || ! preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+        if (! $this->validDate($date)) {
             $date = null;
         }
 
@@ -55,7 +56,7 @@ class NotificationsV2PreviewController extends Controller
     public function turno2Acd(Request $request, TurnoTwoAcdWeeklySummaryNotifier $notifier): View
     {
         $date = $request->query('date');
-        if (! is_string($date) || ! preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+        if (! $this->validDate($date)) {
             $date = null;
         }
 
@@ -119,7 +120,7 @@ class NotificationsV2PreviewController extends Controller
 
     public function userStatus(Request $request): View
     {
-        $status = (string) $request->query('status', 'approved');
+        $status = $request->query('status', 'approved');
 
         [$subject, $line] = match ($status) {
             'approved' => [
@@ -156,17 +157,17 @@ class NotificationsV2PreviewController extends Controller
     {
         return view('emails.v2.bitacora-pruebas-outlook', [
             'subject' => 'Notificacion de Bitacora de Pruebas',
-            'senderName' => (string) $request->query('sender', 'Admin Demo'),
-            'documentosUrl' => (string) $request->query('documentos', 'https://example.com/documentos'),
-            'bitacoraPublicUrl' => (string) $request->query('bitacora', route('bitacora-pruebas.public')),
-            'recipientName' => (string) $request->query('user', 'Usuario Demo'),
+            'senderName' => is_string($request->query('sender')) ? $request->query('sender') : 'Admin Demo',
+            'documentosUrl' => $this->safeUrl($request->query('documentos'), 'https://example.com/documentos'),
+            'bitacoraPublicUrl' => $this->safeUrl($request->query('bitacora'), route('bitacora-pruebas.public')),
+            'recipientName' => is_string($request->query('user')) ? $request->query('user') : 'Usuario Demo',
         ]);
     }
 
     public function ttyppListado(Request $request, TtyppListadoNotifier $notifier): View
     {
         $date = $request->query('fecha');
-        if (! is_string($date) || ! preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+        if (! $this->validDate($date)) {
             $date = now('America/Santiago')->toDateString();
         }
 
@@ -175,5 +176,16 @@ class NotificationsV2PreviewController extends Controller
             'senderName' => $request->user()?->name ?? 'Usuario Demo',
             'registros' => $notifier->recordsForDate($date),
         ]);
+    }
+
+    private function validDate(mixed $date): bool
+    {
+        return Validator::make(['date' => $date], ['date' => 'required|date_format:Y-m-d'])->passes();
+    }
+
+    private function safeUrl(mixed $url, string $fallback): string
+    {
+        return is_string($url) && filter_var($url, FILTER_VALIDATE_URL) && in_array(strtolower((string) parse_url($url, PHP_URL_SCHEME)), ['http', 'https'], true)
+            ? $url : $fallback;
     }
 }

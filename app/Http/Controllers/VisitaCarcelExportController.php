@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Support\SafeSpreadsheetValueBinder;
 use Illuminate\Support\Facades\Gate;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
@@ -40,6 +41,7 @@ class VisitaCarcelExportController extends Controller
         }
 
         $spreadsheet = new Spreadsheet;
+        $spreadsheet->setValueBinder(new SafeSpreadsheetValueBinder);
 
         try {
             $sheet = $spreadsheet->getActiveSheet();

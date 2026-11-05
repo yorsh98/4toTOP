@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\FileConversion;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Validator;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -35,7 +36,7 @@ class FileConversionHistoryPage extends Component
                 ->when(in_array($this->area, ['frontoffice', 'backoffice'], true), fn ($query) => $query->where('area', $this->area))
                 ->when(array_key_exists($this->format, config('conversions.tools')), fn ($query) => $query->where('format', $this->format))
                 ->when(in_array($this->status, ['queued', 'processing', 'ready', 'failed'], true), fn ($query) => $query->where('status', $this->status))
-                ->when(preg_match('/^\d{4}-\d{2}-\d{2}$/', $this->date), fn ($query) => $query->whereDate('created_at', $this->date))
+                ->when(Validator::make(['date' => $this->date], ['date' => 'required|date_format:Y-m-d'])->passes(), fn ($query) => $query->whereDate('created_at', $this->date))
                 ->latest()->paginate(25),
         ]);
     }
