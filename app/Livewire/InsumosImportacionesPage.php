@@ -6,6 +6,7 @@ use App\Services\InsumoStockExcelImporter;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Throwable;
@@ -17,6 +18,7 @@ class InsumosImportacionesPage extends Component
 
     public $archivo = null;
 
+    #[Locked]
     public ?array $preview = null;
 
     public bool $confirmarCambios = false;
@@ -54,7 +56,7 @@ class InsumosImportacionesPage extends Component
         }
 
         try {
-            $extension = strtolower($this->archivo->getClientOriginalExtension());
+            $extension = $this->archivo->guessExtension() === 'xls' ? 'xls' : 'xlsx';
             $path = $this->archivo->storeAs('insumos/importaciones', "{$this->preview['archivo_hash']}.{$extension}", 'local');
             $result = $importer->importar(
                 Storage::disk('local')->path($path),

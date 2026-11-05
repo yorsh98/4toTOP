@@ -7,6 +7,7 @@ use App\Models\Insumo;
 use App\Models\InsumoMovimiento;
 use App\Models\InsumoSolicitudDetalle;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Validator;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -121,9 +122,14 @@ class InsumosReportesPage extends Component
         ]);
     }
 
+    private function fechaValida(string $fecha): bool
+    {
+        return $fecha !== '' && Validator::make(['fecha' => $fecha], ['fecha' => ['date_format:Y-m-d']])->passes();
+    }
+
     private function movimientosQuery()
     {
-        $funcionarioFiltroId = str_starts_with($this->usuarioFiltro, 'funcionario:')
+        $funcionarioFiltroId = preg_match('/\Afuncionario:[1-9][0-9]*\z/', $this->usuarioFiltro)
             ? (int) substr($this->usuarioFiltro, strlen('funcionario:'))
             : null;
         $usuarioFiltroId = ctype_digit($this->usuarioFiltro) ? (int) $this->usuarioFiltro : null;
@@ -132,9 +138,9 @@ class InsumosReportesPage extends Component
             ->where('tipo', 'asignacion')
             ->when($funcionarioFiltroId, fn ($query) => $query->where('asignado_a_funcionario_id', $funcionarioFiltroId))
             ->when($usuarioFiltroId, fn ($query) => $query->where('asignado_a_user_id', $usuarioFiltroId))
-            ->when($this->insumoFiltro !== '', fn ($query) => $query->where('insumo_id', $this->insumoFiltro))
-            ->when($this->fechaDesde !== '', fn ($query) => $query->whereDate('created_at', '>=', $this->fechaDesde))
-            ->when($this->fechaHasta !== '', fn ($query) => $query->whereDate('created_at', '<=', $this->fechaHasta));
+            ->when(ctype_digit($this->insumoFiltro) && (int) $this->insumoFiltro > 0, fn ($query) => $query->where('insumo_id', (int) $this->insumoFiltro))
+            ->when($this->fechaValida($this->fechaDesde), fn ($query) => $query->whereDate('created_at', '>=', $this->fechaDesde))
+            ->when($this->fechaValida($this->fechaHasta), fn ($query) => $query->whereDate('created_at', '<=', $this->fechaHasta));
     }
 
     private function solicitudDetallesQuery()
@@ -142,12 +148,12 @@ class InsumosReportesPage extends Component
         $usuarioFiltroId = ctype_digit($this->usuarioFiltro) ? (int) $this->usuarioFiltro : null;
 
         return InsumoSolicitudDetalle::query()
-            ->when($this->insumoFiltro !== '', fn ($query) => $query->where('insumo_solicitud_detalles.insumo_id', $this->insumoFiltro))
+            ->when(ctype_digit($this->insumoFiltro) && (int) $this->insumoFiltro > 0, fn ($query) => $query->where('insumo_solicitud_detalles.insumo_id', (int) $this->insumoFiltro))
             ->whereHas('solicitud', function ($query) use ($usuarioFiltroId): void {
                 $query
                     ->when($usuarioFiltroId, fn ($query) => $query->where('solicitante_user_id', $usuarioFiltroId))
-                    ->when($this->fechaSolicitudDesde !== '', fn ($query) => $query->whereDate('created_at', '>=', $this->fechaSolicitudDesde))
-                    ->when($this->fechaSolicitudHasta !== '', fn ($query) => $query->whereDate('created_at', '<=', $this->fechaSolicitudHasta));
+                    ->when($this->fechaValida($this->fechaSolicitudDesde), fn ($query) => $query->whereDate('created_at', '>=', $this->fechaSolicitudDesde))
+                    ->when($this->fechaValida($this->fechaSolicitudHasta), fn ($query) => $query->whereDate('created_at', '<=', $this->fechaSolicitudHasta));
             });
     }
 }

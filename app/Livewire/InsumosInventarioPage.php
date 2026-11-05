@@ -9,6 +9,7 @@ use App\Services\InsumoStockService;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -17,6 +18,7 @@ class InsumosInventarioPage extends Component
 {
     use WithPagination;
 
+    #[Locked]
     public ?int $editingId = null;
 
     public string $codigo = '';
@@ -31,6 +33,7 @@ class InsumosInventarioPage extends Component
 
     public string $estadoFiltro = '';
 
+    #[Locked]
     public ?int $reposicionInsumoId = null;
 
     public ?int $reposicionSectorId = null;
@@ -66,8 +69,8 @@ class InsumosInventarioPage extends Component
                 Rule::unique('insumos', 'codigo')->ignore($this->editingId),
             ],
             'nombre' => ['required', 'string', 'max:255'],
-            'unidad_medida' => ['required', 'string', 'max:20'],
-            'stock_minimo' => ['required', 'integer', 'min:0'],
+            'unidad_medida' => ['required', 'string', 'max:20', Rule::in(array_filter(['UN', $this->editingId ? Insumo::query()->findOrFail($this->editingId)->unidad_medida : null]))],
+            'stock_minimo' => ['required', 'integer', 'min:0', 'max:4294967295'],
         ]);
 
         if ($this->editingId === null) {
@@ -123,7 +126,7 @@ class InsumosInventarioPage extends Component
         $validated = $this->validate([
             'reposicionInsumoId' => ['required', 'integer', 'exists:insumos,id'],
             'reposicionSectorId' => ['required', 'integer', 'exists:sectors,id'],
-            'reposicionCantidad' => ['required', 'integer', 'min:1'],
+            'reposicionCantidad' => ['required', 'integer', 'min:1', 'max:4294967295'],
             'reposicionObservacion' => ['nullable', 'string', 'max:5000'],
         ]);
 
@@ -158,15 +161,16 @@ class InsumosInventarioPage extends Component
     {
         Gate::authorize('insumos.inventario');
 
-        $search = trim($this->search);
+        $search = addcslashes(mb_substr(trim($this->search), 0, 255), '%_\\');
+        $estadoFiltro = in_array($this->estadoFiltro, ['', 'activos', 'inactivos', 'bajo'], true) ? $this->estadoFiltro : '';
         $insumos = Insumo::query()
             ->withSum('existencias', 'cantidad')
             ->when($search !== '', fn ($query) => $query->where(fn ($query) => $query
                 ->where('codigo', 'like', "%{$search}%")
                 ->orWhere('nombre', 'like', "%{$search}%")))
-            ->when($this->estadoFiltro === 'activos', fn ($query) => $query->where('activo', true))
-            ->when($this->estadoFiltro === 'inactivos', fn ($query) => $query->where('activo', false))
-            ->when($this->estadoFiltro === 'bajo', fn ($query) => $this->whereStockBajo($query))
+            ->when($estadoFiltro === 'activos', fn ($query) => $query->where('activo', true))
+            ->when($estadoFiltro === 'inactivos', fn ($query) => $query->where('activo', false))
+            ->when($estadoFiltro === 'bajo', fn ($query) => $this->whereStockBajo($query))
             ->orderBy('nombre')
             ->paginate(15);
 
