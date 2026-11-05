@@ -1,6 +1,8 @@
 <?php
 use App\Livewire\Actions\Logout;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 use Livewire\Volt\Component;
 
 new class extends Component
@@ -16,7 +18,18 @@ new class extends Component
             'password' => ['required', 'string', 'current_password'],
         ]);
 
-        tap(Auth::user(), $logout(...))->delete();
+        $user = Auth::user();
+
+        // Mismo invariante que UsersRolesPage: nunca dejar el sistema sin SuperAdmin ni sin usuarios.
+        $isLastSuperAdmin = $user->hasRole('SuperAdmin') && User::role('SuperAdmin')->count() <= 1;
+
+        if ($isLastSuperAdmin || User::query()->count() <= 1) {
+            throw ValidationException::withMessages([
+                'password' => 'No se puede eliminar la última cuenta de administración del sistema.',
+            ]);
+        }
+
+        tap($user, $logout(...))->delete();
         $this->redirect('/', navigate: true);
     }
 };

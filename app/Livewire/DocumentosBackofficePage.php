@@ -9,6 +9,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\File;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -16,6 +17,8 @@ use Livewire\WithFileUploads;
 #[Layout('layouts.app')]
 class DocumentosBackofficePage extends Component
 {
+    private const DOCUMENT_EXTENSIONS = ['pdf', 'doc', 'docx'];
+
     use WithFileUploads;
 
     public string $procedimientoNombre = '';
@@ -78,7 +81,7 @@ class DocumentosBackofficePage extends Component
         $validated = $this->validate([
             'procedimientoNombre' => ['required', 'string', 'max:255'],
             'procedimientoOrden' => ['required', 'integer', 'min:1'],
-            'procedimientoArchivo' => ['required', File::types(['pdf', 'doc', 'docx'])->max(20 * 1024)],
+            'procedimientoArchivo' => ['required', File::types(self::DOCUMENT_EXTENSIONS)->extensions(self::DOCUMENT_EXTENSIONS)->max(20 * 1024)],
         ]);
 
         $catalog->addDocumento(
@@ -108,7 +111,7 @@ class DocumentosBackofficePage extends Component
         $validated = $this->validate([
             'documentoNombre' => ['required', 'string', 'max:255'],
             'documentoOrden' => ['required', 'integer', 'min:1'],
-            'documentoArchivo' => ['required', File::types(['pdf', 'doc', 'docx'])->max(20 * 1024)],
+            'documentoArchivo' => ['required', File::types(self::DOCUMENT_EXTENSIONS)->extensions(self::DOCUMENT_EXTENSIONS)->max(20 * 1024)],
         ]);
 
         $catalog->addDocumento(
@@ -338,7 +341,7 @@ class DocumentosBackofficePage extends Component
     protected function storeUploadedFile(mixed $file, string $section): string
     {
         $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
-        $extension = strtolower((string) $file->getClientOriginalExtension());
+        $extension = $this->safeDocumentExtension($file);
         $slug = Str::slug($originalName);
         $slug = $slug !== '' ? $slug : 'archivo';
 
@@ -346,5 +349,28 @@ class DocumentosBackofficePage extends Component
         $storedPath = $file->storeAs('documentos/'.$section, $filename, 'public');
 
         return $storedPath;
+    }
+
+    /**
+     * La extensión guardada en el disco público debe coincidir con el tipo validado:
+     * nunca se confía en el nombre que manda el navegador (evita servir .html/.svg).
+     */
+    protected function safeDocumentExtension(mixed $file): string
+    {
+        $client = strtolower((string) $file->getClientOriginalExtension());
+
+        if (in_array($client, self::DOCUMENT_EXTENSIONS, true)) {
+            return $client;
+        }
+
+        $guessed = strtolower((string) $file->guessExtension());
+
+        if (in_array($guessed, self::DOCUMENT_EXTENSIONS, true)) {
+            return $guessed;
+        }
+
+        throw ValidationException::withMessages([
+            'archivo' => 'El archivo debe ser PDF, DOC o DOCX.',
+        ]);
     }
 }
