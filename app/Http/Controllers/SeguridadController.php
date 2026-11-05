@@ -243,6 +243,10 @@ class SeguridadController extends Controller
         $user->suspension_reason = $suspend ? 'Suspendido por administrador' : null;
         $user->save();
 
+        if ($suspend) {
+            $user->revokeAccess();
+        }
+
         $this->sendStatusEmail($user, $suspend ? 'suspended' : 'unsuspended');
 
         $after = [
@@ -324,6 +328,7 @@ class SeguridadController extends Controller
         $user->rejected_by = auth()->id();
         $user->rejection_note = 'Rechazado desde Seguridad';
         $user->save();
+        $user->revokeAccess();
 
         $this->sendStatusEmail($user, 'rejected');
 
