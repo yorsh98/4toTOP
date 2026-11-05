@@ -9,8 +9,10 @@ use App\Models\Sector;
 use App\Services\InsumoGestionService;
 use DomainException;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\Rule;
 use InvalidArgumentException;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -19,6 +21,7 @@ class InsumosGestionPage extends Component
 {
     use WithPagination;
 
+    #[Locked]
     public ?int $selectedSolicitudId = null;
 
     /** @var array<int, array{cantidad: int, sector_id: int|null}> */
@@ -35,6 +38,7 @@ class InsumosGestionPage extends Component
     public string $directObservacion = '';
 
     /** @var array<string, array{insumo_id: int, sector_id: int, cantidad: int}> */
+    #[Locked]
     public array $directCart = [];
 
     public function mount(): void
@@ -46,7 +50,8 @@ class InsumosGestionPage extends Component
     {
         Gate::authorize('insumos.gestionar');
 
-        $solicitud = $this->solicitudConDetalles($solicitudId);
+        $solicitud = InsumoSolicitud::query()->whereIn('estado', ['pendiente', 'parcial'])->findOrFail($solicitudId);
+        $solicitud = $this->solicitudConDetalles($solicitud->id);
         $this->selectedSolicitudId = $solicitud->id;
         $this->entregas = $solicitud->detalles->mapWithKeys(function ($detalle): array {
             $entregado = $detalle->movimientos->where('tipo', 'asignacion')->sum('cantidad');
@@ -67,6 +72,13 @@ class InsumosGestionPage extends Component
         if ($this->selectedSolicitudId === null) {
             return;
         }
+
+        $this->validate([
+            'entregas' => ['array'],
+            'entregas.*' => ['required', 'array'],
+            'entregas.*.cantidad' => ['required', 'integer', 'min:0', 'max:4294967295'],
+            'entregas.*.sector_id' => ['nullable', 'integer', 'exists:sectors,id'],
+        ]);
 
         $entregas = collect($this->entregas)
             ->filter(fn (array $entrega): bool => (int) ($entrega['cantidad'] ?? 0) > 0)
@@ -98,6 +110,8 @@ class InsumosGestionPage extends Component
             return;
         }
 
+        $this->validate(['motivoRechazo' => ['required', 'string', 'max:1000']]);
+
         try {
             $gestionService->rechazar(InsumoSolicitud::query()->findOrFail($this->selectedSolicitudId), auth()->id(), $this->motivoRechazo);
         } catch (DomainException|InvalidArgumentException $exception) {
@@ -115,8 +129,8 @@ class InsumosGestionPage extends Component
         Gate::authorize('insumos.gestionar');
 
         $this->validate([
-            'directInsumoId' => ['required', 'integer', 'exists:insumos,id'],
-            'directCantidad' => ['required', 'integer', 'min:1'],
+            'directInsumoId' => ['required', 'integer', Rule::exists('insumos', 'id')->where('activo', true)],
+            'directCantidad' => ['required', 'integer', 'min:1', 'max:4294967295'],
         ]);
 
         $key = (string) $this->directInsumoId;
@@ -136,7 +150,12 @@ class InsumosGestionPage extends Component
     public function asignarDirecto(InsumoGestionService $gestionService): void
     {
         Gate::authorize('insumos.gestionar');
-        $this->validate(['directRecipientId' => ['required', 'integer', 'exists:funcionarios,id']]);
+        $this->validate([
+            'directRecipientId' => ['required', 'integer', 'exists:funcionarios,id'],
+            'directObservacion' => ['nullable', 'string', 'max:2000'],
+            'directCart.*.insumo_id' => ['required', 'integer', Rule::exists('insumos', 'id')->where('activo', true)],
+            'directCart.*.cantidad' => ['required', 'integer', 'min:1', 'max:4294967295'],
+        ]);
 
         try {
             $gestionService->asignarDirecto(array_values($this->directCart), auth()->id(), $this->directRecipientId, filled($this->directObservacion) ? $this->directObservacion : null);

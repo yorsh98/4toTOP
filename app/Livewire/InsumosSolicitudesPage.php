@@ -7,6 +7,8 @@ use App\Models\InsumoSolicitud;
 use App\Services\InsumoSolicitudService;
 use DomainException;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use InvalidArgumentException;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -61,10 +63,34 @@ class InsumosSolicitudesPage extends Component
     {
         Gate::authorize('insumos.solicitar');
 
+        $this->validate(['observacion' => ['nullable', 'string', 'max:2000']]);
+
+        if (Validator::make(['cart' => $this->cart], [
+            'cart' => ['array'],
+            'cart.*' => ['required', 'integer', 'min:1', 'max:4294967295'],
+        ])->fails()) {
+            $this->addError('cart', 'La solicitud contiene cantidades invalidas.');
+
+            return;
+        }
+
         $items = collect($this->cart)
-            ->map(fn ($cantidad, $insumoId): array => ['insumo_id' => (int) $insumoId, 'cantidad' => $cantidad])
+            ->map(fn ($cantidad, $insumoId): array => ['insumo_id' => $insumoId, 'cantidad' => $cantidad])
             ->values()
             ->all();
+
+        if (Validator::make(['items' => $items], [
+            'items.*.insumo_id' => ['required', 'integer', Rule::exists('insumos', 'id')->where('activo', true)],
+        ])->fails()) {
+            $this->addError('cart', 'El insumo ya no esta disponible.');
+
+            return;
+        }
+
+        $items = array_map(fn (array $item): array => [
+            'insumo_id' => (int) $item['insumo_id'],
+            'cantidad' => (int) $item['cantidad'],
+        ], $items);
 
         try {
             $solicitudService->crear($items, auth()->id(), filled($this->observacion) ? $this->observacion : null, $this->firma);
@@ -96,7 +122,7 @@ class InsumosSolicitudesPage extends Component
     {
         Gate::authorize('insumos.solicitar');
 
-        $search = trim($this->search);
+        $search = mb_substr(trim($this->search), 0, 255);
         $catalogo = Insumo::query()
             ->where('activo', true)
             ->withSum('existencias', 'cantidad')
