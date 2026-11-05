@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
@@ -73,6 +75,22 @@ class User extends Authenticatable
     public function isSuspended(): bool
     {
         return $this->suspended_at !== null;
+    }
+
+    /**
+     * Corta el acceso vigente: rota el remember_token e invalida las sesiones
+     * guardadas en base de datos. Se usa al suspender o rechazar una cuenta.
+     */
+    public function revokeAccess(): void
+    {
+        $this->forceFill(['remember_token' => Str::random(60)])->save();
+
+        if (config('session.driver') === 'database') {
+            DB::connection(config('session.connection'))
+                ->table(config('session.table', 'sessions'))
+                ->where('user_id', $this->getKey())
+                ->delete();
+        }
     }
 
     public function insumoSolicitudes(): HasMany
