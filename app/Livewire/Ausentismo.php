@@ -5,6 +5,8 @@ namespace App\Livewire;
 use App\Models\Ausentismo as AusentismoModel;
 use App\Services\FuncionarioCatalog;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\Rule;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -20,6 +22,7 @@ class Ausentismo extends Component
     protected $paginationTheme = 'bootstrap';
 
     // Formulario
+    #[Locked]
     public ?int $editingId = null;
 
     public string $funcionario_nombre = '';
@@ -35,16 +38,19 @@ class Ausentismo extends Component
     public ?string $observacion = null;
 
     // Listas para selects
+    #[Locked]
     public array $cargos = [
         'Juez/a', 'Administrador/a', 'Administrativo/a', 'Encargado/a de Causa',
         'Jefe/a de Unidad', 'Informatico',
     ];
 
+    #[Locked]
     public array $tipos_ausencia = [ // <-- plural para la lista
         'Licencia Medica', 'Permiso 347', 'Permiso sin goce de sueldo', 'Feriado Legal',
         'Curso Academia', 'Comision de servicio', 'Otro',
     ];
 
+    #[Locked]
     public array $funcionarios_sugeridos = [];
 
     public function mount(): void
@@ -53,15 +59,23 @@ class Ausentismo extends Component
         $this->funcionarios_sugeridos = $catalog->nombresByRoles($catalog->roles());
     }
 
+    /** Catálogo vigente más el valor ya guardado del registro en edición (datos antiguos). */
+    private function tiposPermitidos(): array
+    {
+        $actual = $this->editingId ? AusentismoModel::query()->whereKey($this->editingId)->value('tipo_permiso') : null;
+
+        return array_values(array_unique(array_filter([...$this->tipos_ausencia, $actual])));
+    }
+
     protected function rules(): array
     {
         return [
             'funcionario_nombre' => ['required', 'string', 'min:3', 'max:150'],
             'cargo' => ['required', 'string', 'min:2', 'max:120'],
-            'tipo_permiso' => ['required', 'string'], // <-- actualizado
+            'tipo_permiso' => ['required', 'string', Rule::in($this->tiposPermitidos())],
             'fecha_inicio' => ['required', 'date'],
             'fecha_termino' => ['required', 'date', 'after_or_equal:fecha_inicio'],
-            'observacion' => ['nullable', 'string'],
+            'observacion' => ['nullable', 'string', 'max:1000'],
         ];
     }
 
@@ -188,7 +202,7 @@ class Ausentismo extends Component
             // Orden: primero las más antiguas (fecha_inicio asc), luego por fecha_termino asc
             ->orderBy('fecha_inicio', 'asc')
             ->orderBy('fecha_termino', 'asc')
-            ->paginate($this->perPage);
+            ->paginate(in_array($this->perPage, [10, 25, 50, 100], true) ? $this->perPage : 10);
 
         return view('livewire.ausentismo', [
             'items' => $items,
