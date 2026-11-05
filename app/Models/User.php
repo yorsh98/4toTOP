@@ -79,17 +79,24 @@ class User extends Authenticatable
 
     /**
      * Corta el acceso vigente: rota el remember_token e invalida las sesiones
-     * guardadas en base de datos. Se usa al suspender o rechazar una cuenta.
+     * guardadas en base de datos. Se usa al suspender o rechazar una cuenta y al
+     * cambiar o restablecer la contraseña. Con $keepSessionId conserva esa sesión
+     * (la del usuario que acaba de cambiar su propia contraseña).
      */
-    public function revokeAccess(): void
+    public function revokeAccess(?string $keepSessionId = null): void
     {
         $this->forceFill(['remember_token' => Str::random(60)])->save();
 
         if (config('session.driver') === 'database') {
-            DB::connection(config('session.connection'))
+            $query = DB::connection(config('session.connection'))
                 ->table(config('session.table', 'sessions'))
-                ->where('user_id', $this->getKey())
-                ->delete();
+                ->where('user_id', $this->getKey());
+
+            if ($keepSessionId !== null) {
+                $query->where('id', '!=', $keepSessionId);
+            }
+
+            $query->delete();
         }
     }
 

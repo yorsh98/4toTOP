@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\Guias;
 use Illuminate\Support\Facades\Gate;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -11,19 +12,24 @@ class TablaGuias extends Component
 {
     use WithPagination;
 
+    // Estado de servidor: el cliente no puede modificarlo desde /livewire/update.
+    #[Locked]
     public $modo = 'full'; // 'full' o 'lectura'
 
     public $search = '';
 
     public $perPage = 10;
 
+    #[Locked]
     public $sortField = 'nombre_completo';
 
+    #[Locked]
     public $sortDirection = 'asc';
 
     public $filtroInstitucion = '';
 
     // Campos para edición
+    #[Locked]
     public $editId;
 
     public $editNombre;
@@ -80,11 +86,23 @@ class TablaGuias extends Component
 
     protected $paginationTheme = 'bootstrap';
 
+    private const SORTABLE = ['nombre_completo', 'rut', 'email', 'telefono1', 'telefono2', 'institucion'];
+
+    private const PER_PAGE = [10, 25, 50, 100];
+
     private function authorizeRead(): void
     {
-        if ($this->modo === 'full') {
+        // Falla cerrado: solo el modo público 'lectura' se salta el permiso.
+        if ($this->modo !== 'lectura') {
             Gate::authorize('guias.ver');
         }
+    }
+
+    private function sortableFields(): array
+    {
+        return $this->modo === 'lectura'
+            ? array_values(array_diff(self::SORTABLE, ['rut']))
+            : self::SORTABLE;
     }
 
     private function authorizeWrite(): void
@@ -95,7 +113,7 @@ class TablaGuias extends Component
 
     public function sortBy($campo)
     {
-        if ($this->modo === 'lectura' && $campo === 'rut') {
+        if (! is_string($campo) || ! in_array($campo, $this->sortableFields(), true)) {
             return;
         }
 
@@ -125,6 +143,12 @@ class TablaGuias extends Component
 
     public function updatedPerPage($value)
     {
+        if (! in_array((int) $value, self::PER_PAGE, true)) {
+            $this->perPage = 10;
+        } else {
+            $this->perPage = (int) $value;
+        }
+
         $this->resetPage();
     }
 
@@ -229,6 +253,11 @@ class TablaGuias extends Component
     {
         $this->authorizeRead();
 
+        $sortField = in_array($this->sortField, $this->sortableFields(), true) ? $this->sortField : 'nombre_completo';
+        $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
+        $perPage = in_array((int) $this->perPage, self::PER_PAGE, true) ? (int) $this->perPage : 10;
+        $filtroInstitucion = in_array((int) $this->filtroInstitucion, range(1, 11), true) ? (int) $this->filtroInstitucion : null;
+
         $query = Guias::query()
             ->when($this->search, function ($query) {
                 $query->where(function ($q) {
@@ -240,14 +269,13 @@ class TablaGuias extends Component
                         ->orWhere('institucion', 'like', '%'.$this->search.'%');
                 });
             })
-            ->when($this->filtroInstitucion, function ($query) {
-                $query->where('institucion', $this->filtroInstitucion);
+            ->when($filtroInstitucion, function ($query) use ($filtroInstitucion) {
+                $query->where('institucion', $filtroInstitucion);
             })
-
-            ->orderBy($this->sortField, $this->sortDirection);
+            ->orderBy($sortField, $sortDirection);
 
         return view($this->modo === 'lectura' ? 'livewire.tabla-guias-publica' : 'livewire.tabla-guias', [
-            'guias' => $query->paginate($this->perPage),
+            'guias' => $query->paginate($perPage),
             'modo' => $this->modo,
             'instituciones' => [
                 1 => '4toTOPSTGO',

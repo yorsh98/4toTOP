@@ -26,9 +26,14 @@ new class extends Component
             throw $e;
         }
 
-        Auth::user()->update([
+        $user = Auth::user();
+
+        $user->update([
             'password' => Hash::make($validated['password']),
         ]);
+
+        // Cierra las demás sesiones y cookies "recordarme"; conserva la actual.
+        $user->revokeAccess(session()->getId());
 
         $this->reset('current_password', 'password', 'password_confirmation');
         $this->dispatch('password-updated');

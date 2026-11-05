@@ -45,6 +45,8 @@ new #[Layout('layouts.guest')] class extends Component
                     'password' => Hash::make($this->password),
                     'remember_token' => Str::random(60),
                 ])->save();
+                // Un restablecimiento cierra toda sesión previa (por si la cuenta estaba comprometida).
+                $user->revokeAccess();
                 event(new PasswordReset($user));
             }
         );
