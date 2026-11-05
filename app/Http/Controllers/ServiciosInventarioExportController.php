@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Activo;
+use App\Support\SafeSpreadsheetValueBinder;
 use Illuminate\Support\Facades\Gate;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
@@ -25,6 +26,7 @@ class ServiciosInventarioExportController extends Controller
 
         return response()->streamDownload(function () use ($activos): void {
             $spreadsheet = new Spreadsheet;
+            $spreadsheet->setValueBinder(new SafeSpreadsheetValueBinder);
 
             try {
                 $sheet = $spreadsheet->getActiveSheet();

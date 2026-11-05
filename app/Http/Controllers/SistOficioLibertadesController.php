@@ -48,7 +48,7 @@ class SistOficioLibertadesController extends Controller
             'tipo' => ['required', 'in:oficio,libertad'],
             'CausaAsig' => ['required', 'string', 'regex:/^[a-zA-Z0-9\s\-]{1,10}$/'],
             'UserSolicitante' => ['required', 'string', Rule::in($validSolicitantes)],
-            'UserDirigido' => ['required', 'string', 'regex:/^[a-zA-Z0-9\s\-]+$/'],
+            'UserDirigido' => ['required', 'string', 'max:255', 'regex:/^[a-zA-Z0-9\s\-]+$/'],
         ], [
             'tipo.in' => 'El tipo de solicitud no es válido.',
             'CausaAsig.regex' => 'CAUSA ASIGNADA permite letras/números/espacios/guion (-), máx 10.',
