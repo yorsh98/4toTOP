@@ -5,16 +5,20 @@ namespace App\Livewire;
 use App\Models\Audiencia;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Gate;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 class CambiarEstadoAudiencia extends Component
 {
+    #[Locked]
     public $audiencias = [];
 
+    #[Locked]
     public $ultimaActualizacion;
 
     public $filtro = null; // <-- filtro por tipo de audiencia
 
+    #[Locked]
     public $tiposAudiencia = [
         'Juicio Oral',
         'Cont. Juicio Oral',
@@ -29,14 +33,14 @@ class CambiarEstadoAudiencia extends Component
 
     public function setFiltro($tipo)
     {
-        $this->filtro = $tipo;
+        $this->filtro = in_array($tipo, $this->tiposAudiencia, true) ? $tipo : null;
         $this->cargarAudiencias(true);
     }
 
     public function cargarAudiencias($forceRefresh = false)
     {
         // Si no hay filtro seleccionado, no mostrar audiencias
-        if (! $this->filtro) {
+        if (! in_array($this->filtro, $this->tiposAudiencia, true)) {
             $this->audiencias = collect(); // colección vacía
             $this->ultimaActualizacion = now()->format('H:i:s');
 
@@ -57,7 +61,11 @@ class CambiarEstadoAudiencia extends Component
     {
         Gate::authorize('audiencias.estado.cambiar');
 
-        $audiencia = Audiencia::findOrFail($id);
+        if (! in_array($nuevoEstado, ['POR_REALIZARSE', 'EN_CURSO', 'RECESO', 'FINALIZADA'], true)) {
+            return;
+        }
+
+        $audiencia = Audiencia::query()->whereDate('fecha', Carbon::today())->findOrFail($id);
         $audiencia->update(['estado' => $nuevoEstado]);
         $audiencia->refresh();
 

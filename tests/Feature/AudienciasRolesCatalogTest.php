@@ -66,12 +66,13 @@ test('audiencia form accepts valid names by configured roles', function () {
         ->set('JuezI', 'Juez Audiencia')
         ->set('acta', 'Acta Audiencia')
         ->set('anfitrion', 'Acta Audiencia')
-        ->set('acusados', [[
+        ->set('nuevoAcusado', [
             'nombre_completo' => 'Acusado Prueba',
             'situacion' => 'Libre',
             'medida_cautelar' => '',
             'forma_notificacion' => '',
-        ]])
+        ])
+        ->call('agregarAcusado')
         ->call('guardarAudiencia')
         ->assertHasNoErrors();
 

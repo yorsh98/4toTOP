@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\Audiencia;
 use Illuminate\Support\Facades\Gate;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Reactive;
 use Livewire\Component;
@@ -13,8 +14,10 @@ class AudienciasDiariasTabla extends Component
     #[Reactive]
     public string $fecha;
 
+    #[Locked]
     public $audiencias = [];
 
+    #[Locked]
     public ?int $detalleId = null;
 
     public function mount(): void
@@ -37,6 +40,14 @@ class AudienciasDiariasTabla extends Component
 
     public function buscar(): void
     {
+        Gate::authorize('audiencias.ver');
+
+        if (validator(['fecha' => $this->fecha], ['fecha' => 'required|date_format:Y-m-d'])->fails()) {
+            $this->audiencias = collect();
+
+            return;
+        }
+
         $this->audiencias = Audiencia::query()
             ->whereDate('fecha', $this->fecha)
             ->orderBy('sala')

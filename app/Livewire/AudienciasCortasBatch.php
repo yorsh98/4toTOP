@@ -9,10 +9,12 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 class AudienciasCortasBatch extends Component
 {
+    #[Locked]
     public ?int $editId = null;
 
     /** Datos compartidos por todas las filas */
@@ -31,13 +33,17 @@ class AudienciasCortasBatch extends Component
     /** Filas a crear */
     public $items = [];
 
+    #[Locked]
     public array $juecesOptions = [];
 
+    #[Locked]
     public array $actaAnfitrionOptions = [];
 
+    #[Locked]
     public array $encargadoCausaOptions = [];
 
     /** Sugerencias */
+    #[Locked]
     public array $situaciones = ['Libre', 'P.Prev.', 'P.x OC.'];
 
     /** Constante interna: no se expone en la vista */
@@ -104,6 +110,7 @@ class AudienciasCortasBatch extends Component
 
     public function buscarPorRit(int $i): void
     {
+        Gate::authorize('audiencias.ver');
         $rit = $this->items[$i]['rit'] ?? null;
         $fecha = $this->shared['fecha'] ?? null;
 
@@ -164,9 +171,15 @@ class AudienciasCortasBatch extends Component
 
     public function addAcusado(int $i): void
     {
+        if (! isset($this->items[$i]['nuevoAcusado'])) {
+            return;
+        }
+
         $this->validate([
-            "items.$i.nuevoAcusado.nombre_completo" => 'required|string',
-            "items.$i.nuevoAcusado.situacion" => 'required|string',
+            "items.$i.nuevoAcusado.nombre_completo" => 'required|string|max:255',
+            "items.$i.nuevoAcusado.situacion" => 'required|string|max:255',
+            "items.$i.nuevoAcusado.medida_cautelar" => 'nullable|string|max:255',
+            "items.$i.nuevoAcusado.forma_notificacion" => 'nullable|string|max:255',
         ]);
 
         $this->items[$i]['acusados'][] = $this->items[$i]['nuevoAcusado'];
@@ -180,6 +193,10 @@ class AudienciasCortasBatch extends Component
 
     public function removeAcusado(int $i, int $k): void
     {
+        if (! isset($this->items[$i]['acusados'][$k])) {
+            return;
+        }
+
         unset($this->items[$i]['acusados'][$k]);
         $this->items[$i]['acusados'] = array_values($this->items[$i]['acusados']);
     }
@@ -188,30 +205,30 @@ class AudienciasCortasBatch extends Component
     {
         return [
             // Compartidos
-            'shared.fecha' => 'required|date',
-            'shared.sala' => 'required|string',
+            'shared.fecha' => 'required|date_format:Y-m-d',
+            'shared.sala' => 'required|string|max:255',
             'shared.JuezP' => ['required', 'string', 'max:255'],
             'shared.JuezR' => ['required', 'string', 'max:255'],
             'shared.JuezI' => ['required', 'string', 'max:255'],
             'shared.anfitrion' => ['nullable', 'string', 'max:255'],
-            'shared.cta_zoom' => 'nullable|string',
-            'shared.ubicacion' => 'required|string',
+            'shared.cta_zoom' => 'nullable|string|max:255',
+            'shared.ubicacion' => 'required|string|max:255',
             'shared.hora_inicio' => 'required|date_format:H:i',
 
             // Filas
-            'items' => 'required|array|min:1',
-            'items.*.rit' => 'required|string',
-            'items.*.ruc' => 'required|string',
+            'items' => 'required|array|min:1|max:100',
+            'items.*.rit' => 'required|string|max:255',
+            'items.*.ruc' => 'required|string|max:255',
             'items.*.encargado_causa' => ['required', 'string', 'max:255'],
             'items.*.acta' => ['required', 'string', 'max:255'],
-            'items.*.obs' => 'nullable|string',
+            'items.*.obs' => 'nullable|string|max:5000',
 
             // Acusados (mínimo 1 por fila)
-            'items.*.acusados' => 'required|array|min:1',
-            'items.*.acusados.*.nombre_completo' => 'required|string',
-            'items.*.acusados.*.situacion' => 'required|string',
-            'items.*.acusados.*.medida_cautelar' => 'nullable|string',
-            'items.*.acusados.*.forma_notificacion' => 'nullable|string',
+            'items.*.acusados' => 'required|array|min:1|max:100',
+            'items.*.acusados.*.nombre_completo' => 'required|string|max:255',
+            'items.*.acusados.*.situacion' => 'required|string|max:255',
+            'items.*.acusados.*.medida_cautelar' => 'nullable|string|max:255',
+            'items.*.acusados.*.forma_notificacion' => 'nullable|string|max:255',
         ];
     }
 
@@ -270,7 +287,7 @@ class AudienciasCortasBatch extends Component
             foreach ($this->items as $i => $row) {
                 if ($this->editId !== null && $i === 0) {
                     Gate::authorize('audiencias.editar');
-                    Audiencia::findOrFail($this->editId)->update(Arr::except($this->audienciaData($row), 'estado'));
+                    Audiencia::query()->where('tipo_audiencia', self::TIPO)->findOrFail($this->editId)->update(Arr::except($this->audienciaData($row), 'estado'));
                 } else {
                     Audiencia::create($this->audienciaData($row));
                 }
