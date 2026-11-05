@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -37,12 +38,12 @@ class UsersRolesPage extends Component
         Gate::authorize('navbar.seguridad.editable');
 
         $user = User::query()->with('roles')->findOrFail($userId);
-        $roles = array_values(array_unique($this->selectedRoles[$userId] ?? []));
-
         $this->validate([
             "selectedRoles.{$userId}" => ['nullable', 'array'],
-            "selectedRoles.{$userId}.*" => ['string', 'exists:roles,name'],
+            "selectedRoles.{$userId}.*" => ['string', Rule::exists('roles', 'name')->where('guard_name', 'web')],
         ]);
+
+        $roles = array_values(array_unique($this->selectedRoles[$userId] ?? []));
 
         $beforeRoles = $user->roles()->pluck('name')->sort()->values()->all();
 
@@ -137,6 +138,12 @@ class UsersRolesPage extends Component
             return;
         }
 
+        if ($this->isActiveSuperAdmin($user) && $this->activeSuperAdminCount() <= 1) {
+            session()->flash('error', 'No se puede dejar el sistema sin al menos un SuperAdmin.');
+
+            return;
+        }
+
         $before = [
             'approved_at' => optional($user->approved_at)?->toDateTimeString(),
             'approved_by' => $user->approved_by,
@@ -215,6 +222,12 @@ class UsersRolesPage extends Component
             return;
         }
 
+        if ($suspend && $this->isActiveSuperAdmin($user) && $this->activeSuperAdminCount() <= 1) {
+            session()->flash('error', 'No se puede dejar el sistema sin al menos un SuperAdmin.');
+
+            return;
+        }
+
         $before = [
             'suspended_at' => optional($user->suspended_at)?->toDateTimeString(),
             'suspension_reason' => $user->suspension_reason,
@@ -249,12 +262,14 @@ class UsersRolesPage extends Component
     {
         Gate::authorize('navbar.seguridad.editable');
 
+        $q = addcslashes(mb_substr($this->q, 0, 100), '\\%_');
+
         $users = User::query()
             ->with('roles')
-            ->when($this->q !== '', function ($query) {
-                $query->where(function ($sub) {
-                    $sub->where('name', 'like', "%{$this->q}%")
-                        ->orWhere('email', 'like', "%{$this->q}%");
+            ->when($q !== '', function ($query) use ($q) {
+                $query->where(function ($sub) use ($q) {
+                    $sub->where('name', 'like', "%{$q}%")
+                        ->orWhere('email', 'like', "%{$q}%");
                 });
             })
             ->orderBy('name')
@@ -268,6 +283,16 @@ class UsersRolesPage extends Component
             'users' => $users,
             'roles' => Role::query()->orderBy('name')->get(),
         ]);
+    }
+
+    private function isActiveSuperAdmin(User $user): bool
+    {
+        return $user->hasRole('SuperAdmin') && $user->isApproved() && ! $user->isRejected() && ! $user->isSuspended();
+    }
+
+    private function activeSuperAdminCount(): int
+    {
+        return User::role('SuperAdmin')->whereNotNull('approved_at')->whereNull('rejected_at')->whereNull('suspended_at')->count();
     }
 
     private function sendStatusEmail(User $user, string $status): void

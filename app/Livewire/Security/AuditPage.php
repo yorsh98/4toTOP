@@ -42,24 +42,30 @@ class AuditPage extends Component
     {
         Gate::authorize('navbar.seguridad.visible');
 
+        $q = addcslashes(mb_substr($this->q, 0, 100), '\\%_');
+        $actions = SecurityAudit::query()->select('action')->distinct()->orderBy('action')->pluck('action');
+        $entities = SecurityAudit::query()->select('entity_type')->distinct()->orderBy('entity_type')->pluck('entity_type');
+        $action = $actions->contains($this->action) ? $this->action : '';
+        $entity = $entities->contains($this->entity) ? $this->entity : '';
+
         $audits = SecurityAudit::query()
-            ->when($this->q !== '', function ($query) {
-                $query->where(function ($sub) {
-                    $sub->where('actor_name', 'like', "%{$this->q}%")
-                        ->orWhere('actor_email', 'like', "%{$this->q}%")
-                        ->orWhere('entity_id', 'like', "%{$this->q}%")
-                        ->orWhere('action', 'like', "%{$this->q}%");
+            ->when($q !== '', function ($query) use ($q) {
+                $query->where(function ($sub) use ($q) {
+                    $sub->where('actor_name', 'like', "%{$q}%")
+                        ->orWhere('actor_email', 'like', "%{$q}%")
+                        ->orWhere('entity_id', 'like', "%{$q}%")
+                        ->orWhere('action', 'like', "%{$q}%");
                 });
             })
-            ->when($this->action !== '', fn ($query) => $query->where('action', $this->action))
-            ->when($this->entity !== '', fn ($query) => $query->where('entity_type', $this->entity))
+            ->when($action !== '', fn ($query) => $query->where('action', $action))
+            ->when($entity !== '', fn ($query) => $query->where('entity_type', $entity))
             ->orderByDesc('id')
             ->paginate(25);
 
         return view('livewire.security.audit-page', [
             'audits' => $audits,
-            'actions' => SecurityAudit::query()->select('action')->distinct()->orderBy('action')->pluck('action'),
-            'entities' => SecurityAudit::query()->select('entity_type')->distinct()->orderBy('entity_type')->pluck('entity_type'),
+            'actions' => $actions,
+            'entities' => $entities,
         ]);
     }
 }

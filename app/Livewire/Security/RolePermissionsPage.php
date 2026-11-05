@@ -5,7 +5,9 @@ namespace App\Livewire\Security;
 use App\Livewire\Security\Concerns\LogsSecurityAudit;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -68,6 +70,7 @@ class RolePermissionsPage extends Component
         'navbar.seguridad.editable' => ['seguridad.roles.gestionar', 'seguridad.permisos.gestionar', 'seguridad.usuarios_roles.gestionar'],
     ];
 
+    #[Locked]
     public Role $role;
 
     public array $permissions = [];
@@ -86,7 +89,7 @@ class RolePermissionsPage extends Component
 
         $this->validate([
             'permissions' => ['nullable', 'array'],
-            'permissions.*' => ['string', 'exists:permissions,name'],
+            'permissions.*' => ['string', Rule::exists('permissions', 'name')->where('guard_name', 'web')],
         ]);
 
         $beforePermissions = $this->role->permissions()->pluck('name')->sort()->values()->all();
@@ -95,7 +98,7 @@ class RolePermissionsPage extends Component
         $this->role->syncPermissions($expandedPermissions);
 
         if ($this->role->name === 'SuperAdmin') {
-            $all = Permission::query()->pluck('name')->all();
+            $all = Permission::query()->where('guard_name', 'web')->pluck('name')->all();
             $this->role->syncPermissions($all);
         }
 
@@ -119,7 +122,7 @@ class RolePermissionsPage extends Component
     {
         Gate::authorize('navbar.seguridad.visible');
 
-        $allPermissions = Permission::query()->orderBy('name')->get();
+        $allPermissions = Permission::query()->where('guard_name', 'web')->orderBy('name')->get();
 
         return view('livewire.security.role-permissions-page', [
             'navbarPermissions' => $this->buildNavbarPermissions($allPermissions),

@@ -25,8 +25,8 @@ trait LogsSecurityAudit
             'entity_id' => $entityId,
             'before_data' => $before,
             'after_data' => $after,
-            'ip_address' => request()->ip(),
-            'user_agent' => request()->userAgent(),
+            'ip_address' => mb_substr(request()->ip() ?? '', 0, 45) ?: null,
+            'user_agent' => request()->userAgent() === null ? null : mb_strcut(request()->userAgent(), 0, 65535),
         ]);
     }
 }
