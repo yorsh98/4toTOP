@@ -33,6 +33,9 @@
                         @foreach ($availableFloors as $floor)
                             <button type="button" wire:click="selectPiso({{ $floor }})" wire:loading.attr="disabled" class="rounded-md px-3 py-1.5 text-sm font-semibold transition {{ $piso === $floor ? 'bg-blue-700 text-white shadow' : 'text-slate-600 hover:bg-white' }}">
                                 Piso {{ $floor }}
+                                @if ($floorResults[$floor] > 0)
+                                    <span @if ($piso !== $floor) style="color: #0891b2; font-weight: bold;" @endif>({{ $floorResults[$floor] }})</span>
+                                @endif
                             </button>
                         @endforeach
                     </div>
@@ -42,6 +45,12 @@
                         <input type="search" wire:model.live.debounce.500ms="search" placeholder="Buscar activo o sector..." class="w-full rounded-lg border-slate-300 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500">
                         @if ($search !== '')
                             <span class="mt-1 block text-xs font-semibold text-cyan-700">{{ $mapSearchResultCount }} {{ $mapSearchResultCount === 1 ? 'sector encontrado en el plano' : 'sectores encontrados en el plano' }}</span>
+                        @endif
+                        @if ($searchTerm !== '' && $floorResults[$piso] === 0 && count($otherFloors))
+                            <span class="mt-1 block text-xs">Sin coincidencias en Piso {{ $piso }}; encontrado en {{ implode(' y ', array_map(fn ($floor) => 'Piso '.$floor, $otherFloors)) }}</span>
+                        @endif
+                        @if ($bodegas->isNotEmpty())
+                            <span class="mt-1 block text-xs">Objeto encontrado en bodega: {{ $bodegas->join(', ') }}</span>
                         @endif
                     </label>
                 </div>
@@ -164,6 +173,9 @@
                         @foreach ($availableFloors as $floor)
                             <button type="button" wire:click="selectPiso({{ $floor }})" class="bo-segmented-item rounded-xl px-4 py-2 text-sm font-bold transition {{ $piso === $floor ? 'is-active' : '' }}" @if ($piso === $floor) aria-current="true" @endif>
                                 Piso {{ $floor }}
+                                @if ($floorResults[$floor] > 0)
+                                    <span @if ($piso !== $floor) style="color: #0891b2; font-weight: bold;" @endif>({{ $floorResults[$floor] }})</span>
+                                @endif
                             </button>
                         @endforeach
                     </div>
@@ -173,6 +185,12 @@
                         <input type="search" wire:model.live.debounce.300ms="{{ $isPublic ? 'search' : 'mapSearch' }}" placeholder="{{ $isPublic ? 'Buscar activo o sector...' : 'Buscar activo, código, serie o sector en el mapa...' }}" class="w-full bo-input text-sm">
                         @if (! $isPublic && $mapSearch !== '')
                             <span class="mt-1 block text-xs font-semibold bo-text--info">{{ $mapSearchResultCount }} {{ $mapSearchResultCount === 1 ? 'sector encontrado en el plano' : 'sectores encontrados en el plano' }}</span>
+                        @endif
+                        @if ($searchTerm !== '' && $floorResults[$piso] === 0 && count($otherFloors))
+                            <span class="mt-1 block text-xs">Sin coincidencias en Piso {{ $piso }}; encontrado en {{ implode(' y ', array_map(fn ($floor) => 'Piso '.$floor, $otherFloors)) }}</span>
+                        @endif
+                        @if ($bodegas->isNotEmpty())
+                            <span class="mt-1 block text-xs">Objeto encontrado en bodega: {{ $bodegas->join(', ') }}</span>
                         @endif
                     </label>
                 </div>
@@ -324,7 +342,11 @@
 
                     @if ($selectedSector)
                         <div class="{{ $isPublic ? 'mb-4 rounded-2xl bg-blue-50 p-4 text-sm font-semibold text-blue-900' : 'mb-4 rounded-2xl p-4 text-sm font-semibold bo-panel-subtle bo-text--info' }}">
-                            {{ $selectedSector->activos->count() }} {{ $selectedSector->activos->count() === 1 ? 'activo registrado' : 'activos registrados' }} en este sector.
+                            @if ($searchTerm !== '')
+                                {{ count($matchingActivoIds) }} de {{ $selectedSector->activos->count() }} activos coinciden con la búsqueda
+                            @else
+                                {{ $selectedSector->activos->count() }} {{ $selectedSector->activos->count() === 1 ? 'activo registrado' : 'activos registrados' }} en este sector.
+                            @endif
                         </div>
 
                         @unless ($isPublic)
@@ -332,7 +354,9 @@
                                 <p class="{{ $isPublic ? 'text-sm font-semibold text-emerald-950' : 'text-sm font-semibold' }}">{{ $selectedSector->insumo_existencias_sum_cantidad ?? 0 }} unidades de insumos en esta bodega.</p>
                                 <div class="mt-3 space-y-2">
                                     @forelse ($selectedSector->insumoExistencias as $existencia)
-                                        <p class="{{ $isPublic ? 'text-sm text-emerald-900' : 'text-sm' }}">{{ $existencia->insumo->codigo }} · {{ $existencia->insumo->nombre }}: {{ $existencia->cantidad }} {{ $existencia->insumo->unidad_medida }}</p>
+                                        <p class="{{ $isPublic ? 'text-sm text-emerald-900' : 'text-sm' }}" @if ($searchTerm !== '' && (mb_stripos($existencia->insumo->codigo, $searchTerm) !== false || mb_stripos($existencia->insumo->nombre, $searchTerm) !== false)) style="border: 2px solid #67e8f9; padding: 4px;" @endif>@foreach ($this->searchSegments($existencia->insumo->codigo, $searchTerm) as [$segment, $match])@if ($match)<mark>{{ $segment }}</mark>@endif@unless ($match){{ $segment }}@endunless@endforeach · @foreach ($this->searchSegments($existencia->insumo->nombre, $searchTerm) as [$segment, $match])@if ($match)<mark>{{ $segment }}</mark>@endif@unless ($match){{ $segment }}@endunless@endforeach: {{ $existencia->cantidad }} {{ $existencia->insumo->unidad_medida }}
+                                            @if ($searchTerm !== '' && (mb_stripos($existencia->insumo->codigo, $searchTerm) !== false || mb_stripos($existencia->insumo->nombre, $searchTerm) !== false)) <span>Coincide con la búsqueda</span> @endif
+                                        </p>
                                     @empty
                                         <p class="{{ $isPublic ? 'text-sm text-emerald-800' : 'text-sm' }}">No hay insumos almacenados en este sector.</p>
                                     @endforelse
@@ -342,11 +366,12 @@
 
                         <div class="space-y-3">
                             @forelse ($selectedSector->activos as $activo)
-                                <article wire:key="sector-activo-{{ $activo->id }}" class="{{ $isPublic ? 'rounded-2xl border border-slate-200 bg-slate-50 p-4' : 'rounded-2xl border p-4 bo-panel-subtle' }}">
+                                <article wire:key="sector-activo-{{ $activo->id }}" class="{{ $isPublic ? 'rounded-2xl border border-slate-200 bg-slate-50 p-4' : 'rounded-2xl border p-4 bo-panel-subtle' }}" @if (in_array($activo->id, $matchingActivoIds)) style="border: 2px solid #0891b2; box-shadow: 0 0 0 3px #a5f3fc;" @endif>
+                                    @if (in_array($activo->id, $matchingActivoIds)) <span class="text-xs font-semibold">Coincide con la búsqueda</span> @endif
                                     <div class="flex items-start justify-between gap-3">
                                         <div>
-                                            <p class="{{ $isPublic ? 'font-bold text-slate-950' : 'font-bold bo-strong' }}">{{ $activo->nombre }}</p>
-                                            <p class="{{ $isPublic ? 'mt-1 text-xs text-slate-600' : 'mt-1 text-xs bo-muted' }}">{{ $activo->codigo_inventario ?: 'Sin codigo inventario' }}</p>
+                                            <p class="{{ $isPublic ? 'font-bold text-slate-950' : 'font-bold bo-strong' }}">@foreach ($this->searchSegments($activo->nombre, $searchTerm) as [$segment, $match])@if ($match)<mark>{{ $segment }}</mark>@endif@unless ($match){{ $segment }}@endunless@endforeach</p>
+                                            <p class="{{ $isPublic ? 'mt-1 text-xs text-slate-600' : 'mt-1 text-xs bo-muted' }}">@foreach ($this->searchSegments($activo->codigo_inventario ?: 'Sin codigo inventario', $searchTerm) as [$segment, $match])@if ($match)<mark>{{ $segment }}</mark>@endif@unless ($match){{ $segment }}@endunless@endforeach</p>
                                         </div>
                                         <span class="{{ $isPublic ? 'rounded-full bg-white px-2 py-1 text-xs font-bold text-slate-700 shadow-sm' : 'rounded-full px-2 py-1 text-xs font-bold bo-panel-subtle bo-strong' }}">{{ $activo->estado }}</span>
                                     </div>
@@ -354,7 +379,7 @@
                                     @if ($activo->numero_serie || (! $isPublic && $activo->observaciones))
                                         <div class="{{ $isPublic ? 'mt-3 space-y-1 text-xs text-slate-600' : 'mt-3 space-y-1 text-xs bo-muted' }}">
                                             @if ($activo->numero_serie)
-                                                <p>Serie: {{ $activo->numero_serie }}</p>
+                                                <p>@if ($searchTerm === '')Serie: {{ $activo->numero_serie }}@else Serie: @foreach ($this->searchSegments($activo->numero_serie, $searchTerm) as [$segment, $match])@if ($match)<mark>{{ $segment }}</mark>@endif@unless ($match){{ $segment }}@endunless@endforeach @endif</p>
                                             @endif
                                             @if (! $isPublic && $activo->observaciones)
                                                 <p>{{ $activo->observaciones }}</p>

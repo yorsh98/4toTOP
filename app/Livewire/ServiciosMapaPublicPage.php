@@ -37,6 +37,7 @@ class ServiciosMapaPublicPage extends ServiciosMapaPage
         $this->search = trim((string) request()->query('search', ''));
 
         parent::mount();
+        $this->moveToMatchingFloor();
     }
 
     protected function authorizeBackoffice(): void
