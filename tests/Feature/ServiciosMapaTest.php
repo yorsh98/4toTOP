@@ -531,3 +531,93 @@ test('sector seeder registers map sectors for floors seven and nine', function (
         'nombre' => '-',
     ]);
 });
+
+test('search moves to the only matching floor without opening a sector', function (string $component, string $property) {
+    $sector = Sector::factory()->create(['piso' => '7MO', 'identificador_mapa' => '7_713']);
+    Activo::factory()->for($sector)->create(['codigo_inventario' => 'UNICO-7']);
+    $user = User::factory()->create();
+    $user->givePermissionTo('servicios.ver');
+
+    Livewire::actingAs($user)->test($component)
+        ->set($property, 'UNICO-7')
+        ->assertSet('piso', 7)
+        ->assertSet('selectedSectorId', null)
+        ->assertDispatched('app-toast', message: 'Encontrado en Piso 7.');
+})->with([[ServiciosMapaPage::class, 'mapSearch'], [ServiciosMapaPublicPage::class, 'search']]);
+
+test('search reports matching floors without moving when several match', function (string $component, string $property) {
+    foreach (['7MO', '9NO'] as $floor) {
+        $sector = Sector::factory()->create(['piso' => $floor]);
+        Activo::factory()->for($sector)->create(['codigo_inventario' => 'VARIOS-79']);
+    }
+    $user = User::factory()->create();
+    $user->givePermissionTo('servicios.ver');
+
+    Livewire::actingAs($user)->test($component)
+        ->set($property, 'VARIOS-79')
+        ->assertSet('piso', 8)
+        ->assertSee('Sin coincidencias en Piso 8; encontrado en Piso 7 y Piso 9')
+        ->assertSeeHtml('(1)');
+})->with([[ServiciosMapaPage::class, 'mapSearch'], [ServiciosMapaPublicPage::class, 'search']]);
+
+test('search stays on current floor when it also has matches', function (string $component, string $property) {
+    foreach (['7MO', '8VO'] as $floor) {
+        $sector = Sector::factory()->create(['piso' => $floor]);
+        Activo::factory()->for($sector)->create(['codigo_inventario' => 'ACTUAL-78']);
+    }
+    $user = User::factory()->create();
+    $user->givePermissionTo('servicios.ver');
+
+    Livewire::actingAs($user)->test($component)->set($property, 'ACTUAL-78')->assertSet('piso', 8);
+})->with([[ServiciosMapaPage::class, 'mapSearch'], [ServiciosMapaPublicPage::class, 'search']]);
+
+test('modal orders and safely highlights matching assets', function (string $component, string $property) {
+    $sector = Sector::factory()->create(['identificador_mapa' => '837']);
+    Activo::factory()->for($sector)->create(['nombre' => 'Coincidente', 'codigo_inventario' => 'COD-<script>']);
+    Activo::factory()->for($sector)->create(['nombre' => 'No coincidente']);
+    $user = User::factory()->create();
+    $user->givePermissionTo('servicios.ver');
+
+    Livewire::actingAs($user)->test($component)
+        ->set($property, '<script>')
+        ->call('selectHotspot', '837')
+        ->assertSee('1 de 2 activos coinciden con la búsqueda')
+        ->assertSeeHtml('<mark>&lt;script&gt;</mark>')
+        ->assertDontSeeHtml('<mark><script></mark>')
+        ->assertSeeInOrder(['Coincidente', 'No coincidente']);
+})->with([[ServiciosMapaPage::class, 'mapSearch'], [ServiciosMapaPublicPage::class, 'search']]);
+
+test('search reports matching underground storage', function (string $component, string $property) {
+    $sector = Sector::factory()->create(['piso' => 'SUBTERRANEO', 'nombre' => 'Bodega subterránea S03']);
+    Activo::factory()->for($sector)->create(['codigo_inventario' => 'BODEGA-UNICA']);
+    $user = User::factory()->create();
+    $user->givePermissionTo('servicios.ver');
+
+    Livewire::actingAs($user)->test($component)
+        ->set($property, 'BODEGA-UNICA')
+        ->assertSet('piso', 8)
+        ->assertSee('Objeto encontrado en bodega: Bodega subterránea S03');
+})->with([[ServiciosMapaPage::class, 'mapSearch'], [ServiciosMapaPublicPage::class, 'search']]);
+
+test('private modal highlights matching stock', function () {
+    $sector = Sector::factory()->create(['identificador_mapa' => '837']);
+    $insumo = Insumo::create(['codigo' => 'INS-RESALTAR', 'nombre' => 'Tóner', 'unidad_medida' => 'UN']);
+    InsumoExistencia::create(['insumo_id' => $insumo->id, 'sector_id' => $sector->id, 'cantidad' => 1]);
+    $user = User::factory()->create();
+    $user->givePermissionTo('servicios.ver');
+
+    Livewire::actingAs($user)->test(ServiciosMapaPage::class)
+        ->set('mapSearch', 'RESALTAR')
+        ->call('selectHotspot', '837')
+        ->assertSeeHtml('<mark>RESALTAR</mark>');
+});
+
+test('public search query selects the only matching floor on mount', function () {
+    $sector = Sector::factory()->create(['piso' => '7MO']);
+    Activo::factory()->for($sector)->create(['codigo_inventario' => 'QUERY-UNICO']);
+
+    Livewire::withQueryParams(['search' => 'QUERY-UNICO'])->test(ServiciosMapaPublicPage::class)
+        ->assertSet('piso', 7)
+        ->assertSet('selectedSectorId', null)
+        ->assertDispatched('app-toast', message: 'Encontrado en Piso 7.');
+});

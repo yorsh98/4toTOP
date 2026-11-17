@@ -3,8 +3,8 @@
 namespace App\Livewire;
 
 use App\Models\Activo;
-use App\Models\InsumoExistencia;
 use App\Models\Sector;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Locked;
@@ -118,6 +118,87 @@ class ServiciosMapaPage extends Component
         $this->resetValidation();
     }
 
+    public function updatedMapSearch(): void
+    {
+        $this->moveToMatchingFloor();
+    }
+
+    public function updatedSearch(): void
+    {
+        $this->moveToMatchingFloor();
+    }
+
+    protected function moveToMatchingFloor(): void
+    {
+        $term = trim($this->publicMode ? $this->search : $this->mapSearch);
+        if ($term === '') {
+            return;
+        }
+
+        $counts = $this->matchingFloorCounts($term);
+        $floors = array_filter([7 => $counts['7MO'] ?? 0, 8 => $counts['8VO'] ?? 0, 9 => $counts['9NO'] ?? 0]);
+        if (count($floors) === 1 && ! isset($floors[$this->piso])) {
+            $this->piso = array_key_first($floors);
+            $this->closeSectorDetail();
+            $this->dispatch('app-toast', message: "Encontrado en Piso {$this->piso}.");
+        }
+    }
+
+    private function applyActivoSearch(Builder $query, string $term): void
+    {
+        $search = '%'.addcslashes($term, '\\%_').'%';
+        $query->where(function (Builder $query) use ($search) {
+            $query->where('nombre', 'like', $search)
+                ->orWhere('codigo_inventario', 'like', $search)
+                ->orWhere('numero_serie', 'like', $search)
+                ->when($this->publicMode, fn ($query) => $query->orWhere('estado', 'like', $search))
+                ->orWhereHas('sector', function ($query) use ($search) {
+                    $query->where('nombre', 'like', $search)
+                        ->orWhere('identificador_mapa', 'like', $search);
+                    if ($this->publicMode) {
+                        $query->orWhere('piso', 'like', $search);
+                    }
+                });
+        });
+    }
+
+    private function matchingSectors(string $term): Builder
+    {
+        $search = '%'.addcslashes($term, '\\%_').'%';
+
+        return Sector::query()->where(function (Builder $query) use ($term, $search) {
+            $query->whereHas('activos', fn (Builder $query) => $this->applyActivoSearch($query, $term));
+            if (! $this->publicMode) {
+                $query->orWhereHas('insumoExistencias.insumo', fn (Builder $query) => $query->where('codigo', 'like', $search)->orWhere('nombre', 'like', $search));
+            }
+        });
+    }
+
+    private function matchingFloorCounts(string $term): array
+    {
+        return $this->matchingSectors($term)->selectRaw('piso, count(*) as total')->groupBy('piso')->pluck('total', 'piso')->all();
+    }
+
+    public function searchSegments(?string $text, string $term): array
+    {
+        $text ??= '';
+        if ($term === '') {
+            return [[$text, false]];
+        }
+        $segments = [];
+        $offset = 0;
+        while (($position = mb_stripos($text, $term, $offset)) !== false) {
+            if ($position > $offset) {
+                $segments[] = [mb_substr($text, $offset, $position - $offset), false];
+            }
+            $segments[] = [mb_substr($text, $position, mb_strlen($term)), true];
+            $offset = $position + mb_strlen($term);
+        }
+        $segments[] = [mb_substr($text, $offset), false];
+
+        return $segments;
+    }
+
     public function render()
     {
         $this->piso = in_array($this->piso, [7, 8, 9], true) ? $this->piso : 8;
@@ -141,7 +222,6 @@ class ServiciosMapaPage extends Component
             : null;
 
         $inventorySearch = trim($this->inventorySearch);
-        $mapSearch = addcslashes(trim($this->publicMode ? $this->search : $this->mapSearch), '\\%_');
 
         $activos = $this->publicMode ? collect() : Activo::query()
             ->with('sector')
@@ -164,68 +244,38 @@ class ServiciosMapaPage extends Component
             ->limit(200)
             ->get();
 
-        $mapMatchingSectorIds = $mapSearch === ''
-            ? []
-            : Activo::query()
-                ->whereHas('sector', fn ($query) => $query->where('piso', $this->floorLabel()))
-                ->where(function ($query) use ($mapSearch) {
-                    $search = "%{$mapSearch}%";
-
-                    $query->where('nombre', 'like', $search)
-                        ->orWhere('codigo_inventario', 'like', $search)
-                        ->orWhere('numero_serie', 'like', $search)
-                        ->when($this->publicMode, fn ($query) => $query->orWhere('estado', 'like', $search))
-                        ->orWhereHas('sector', function ($query) use ($search) {
-                            $query->where('nombre', 'like', $search)
-                                ->orWhere('identificador_mapa', 'like', $search);
-
-                            if ($this->publicMode) {
-                                $query->orWhere('piso', 'like', $search);
-                            }
-                        });
-                })
-                ->pluck('sector_id')
-                ->unique()
-                ->all();
-
-        if (! $this->publicMode && $mapSearch !== '') {
-            $search = "%{$mapSearch}%";
-            $mapMatchingSectorIds = array_values(array_unique([
-                ...$mapMatchingSectorIds,
-                ...InsumoExistencia::query()
-                    ->whereHas('sector', fn ($query) => $query->where('piso', $this->floorLabel()))
-                    ->whereHas('insumo', fn ($query) => $query->where('codigo', 'like', $search)->orWhere('nombre', 'like', $search))
-                    ->pluck('sector_id')
-                    ->all(),
-            ]));
+        $term = trim($this->publicMode ? $this->search : $this->mapSearch);
+        $floorCounts = $term === '' ? [] : $this->matchingFloorCounts($term);
+        $floorResults = [7 => $floorCounts['7MO'] ?? 0, 8 => $floorCounts['8VO'] ?? 0, 9 => $floorCounts['9NO'] ?? 0];
+        $otherFloors = array_keys(array_filter($floorResults, fn ($count, $floor) => $count > 0 && $floor !== $this->piso, ARRAY_FILTER_USE_BOTH));
+        $bodegas = $term === '' ? collect() : $this->matchingSectors($term)->where('piso', 'SUBTERRANEO')->orderBy('nombre')->pluck('nombre');
+        $mapMatchingSectorIds = $term === '' ? [] : $this->matchingSectors($term)->where('piso', $this->floorLabel())->pluck('id')->all();
+        $matchingActivoIds = $term === '' || ! $selectedSector ? [] : Activo::query()
+            ->where('sector_id', $selectedSector->id)
+            ->where(fn (Builder $query) => $this->applyActivoSearch($query, $term))
+            ->pluck('id')->all();
+        if ($selectedSector && $term !== '') {
+            $selectedSector->setRelation('activos', $selectedSector->activos->sortByDesc(fn ($activo) => in_array($activo->id, $matchingActivoIds)));
+            if (! $this->publicMode) {
+                $selectedSector->setRelation('insumoExistencias', $selectedSector->insumoExistencias->sortByDesc(fn ($existencia) => mb_stripos($existencia->insumo->codigo, $term) !== false || mb_stripos($existencia->insumo->nombre, $term) !== false));
+            }
         }
 
         $publicActivos = $this->publicMode
             ? Activo::query()
                 ->with('sector')
                 ->whereHas('sector', fn ($query) => $query->where('piso', $this->floorLabel()))
-                ->when($this->search !== '', function ($query) {
-                    $search = '%'.addcslashes($this->search, '\\%_').'%';
-
-                    $query->where(function ($query) use ($search) {
-                        $query->where('nombre', 'like', $search)
-                            ->orWhere('codigo_inventario', 'like', $search)
-                            ->orWhere('numero_serie', 'like', $search)
-                            ->orWhere('estado', 'like', $search)
-                            ->orWhereHas('sector', function ($query) use ($search) {
-                                $query->where('nombre', 'like', $search)
-                                    ->orWhere('identificador_mapa', 'like', $search)
-                                    ->orWhere('piso', 'like', $search);
-                            });
-                    });
-                })
-                ->latest('id')
-                ->limit(300)
-                ->get()
+                ->when($this->search !== '', fn (Builder $query) => $this->applyActivoSearch($query, $this->search))
+                ->latest('id')->limit(300)->get()
             : collect();
 
         return view('livewire.servicios-mapa-page', [
-            'hotspots' => $this->hotspots($sectores, $mapMatchingSectorIds, $mapSearch !== ''),
+            'searchTerm' => $term,
+            'floorResults' => $floorResults,
+            'otherFloors' => $otherFloors,
+            'bodegas' => $bodegas,
+            'matchingActivoIds' => $matchingActivoIds,
+            'hotspots' => $this->hotspots($sectores, $mapMatchingSectorIds, $term !== ''),
             'sectoresSinPosicion' => $sectores->except(array_column($this->hotspotLayout(), 'identificador')),
             'selectedSector' => $selectedSector,
             'selectedHotspot' => $this->selectedHotspot($sectores),
