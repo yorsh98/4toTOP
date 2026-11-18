@@ -9,8 +9,10 @@ test('the test account cannot be seeded outside local even with a password confi
     app()->instance('env', $environment);
     config(['security.local_test_user_password' => Str::random(32)]);
 
-    expect(fn () => $this->seed(LocalTestUserSeeder::class))
-        ->toThrow(RuntimeException::class, 'solo se puede crear en el entorno local');
+    expect(fn () => $this->artisan('db:seed', [
+        '--class' => LocalTestUserSeeder::class,
+        '--force' => true,
+    ])->run())->toThrow(RuntimeException::class, 'solo se puede crear en el entorno local');
 
     $this->assertDatabaseMissing('users', ['email' => 'test@example.com']);
 })->with(['production', 'staging', 'testing']);
