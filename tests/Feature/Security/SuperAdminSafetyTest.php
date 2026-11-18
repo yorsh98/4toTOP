@@ -3,6 +3,7 @@
 use App\Livewire\Security\UsersRolesPage;
 use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
+use Database\Seeders\SuperAdminSeeder;
 use Livewire\Livewire;
 
 beforeEach(function () {
@@ -38,4 +39,10 @@ test('system cannot be left without at least one superadmin', function () {
         ->assertHasNoErrors();
 
     expect($targetSuperAdmin->fresh()->hasRole('SuperAdmin'))->toBeTrue();
+});
+
+test('the administrative seeder does not provision a new account', function () {
+    $this->seed(SuperAdminSeeder::class);
+
+    $this->assertDatabaseCount('users', 0);
 });
