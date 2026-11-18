@@ -35,6 +35,21 @@ class SecurityHeaders
             $response->headers->set('Content-Security-Policy', "base-uri 'self'; frame-ancestors 'self'; form-action 'self'");
         }
 
+        if (! $response->headers->has('Cross-Origin-Resource-Policy')) {
+            $response->headers->set('Cross-Origin-Resource-Policy', 'same-origin');
+        }
+
+        if (! $response->headers->has('Cross-Origin-Opener-Policy')) {
+            $response->headers->set('Cross-Origin-Opener-Policy', 'same-origin');
+        }
+
+        if (! $response->headers->has('Cross-Origin-Embedder-Policy')) {
+            $response->headers->set(
+                'Cross-Origin-Embedder-Policy',
+                config('security.enforce_cross_origin_embedder_policy') ? 'require-corp' : 'unsafe-none',
+            );
+        }
+
         if ($request->isSecure() && ! $response->headers->has('Strict-Transport-Security')) {
             $response->headers->set('Strict-Transport-Security', 'max-age=31536000');
         }
