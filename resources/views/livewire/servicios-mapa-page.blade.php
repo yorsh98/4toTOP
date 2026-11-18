@@ -56,33 +56,31 @@
                 </div>
             </div>
 
-            <div class="rounded-lg border border-slate-200 bg-slate-50 p-3">
-                <div class="rounded-md bg-slate-900">
-                    <div class="relative aspect-[4/3] w-full overflow-hidden bg-white" aria-label="Plano interactivo del piso {{ $piso }}">
-                        <img src="{{ $imagePath }}" alt="Plano del piso {{ $piso }} del tribunal" class="absolute inset-0 h-full w-full object-cover">
+            <x-servicios-plano :piso="$piso" :hotspots="$hotspots">
+                <div class="relative aspect-[4/3] w-full overflow-hidden bg-white" aria-label="Plano interactivo del piso {{ $piso }}">
+                    <img src="{{ $imagePath }}" alt="Plano del piso {{ $piso }} del tribunal" class="absolute inset-0 h-full w-full object-cover">
 
-                        @forelse ($hotspots as $hotspot)
-                            <button
-                                type="button"
-                                wire:key="public-hotspot-{{ $piso }}-{{ $hotspot['identificador'] }}"
-                                wire:click="selectHotspot(@js($hotspot['identificador']))"
-                                style="left: {{ ($hotspot['x'] / 1440) * 100 }}%; top: {{ ($hotspot['y'] / 1080) * 100 }}%; width: {{ ($hotspot['w'] / 1440) * 100 }}%; height: {{ ($hotspot['h'] / 1080) * 100 }}%;"
-                                class="group absolute flex items-center justify-center rounded border px-1 text-center text-[8px] font-black uppercase leading-tight shadow-sm transition hover:z-20 hover:-translate-y-0.5 hover:border-cyan-300 hover:bg-blue-700 hover:text-white focus:z-20 focus:outline-none focus:ring-2 focus:ring-cyan-300 sm:text-[10px] lg:text-[11px] {{ $hotspot['is_map_match'] ? 'z-10 border-cyan-300 bg-cyan-600/80 text-white ring-2 ring-cyan-200' : (($hotspot['has_data'] ? 'border-blue-700 bg-blue-600/75 text-white' : 'border-blue-300 bg-blue-200/70 text-blue-950').($hotspot['is_map_dimmed'] ? ' opacity-30' : '')) }}"
-                                title="{{ $hotspot['label'] }} - {{ $hotspot['activos_count'] }} activos"
-                            >
-                                <span class="max-w-full truncate drop-shadow">{{ $hotspot['label'] }}</span>
-                                <span class="absolute -right-1 -top-1 rounded-full border border-white bg-white px-1 py-0.5 text-[8px] font-black text-slate-950 shadow sm:-right-2 sm:-top-2 sm:px-1.5 sm:text-[10px]">
-                                    {{ $hotspot['activos_count'] }}
-                                </span>
-                            </button>
-                        @empty
-                            <div class="absolute inset-x-8 top-8 rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm font-semibold text-blue-900 shadow">
-                                El plano del Piso {{ $piso }} esta disponible, pero sus hotspots aun no fueron cargados.
-                            </div>
-                        @endforelse
-                    </div>
+                    @forelse ($hotspots as $hotspot)
+                        <button
+                            type="button"
+                            wire:key="public-hotspot-{{ $piso }}-{{ $hotspot['identificador'] }}"
+                            wire:click="selectHotspot(@js($hotspot['identificador']))"
+                            style="left: {{ ($hotspot['x'] / 1440) * 100 }}%; top: {{ ($hotspot['y'] / 1080) * 100 }}%; width: {{ ($hotspot['w'] / 1440) * 100 }}%; height: {{ ($hotspot['h'] / 1080) * 100 }}%;"
+                            class="group absolute flex items-center justify-center rounded border px-1 text-center text-[8px] font-black uppercase leading-tight shadow-sm transition hover:z-20 hover:-translate-y-0.5 hover:border-cyan-300 hover:bg-blue-700 hover:text-white focus:z-20 focus:outline-none focus:ring-2 focus:ring-cyan-300 sm:text-[10px] lg:text-[11px] {{ $hotspot['is_map_match'] ? 'z-10 border-cyan-300 bg-cyan-600/80 text-white ring-2 ring-cyan-200' : (($hotspot['has_data'] ? 'border-blue-700 bg-blue-600/75 text-white' : 'border-blue-300 bg-blue-200/70 text-blue-950').($hotspot['is_map_dimmed'] ? ' opacity-30' : '')) }}"
+                            title="{{ $hotspot['label'] }} - {{ $hotspot['activos_count'] }} activos"
+                        >
+                            <span class="max-w-full truncate drop-shadow">{{ $hotspot['label'] }}</span>
+                            <span class="absolute -right-1 -top-1 rounded-full border border-white bg-white px-1 py-0.5 text-[8px] font-black text-slate-950 shadow sm:-right-2 sm:-top-2 sm:px-1.5 sm:text-[10px]">
+                                {{ $hotspot['activos_count'] }}
+                            </span>
+                        </button>
+                    @empty
+                        <div class="absolute inset-x-8 top-8 rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm font-semibold text-blue-900 shadow">
+                            El plano del Piso {{ $piso }} esta disponible, pero sus hotspots aun no fueron cargados.
+                        </div>
+                    @endforelse
                 </div>
-            </div>
+            </x-servicios-plano>
 
             <div class="mt-6 overflow-x-auto rounded-lg border border-slate-200">
                 <table class="min-w-full divide-y divide-slate-200 text-sm">
@@ -196,34 +194,32 @@
                 </div>
             </div>
 
-            <div class="mt-5 border border-slate-300 bg-slate-950 shadow-inner {{ $isPublic ? 'rounded-2xl p-2' : 'rounded-3xl p-3' }}">
-                <div class="overflow-x-auto rounded-2xl bg-slate-900">
-                    <div class="relative h-[1080px] w-[1440px] overflow-hidden bo-panel-subtle" aria-label="Plano interactivo del piso {{ $piso }}">
-                        <img src="{{ $imagePath }}" alt="Plano del piso {{ $piso }} del tribunal" class="absolute inset-0 h-full w-full object-cover">
+            <x-servicios-plano :piso="$piso" :hotspots="$hotspots">
+                <div class="relative h-[1080px] w-[1440px] overflow-hidden bo-panel-subtle" aria-label="Plano interactivo del piso {{ $piso }}">
+                    <img src="{{ $imagePath }}" alt="Plano del piso {{ $piso }} del tribunal" class="absolute inset-0 h-full w-full object-cover">
 
-                        @forelse ($hotspots as $hotspot)
-                            <button
-                                type="button"
-                                wire:key="hotspot-{{ $piso }}-{{ $hotspot['identificador'] }}"
-                                wire:click="selectHotspot(@js($hotspot['identificador']))"
-                                style="left: {{ $hotspot['x'] }}px; top: {{ $hotspot['y'] }}px; width: {{ $hotspot['w'] }}px; height: {{ $hotspot['h'] }}px;"
-                                aria-label="{{ $hotspot['label'] }}, {{ $hotspot['activos_count'] }} activos{{ $isPublic || $hotspot['insumos_count'] === 0 ? '' : ', '.$hotspot['insumos_count'].' insumos' }}"
-                                class="group absolute flex items-center justify-center rounded-md border-2 px-2 text-center text-[11px] font-black uppercase leading-tight shadow-sm transition hover:z-20 hover:-translate-y-0.5 hover:border-cyan-300 hover:bg-blue-700 hover:text-white focus:z-20 focus:outline-none focus:ring-4 focus:ring-cyan-300 {{ ($selectedHotspot['identificador'] ?? null) === $hotspot['identificador'] ? 'z-10 border-cyan-300 bg-blue-700/80 text-white ring-4 ring-cyan-200' : ($hotspot['is_map_match'] ? 'z-10 border-cyan-300 bg-cyan-600/80 text-white ring-4 ring-cyan-200' : (($hotspot['has_data'] ? 'border-blue-700 bg-blue-600/75 text-white' : 'border-blue-300 bg-blue-200/70 text-blue-950').($hotspot['is_map_dimmed'] ? ' opacity-30' : '')) ) }}"
-                                title="{{ $hotspot['label'] }} - {{ $hotspot['activos_count'] }} activos{{ $isPublic || $hotspot['insumos_count'] === 0 ? '' : ' - '.$hotspot['insumos_count'].' insumos' }}"
-                            >
-                                <span class="drop-shadow">{{ $hotspot['label'] }}</span>
-                                <span class="absolute -right-2 -top-2 rounded-full border border-white bg-white px-1.5 py-0.5 text-[10px] font-black text-slate-950 shadow">
-                                    {{ ! $isPublic && $hotspot['insumos_count'] > 0 ? $hotspot['activos_count'].' / '.$hotspot['insumos_count'] : $hotspot['activos_count'] }}
-                                </span>
-                            </button>
-                        @empty
-                            <div class="absolute inset-x-8 top-8 rounded-2xl border p-4 text-sm font-semibold bo-panel-subtle bo-text--info">
-                                El plano del Piso {{ $piso }} está disponible, pero sus hotspots aún no fueron cargados.
-                            </div>
-                        @endforelse
-                    </div>
+                    @forelse ($hotspots as $hotspot)
+                        <button
+                            type="button"
+                            wire:key="hotspot-{{ $piso }}-{{ $hotspot['identificador'] }}"
+                            wire:click="selectHotspot(@js($hotspot['identificador']))"
+                            style="left: {{ ($hotspot['x'] / 1440) * 100 }}%; top: {{ ($hotspot['y'] / 1080) * 100 }}%; width: {{ ($hotspot['w'] / 1440) * 100 }}%; height: {{ ($hotspot['h'] / 1080) * 100 }}%;"
+                            aria-label="{{ $hotspot['label'] }}, {{ $hotspot['activos_count'] }} activos{{ $isPublic || $hotspot['insumos_count'] === 0 ? '' : ', '.$hotspot['insumos_count'].' insumos' }}"
+                            class="group absolute flex items-center justify-center rounded-md border-2 px-2 text-center text-[11px] font-black uppercase leading-tight shadow-sm transition hover:z-20 hover:-translate-y-0.5 hover:border-cyan-300 hover:bg-blue-700 hover:text-white focus:z-20 focus:outline-none focus:ring-4 focus:ring-cyan-300 {{ ($selectedHotspot['identificador'] ?? null) === $hotspot['identificador'] ? 'z-10 border-cyan-300 bg-blue-700/80 text-white ring-4 ring-cyan-200' : ($hotspot['is_map_match'] ? 'z-10 border-cyan-300 bg-cyan-600/80 text-white ring-4 ring-cyan-200' : (($hotspot['has_data'] ? 'border-blue-700 bg-blue-600/75 text-white' : 'border-blue-300 bg-blue-200/70 text-blue-950').($hotspot['is_map_dimmed'] ? ' opacity-30' : '')) ) }}"
+                            title="{{ $hotspot['label'] }} - {{ $hotspot['activos_count'] }} activos{{ $isPublic || $hotspot['insumos_count'] === 0 ? '' : ' - '.$hotspot['insumos_count'].' insumos' }}"
+                        >
+                            <span class="drop-shadow">{{ $hotspot['label'] }}</span>
+                            <span class="absolute -right-2 -top-2 rounded-full border border-white bg-white px-1.5 py-0.5 text-[10px] font-black text-slate-950 shadow">
+                                {{ ! $isPublic && $hotspot['insumos_count'] > 0 ? $hotspot['activos_count'].' / '.$hotspot['insumos_count'] : $hotspot['activos_count'] }}
+                            </span>
+                        </button>
+                    @empty
+                        <div class="absolute inset-x-8 top-8 rounded-2xl border p-4 text-sm font-semibold bo-panel-subtle bo-text--info">
+                            El plano del Piso {{ $piso }} está disponible, pero sus hotspots aún no fueron cargados.
+                        </div>
+                    @endforelse
                 </div>
-            </div>
+            </x-servicios-plano>
 
             <div class="mt-4 flex flex-wrap items-center gap-3 text-xs font-semibold bo-muted">
                 <span class="inline-flex items-center gap-2"><span class="h-3 w-3 rounded-full bg-blue-600"></span>Con registros</span>
