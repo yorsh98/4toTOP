@@ -66,37 +66,90 @@
     .floor-stage > div { transition: none; }
 }
 
-.model-scroll { overflow: auto; background: #e6ecee; border-radius: .8rem; }
-.model-frame { position: relative; min-width: 340px; aspect-ratio: 1.6; container-type: inline-size; }
-.model-slab {
-    position: absolute; width: 82%; aspect-ratio: 914 / 583; left: 9%; top: 50%;
-    translate: 0 -50%; transform-style: preserve-3d; background: #eedcaf;
-    box-shadow: 0 1px #798994, 0 3px #798994, 0 10px 18px #33415545;
-    --wall-height: 1.35cqw;
+/* Architectural model: the floor and wall tokens are shared by the legend. */
+.model-scroll, .model-legend {
+    --floor: #efebe3; --wall-top: #fff; --wall-light: #c3cdd9; --wall-shadow: #93a3b6;
+    --slab-edge: #a9b5c3; --room-data: #2f62d0; --room-data-top: #4a7fe6; --room-data-side: #1f4699;
+    --room-empty: #e3e8ef; --room-empty-side: #b9c3d0; --room-text: #334155; --accent: #22d3ee;
+    --label-bg: #ffffffeb; --label-text: #1e293b; --label-count: #1d4ed8;
+    --scene-center: #f8fafc; --scene-edge: #dce5ed; --grid: #64748b12;
 }
-.model-room { position: absolute; background: #e3e9eb; color: #253b49; font-size: clamp(6px,1.15cqw,16px); font-weight: 700; overflow: hidden; }
-.model-room { overflow-wrap: anywhere; line-height: 1.08; }
-.model-room[data-inventory="present"] { background: #336aa2; color: white; }
-.model-room[data-search="match"] { background: #087b88; color: white; outline: 2px solid #67e8f9; }
-.model-room[data-search="dimmed"] { opacity: .45; }
-.model-room:hover, .model-room:focus-visible { background: #173f73; color: white; outline: 2px solid #67e8f9; }
+[data-theme="dark"] .model-scroll, [data-theme="dark"] .model-legend {
+    --floor: #1c2b40; --wall-top: #5b7290; --wall-light: #3a4f6a; --wall-shadow: #26364c;
+    --slab-edge: #33465f; --room-data: #2f5fc4; --room-data-top: #4777dc; --room-data-side: #1d3d84;
+    --room-empty: #2a3a52; --room-empty-side: #1f2c40; --room-text: #e2e8f0;
+    --label-bg: #0f172ae6; --label-text: #e2e8f0; --label-count: #7dd3fc;
+    --scene-center: #13233a; --scene-edge: #0b1626; --grid: #cbd5e10d;
+}
+.model-scroll { position: relative; overflow: hidden; border-radius: .8rem; scroll-margin-top: 6rem; touch-action: none; cursor: grab;
+    background: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px), radial-gradient(ellipse, var(--scene-center), var(--scene-edge)); background-size: 24px 24px, 24px 24px, auto; }
+.model-scroll:active { cursor: grabbing; }
+.model-scroll:focus-visible { outline: 2px solid #0891b2; outline-offset: 3px; }
+.model-scroll:fullscreen, .model-fullscreen { position: fixed; inset: 0; z-index: 100; border-radius: 0; display: grid; place-items: center; }
+.model-fullscreen .model-frame, .model-scroll:fullscreen .model-frame { max-width: 1200px; }
+.model-exit-fullscreen { display: none; position: absolute; z-index: 5; top: .7rem; right: .8rem; padding: .4rem .65rem; border-radius: .4rem; background: #fff; color: #172554; }
+.model-fullscreen .model-exit-fullscreen, .model-scroll:fullscreen .model-exit-fullscreen { display: block; }
+.model-hint { position: absolute; z-index: 2; top: .7rem; left: .8rem; margin: 0; color: var(--room-text); font-size: .75rem; pointer-events: none; }
+.model-frame { position: relative; width: 100%; min-width: 340px; max-width: none; aspect-ratio: 1.52; container-type: inline-size; perspective: 240cqw; perspective-origin: 50% 40%; }
+.model-frame::before { content: ''; position: absolute; inset: 23% 13% 14%; background: #0f172a55; filter: blur(2.5cqw); border-radius: 50%; }
+.model-slab { position: absolute; width: 76%; aspect-ratio: 914 / 583; left: 12%; top: 48%; translate: 0 -50%; transform-style: preserve-3d; background: var(--floor); --wall-height: 1.35cqw; animation: model-arrive .45s cubic-bezier(.2,.8,.2,1) backwards; }
+/* Opacity must stay off the 3D context (it flattens preserve-3d), so the fade lives on the flat frame. */
+.model-frame { animation: model-fade .35s ease-out backwards; }
+@keyframes model-arrive { from { translate: 0 -60%; } }
+@keyframes model-fade { from { opacity: 0; } }
+/* Each room is a 3D block: a div keeps preserve-3d (a <button> flattens its children in Chromium), the button is the top face. */
+.model-room { position: absolute; transform-style: preserve-3d; pointer-events: none; --lift: 0cqw; }
+.model-room-block { position: absolute; inset: .28cqw; transform-style: preserve-3d; transform: translateZ(calc(var(--room-height) + var(--lift))); transition: transform .25s cubic-bezier(.2,.8,.2,1); }
+.model-room-face { position: absolute; inset: 0; padding: 0; border: 0; border-radius: .12cqw; background: var(--room-empty); box-shadow: inset 0 0 0 .08cqw #ffffff40, inset 0 -.5cqw .8cqw #0f172a1f; pointer-events: auto; cursor: pointer; transition: background-color .2s, filter .2s, box-shadow .2s; }
+.model-room[data-inventory="present"] .model-room-face { background: linear-gradient(160deg, var(--room-data-top), var(--room-data)); }
+.model-room-side { position: absolute; display: block; background: var(--room-empty-side); pointer-events: none; transition: filter .2s; }
+.model-room[data-inventory="present"] .model-room-side { background: var(--room-data-side); }
+.model-room-side-x, .model-room-side-xb { left: 0; width: 100%; height: calc(var(--room-height) + var(--lift)); transform-origin: top; transform: rotateX(-90deg); }
+.model-room-side-x { top: 100%; } .model-room-side-xb { top: 0; }
+.model-room-side-y, .model-room-side-yb { top: 0; height: 100%; width: calc(var(--room-height) + var(--lift)); transform-origin: left; transform: rotateY(90deg); filter: brightness(.82); }
+.model-room-side-y { left: 100%; } .model-room-side-yb { left: 0; }
+.model-room:hover { --lift: .3cqw; }
+.model-room:hover .model-room-face { filter: brightness(1.12); }
+.model-room[data-selected="true"], .model-room[data-search="match"] { --lift: .7cqw; }
+.model-room-face:focus-visible { outline: .18cqw solid var(--accent); outline-offset: .1cqw; }
+.model-room[data-selected="true"] .model-room-face, .model-room[data-search="match"] .model-room-face { box-shadow: inset 0 0 0 .18cqw var(--accent), 0 0 1.4cqw #22d3ee99; }
+.model-slab:has(.model-room[data-selected="true"]) .model-room:not([data-selected="true"]) :is(.model-room-face, .model-room-side),
+.model-room[data-search="dimmed"] :is(.model-room-face, .model-room-side) { filter: grayscale(.8) brightness(1.12) opacity(.55); }
+.model-room[data-search="match"] .model-room-face { animation: model-match .9s ease-out 1; }
+@keyframes model-match { 40% { box-shadow: inset 0 0 0 .18cqw var(--accent), 0 0 3cqw #22d3ee; } }
+.model-label { position: absolute; left: 50%; top: 50%; width: max-content; max-width: 9cqw; padding: .2em .5em; border-radius: 999px; background: var(--label-bg); color: var(--label-text); box-shadow: 0 .1cqw .4cqw #0f172a40; font-size: clamp(8px, .78cqw, 13px); font-weight: 700; letter-spacing: .01em; line-height: 1.25; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; pointer-events: none; }
+.model-label-full, .model-near .model-label-short { display: none; }
+.model-near .model-label-full, .model-room:hover .model-label-full, .model-room:has(:focus-visible) .model-label-full, .model-room[data-selected="true"] .model-label-full { display: inline; }
+.model-room:hover .model-label-short, .model-room:has(:focus-visible) .model-label-short, .model-room[data-selected="true"] .model-label-short { display: none; }
+.model-label b { color: var(--label-count); font-weight: 800; }
+.model-room:hover .model-label b, .model-room:has(:focus-visible) .model-label b, .model-room[data-selected="true"] .model-label b { color: #7dd3fc; }
+.model-room:hover .model-label, .model-room:has(:focus-visible) .model-label, .model-room[data-selected="true"] .model-label { max-width: 22cqw; background: #0f172a; color: #fff; z-index: 4; }
 .model-wall { position: absolute; transform-style: preserve-3d; pointer-events: none; }
-.model-wall::before, .model-wall::after, .model-wall > *, .model-wall > em { content: ''; position: absolute; display: block; }
-.model-wall::before { inset: 0; background: #fff8eb; transform: translateZ(var(--wall-height)); }
-.model-wall::after, .model-wall > b { left: 0; width: 100%; height: var(--wall-height); transform-origin: top; transform: rotateX(90deg); background: #a7907d; }
-.model-wall::after { top: 0; }
-.model-wall > b { top: 100%; }
-.model-wall > i, .model-wall > em { top: 0; width: var(--wall-height); height: 100%; background: #827666; transform-origin: left; transform: rotateY(-90deg); }
-.model-wall > i { left: 100%; }
-.model-wall { border-left: 1px solid #827666; }
-.model-wall > em { left: 0; }
-.model-slab::before, .model-slab::after {
-    content: ''; position: absolute; background: #718490; pointer-events: none;
-}
-.model-slab::before { top: 100%; width: 100%; height: .8cqw; transform-origin: top; transform: rotateX(-90deg); }
-.model-slab::after { left: 100%; height: 100%; width: .8cqw; transform-origin: left; transform: rotateY(90deg); }
+.model-wall::before, .model-wall::after, .model-wall > * { content: ''; position: absolute; display: block; }
+.model-wall::before { inset: 0; background: var(--wall-top); transform: translateZ(var(--wall-height)); }
+.model-wall::after, .model-wall > b { left: 0; width: 100%; height: var(--wall-height); transform-origin: top; transform: rotateX(90deg); background: var(--wall-light); }
+.model-wall::after { top: 0; } .model-wall > b { top: 100%; }
+.model-wall > i, .model-wall > em { top: 0; width: var(--wall-height); height: 100%; background: var(--wall-shadow); transform-origin: left; transform: rotateY(-90deg); }
+.model-wall > i { left: 100%; } .model-wall > em { left: 0; }
+.model-slab::before, .model-slab::after, .model-slab-back::before, .model-slab-back::after { content: ''; position: absolute; background: var(--slab-edge); pointer-events: none; }
+.model-slab::before, .model-slab-back::before { top: 100%; width: 100%; height: .8cqw; transform-origin: top; transform: rotateX(-90deg); }
+.model-slab::after, .model-slab-back::after { left: 100%; height: 100%; width: .8cqw; transform-origin: left; transform: rotateY(90deg); }
 .model-slab-back { position: absolute; inset: 0; pointer-events: none; transform-style: preserve-3d; }
-.model-slab-back::before, .model-slab-back::after { content: ''; position: absolute; background: #718490; }
-.model-slab-back::before { top: 0; width: 100%; height: .8cqw; transform-origin: top; transform: rotateX(-90deg); }
-.model-slab-back::after { left: 0; height: 100%; width: .8cqw; transform-origin: left; transform: rotateY(90deg); }
-.model-frame { aspect-ratio: 1.52; }
+.model-slab-back::before { top: 0; } .model-slab-back::after { left: 0; }
+.model-legend span { display: inline-flex; align-items: center; gap: .35rem; }
+.model-legend i { width: .9rem; height: .9rem; border: 1px solid #64748b; border-radius: .2rem; background: var(--room-data); }
+.model-legend .legend-empty { background: var(--room-empty); } .model-legend .legend-floor { background: var(--floor); } .model-legend .legend-selected { background: #0891b2; border-color: #0891b2; }
+.model-controls button { border: 1px solid #94a3b8; border-radius: .4rem; padding: .25rem .55rem; }
+.model-controls input { width: 6rem; vertical-align: middle; }
+.model-detail { position: fixed; inset: auto 0 0; z-index: 50; display: flex; justify-content: center; pointer-events: none; }
+.model-detail-card { max-height: 60vh; max-width: 42rem; overflow-y: auto; pointer-events: auto; }
+@media (min-width: 1024px) { .model-detail { inset: 5rem 1rem 1rem auto; width: min(28rem, 38vw); } .model-detail-card { max-height: 100%; border-radius: 1rem; } }
+@media (max-width: 640px) { .model-frame { min-width: 0; aspect-ratio: 1.25; } .model-hint { font-size: .65rem; } }
+.model-hint-touch { display: none; }
+@media (pointer: coarse) { .model-hint-mouse { display: none; } .model-hint-touch { display: inline; } }
+/* On a small stage the pills would overlap: show them only once the user zooms in, or on the room in focus. */
+@container (max-width: 700px) {
+    .model-label { display: none; }
+    .model-near .model-label, .model-room:hover .model-label, .model-room:has(:focus-visible) .model-label, .model-room[data-selected="true"] .model-label, .model-room[data-search="match"] .model-label { display: block; }
+}
+@media (prefers-reduced-motion: reduce) { .model-slab, .model-frame, .model-room[data-search="match"] .model-room-face { animation: none; } .model-room-block, .model-room-face, .model-room-side { transition: none; } }
