@@ -23,6 +23,7 @@
         "jquery": "^4.0.0",
         "pdfjs-dist": "6.4.299",
         "sweetalert2": "^11.22.3",
+        "three": "0.170.0",
         "wavesurfer.js": "7.12.12"
     }
 }

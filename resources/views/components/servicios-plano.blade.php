@@ -1,15 +1,5 @@
 @props(['piso', 'hotspots', 'selectedHotspot' => null])
-<div x-data="{
-    relief: false, orbit: window.matchMedia('(max-width: 640px)').matches ? 0 : -28, zoom: window.matchMedia('(max-width: 640px)').matches ? 1.2 : 1,
-    tilt: window.matchMedia('(max-width: 640px)').matches ? 30 : 48,
-    pointers: {}, start: {x: 0, y: 0}, lastX: 0, distance: 0, moved: false, velocity: 0, frame: null, fallback: false,
-    reset() { let small = window.matchMedia('(max-width: 640px)').matches; this.orbit = small ? 0 : -28; this.zoom = small ? 1.2 : 1 },
-    clampZoom(value) { this.zoom = Math.max(.8, Math.min(2, value)) },
-    down(e) { if (e.button !== 0 && e.pointerType === 'mouse') return; cancelAnimationFrame(this.frame); this.pointers[e.pointerId] = {x: e.clientX, y: e.clientY}; this.lastX = e.clientX; this.start = {x: e.clientX, y: e.clientY}; this.moved = false; this.velocity = 0 },
-    move(e) { if (!this.pointers[e.pointerId]) return; let old = this.pointers[e.pointerId]; let dx = e.clientX - old.x; let dy = e.clientY - old.y; this.pointers[e.pointerId] = {x: e.clientX, y: e.clientY}; let points = Object.values(this.pointers); if (!this.moved && Math.hypot(e.clientX - this.start.x, e.clientY - this.start.y) > 6) this.moved = true; if (points.length > 1) { let d = Math.hypot(points[0].x - points[1].x, points[0].y - points[1].y); if (this.distance) this.clampZoom(this.zoom * d / this.distance); this.distance = d } else if (this.moved) { this.orbit += dx * .45; this.velocity = dx * .45 } },
-    up(e) { delete this.pointers[e.pointerId]; this.distance = 0; if (this.moved && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) { let tick = () => { this.velocity *= .9; if (Math.abs(this.velocity) > .05) { this.orbit += this.velocity; this.frame = requestAnimationFrame(tick) } }; this.frame = requestAnimationFrame(tick) } },
-    fullscreen() { if (document.fullscreenElement) document.exitFullscreen(); else if (this.fallback) this.fallback = false; else if (this.$refs.stage.requestFullscreen) this.$refs.stage.requestFullscreen().catch(() => this.fallback = true); else this.fallback = true }
-}" class="mt-4 min-w-0">
+<div x-data="serviciosPlano()" class="mt-4 min-w-0">
     <div class="mb-3 flex flex-wrap items-center gap-3">
         <div role="group" aria-label="Vista del plano" class="floor-view-switch">
             @foreach (['2D', '3D'] as $mode)
@@ -27,7 +17,7 @@
                 <button type="button" class="rounded border px-3 py-1" @click="reset()">Vista inicial</button>
             </div>
     </div>
-    @include('components.servicios-maqueta')
+    <x-servicios-maqueta :piso="$piso" :hotspots="$hotspots" :selected-hotspot="$selectedHotspot" />
     <div x-show="!relief" class="floor-stage">
         {{ $slot }}
     </div>

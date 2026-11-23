@@ -1,3 +1,4 @@
+import "./servicios-maqueta/index.js";
 import './lib/page-motion.js';
 import './lib/quote-rotate.js';
 import $ from 'jquery';

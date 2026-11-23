@@ -12,6 +12,8 @@ use App\NotificationsV2\Application\Services\DatabaseNotificationOrchestrator;
 use App\NotificationsV2\Application\Services\SimpleTemplateRenderer;
 use App\NotificationsV2\Infrastructure\Mail\MailChannelSender;
 use App\Policies\GuiasPolicy;
+use App\Services\Servicios\Maqueta\ArchivoPlanoMurosRepository;
+use App\Services\Servicios\Maqueta\Contracts\PlanoMurosRepository;
 use Illuminate\Mail\Events\MessageSending;
 use Illuminate\Mail\Events\MessageSent;
 use Illuminate\Pagination\Paginator;
@@ -31,6 +33,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        $this->app->bind(PlanoMurosRepository::class, ArchivoPlanoMurosRepository::class);
         $this->app->bind(NotificationOrchestrator::class, DatabaseNotificationOrchestrator::class);
         $this->app->bind(RecipientResolver::class, CatalogRecipientResolver::class);
         $this->app->bind(TemplateRenderer::class, SimpleTemplateRenderer::class);
