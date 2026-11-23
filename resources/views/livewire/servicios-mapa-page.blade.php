@@ -56,7 +56,7 @@
                 </div>
             </div>
 
-            <x-servicios-plano :piso="$piso" :hotspots="$hotspots">
+            <x-servicios-plano :piso="$piso" :hotspots="$hotspots" :selected-hotspot="$selectedHotspot['identificador'] ?? null">
                 <div class="relative aspect-[4/3] w-full overflow-hidden bg-white" aria-label="Plano interactivo del piso {{ $piso }}">
                     <img src="{{ $imagePath }}" alt="Plano del piso {{ $piso }} del tribunal" class="absolute inset-0 h-full w-full object-cover">
 
@@ -194,7 +194,7 @@
                 </div>
             </div>
 
-            <x-servicios-plano :piso="$piso" :hotspots="$hotspots">
+            <x-servicios-plano :piso="$piso" :hotspots="$hotspots" :selected-hotspot="$selectedHotspot['identificador'] ?? null">
                 <div class="relative h-[1080px] w-[1440px] overflow-hidden bo-panel-subtle" aria-label="Plano interactivo del piso {{ $piso }}">
                     <img src="{{ $imagePath }}" alt="Plano del piso {{ $piso }} del tribunal" class="absolute inset-0 h-full w-full object-cover">
 
@@ -299,8 +299,8 @@
     @endif
 
     @if ($selectedSector || $selectedHotspot)
-        <div class="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/70 p-4 sm:items-center" role="dialog" aria-modal="true">
-            <div class="{{ $isPublic ? 'max-h-[90vh] w-full max-w-2xl overflow-hidden rounded-[2rem] bg-white shadow-2xl' : 'max-h-[90vh] w-full max-w-2xl overflow-hidden bo-card' }}">
+        <div class="model-detail" role="dialog" aria-label="Detalle de sector">
+            <div class="{{ $isPublic ? 'model-detail-card w-full overflow-hidden rounded-t-2xl bg-white shadow-2xl' : 'model-detail-card w-full overflow-hidden bo-card' }}">
                 <div class="{{ $isPublic ? 'flex items-start justify-between gap-4 border-b border-slate-200 p-5' : 'flex items-start justify-between gap-4 border-b p-5' }}">
                     <div>
                         <p class="{{ $isPublic ? 'text-xs font-bold uppercase tracking-[0.24em] text-blue-700' : 'text-xs font-bold uppercase tracking-[0.24em] bo-text--info' }}">Detalle de sector</p>
