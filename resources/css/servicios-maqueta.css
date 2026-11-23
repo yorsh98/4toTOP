@@ -1,0 +1,257 @@
+/* Theme tokens */
+.model-scroll,
+.model-legend {
+    --floor: #efebe3;
+    --wall-top: #e7eaed;
+    --wall-light: #c3cdd9;
+    --wall-shadow: #93a3b6;
+    --slab-edge: #a9b5c3;
+    --room-data: #3a67c9;
+    --room-data-top: #4a7fe6;
+    --room-data-side: #1f4699;
+    --room-empty: #e3e8ef;
+    --room-empty-side: #b9c3d0;
+    --room-text: #334155;
+    --accent: #22d3ee;
+    --label-bg: #ffffffeb;
+    --label-text: #1e293b;
+    --label-count: #1d4ed8;
+    --scene-center: #f8fafc;
+    --scene-edge: #dce5ed;
+    --grid: #64748b12;
+}
+[data-theme='dark'] .model-scroll,
+[data-theme='dark'] .model-legend {
+    --floor: #1c2b40;
+    --wall-top: #5b7290;
+    --wall-light: #3a4f6a;
+    --wall-shadow: #26364c;
+    --slab-edge: #33465f;
+    --room-data: #2c519f;
+    --room-data-top: #4777dc;
+    --room-data-side: #1d3d84;
+    --room-empty: #2a3a52;
+    --room-empty-side: #1f2c40;
+    --room-text: #e2e8f0;
+    --label-bg: #0f172ae6;
+    --label-text: #e2e8f0;
+    --label-count: #7dd3fc;
+    --scene-center: #13233a;
+    --scene-edge: #0b1626;
+    --grid: #cbd5e10d;
+}
+/* Scene and controls */
+.model-scroll {
+    position: relative;
+    overflow: hidden;
+    border-radius: 0.8rem;
+    scroll-margin-top: 6rem;
+    touch-action: none;
+    cursor: grab;
+    background: linear-gradient(var(--grid) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid) 1px, transparent 1px),
+        radial-gradient(ellipse, var(--scene-center), var(--scene-edge));
+    background-size:
+        24px 24px,
+        24px 24px,
+        auto;
+}
+.model-scroll:active {
+    cursor: grabbing;
+}
+.model-scroll:focus-visible {
+    outline: 2px solid #0891b2;
+    outline-offset: 3px;
+}
+.model-scroll:fullscreen,
+.model-fullscreen {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    border-radius: 0;
+    display: grid;
+    place-items: center;
+}
+.model-fullscreen .model-frame,
+.model-scroll:fullscreen .model-frame {
+    max-width: 1200px;
+}
+.model-exit-fullscreen {
+    display: none;
+    position: absolute;
+    z-index: 5;
+    top: 0.7rem;
+    right: 0.8rem;
+    padding: 0.4rem 0.65rem;
+    border-radius: 0.4rem;
+    background: #fff;
+    color: #172554;
+}
+.model-fullscreen .model-exit-fullscreen,
+.model-scroll:fullscreen .model-exit-fullscreen {
+    display: block;
+}
+.model-hint {
+    position: absolute;
+    z-index: 2;
+    top: 0.7rem;
+    left: 0.8rem;
+    margin: 0;
+    color: var(--room-text);
+    font-size: 0.75rem;
+    pointer-events: none;
+}
+.model-frame {
+    position: relative;
+    width: 100%;
+    min-width: 340px;
+    max-width: none;
+    aspect-ratio: 16 / 9;
+}
+.model-label {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: max-content;
+    max-width: 150px;
+    padding: 0.2em 0.5em;
+    border-radius: 999px;
+    background: var(--label-bg);
+    color: var(--label-text);
+    box-shadow: 0 1px 4px #0f172a40;
+    font-size: clamp(8px, 0.78vw, 13px);
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    line-height: 1.25;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    pointer-events: none;
+}
+/* Legend and controls */
+.model-legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+.model-legend i {
+    width: 0.9rem;
+    height: 0.9rem;
+    border: 1px solid #64748b;
+    border-radius: 0.2rem;
+    background: var(--room-data);
+}
+.model-legend .legend-empty {
+    background: var(--room-empty);
+}
+.model-legend .legend-floor {
+    background: var(--floor);
+}
+.model-legend .legend-selected {
+    background: #0891b2;
+    border-color: #0891b2;
+}
+.model-controls button {
+    border: 1px solid #94a3b8;
+    border-radius: 0.4rem;
+    padding: 0.25rem 0.55rem;
+}
+.model-controls input {
+    width: 6rem;
+    vertical-align: middle;
+}
+/* Detail panel */
+.model-detail {
+    position: fixed;
+    inset: auto 0 0;
+    z-index: 50;
+    display: flex;
+    justify-content: center;
+    pointer-events: none;
+}
+.model-detail-card {
+    max-height: 60vh;
+    max-width: 42rem;
+    overflow-y: auto;
+    pointer-events: auto;
+}
+@media (min-width: 1024px) {
+    .model-detail {
+        inset: 5rem 1rem 1rem auto;
+        width: min(28rem, 38vw);
+    }
+    .model-detail-card {
+        max-height: 100%;
+        border-radius: 1rem;
+    }
+}
+@media (max-width: 640px) {
+    .model-frame {
+        min-width: 0;
+        aspect-ratio: 5 / 4;
+    }
+    .model-hint {
+        font-size: 0.65rem;
+    }
+}
+.model-hint-touch {
+    display: none;
+}
+@media (pointer: coarse) {
+    .model-hint-mouse {
+        display: none;
+    }
+    .model-hint-touch {
+        display: inline;
+    }
+}
+/* WebGL canvas and accessible room controls */
+.model-canvas,
+.model-canvas canvas,
+.model-label-layer {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+}
+.model-label-layer {
+    pointer-events: none;
+    overflow: hidden;
+}
+.model-label {
+    left: 0;
+    top: 0;
+    max-width: 150px;
+    transform: translate(-50%, -50%);
+}
+.model-access {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+}
+.model-access:focus-within {
+    position: absolute;
+    top: 2rem;
+    left: 1rem;
+    z-index: 10;
+    width: auto;
+    height: auto;
+    clip-path: none;
+    overflow: visible;
+}
+.model-access button {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+}
+.model-access button:focus {
+    position: static;
+    width: auto;
+    height: auto;
+    padding: 0.5rem;
+    background: white;
+    color: #172554;
+}
