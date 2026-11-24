@@ -221,8 +221,35 @@
 .model-label {
     left: 0;
     top: 0;
-    max-width: 150px;
+    max-width: 120px;
+    padding: 0.1em 0.4em;
+    font-size: 9px;
+    font-weight: 600;
+    opacity: 0.88;
     transform: translate(-50%, -50%);
+    transition:
+        font-size 0.15s ease-out,
+        padding 0.15s ease-out,
+        opacity 0.15s ease-out;
+}
+
+/* Hover, keyboard focus or selection: the label grows and shows the full name above its neighbours. */
+.model-label.is-active {
+    z-index: 2;
+    max-width: 320px;
+    padding: 0.3em 0.75em;
+    background: #0f172a;
+    color: #fff;
+    box-shadow: 0 6px 18px #0f172a59;
+    font-size: 15px;
+    font-weight: 700;
+    opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .model-label {
+        transition: none;
+    }
 }
 .model-access {
     position: absolute;

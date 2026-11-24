@@ -2,11 +2,14 @@ import * as THREE from 'three';
 
 function updateLabel(element, mesh, id, host, camera, state) {
     const room = mesh.userData;
-    const full = state.zoom >= 1.25 || room.hover || room.focus || room.selected;
+    const active = Boolean(room.hover || room.focus || room.selected);
+    const full = state.zoom >= 1.25 || active;
     const display = host.clientWidth < 700 && !(full || room.match) ? 'none' : '';
     const text = (full ? room.label : id.replaceAll('_', ' ')) + (room.count ? ` · ${room.count}` : '');
     if (element.style.display !== display) element.style.display = display;
     if (element.textContent !== text) element.textContent = text;
+    // Resting labels stay small; the room under the pointer, focused or selected gets a large one.
+    element.classList.toggle('is-active', active);
     const point = new THREE.Vector3(mesh.position.x, mesh.position.y + mesh.scale.y / 2 + 8, mesh.position.z);
     mesh.parent.localToWorld(point);
     point.project(camera);
