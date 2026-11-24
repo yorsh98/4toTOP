@@ -13,7 +13,8 @@ export function createRenderer(host) {
     renderer.toneMapping = THREE.NeutralToneMapping;
     renderer.toneMappingExposure = 1;
     renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    // three 0.187 removed PCFSoftShadowMap; PCF softens edges through each light's shadow.radius.
+    renderer.shadowMap.type = THREE.PCFShadowMap;
     host.append(renderer.domElement);
     return renderer;
 }
