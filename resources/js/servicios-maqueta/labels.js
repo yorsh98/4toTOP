@@ -1,11 +1,12 @@
 import * as THREE from 'three';
 
-function updateLabel(element, mesh, id, host, camera, state) {
+function updateLabel(element, mesh, host, camera, state) {
     const room = mesh.userData;
     const active = Boolean(room.hover || room.focus || room.selected);
-    const full = state.zoom >= 1.25 || active;
-    const display = host.clientWidth < 700 && !(full || room.match) ? 'none' : '';
-    const text = (full ? room.label : id.replaceAll('_', ' ')) + (room.count ? ` · ${room.count}` : '');
+    const zoomedIn = state.zoom >= 1.25;
+    const display = host.clientWidth < 700 && !(zoomedIn || active || room.match) ? 'none' : '';
+    // Always the zone name; CSS truncates it at rest and shows it whole on hover, focus or selection.
+    const text = room.label + (room.count ? ` · ${room.count}` : '');
     if (element.style.display !== display) element.style.display = display;
     if (element.textContent !== text) element.textContent = text;
     // Resting labels stay small; the room under the pointer, focused or selected gets a large one.
@@ -38,7 +39,7 @@ export function createLabels(host, rooms, camera, state) {
     });
     return {
         update() {
-            rooms.forEach((mesh, id) => updateLabel(labels.get(id), mesh, id, host, camera, state));
+            rooms.forEach((mesh, id) => updateLabel(labels.get(id), mesh, host, camera, state));
         },
         dispose() {
             layer.remove();
