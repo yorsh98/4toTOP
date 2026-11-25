@@ -4,9 +4,8 @@ namespace App\NotificationsV2\Application\Services;
 
 use App\Models\Turno;
 use App\NotificationsV2\Application\Contracts\NotificationOrchestrator;
-use App\NotificationsV2\Domain\Models\NotificationTemplate;
 use App\NotificationsV2\Domain\Models\NotificationType;
-use App\NotificationsV2\Support\DefaultEmailTemplates;
+use App\NotificationsV2\Support\OutlookEmailTemplates;
 use App\Services\FuncionarioCatalog;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Carbon;
@@ -75,26 +74,10 @@ class TurnoTwoAcdWeeklySummaryNotifier
             ->all();
 
         $tribunalOral = (string) config('notifications_v2.turno1_summary.tribunal_oral', '4to TOP');
-        $tribunalRowspan = max(count($funcionarios), 1) + 6;
 
         $semanaRango = $this->resolveSemanaRango($turno2?->FECHA, $startOfWeek, $endOfWeek);
 
-        $payload = [
-            'fecha_turno' => $baseDate->toDateString(),
-            'semana_rango' => $semanaRango,
-            'tribunal_oral' => $tribunalOral,
-            'magistrados' => $magistrados,
-            'magistrados_rows_html' => $this->buildMagistradosRowsHtml($magistrados, $tribunalOral, $tribunalRowspan),
-            'jefatura_run' => $jefatura['run'],
-            'jefatura_nombre' => $jefatura['nombre'],
-            'jefatura_telefono' => $jefatura['telefono'],
-            'jefatura_correo' => $jefatura['correo'],
-            'jefatura_observaciones' => $jefatura['cargo'],
-            'funcionarios' => $funcionarios,
-            'tribunal_rowspan' => $tribunalRowspan,
-            'funcionarios_rows_html' => $this->buildFuncionariosRowsHtml($funcionarios),
-            'funcionarios_rows_text' => $this->buildFuncionariosRowsText($funcionarios),
-        ];
+        $payload = $this->buildPayload($baseDate, $semanaRango, $tribunalOral, $magistrados, $jefatura, $funcionarios);
 
         $recipientResolution = $this->resolveWeeklyRecipients($turno2);
 
@@ -107,6 +90,36 @@ class TurnoTwoAcdWeeklySummaryNotifier
             'payload' => $payload,
             'options' => $options,
             'skipped' => $recipientResolution['skipped'],
+        ];
+    }
+
+    public function buildPayload(CarbonInterface $baseDate, string $semanaRango, string $tribunalOral, array $magistrados, array $jefatura, array $funcionarios): array
+    {
+        $magistradoRows = $magistrados === [] ? 3 : count($magistrados);
+        $tribunalRowspan = $magistradoRows + 3 + max(count($funcionarios), 1);
+
+        return [
+            'fecha_turno' => $baseDate->toDateString(),
+            'semana_rango' => $semanaRango,
+            'semana_rango_html' => e($semanaRango),
+            'tribunal_oral' => $tribunalOral,
+            'tribunal_oral_html' => e($tribunalOral),
+            'magistrados' => $magistrados,
+            'magistrados_rows_html' => $this->buildMagistradosRowsHtml($magistrados, $tribunalOral, $tribunalRowspan),
+            'jefatura_run' => $jefatura['run'],
+            'jefatura_run_html' => e($jefatura['run']),
+            'jefatura_nombre' => $jefatura['nombre'],
+            'jefatura_nombre_html' => e($jefatura['nombre']),
+            'jefatura_telefono' => $jefatura['telefono'],
+            'jefatura_telefono_html' => e($jefatura['telefono']),
+            'jefatura_correo' => $jefatura['correo'],
+            'jefatura_correo_html' => e($jefatura['correo']),
+            'jefatura_observaciones' => $jefatura['cargo'],
+            'jefatura_observaciones_html' => e($jefatura['cargo']),
+            'funcionarios' => $funcionarios,
+            'tribunal_rowspan' => $tribunalRowspan,
+            'funcionarios_rows_html' => OutlookEmailTemplates::funcionariosRows($funcionarios),
+            'funcionarios_rows_text' => $this->buildFuncionariosRowsText($funcionarios),
         ];
     }
 
@@ -154,46 +167,7 @@ class TurnoTwoAcdWeeklySummaryNotifier
         $rows = '';
 
         foreach ($magistrados as $index => $magistrado) {
-            $correo = (string) ($magistrado['correo'] ?? '-');
-            $correoHtml = $correo !== '-' ? '<a href="mailto:'.e($correo).'" style="color:#1d4ed8;">'.e($correo).'</a>' : '-';
-
-            $rows .= '<tr>';
-
-            if ($index === 0) {
-                $rows .= '<td rowspan="'.e((string) $tribunalRowspan).'" style="border:1px solid #cbd5e1;padding:8px;text-align:center;font-weight:bold;background:#f1f5f9;font-size:18px;line-height:22px;">'.e($tribunalOral).'</td>';
-            }
-
-            $rows .= ''
-                .'<td style="border:1px solid #cbd5e1;padding:8px;text-align:center;background:#ffffff;">'.e((string) ($magistrado['run'] ?? '-')).'</td>'
-                .'<td style="border:1px solid #cbd5e1;padding:8px;text-align:center;background:#ffffff;font-size:16px;line-height:20px;">'.e((string) ($magistrado['nombre'] ?? '-')).'</td>'
-                .'<td style="border:1px solid #cbd5e1;padding:8px;text-align:center;background:#ffffff;">'.e((string) ($magistrado['telefono'] ?? '-')).'</td>'
-                .'<td style="border:1px solid #cbd5e1;padding:8px;text-align:center;background:#ffffff;">'.$correoHtml.'</td>'
-                .'<td style="border:1px solid #cbd5e1;padding:8px;text-align:center;background:#ffffff;">'.e((string) ($magistrado['cargo'] ?? '-')).'</td>'
-                .'</tr>';
-        }
-
-        return $rows;
-    }
-
-    private function buildFuncionariosRowsHtml(array $funcionarios): string
-    {
-        if ($funcionarios === []) {
-            return '<tr><td style="border:1px solid #cbd5e1;padding:8px;text-align:center;background:#ffffff;" colspan="5">Sin funcionarios asignados.</td></tr>';
-        }
-
-        $rows = '';
-
-        foreach ($funcionarios as $funcionario) {
-            $correo = (string) ($funcionario['correo'] ?? '-');
-            $correoHtml = $correo !== '-' ? '<a href="mailto:'.e($correo).'" style="color:#1d4ed8;">'.e($correo).'</a>' : '-';
-
-            $rows .= '<tr>'
-                .'<td style="border:1px solid #cbd5e1;padding:8px;text-align:center;background:#ffffff;">'.e((string) ($funcionario['run'] ?? '-')).'</td>'
-                .'<td style="border:1px solid #cbd5e1;padding:8px;text-align:center;background:#ffffff;font-size:16px;line-height:20px;">'.e((string) ($funcionario['nombre'] ?? '-')).'</td>'
-                .'<td style="border:1px solid #cbd5e1;padding:8px;text-align:center;background:#ffffff;">'.e((string) ($funcionario['telefono'] ?? '-')).'</td>'
-                .'<td style="border:1px solid #cbd5e1;padding:8px;text-align:center;background:#ffffff;">'.$correoHtml.'</td>'
-                .'<td style="border:1px solid #cbd5e1;padding:8px;text-align:center;background:#ffffff;">'.e((string) ($funcionario['cargo'] ?? '-')).'</td>'
-                .'</tr>';
+            $rows .= OutlookEmailTemplates::personRow($magistrado, $index === 0 ? $tribunalOral : null, $tribunalRowspan);
         }
 
         return $rows;
@@ -324,57 +298,6 @@ class TurnoTwoAcdWeeklySummaryNotifier
             ]
         );
 
-        $activeTemplate = NotificationTemplate::query()
-            ->where('notification_type_id', $type->id)
-            ->where('is_active', true)
-            ->first();
-
-        if ($activeTemplate) {
-            $activeTemplate->update([
-                'subject' => 'Turno 2 ACD - Periodo {{ semana_rango }}',
-                'body_html' => DefaultEmailTemplates::turno2AcdResumenSemanalHtml(),
-                'body_text' => DefaultEmailTemplates::turno2AcdResumenSemanalText(),
-                'variables_schema' => [
-                    'fecha_turno',
-                    'semana_rango',
-                    'tribunal_oral',
-                    'magistrados_rows_html',
-                    'jefatura_run',
-                    'jefatura_nombre',
-                    'jefatura_telefono',
-                    'jefatura_correo',
-                    'jefatura_observaciones',
-                    'tribunal_rowspan',
-                    'funcionarios_rows_html',
-                    'funcionarios_rows_text',
-                ],
-            ]);
-
-            return;
-        }
-
-        NotificationTemplate::query()->create([
-            'notification_type_id' => $type->id,
-            'version' => 1,
-            'subject' => 'Turno 2 ACD - Periodo {{ semana_rango }}',
-            'body_html' => DefaultEmailTemplates::turno2AcdResumenSemanalHtml(),
-            'body_text' => DefaultEmailTemplates::turno2AcdResumenSemanalText(),
-            'variables_schema' => [
-                'fecha_turno',
-                'semana_rango',
-                'tribunal_oral',
-                'magistrados_rows_html',
-                'jefatura_run',
-                'jefatura_nombre',
-                'jefatura_telefono',
-                'jefatura_correo',
-                'jefatura_observaciones',
-                'tribunal_rowspan',
-                'funcionarios_rows_html',
-                'funcionarios_rows_text',
-            ],
-            'is_active' => true,
-            'activated_at' => now(),
-        ]);
+        OutlookEmailTemplates::ensureActive($type);
     }
 }

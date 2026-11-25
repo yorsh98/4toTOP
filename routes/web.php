@@ -19,7 +19,6 @@ use App\Http\Controllers\guiastelefonicasController;
 use App\Http\Controllers\libertadController;
 use App\Http\Controllers\migraunijudController;
 use App\Http\Controllers\MonitorController;
-use App\Http\Controllers\NotificationsV2PreviewController;
 use App\Http\Controllers\oficiolibertadController;
 use App\Http\Controllers\procController;
 use App\Http\Controllers\prograController;
@@ -255,30 +254,6 @@ Route::get('/preview/progra/{fecha?}', [PrograMailController::class, 'preview'])
     ->name('preview.progra');
 
 Route::get('/ttypp', [TurnoController::class, 'ttyppWelcome'])->name('ttypp.welcome');
-
-Route::get('/preview/notificaciones-v2/ttypp-listado', [NotificationsV2PreviewController::class, 'ttyppListado'])
-    ->name('preview.notifications-v2.ttypp-listado')
-    ->middleware(['auth', 'can:ttypp.mail.preview']);
-
-Route::prefix('preview/notificaciones-v2')
-    ->name('preview.notifications-v2.')
-    ->middleware(['auth', 'can:navbar.seguridad.visible'])
-    ->group(function () {
-        Route::get('/turno-asignado', [NotificationsV2PreviewController::class, 'turnoAsignado'])
-            ->name('turno-asignado');
-
-        Route::get('/turno2-acd', [NotificationsV2PreviewController::class, 'turno2Acd'])
-            ->name('turno2-acd');
-
-        Route::get('/ausentismo-resumen', [NotificationsV2PreviewController::class, 'ausentismoResumen'])
-            ->name('ausentismo-resumen');
-
-        Route::get('/user-status', [NotificationsV2PreviewController::class, 'userStatus'])
-            ->name('user-status');
-
-        Route::get('/bitacora-pruebas', [NotificationsV2PreviewController::class, 'bitacoraPruebas'])
-            ->name('bitacora-pruebas');
-    });
 
 /*
 |--------------------------------------------------------------------------

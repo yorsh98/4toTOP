@@ -1,0 +1,3 @@
+@php($w = $w ?? 260)
+@php($fill = $fill ?? '#1F3864')
+<table role="presentation" width="{{ $w }}" border="0" cellpadding="0" cellspacing="0" style="width:{{ $w }}px;border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;"><tr><td align="center" bgcolor="{{ $fill }}" style="background-color:{{ $fill }};padding:12px 20px;mso-padding-alt:12px 20px;"><a href="{{ $href }}" target="_blank" rel="noopener noreferrer" style="display:inline-block;color:#FFFFFF;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:18px;font-weight:bold;text-decoration:none;mso-line-height-rule:exactly;">{{ $label }}</a></td></tr></table>

@@ -322,15 +322,6 @@ class TtyppPage extends Component
         ], navigate: false);
     }
 
-    public function previewTtyppMail()
-    {
-        Gate::authorize('ttypp.mail.preview');
-
-        return redirect()->route('preview.notifications-v2.ttypp-listado', [
-            'fecha' => $this->safeSelectedDate(),
-        ]);
-    }
-
     public function sendTtyppMail(): void
     {
         Gate::authorize('ttypp.mail.enviar');

@@ -92,7 +92,6 @@ class RolesAndPermissionsSeeder extends Seeder
             'ttypp.editar',
             'ttypp.importar',
             'ttypp.exportar',
-            'ttypp.mail.preview',
             'ttypp.mail.enviar',
             'insumos.solicitar',
             'insumos.gestionar',
@@ -185,7 +184,6 @@ class RolesAndPermissionsSeeder extends Seeder
             'ttypp.editar',
             'ttypp.importar',
             'ttypp.exportar',
-            'ttypp.mail.preview',
             'ttypp.mail.enviar',
             'navbar.visita_carcel.visible',
             'navbar.visita_carcel.editable',
@@ -229,7 +227,6 @@ class RolesAndPermissionsSeeder extends Seeder
             'ttypp.editar',
             'ttypp.importar',
             'ttypp.exportar',
-            'ttypp.mail.preview',
             'ttypp.mail.enviar',
         ]);
 
@@ -251,7 +248,6 @@ class RolesAndPermissionsSeeder extends Seeder
             'sentencias.ver',
             'ttypp.ver',
             'ttypp.exportar',
-            'ttypp.mail.preview',
         ]);
 
         app(PermissionRegistrar::class)->forgetCachedPermissions();

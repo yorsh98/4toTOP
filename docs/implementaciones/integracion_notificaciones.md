@@ -585,16 +585,9 @@ Todos los correos del sistema gestionados por el modulo centralizado.
   - fallback legacy cuando V2 esta desactivado,
   - ruteo V2 cuando la feature flag esta activa.
 
-### Modelos de correo Outlook + rutas de preview
+### Plantillas Outlook
 
-- Modelos HTML (compatibles con Outlook, basados en tablas e inline CSS):
-  - `resources/views/emails/v2/turno-asignado-outlook.blade.php`
-  - `resources/views/emails/v2/ausentismo-resumen-diario-outlook.blade.php`
-  - `resources/views/emails/v2/legacy-user-status-outlook.blade.php`
-- Rutas de preview (requieren `auth` + `can:navbar.seguridad.visible`):
-  - `GET /preview/notificaciones-v2/turno-asignado`
-  - `GET /preview/notificaciones-v2/ausentismo-resumen` (usar `?empty=1` para vista sin ausentes)
-  - `GET /preview/notificaciones-v2/user-status` (usar `?status=approved|rejected|suspended|unsuspended`)
+Las plantillas oficiales de Turno 1, ausentismo y estado de cuenta se definen en `app/NotificationsV2/Support/OutlookEmailTemplates.php`.
 
 ### Issues futuros (backlog)
 

@@ -5,9 +5,8 @@ namespace App\NotificationsV2\Application\Services;
 use App\Models\User;
 use App\Notifications\UserAccountStatusNotification;
 use App\NotificationsV2\Application\Contracts\NotificationOrchestrator;
-use App\NotificationsV2\Domain\Models\NotificationTemplate;
 use App\NotificationsV2\Domain\Models\NotificationType;
-use App\NotificationsV2\Support\DefaultEmailTemplates;
+use App\NotificationsV2\Support\OutlookEmailTemplates;
 
 class LegacyUserAccountStatusNotifier
 {
@@ -23,17 +22,7 @@ class LegacyUserAccountStatusNotifier
 
         $this->ensureTypeAndTemplate();
 
-        [$subject, $line] = $this->resolveStatusContent($status);
-
-        $payload = [
-            'user_name' => $user->name,
-            'status' => $status,
-            'subject' => $subject,
-            'line' => $line,
-            'admin_name' => $adminName,
-            'admin_line' => $adminName ? '<p style="margin:0 0 10px 0;">Gestion realizada por: '.e($adminName).'.</p>' : '',
-            'admin_line_text' => $adminName ? 'Gestion realizada por: '.$adminName.'.' : '',
-        ];
+        $payload = $this->buildPayload($user, $status, $adminName);
 
         $this->orchestrator->dispatch('legacy.user_account_status', $payload, [
             'event_key' => "legacy.user_account_status.{$status}.{$user->id}",
@@ -44,6 +33,22 @@ class LegacyUserAccountStatusNotifier
                 'context' => 'legacy.user_account_status',
             ]],
         ]);
+    }
+
+    public function buildPayload(User $user, string $status, ?string $adminName = null): array
+    {
+        [$subject, $line] = $this->resolveStatusContent($status);
+
+        return [
+            'user_name' => $user->name,
+            'user_name_html' => e($user->name),
+            'status' => $status,
+            'subject' => $subject,
+            'line' => $line,
+            'admin_name' => $adminName,
+            'admin_line' => $adminName ? '<p style="margin:0 0 10px 0;">Gestion realizada por: '.e($adminName).'.</p>' : '',
+            'admin_line_text' => $adminName ? 'Gestion realizada por: '.$adminName.'.' : '',
+        ];
     }
 
     private function ensureTypeAndTemplate(): void
@@ -60,33 +65,7 @@ class LegacyUserAccountStatusNotifier
             ]
         );
 
-        $activeTemplate = NotificationTemplate::query()
-            ->where('notification_type_id', $type->id)
-            ->where('is_active', true)
-            ->first();
-
-        if ($activeTemplate) {
-            return;
-        }
-
-        NotificationTemplate::query()->create([
-            'notification_type_id' => $type->id,
-            'version' => 1,
-            'subject' => '{{ subject }}',
-            'body_html' => DefaultEmailTemplates::legacyUserStatusHtml(),
-            'body_text' => DefaultEmailTemplates::legacyUserStatusText(),
-            'variables_schema' => [
-                'user_name',
-                'status',
-                'subject',
-                'line',
-                'admin_name',
-                'admin_line',
-                'admin_line_text',
-            ],
-            'is_active' => true,
-            'activated_at' => now(),
-        ]);
+        OutlookEmailTemplates::ensureActive($type);
     }
 
     private function resolveStatusContent(string $status): array

@@ -4,9 +4,8 @@ namespace App\NotificationsV2\Application\Services;
 
 use App\Notifications\BitacoraPruebasNotification;
 use App\NotificationsV2\Application\Contracts\NotificationOrchestrator;
-use App\NotificationsV2\Domain\Models\NotificationTemplate;
 use App\NotificationsV2\Domain\Models\NotificationType;
-use App\NotificationsV2\Support\DefaultEmailTemplates;
+use App\NotificationsV2\Support\OutlookEmailTemplates;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 
@@ -40,14 +39,7 @@ class BitacoraPruebasNotifier
 
         $this->ensureTypeAndTemplate();
 
-        $payload = [
-            'subject' => 'Notificacion de Bitacora de Pruebas',
-            'sender_name' => $senderName,
-            'line' => $senderName.' le ha enviado esta notificacion.',
-            'rit' => trim((string) $rit),
-            'documentos_url' => $documentosUrl,
-            'bitacora_public_url' => $bitacoraPublicUrl,
-        ];
+        $payload = $this->buildPayload($senderName, $documentosUrl, $bitacoraPublicUrl, $rit);
 
         $this->orchestrator->dispatch('bitacora_pruebas.notificacion', $payload, [
             'event_key' => 'bitacora_pruebas.notificacion.'.Str::uuid(),
@@ -61,6 +53,22 @@ class BitacoraPruebasNotifier
                 ])
                 ->all(),
         ]);
+    }
+
+    public function buildPayload(string $senderName, string $documentosUrl, string $bitacoraPublicUrl, ?string $rit = null): array
+    {
+        return [
+            'subject' => 'Notificacion de Bitacora de Pruebas',
+            'sender_name' => $senderName,
+            'line' => $senderName.' le ha enviado esta notificacion.',
+            'line_html' => e($senderName.' le ha enviado esta notificacion.'),
+            'rit' => trim((string) $rit),
+            'rit_html' => e(trim((string) $rit)),
+            'documentos_url' => $documentosUrl,
+            'documentos_url_html' => e($documentosUrl),
+            'bitacora_public_url' => $bitacoraPublicUrl,
+            'bitacora_public_url_html' => e($bitacoraPublicUrl),
+        ];
     }
 
     private function ensureTypeAndTemplate(): void
@@ -77,45 +85,6 @@ class BitacoraPruebasNotifier
             ]
         );
 
-        $activeTemplate = NotificationTemplate::query()
-            ->where('notification_type_id', $type->id)
-            ->where('is_active', true)
-            ->first();
-
-        if ($activeTemplate) {
-            $activeTemplate->update([
-                'subject' => '{{ subject }}',
-                'body_html' => DefaultEmailTemplates::bitacoraPruebasHtml(),
-                'body_text' => DefaultEmailTemplates::bitacoraPruebasText(),
-                'variables_schema' => [
-                    'subject',
-                    'sender_name',
-                    'line',
-                    'rit',
-                    'documentos_url',
-                    'bitacora_public_url',
-                ],
-            ]);
-
-            return;
-        }
-
-        NotificationTemplate::query()->create([
-            'notification_type_id' => $type->id,
-            'version' => 1,
-            'subject' => '{{ subject }}',
-            'body_html' => DefaultEmailTemplates::bitacoraPruebasHtml(),
-            'body_text' => DefaultEmailTemplates::bitacoraPruebasText(),
-            'variables_schema' => [
-                'subject',
-                'sender_name',
-                'line',
-                'rit',
-                'documentos_url',
-                'bitacora_public_url',
-            ],
-            'is_active' => true,
-            'activated_at' => now(),
-        ]);
+        OutlookEmailTemplates::ensureActive($type);
     }
 }

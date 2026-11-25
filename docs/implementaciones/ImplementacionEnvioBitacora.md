@@ -71,28 +71,12 @@ Se creo `resources/views/emails/v2/bitacora-pruebas-outlook.blade.php` siguiendo
 
 ### 6) Template por defecto para Orquestador V2
 
-Se actualizo `app/NotificationsV2/Support/DefaultEmailTemplates.php` con:
+La plantilla oficial se define en `app/NotificationsV2/Support/OutlookEmailTemplates.php` con:
 
 - `bitacoraPruebasHtml()`
 - `bitacoraPruebasText()`
 
 Estas funciones son usadas para crear/actualizar `NotificationTemplate` del tipo `bitacora_pruebas.notificacion`.
-
-### 7) Preview de correo
-
-Se agrego vista previa para QA visual en:
-
-- Controlador: `app/Http/Controllers/NotificationsV2PreviewController.php`
-  - metodo `bitacoraPruebas()`
-- Ruta: `preview.notifications-v2.bitacora-pruebas`
-  - URL: `/preview/notificaciones-v2/bitacora-pruebas`
-
-Parametros opcionales para preview:
-
-- `sender`
-- `documentos`
-- `bitacora`
-- `user`
 
 ## Pruebas automatizadas
 
@@ -107,8 +91,7 @@ Se agrego `tests/Feature/NotificationsV2/BitacoraPruebasNotifierTest.php` con do
 
 - `app/Livewire/BitacoraPruebasPage.php`
 - `resources/views/livewire/bitacora-pruebas-page.blade.php`
-- `app/NotificationsV2/Support/DefaultEmailTemplates.php`
-- `app/Http/Controllers/NotificationsV2PreviewController.php`
+- `app/NotificationsV2/Support/OutlookEmailTemplates.php`
 - `routes/web.php`
 
 ## Archivos nuevos

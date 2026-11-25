@@ -10,9 +10,8 @@ use App\Models\InsumoSolicitud;
 use App\Models\User;
 use App\Notifications\InsumosServiciosNotification;
 use App\NotificationsV2\Application\Contracts\NotificationOrchestrator;
-use App\NotificationsV2\Domain\Models\NotificationTemplate;
 use App\NotificationsV2\Domain\Models\NotificationType;
-use App\NotificationsV2\Support\DefaultEmailTemplates;
+use App\NotificationsV2\Support\OutlookEmailTemplates;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Collection;
 use Ramsey\Uuid\Uuid;
@@ -163,11 +162,12 @@ class InsumosNotifier
     }
 
     /** @param Collection<int, string> $items */
-    private function payload(string $title, string $line, Collection $items, ?string $firma = null): array
+    public function payload(string $title, string $line, Collection $items, ?string $firma = null): array
     {
         return [
             'title' => $title,
             'line' => $line,
+            'line_html' => e($line),
             'items_html' => $items->map(fn (string $item): string => '<li>'.e($item).'</li>')->implode(''),
             'items_text' => $items->implode('; '),
             'firma_html' => $firma ? '<p style="margin:20px 0 0;">'.e($firma).'</p>' : '',
@@ -193,19 +193,6 @@ class InsumosNotifier
             ],
         );
 
-        if (NotificationTemplate::query()->where('notification_type_id', $type->id)->where('is_active', true)->exists()) {
-            return;
-        }
-
-        NotificationTemplate::query()->create([
-            'notification_type_id' => $type->id,
-            'version' => 1,
-            'subject' => '{{ title }}',
-            'body_html' => DefaultEmailTemplates::insumosHtml(),
-            'body_text' => DefaultEmailTemplates::insumosText(),
-            'variables_schema' => ['title', 'line', 'items_html', 'items_text', 'firma_html', 'firma_text'],
-            'is_active' => true,
-            'activated_at' => now(),
-        ]);
+        OutlookEmailTemplates::ensureActive($type);
     }
 }
