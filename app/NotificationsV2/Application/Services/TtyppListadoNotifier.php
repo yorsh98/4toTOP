@@ -5,9 +5,8 @@ namespace App\NotificationsV2\Application\Services;
 use App\Models\TtyppRegistro;
 use App\NotificationsV2\Application\Contracts\NotificationOrchestrator;
 use App\NotificationsV2\Domain\Models\NotificationDispatch;
-use App\NotificationsV2\Domain\Models\NotificationTemplate;
 use App\NotificationsV2\Domain\Models\NotificationType;
-use App\NotificationsV2\Support\DefaultEmailTemplates;
+use App\NotificationsV2\Support\OutlookEmailTemplates;
 use App\Services\FuncionarioCatalog;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
@@ -88,6 +87,7 @@ class TtyppListadoNotifier
             'subject' => 'Listado TTyPP - '.$fecha,
             'fecha' => $fecha,
             'sender_name' => $senderName,
+            'sender_name_html' => e($senderName),
             'total_registros' => $registros->count(),
             'tabla_rows_html' => $this->rowsHtml($registros),
             'tabla_rows_text' => $this->rowsText($registros),
@@ -116,48 +116,7 @@ class TtyppListadoNotifier
             ]
         );
 
-        $activeTemplate = NotificationTemplate::query()
-            ->where('notification_type_id', $type->id)
-            ->where('is_active', true)
-            ->first();
-
-        if ($activeTemplate) {
-            $activeTemplate->update([
-                'subject' => '{{ subject }}',
-                'body_html' => DefaultEmailTemplates::ttyppListadoHtml(),
-                'body_text' => DefaultEmailTemplates::ttyppListadoText(),
-                'variables_schema' => [
-                    'subject',
-                    'fecha',
-                    'sender_name',
-                    'total_registros',
-                    'tabla_rows_html',
-                    'tabla_rows_text',
-                    'mensaje_sin_registros',
-                ],
-            ]);
-
-            return;
-        }
-
-        NotificationTemplate::query()->create([
-            'notification_type_id' => $type->id,
-            'version' => 1,
-            'subject' => '{{ subject }}',
-            'body_html' => DefaultEmailTemplates::ttyppListadoHtml(),
-            'body_text' => DefaultEmailTemplates::ttyppListadoText(),
-            'variables_schema' => [
-                'subject',
-                'fecha',
-                'sender_name',
-                'total_registros',
-                'tabla_rows_html',
-                'tabla_rows_text',
-                'mensaje_sin_registros',
-            ],
-            'is_active' => true,
-            'activated_at' => now(),
-        ]);
+        OutlookEmailTemplates::ensureActive($type);
     }
 
     private function rowsHtml(Collection $registros): string
@@ -167,22 +126,7 @@ class TtyppListadoNotifier
         }
 
         return $registros->map(function (TtyppRegistro $registro): string {
-            $cells = [
-                $registro->rit,
-                $registro->ruc,
-                $registro->tipo_audiencia,
-                $registro->numero_dias,
-                $registro->cantidad,
-                $registro->modalidad,
-                $registro->encargada_ti_mp,
-                $registro->encargada_ti_d,
-                $registro->encargada_zoom,
-                $registro->acta,
-                $registro->sala,
-                $registro->jueces,
-            ];
-
-            return '<tr>'.collect($cells)
+            return '<tr>'.collect($this->rowValues($registro))
                 ->map(fn ($value): string => '<td style="border:1px solid #cbd5e1;padding:6px;">'.e((string) ($value ?: '-')).'</td>')
                 ->implode('').'</tr>';
         })->implode('');
@@ -190,16 +134,27 @@ class TtyppListadoNotifier
 
     private function rowsText(Collection $registros): string
     {
-        if ($registros->isEmpty()) {
-            return '';
-        }
+        return $registros->map(fn (TtyppRegistro $registro): string => collect($this->rowValues($registro))
+            ->map(fn ($value): string => str_replace(["\r\n", "\r", "\n"], ' ', (string) ($value ?? '-')))
+            ->implode(' | '))->implode("\n");
+    }
 
-        return $registros->map(fn (TtyppRegistro $registro): string => implode(' | ', array_filter([
-            'RIT '.$registro->rit,
-            'RUC '.$registro->ruc,
-            'Sala '.$registro->sala,
-            'Acta '.$registro->acta,
-        ])))->implode(' ; ');
+    private function rowValues(TtyppRegistro $registro): array
+    {
+        return [
+            $registro->rit,
+            $registro->ruc,
+            $registro->tipo_audiencia,
+            $registro->numero_dias,
+            $registro->cantidad,
+            $registro->modalidad,
+            $registro->encargada_ti_mp,
+            $registro->encargada_ti_d,
+            $registro->encargada_zoom,
+            $registro->acta,
+            $registro->sala,
+            $registro->jueces,
+        ];
     }
 
     private function sendLegacyMail(array $recipients, array $payload, Collection $registros): void

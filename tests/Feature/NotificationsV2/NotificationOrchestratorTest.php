@@ -8,10 +8,10 @@ use Illuminate\Support\Facades\Queue;
 
 beforeEach(function () {
     NotificationType::query()->updateOrCreate(
-        ['code' => 'turno.asignado'],
+        ['code' => 'prueba.orquestador'],
         [
-            'name' => 'Turno asignado',
-            'description' => 'Evento de turno asignado para pruebas',
+            'name' => 'Notificación de prueba',
+            'description' => 'Evento de prueba del orquestador',
             'channel' => 'mail',
             'is_active' => true,
             'priority' => 'normal',
@@ -27,11 +27,8 @@ test('orchestrator queues processing job when feature flag is enabled', function
     /** @var NotificationOrchestrator $orchestrator */
     $orchestrator = app(NotificationOrchestrator::class);
 
-    $dispatch = $orchestrator->dispatch('turno.asignado', [
-        'fecha_turno' => '2026-04-21',
-        'bloque_turno' => 'Turno 1',
-        'slot_turno' => 'TF1',
-        'nombre_asignado' => 'Funcionario Uno',
+    $dispatch = $orchestrator->dispatch('prueba.orquestador', [
+        'mensaje' => 'Notificación de prueba',
     ], [
         'recipients' => [[
             'type' => 'to',
@@ -54,11 +51,8 @@ test('orchestrator does not queue processing job when feature flag is disabled',
     /** @var NotificationOrchestrator $orchestrator */
     $orchestrator = app(NotificationOrchestrator::class);
 
-    $dispatch = $orchestrator->dispatch('turno.asignado', [
-        'fecha_turno' => '2026-04-21',
-        'bloque_turno' => 'Turno 1',
-        'slot_turno' => 'TF1',
-        'nombre_asignado' => 'Funcionario Uno',
+    $dispatch = $orchestrator->dispatch('prueba.orquestador', [
+        'mensaje' => 'Notificación de prueba',
     ], [
         'recipients' => [[
             'type' => 'to',
@@ -78,10 +72,7 @@ test('orchestrator enforces idempotency for same event payload', function () {
     $orchestrator = app(NotificationOrchestrator::class);
 
     $payload = [
-        'fecha_turno' => '2026-04-21',
-        'bloque_turno' => 'Turno 1',
-        'slot_turno' => 'TF1',
-        'nombre_asignado' => 'Funcionario Uno',
+        'mensaje' => 'Notificación de prueba',
     ];
 
     $options = [
@@ -92,9 +83,9 @@ test('orchestrator enforces idempotency for same event payload', function () {
         ]],
     ];
 
-    $first = $orchestrator->dispatch('turno.asignado', $payload, $options);
-    $second = $orchestrator->dispatch('turno.asignado', $payload, $options);
+    $first = $orchestrator->dispatch('prueba.orquestador', $payload, $options);
+    $second = $orchestrator->dispatch('prueba.orquestador', $payload, $options);
 
     expect($first->id)->toBe($second->id);
-    expect(NotificationDispatch::query()->where('event_key', 'turno.asignado')->count())->toBe(1);
+    expect(NotificationDispatch::query()->where('event_key', 'prueba.orquestador')->count())->toBe(1);
 });

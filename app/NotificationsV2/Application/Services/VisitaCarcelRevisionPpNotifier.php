@@ -3,9 +3,8 @@
 namespace App\NotificationsV2\Application\Services;
 
 use App\NotificationsV2\Application\Contracts\NotificationOrchestrator;
-use App\NotificationsV2\Domain\Models\NotificationTemplate;
 use App\NotificationsV2\Domain\Models\NotificationType;
-use App\NotificationsV2\Support\DefaultEmailTemplates;
+use App\NotificationsV2\Support\OutlookEmailTemplates;
 use App\Services\FuncionarioCatalog;
 use App\Services\VisitaCarcelRevisionPpService;
 use Carbon\CarbonInterface;
@@ -25,19 +24,24 @@ class VisitaCarcelRevisionPpNotifier
         $records = $this->revisionPp->recordsForDate($date);
         $this->ensureTypeAndTemplate();
 
-        $this->orchestrator->dispatch('visita_carcel.revision_pp', [
-            'fecha' => $date->format('d/m/Y'),
-            'total_imputados' => $records->count(),
-            'tabla_rows_html' => $this->rowsHtml($records),
-            'tabla_rows_text' => $this->rowsText($records),
-            'mensaje_sin_imputados' => $records->isEmpty() ? 'No se encuentran imputados para la revision de PP.' : '',
-        ], [
+        $this->orchestrator->dispatch('visita_carcel.revision_pp', $this->buildPayload($date, $records), [
             'event_key' => 'visita_carcel.revision_pp.'.$date->toDateString(),
             'idempotency_key' => 'visita_carcel.revision_pp.'.$date->toDateString(),
             'recipients' => collect($this->funcionarioCatalog->destinatariosByRoles(['jefatura']))
                 ->map(fn (array $recipient): array => ['type' => 'to', 'name' => $recipient['nombre'] ?? null, 'email' => $recipient['email'] ?? null, 'context' => 'visita_carcel.jefatura'])
                 ->all(),
         ]);
+    }
+
+    public function buildPayload(CarbonInterface $date, Collection $records): array
+    {
+        return [
+            'fecha' => $date->format('d/m/Y'),
+            'total_imputados' => $records->count(),
+            'tabla_rows_html' => $this->rowsHtml($records),
+            'tabla_rows_text' => $this->rowsText($records),
+            'mensaje_sin_imputados' => $records->isEmpty() ? 'No se encuentran imputados para la revision de PP.' : '',
+        ];
     }
 
     private function ensureTypeAndTemplate(): void
@@ -51,17 +55,7 @@ class VisitaCarcelRevisionPpNotifier
             'copy_contexts' => null,
         ]);
 
-        NotificationTemplate::query()->updateOrCreate([
-            'notification_type_id' => $type->id,
-            'is_active' => true,
-        ], [
-            'version' => 1,
-            'subject' => 'Revisión de PP - {{ fecha }}',
-            'body_html' => DefaultEmailTemplates::visitaCarcelRevisionPpHtml(),
-            'body_text' => DefaultEmailTemplates::visitaCarcelRevisionPpText(),
-            'variables_schema' => ['fecha', 'total_imputados', 'tabla_rows_html', 'tabla_rows_text', 'mensaje_sin_imputados'],
-            'activated_at' => now(),
-        ]);
+        OutlookEmailTemplates::ensureActive($type);
     }
 
     private function rowsHtml(Collection $records): string

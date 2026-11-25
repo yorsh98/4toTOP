@@ -244,22 +244,6 @@ test('ttypp welcome module route is accessible', function () {
         ->assertSee('TTyPP');
 });
 
-test('ttypp mail preview route renders listado for selected date', function () {
-    $user = User::factory()->create();
-    $user->assignRole('SuperAdmin');
-
-    TtyppRegistro::query()->create([
-        'rit' => '777-2026',
-        'fecha_asignacion' => '2026-05-30',
-    ]);
-
-    $this->actingAs($user)
-        ->get(route('preview.notifications-v2.ttypp-listado', ['fecha' => '2026-05-30']))
-        ->assertSuccessful()
-        ->assertSee('777-2026')
-        ->assertSee('Listado TTyPP');
-});
-
 test('ttypp mail is sent to funcionarios with ttypp role', function () {
     config(['notifications_v2.enabled' => true]);
 

@@ -7,13 +7,6 @@ class IdempotencyKeyFactory
     public static function make(string $eventCode, array $payload): string
     {
         $base = match ($eventCode) {
-            'turno.asignado' => sprintf(
-                'turno.asignado|%s|%s|%s|%s',
-                (string) ($payload['fecha_turno'] ?? ''),
-                (string) ($payload['bloque_turno'] ?? ''),
-                (string) ($payload['slot_turno'] ?? ''),
-                (string) ($payload['nombre_asignado'] ?? '')
-            ),
             'ausentismo.resumen_diario' => sprintf(
                 'ausentismo.resumen_diario|%s',
                 (string) ($payload['fecha_reporte'] ?? now()->toDateString())

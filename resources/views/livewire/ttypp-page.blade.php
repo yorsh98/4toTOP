@@ -225,9 +225,6 @@
                     <button type="button" wire:click="nextDay" class="flex-1 sm:flex-none justify-center rounded-md border bo-border px-3 py-2 text-sm font-medium bo-btn bo-btn--secondary">Siguiente</button>
                 </div>
                 <div class="mt-3 flex flex-wrap items-center gap-2">
-                    @can('ttypp.mail.preview')
-                        <button type="button" wire:click="previewTtyppMail" class="flex-1 sm:flex-none justify-center rounded-md border bo-border px-3 py-2 text-sm font-medium bo-btn bo-btn--secondary">Previsualizar correo</button>
-                    @endcan
                     @can('ttypp.mail.enviar')
                         <button type="button" wire:click="sendTtyppMail" wire:confirm="¿Remitir correo TTyPP para la fecha seleccionada?" class="flex-1 sm:flex-none justify-center rounded-md px-3 py-2 text-sm font-medium bo-btn bo-btn--primary">Remitir correo</button>
                     @endcan

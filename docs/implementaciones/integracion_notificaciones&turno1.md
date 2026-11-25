@@ -4,7 +4,7 @@
 
 Conectar el flujo de Turno 1 con Notificaciones V2 para que:
 
-- la maqueta de correo (preview) se alimente con datos reales del sistema,
+- el correo se alimente con datos reales del sistema,
 - el envio semanal llegue solo a personas seleccionadas en Turno 1,
 - el usuario autenticado que ejecuta el envio reciba copia de evidencia.
 
@@ -12,7 +12,6 @@ Conectar el flujo de Turno 1 con Notificaciones V2 para que:
 
 - Subsistema: Turnos (Turno 1 semanal).
 - Evento: `turno1.resumen_semanal`.
-- Preview objetivo: `/preview/notificaciones-v2/turno-asignado`.
 
 Fuera de alcance:
 
@@ -30,9 +29,9 @@ Fuera de alcance:
 4. Se deduplican destinatarios por email.
 5. Se agrega como destinatario al usuario autenticado que ejecuta el envio (evidencia).
 
-## Fuente unica de datos (preview + envio)
+## Fuente de datos del correo
 
-Se define una sola capa de armado de datos para evitar diferencias entre lo que se ve y lo que se envia.
+El notificador semanal arma el contenido y los destinatarios.
 
 ### Propuesta tecnica
 
@@ -40,7 +39,6 @@ Se define una sola capa de armado de datos para evitar diferencias entre lo que 
 - El metodo debe retornar:
   - payload completo de la tabla,
   - destinatarios finales resueltos.
-- El preview y el envio deben consumir ese mismo metodo.
 
 ## Flujo integrado
 
@@ -53,18 +51,6 @@ Se define una sola capa de armado de datos para evitar diferencias entre lo que 
    - + usuario autenticado (actor).
 6. Orquestador V2 crea dispatch + recipients + attempt.
 7. Job en cola envia correo y actualiza trazabilidad.
-
-## Integracion del preview
-
-### Objetivo
-
-La ruta `/preview/notificaciones-v2/turno-asignado` debe reflejar datos reales de Turno 1, no datos demo.
-
-### Implementacion esperada
-
-- El controller de preview delega en el mismo servicio/builder del envio semanal.
-- Soporta consulta opcional de fecha base para probar semanas (`?date=Y-m-d`).
-- Si faltan datos, mostrar placeholders coherentes sin romper la vista.
 
 ## Integracion de destinatarios
 
@@ -98,7 +84,6 @@ La ruta `/preview/notificaciones-v2/turno-asignado` debe reflejar datos reales d
 ### Etapa 1 - Unificacion de datos
 
 - Extraer builder unico de payload+recipients para Turno 1 semanal.
-- Reusar en preview y envio.
 
 Estado: implementado
 
@@ -119,19 +104,6 @@ Implementado en `TurnoOneWeeklySummaryNotifier`:
 - Deduccion de duplicados por email.
 - Warning en logs para seleccionados sin correo valido.
 
-### Etapa 3 - Ajuste de preview
-
-- Conectar preview al builder real.
-- Eliminar hardcode demo del preview de turno.
-
-Estado: implementado
-
-Implementado en `NotificationsV2PreviewController::turnoAsignado(...)`:
-
-- El preview consume `buildWeekSummaryData(...)`.
-- Se elimino la maqueta hardcode de datos demo para Turno 1.
-- Se soporta `?date=Y-m-d` para pruebas de semana.
-
 ### Etapa 4 - QA funcional
 
 - Caso completo con datos y correos reales.
@@ -143,7 +115,6 @@ Estado: implementado
 
 Cobertura ejecutada:
 
-- Preview real con datos del sistema y soporte `?date=Y-m-d`.
 - Destinatarios del resumen semanal solo desde seleccionados (`TM1`, `TJ1`, `TF1-3`) + actor autenticado.
 - Exclusion de seleccionados sin correo valido (warning sin romper flujo).
 - Deduccion de duplicados por email en destinatarios.
@@ -151,14 +122,13 @@ Cobertura ejecutada:
 
 Pruebas asociadas:
 
-- `tests/Feature/NotificationsV2/NotificationsV2PreviewRoutesTest.php`
+- `tests/Feature/NotificationsV2/CorreosIntegracionTest.php`
 - `tests/Feature/NotificationsV2/TurnoOneWeeklySummaryRecipientsTest.php`
 - `tests/Feature/NotificationsV2/TurnoOneWeeklySummaryCommandTest.php`
 - `tests/Feature/NotificationsV2/TurnoAssignedNotificationTest.php`
 
 ## Criterios de aceptacion
 
-- El preview de turno muestra datos reales de Turno 1.
 - El correo semanal llega a TM1, TJ1, TF1-3 segun seleccion y correos validos.
 - El usuario que ejecuta el envio recibe copia de evidencia.
 - No hay destinatarios duplicados.
@@ -171,13 +141,10 @@ Pruebas asociadas:
   - Mitigacion: resolver por nombre exacto y registrar ambiguedad; mejorar luego con ID de funcionario.
 - Riesgo: actor sin correo en cuenta de usuario.
   - Mitigacion: warning y continuar envio a seleccionados.
-- Riesgo: divergencia preview/envio por doble logica.
-  - Mitigacion: builder unico obligatorio para ambos.
 
 ## Checklist operativo
 
 - [ ] Feature flag `notifications_v2.enabled` validada para entorno.
 - [ ] Turno 1 configurado con semana y personas.
-- [ ] Preview validado visualmente en ruta de notificaciones V2.
 - [ ] Envio semanal ejecutado y revisado en tablas V2.
 - [ ] Correo recibido por seleccionados + actor autenticado.

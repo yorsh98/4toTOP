@@ -32,14 +32,6 @@ it('rejects a motivo longer than the database column', function () {
     ])->assertSessionHasErrors('UserDirigido');
 });
 
-it('accepts safe preview links and replaces unsafe schemes', function () {
-    $user = User::factory()->create();
-    $user->assignRole('SuperAdmin');
-    $this->actingAs($user)->get(route('preview.notifications-v2.bitacora-pruebas', [
-        'documentos' => 'javascript:alert(1)', 'bitacora' => 'https://example.org/bitacora',
-    ]))->assertOk()->assertDontSee('javascript:alert(1)')->assertSee('https://example.org/bitacora');
-});
-
 it('validates export dates and search length while accepting normal filters', function () {
     $user = User::factory()->create();
     $user->assignRole('SuperAdmin');

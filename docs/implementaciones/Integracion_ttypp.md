@@ -29,11 +29,10 @@ Reemplazar el Excel operativo de Testigos y Peritos por un formulario web en bac
   - Aplicacion de permisos en UI y acciones Livewire de importacion/exportacion.
   - Pruebas Pest para flujo principal: alta nullable, filtro, permisos de importacion Excel SIAGJ, importacion filtrada, exportacion `.xlsx` y ruta de modulo `TTyPP` en `welcome`.
 - Integracion de correo TTyPP completada:
-  - Botones `Previsualizar correo` y `Remitir correo` en `Listado TTYPP`.
-  - Preview bajo el flujo `NotificationsV2` (`preview.notifications-v2.ttypp-listado`).
+  - Botón `Remitir correo` en `Listado TTYPP`.
   - Servicio `TtyppListadoNotifier` con plantilla `ttypp.listado.diario`.
   - Destinatarios resueltos desde catalogo de funcionarios con rol `TTyPP`.
-  - Pruebas Pest para preview y dispatch de correo TTyPP.
+  - Pruebas Pest del envío de correo TTyPP.
 - Importacion SIAGJ completada:
   - Archivo esperado `.xlsx` o `.xls` con encabezados `RIT`, `AÑOCAUSA`, `TIPOCAUSA`, `TIPO_TRAMITE`, `EVENTO`, `FECHAEVENTO`, `ESTADOEVENTO`.
   - Solo se importan filas con `ESTADOEVENTO = Por realizarse`, `EVENTO = Audiencia de juicio oral TOP` y `TIPO_TRAMITE = Audiencia`.

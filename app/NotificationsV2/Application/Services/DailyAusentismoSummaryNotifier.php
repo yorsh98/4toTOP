@@ -3,9 +3,8 @@
 namespace App\NotificationsV2\Application\Services;
 
 use App\NotificationsV2\Application\Contracts\NotificationOrchestrator;
-use App\NotificationsV2\Domain\Models\NotificationTemplate;
 use App\NotificationsV2\Domain\Models\NotificationType;
-use App\NotificationsV2\Support\DefaultEmailTemplates;
+use App\NotificationsV2\Support\OutlookEmailTemplates;
 use App\Services\DailyAusentismoSnapshotService;
 use App\Services\FuncionarioCatalog;
 use Carbon\CarbonInterface;
@@ -33,7 +32,20 @@ class DailyAusentismoSummaryNotifier
             return;
         }
 
-        $payload = [
+        $payload = $this->buildPayload($fechaReporte, $ausentes, $totalAusentes);
+
+        $options = [
+            'event_key' => 'ausentismo.resumen_diario.'.$fechaReporte,
+            'recipients' => $this->catalogRecipientsWithoutJueces(),
+            'idempotency_key' => ($force ? 'force.' : 'run.').'ausentismo.resumen_diario.'.$fechaReporte.'.'.Str::uuid()->toString(),
+        ];
+
+        $this->orchestrator->dispatch('ausentismo.resumen_diario', $payload, $options);
+    }
+
+    public function buildPayload(string $fechaReporte, array $ausentes, int $totalAusentes): array
+    {
+        return [
             'fecha_reporte' => $fechaReporte,
             'total_ausentes' => $totalAusentes,
             'ausentes' => $ausentes,
@@ -43,14 +55,6 @@ class DailyAusentismoSummaryNotifier
                 ? (string) config('notifications_v2.ausentismo.empty_message', 'no hay ausencias registradas')
                 : '',
         ];
-
-        $options = [
-            'event_key' => 'ausentismo.resumen_diario.'.$fechaReporte,
-            'recipients' => $this->catalogRecipientsWithoutJueces(),
-            'idempotency_key' => ($force ? 'force.' : 'run.').'ausentismo.resumen_diario.'.$fechaReporte.'.'.Str::uuid()->toString(),
-        ];
-
-        $this->orchestrator->dispatch('ausentismo.resumen_diario', $payload, $options);
     }
 
     private function catalogRecipientsWithoutJueces(): array
@@ -84,32 +88,7 @@ class DailyAusentismoSummaryNotifier
             ]
         );
 
-        $activeTemplate = NotificationTemplate::query()
-            ->where('notification_type_id', $type->id)
-            ->where('is_active', true)
-            ->first();
-
-        if ($activeTemplate) {
-            return;
-        }
-
-        NotificationTemplate::query()->create([
-            'notification_type_id' => $type->id,
-            'version' => 1,
-            'subject' => 'Resumen diario de ausentismo - {{ fecha_reporte }}',
-            'body_html' => DefaultEmailTemplates::ausentismoResumenHtml(),
-            'body_text' => DefaultEmailTemplates::ausentismoResumenText(),
-            'variables_schema' => [
-                'fecha_reporte',
-                'total_ausentes',
-                'ausentes',
-                'ausentes_html',
-                'ausentes_text',
-                'mensaje_sin_novedades',
-            ],
-            'is_active' => true,
-            'activated_at' => now(),
-        ]);
+        OutlookEmailTemplates::ensureActive($type);
     }
 
     private function buildAusentesHtml(array $ausentes): string

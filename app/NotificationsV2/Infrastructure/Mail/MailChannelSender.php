@@ -103,13 +103,15 @@ class MailChannelSender implements ChannelSender
             }
         }
 
+        $text = $renderedContent['text'] ?? '';
+
         foreach ($dispatch->recipients as $recipient) {
             if ($recipient->status === 'sent') {
                 continue;
             }
 
             try {
-                Mail::mailer($mailer)->send([], [], function (Message $message) use ($recipient, $from, $subject, $html): void {
+                Mail::mailer($mailer)->send([], [], function (Message $message) use ($recipient, $from, $subject, $html, $text): void {
                     $message->to($recipient->email, $recipient->name ?: null);
                     $message->subject($subject);
 
@@ -118,6 +120,7 @@ class MailChannelSender implements ChannelSender
                     }
 
                     $message->html($html);
+                    $message->text($text);
                 });
 
                 $recipient->update([

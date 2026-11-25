@@ -6,7 +6,7 @@ use App\Models\Funcionario;
 use App\NotificationsV2\Application\Contracts\NotificationOrchestrator;
 use App\NotificationsV2\Domain\Models\NotificationTemplate;
 use App\NotificationsV2\Domain\Models\NotificationType;
-use App\NotificationsV2\Support\DefaultEmailTemplates;
+use App\NotificationsV2\Support\OutlookEmailTemplates;
 use App\Services\FuncionarioCatalog;
 use Illuminate\Mail\Message;
 use Illuminate\Support\Carbon;
@@ -44,7 +44,7 @@ class BirthdayNotifier
             $type = $isBirthday ? 'saludo' : 'recordatorio';
             $subject = $isBirthday ? 'Te deseamos un Feliz Cumpleaños' : 'Deséales un feliz Cumpleaños';
             $image = asset('img/cumpleanos/'.($isBirthday ? 'cumpleanos.png' : 'Cumplere.png'));
-            $html = view('emails.cumpleanos.'.$type, compact('person', 'others', 'birthdays', 'upcoming', 'date', 'image'))->render();
+            $html = view('emails.outlook.cumpleanos-'.$type, compact('person', 'others', 'birthdays', 'upcoming', 'date', 'image'))->render();
             $messages[] = ['type' => $type, 'email' => $recipient->email, 'name' => $recipient->nombre, 'subject' => $subject, 'html' => $html];
         }
         if (! $dryRun) {
@@ -66,7 +66,7 @@ class BirthdayNotifier
         if (config('notifications_v2.enabled', false)) {
             $code = 'cumpleanos.'.$mail['type'];
             $type = NotificationType::query()->firstOrCreate(['code' => $code], ['name' => 'Cumpleaños', 'channel' => 'mail', 'is_active' => true, 'priority' => 'normal']);
-            NotificationTemplate::query()->firstOrCreate(['notification_type_id' => $type->id, 'is_active' => true], ['version' => 1, 'subject' => '{{ subject }}', 'body_html' => DefaultEmailTemplates::birthdayHtml(), 'variables_schema' => ['subject', 'html'], 'activated_at' => now()]);
+            NotificationTemplate::query()->firstOrCreate(['notification_type_id' => $type->id, 'is_active' => true], ['version' => 1, 'subject' => '{{ subject }}', 'body_html' => OutlookEmailTemplates::birthdayHtml(), 'variables_schema' => ['subject', 'html'], 'activated_at' => now()]);
             $this->orchestrator->dispatch($code, ['subject' => $mail['subject'], 'html' => $mail['html'], 'birthday_mail' => true], ['event_key' => $code.'.'.$date->toDateString(), 'idempotency_key' => $key, 'recipients' => [['type' => 'to', 'email' => $mail['email'], 'name' => $mail['name']]]]);
 
             return;

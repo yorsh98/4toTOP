@@ -124,7 +124,7 @@ test('las cuatro variantes de correo tienen destinatarios y asuntos correctos', 
     $greeting = $messages->firstWhere('email', 'celebrado@example.test');
     $reminder = $messages->firstWhere('email', 'receptor@example.test');
     expect($greeting['type'])->toBe('saludo')->and($greeting['subject'])->toBe('Te deseamos un Feliz Cumpleaños')
-        ->and($greeting['html'])->toContain('Feliz cumpleaños Celebrado')
+        ->and($greeting['html'])->toContain('Feliz cumpleaños, Celebrado')
         ->and($reminder['type'])->toBe('recordatorio')->and($reminder['subject'])->toBe('Deséales un feliz Cumpleaños')
         ->and($reminder['html'])->toContain('Celebrado');
     if ($multiple) {

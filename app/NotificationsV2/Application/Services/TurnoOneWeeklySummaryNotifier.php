@@ -4,9 +4,8 @@ namespace App\NotificationsV2\Application\Services;
 
 use App\Models\Turno;
 use App\NotificationsV2\Application\Contracts\NotificationOrchestrator;
-use App\NotificationsV2\Domain\Models\NotificationTemplate;
 use App\NotificationsV2\Domain\Models\NotificationType;
-use App\NotificationsV2\Support\DefaultEmailTemplates;
+use App\NotificationsV2\Support\OutlookEmailTemplates;
 use App\Services\FuncionarioCatalog;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Carbon;
@@ -78,27 +77,7 @@ class TurnoOneWeeklySummaryNotifier
 
         $semanaRango = $this->resolveSemanaRango($turno1?->FECHA, $startOfWeek, $endOfWeek);
 
-        $payload = [
-            'fecha_turno' => $baseDate->toDateString(),
-            'semana_rango' => $semanaRango,
-            'tribunal_oral' => (string) config('notifications_v2.turno1_summary.tribunal_oral', '4to TOP'),
-            'juez_despacho' => $juezDespacho,
-            'juez_despacho_run' => $juezDespacho['run'],
-            'juez_despacho_nombre' => $juezDespacho['nombre'],
-            'juez_despacho_telefono' => $juezDespacho['telefono'],
-            'juez_despacho_correo' => $juezDespacho['correo'],
-            'juez_despacho_cargo' => $juezDespacho['cargo'],
-            'jefe_turno' => $jefeTurno,
-            'jefe_turno_run' => $jefeTurno['run'],
-            'jefe_turno_nombre' => $jefeTurno['nombre'],
-            'jefe_turno_telefono' => $jefeTurno['telefono'],
-            'jefe_turno_correo' => $jefeTurno['correo'],
-            'jefe_turno_observaciones' => $jefeTurno['cargo'],
-            'funcionarios' => $funcionarios,
-            'tribunal_rowspan' => max(count($funcionarios), 1) + 4,
-            'funcionarios_rows_html' => $this->buildFuncionariosRowsHtml($funcionarios),
-            'funcionarios_rows_text' => $this->buildFuncionariosRowsText($funcionarios),
-        ];
+        $payload = $this->buildPayload($baseDate, $semanaRango, $juezDespacho, $jefeTurno, $funcionarios);
 
         $recipientResolution = $this->resolveWeeklyRecipients($turno1);
 
@@ -111,6 +90,45 @@ class TurnoOneWeeklySummaryNotifier
             'payload' => $payload,
             'options' => $options,
             'skipped' => $recipientResolution['skipped'],
+        ];
+    }
+
+    public function buildPayload(CarbonInterface $baseDate, string $semanaRango, array $juezDespacho, array $jefeTurno, array $funcionarios): array
+    {
+        $tribunalOral = (string) config('notifications_v2.turno1_summary.tribunal_oral', '4to TOP');
+
+        return [
+            'fecha_turno' => $baseDate->toDateString(),
+            'semana_rango' => $semanaRango,
+            'semana_rango_html' => e($semanaRango),
+            'tribunal_oral' => $tribunalOral,
+            'tribunal_oral_html' => e($tribunalOral),
+            'juez_despacho' => $juezDespacho,
+            'juez_despacho_run' => $juezDespacho['run'],
+            'juez_despacho_run_html' => e($juezDespacho['run']),
+            'juez_despacho_nombre' => $juezDespacho['nombre'],
+            'juez_despacho_nombre_html' => e($juezDespacho['nombre']),
+            'juez_despacho_telefono' => $juezDespacho['telefono'],
+            'juez_despacho_telefono_html' => e($juezDespacho['telefono']),
+            'juez_despacho_correo' => $juezDespacho['correo'],
+            'juez_despacho_correo_html' => e($juezDespacho['correo']),
+            'juez_despacho_cargo' => $juezDespacho['cargo'],
+            'juez_despacho_cargo_html' => e($juezDespacho['cargo']),
+            'jefe_turno' => $jefeTurno,
+            'jefe_turno_run' => $jefeTurno['run'],
+            'jefe_turno_run_html' => e($jefeTurno['run']),
+            'jefe_turno_nombre' => $jefeTurno['nombre'],
+            'jefe_turno_nombre_html' => e($jefeTurno['nombre']),
+            'jefe_turno_telefono' => $jefeTurno['telefono'],
+            'jefe_turno_telefono_html' => e($jefeTurno['telefono']),
+            'jefe_turno_correo' => $jefeTurno['correo'],
+            'jefe_turno_correo_html' => e($jefeTurno['correo']),
+            'jefe_turno_observaciones' => $jefeTurno['cargo'],
+            'jefe_turno_observaciones_html' => e($jefeTurno['cargo']),
+            'funcionarios' => $funcionarios,
+            'tribunal_rowspan' => max(count($funcionarios), 1) + 4,
+            'funcionarios_rows_html' => OutlookEmailTemplates::funcionariosRows($funcionarios),
+            'funcionarios_rows_text' => $this->buildFuncionariosRowsText($funcionarios),
         ];
     }
 
@@ -141,30 +159,6 @@ class TurnoOneWeeklySummaryNotifier
             'correo' => (string) ($profile['email'] ?? '-'),
             'cargo' => $cargo,
         ];
-    }
-
-    private function buildFuncionariosRowsHtml(array $funcionarios): string
-    {
-        if ($funcionarios === []) {
-            return '<tr><td style="border:1px solid #cbd5e1;padding:8px;text-align:center;background:#ffffff;" colspan="5">Sin funcionarios asignados.</td></tr>';
-        }
-
-        $rows = '';
-
-        foreach ($funcionarios as $funcionario) {
-            $correo = (string) ($funcionario['correo'] ?? '-');
-            $correoHtml = $correo !== '-' ? '<a href="mailto:'.e($correo).'" style="color:#1d4ed8;">'.e($correo).'</a>' : '-';
-
-            $rows .= '<tr>'
-                .'<td style="border:1px solid #cbd5e1;padding:8px;text-align:center;background:#ffffff;">'.e((string) ($funcionario['run'] ?? '-')).'</td>'
-                .'<td style="border:1px solid #cbd5e1;padding:8px;text-align:center;background:#ffffff;font-size:16px;line-height:20px;">'.e((string) ($funcionario['nombre'] ?? '-')).'</td>'
-                .'<td style="border:1px solid #cbd5e1;padding:8px;text-align:center;background:#ffffff;">'.e((string) ($funcionario['telefono'] ?? '-')).'</td>'
-                .'<td style="border:1px solid #cbd5e1;padding:8px;text-align:center;background:#ffffff;">'.$correoHtml.'</td>'
-                .'<td style="border:1px solid #cbd5e1;padding:8px;text-align:center;background:#ffffff;">'.e((string) ($funcionario['cargo'] ?? '-')).'</td>'
-                .'</tr>';
-        }
-
-        return $rows;
     }
 
     private function buildFuncionariosRowsText(array $funcionarios): string
@@ -291,65 +285,6 @@ class TurnoOneWeeklySummaryNotifier
             ]
         );
 
-        $activeTemplate = NotificationTemplate::query()
-            ->where('notification_type_id', $type->id)
-            ->where('is_active', true)
-            ->first();
-
-        if ($activeTemplate) {
-            $activeTemplate->update([
-                'subject' => 'Turno Semanal - Semana {{ semana_rango }}',
-                'body_html' => DefaultEmailTemplates::turno1ResumenSemanalHtml(),
-                'body_text' => DefaultEmailTemplates::turno1ResumenSemanalText(),
-                'variables_schema' => [
-                    'fecha_turno',
-                    'semana_rango',
-                    'tribunal_oral',
-                    'juez_despacho_run',
-                    'juez_despacho_nombre',
-                    'juez_despacho_telefono',
-                    'juez_despacho_correo',
-                    'juez_despacho_cargo',
-                    'jefe_turno_run',
-                    'jefe_turno_nombre',
-                    'jefe_turno_telefono',
-                    'jefe_turno_correo',
-                    'jefe_turno_observaciones',
-                    'tribunal_rowspan',
-                    'funcionarios_rows_html',
-                    'funcionarios_rows_text',
-                ],
-            ]);
-
-            return;
-        }
-
-        NotificationTemplate::query()->create([
-            'notification_type_id' => $type->id,
-            'version' => 1,
-            'subject' => 'Turno Semanal - Semana {{ semana_rango }}',
-            'body_html' => DefaultEmailTemplates::turno1ResumenSemanalHtml(),
-            'body_text' => DefaultEmailTemplates::turno1ResumenSemanalText(),
-            'variables_schema' => [
-                'fecha_turno',
-                'semana_rango',
-                'tribunal_oral',
-                'juez_despacho_run',
-                'juez_despacho_nombre',
-                'juez_despacho_telefono',
-                'juez_despacho_correo',
-                'juez_despacho_cargo',
-                'jefe_turno_run',
-                'jefe_turno_nombre',
-                'jefe_turno_telefono',
-                'jefe_turno_correo',
-                'jefe_turno_observaciones',
-                'tribunal_rowspan',
-                'funcionarios_rows_html',
-                'funcionarios_rows_text',
-            ],
-            'is_active' => true,
-            'activated_at' => now(),
-        ]);
+        OutlookEmailTemplates::ensureActive($type);
     }
 }
